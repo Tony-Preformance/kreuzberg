@@ -132,6 +132,21 @@ async def process_uploaded_image(image_content: bytes):
     return result.content
 ```
 
+### Forcing OCR
+
+When extracting a PDF file or bytes, you might want to force OCR - for example, if the PDF includes images that have text that should be extracted etc.
+You can do this by passing `force_ocr=True`:
+
+```python
+from kreuzberg import extract_bytes
+
+
+# Extract text from PDF bytes and force OCR
+async def process_uploaded_pdf(pdf_content: bytes):
+    result = await extract_bytes(pdf_content, mime_type="application/pdf", force_ocr=True)
+    return result.content
+```
+
 ### Error Handling
 
 Kreuzberg raises two exception types:

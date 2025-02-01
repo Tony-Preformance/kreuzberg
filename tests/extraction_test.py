@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import pytest
 
@@ -8,14 +8,21 @@ from kreuzberg._mime_types import MARKDOWN_MIME_TYPE, PDF_MIME_TYPE, PLAIN_TEXT_
 from kreuzberg.exceptions import ValidationError
 from kreuzberg.extraction import extract_bytes, extract_file
 
-if TYPE_CHECKING:
-    from pathlib import Path
 
-
-async def test_extract_bytes_pdf(searchable_pdf: Path) -> None:
-    content = searchable_pdf.read_bytes()
+@pytest.mark.parametrize("pdf_document", list((Path(__file__).parent / "source").glob("*.pdf")))
+async def test_extract_bytes_pdf(pdf_document: Path) -> None:
+    content = pdf_document.read_bytes()
     result = await extract_bytes(content, PDF_MIME_TYPE)
     assert result.mime_type == PLAIN_TEXT_MIME_TYPE
+    assert isinstance(result.content, str)
+    assert result.content.strip()
+
+
+async def test_extract_bytes_force_ocr_pdf(non_ascii_pdf: Path) -> None:
+    content = non_ascii_pdf.read_bytes()
+    result = await extract_bytes(content, PDF_MIME_TYPE, True)
+    assert result.mime_type == PLAIN_TEXT_MIME_TYPE
+    assert result.content.startswith("AMTSBLATT")
     assert isinstance(result.content, str)
     assert result.content.strip()
 
@@ -59,9 +66,18 @@ async def test_extract_bytes_invalid_mime() -> None:
         await extract_bytes(b"some content", "application/unknown")
 
 
-async def test_extract_file_pdf(searchable_pdf: Path) -> None:
-    result = await extract_file(searchable_pdf, PDF_MIME_TYPE)
+@pytest.mark.parametrize("pdf_document", list((Path(__file__).parent / "source").glob("*.pdf")))
+async def test_extract_file_pdf(pdf_document: Path) -> None:
+    result = await extract_file(pdf_document, PDF_MIME_TYPE)
     assert result.mime_type == PLAIN_TEXT_MIME_TYPE
+    assert isinstance(result.content, str)
+    assert result.content.strip()
+
+
+async def test_extract_file_force_ocr_pdf(non_ascii_pdf: Path) -> None:
+    result = await extract_file(non_ascii_pdf, PDF_MIME_TYPE)
+    assert result.mime_type == PLAIN_TEXT_MIME_TYPE
+    assert result.content.startswith("AMTSBLATT")
     assert isinstance(result.content, str)
     assert result.content.strip()
 
