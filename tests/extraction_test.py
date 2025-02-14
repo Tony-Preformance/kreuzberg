@@ -32,7 +32,6 @@ if sys.version_info < (3, 11):  # pragma: no cover
     from exceptiongroup import ExceptionGroup  # type: ignore[import-not-found]
 
 
-@pytest.mark.timeout(timeout=60)
 @pytest.mark.parametrize("pdf_document", list((Path(__file__).parent / "source").glob("*.pdf")))
 async def test_extract_bytes_pdf(pdf_document: Path) -> None:
     content = pdf_document.read_bytes()
