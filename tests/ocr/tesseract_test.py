@@ -7,10 +7,11 @@ from unittest.mock import Mock
 import pytest
 from PIL import Image
 
+from kreuzberg import PSMMode
 from kreuzberg._ocr._tesseract import (
     TesseractBackend,
 )
-from kreuzberg._types import ExtractionResult, PSMMode
+from kreuzberg._types import ExtractionResult
 from kreuzberg.exceptions import MissingDependencyError, OCRError, ValidationError
 
 if TYPE_CHECKING:

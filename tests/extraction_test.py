@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from kreuzberg import TesseractConfig
 from kreuzberg._mime_types import (
     DOCX_MIME_TYPE,
     EXCEL_MIME_TYPE,
@@ -48,7 +49,7 @@ async def test_extract_bytes_pdf(scanned_pdf: Path) -> None:
 )
 async def test_extract_bytes_force_ocr_pdf(non_ascii_pdf: Path) -> None:
     content = non_ascii_pdf.read_bytes()
-    config = ExtractionConfig(force_ocr=True, language="deu")
+    config = ExtractionConfig(force_ocr=True, ocr_config=TesseractConfig(language="deu"))
     result = await extract_bytes(content, PDF_MIME_TYPE, config=config)
     assert_extraction_result(result, mime_type=PLAIN_TEXT_MIME_TYPE)
     assert "Spatenstich für neue Hackschnitzelheizung Nachhaltige Wärmeversorgung" in result.content
