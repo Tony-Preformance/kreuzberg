@@ -130,6 +130,7 @@ nav:
       - user-guide/index.md
       - Basic Usage: user-guide/basic-usage.md
       - Extraction Configuration: user-guide/extraction-configuration.md
+      - Content Chunking: user-guide/chunking.md
       - OCR Configuration: user-guide/ocr-configuration.md
       - OCR Backends: user-guide/ocr-backends.md
       - Supported Formats: user-guide/supported-formats.md

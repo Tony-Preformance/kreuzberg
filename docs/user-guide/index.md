@@ -5,6 +5,8 @@ This guide covers the main concepts and usage patterns of Kreuzberg for text ext
 ## Contents
 
 - [Basic Usage](basic-usage.md) - Essential usage patterns and concepts
+- [Extraction Configuration](extraction-configuration.md) - Configure the extraction process
+- [Content Chunking](chunking.md) - Split documents into manageable chunks
 - [OCR Configuration](ocr-configuration.md) - Configure OCR for optimal text extraction
 - [OCR Backends](ocr-backends.md) - Choose and configure different OCR engines
 - [Supported Formats](supported-formats.md) - Details on all supported document formats

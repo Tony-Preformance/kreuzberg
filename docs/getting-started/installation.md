@@ -1,96 +1,83 @@
 # Installation
 
-Setting up Kreuzberg involves installing both the Python package and its system dependencies.
+Kreuzberg is composed of a core package and several `optional` dependencies, which users can install at their discretion.
 
-## 1. Install the Python Package
+## Kreuzberg Core Package
+
+The Kreuzberg core package can be installed using pip with:
 
 ```shell
 pip install kreuzberg
 ```
 
-For optional OCR engines, you can install with extras:
+Kreuzberg relies on `pandoc`, which is a required system dependency. To install it, follow the instructions below:
+
+### Ubuntu/Debian
 
 ```shell
-# For EasyOCR support
-pip install "kreuzberg[easyocr]"
-
-# For PaddleOCR support
-pip install "kreuzberg[paddleocr]"
+sudo apt-get install pandoc
 ```
 
-## 2. Install System Dependencies
-
-Kreuzberg requires two system level dependencies:
-
-- [Pandoc](https://pandoc.org/installing.html) - For document format conversion. Minimum required version is Pandoc 2.
-- [Tesseract OCR](https://tesseract-ocr.github.io/) - For image and PDF OCR. Minimum required version is Tesseract 5.
-
-### Linux (Ubuntu/Debian)
+### macOS
 
 ```shell
-sudo apt-get install pandoc tesseract-ocr
-```
-
-For additional language support beyond English:
-
-```shell
-# Example: Install German language pack
-sudo apt-get install tesseract-ocr-deu
-```
-
-### MacOS
-
-```shell
-brew install tesseract pandoc
-```
-
-For additional language support:
-
-```shell
-# Example: Install all language data
-brew install tesseract-lang
+brew install pandoc
 ```
 
 ### Windows
 
-Using Chocolatey:
+```shell
+choco install -y pandoc
+```
+
+## OCR
+
+OCR is an optional feature. Kreuzberg supports multiple OCR backends. To understand the differences between these, please read the [OCR Backends documentation](../user-guide/ocr-backends.md).
+
+If you want to be able to extract text from images and non-searchable PDFs, you will need to install one of the following OCR backends:
+
+### Tesseract
+
+To install it you can follow the instructions in the [Tesseract documentation](https://tesseract-ocr.github.io/), or use one of the following commands if applicable to your system:
+
+#### Ubuntu/Debian
 
 ```shell
-choco install -y tesseract pandoc
+sudo apt-get install tesseract-ocr
 ```
 
-## Verifying Installation
-
-You can verify your installation by checking the versions of the installed components:
+#### macOS
 
 ```shell
-# Check Pandoc version
-pandoc --version
-
-# Check Tesseract version
-tesseract --version
+brew install tesseract
 ```
 
-## Docker
+#### Windows
 
-If you're using Docker, you can include Kreuzberg and its dependencies in your Dockerfile:
-
-```dockerfile
-FROM python:3.9-slim
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    pandoc \
-    tesseract-ocr \
-    # Add language packs as needed
-    tesseract-ocr-eng \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Kreuzberg
-RUN pip install kreuzberg
+```shell
+choco install -y tesseract
 ```
 
-## Notes
+__Note__: You will also need to install language support for the languages of choice other than English. Again see the [Tesseract documentation](https://tesseract-ocr.github.io/) for your system.
 
-- In most distributions, the tesseract-ocr package is split into multiple packages. You may need to install any language models you need aside from English separately.
-- Please consult the official documentation for these libraries for the most up-to-date installation instructions for your platform.
+#### EasyOCR OCR Backend
+
+EasyOCR is a Python based OCR backend that has a wide language support and strong performance.
+
+```shell
+pip install "kreuzberg[easyocr]"
+```
+
+#### PaddleOCR OCRBackend
+
+```shell
+pip install "kreuzberg[paddleocr]"
+```
+
+### Chunking
+
+Chunking is an optional feature - useful for RAG applications among others. Kreuzberg uses the excellent `semantic-text-splitter` package for chunking. To install Kreuzberg with chunking support, you can use:
+
+```shell
+pip install "kreuzberg[chunking]"
+```

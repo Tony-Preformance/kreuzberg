@@ -19,7 +19,7 @@
 .run/
 .venv/
 .vscode/
-.windsurf
+.windsurfrules
 .cursorrules
 CLAUDE.md
 __pycache__/

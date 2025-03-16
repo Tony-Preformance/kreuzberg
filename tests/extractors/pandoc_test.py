@@ -3,12 +3,12 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from unittest.mock import AsyncMock, Mock
 
 from kreuzberg.extraction import DEFAULT_CONFIG
 
 if TYPE_CHECKING:
     from collections.abc import Coroutine
-    from unittest.mock import Mock
 
     from kreuzberg._types import ExtractionConfig
 
@@ -41,8 +41,8 @@ SAMPLE_PANDOC_JSON = {
 
 
 @pytest.fixture
-def mock_run_process(mocker: MockerFixture) -> Mock:
-    return mocker.patch("kreuzberg._extractors._pandoc.run_process")
+def mock_run_process(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kreuzberg._extractors._pandoc.run_process", new_callable=AsyncMock)
 
 
 @pytest.fixture
@@ -51,8 +51,8 @@ def mock_version_check(mocker: MockerFixture) -> None:
 
 
 @pytest.fixture
-def mock_run_taskgroup(mocker: MockerFixture) -> Mock:
-    return mocker.patch("kreuzberg._extractors._pandoc.run_taskgroup")
+def mock_run_taskgroup(mocker: MockerFixture) -> AsyncMock:
+    return mocker.patch("kreuzberg._extractors._pandoc.run_taskgroup", new_callable=AsyncMock)
 
 
 @pytest.fixture
@@ -184,12 +184,13 @@ async def test_handle_extract_file(
 @pytest.mark.anyio
 async def test_extract_path_async(
     mock_version_check: None,
-    mock_run_taskgroup: Mock,
+    mock_run_taskgroup: AsyncMock,
     mock_temp_file: None,
     mock_async_path: None,
     test_config: ExtractionConfig,
 ) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
+
     mock_run_taskgroup.return_value = ({"title": "Test Document"}, "Test Content")
 
     result = await extractor.extract_path_async(Path("/tmp/test"))
@@ -197,16 +198,19 @@ async def test_extract_path_async(
     assert result.metadata["title"] == "Test Document"
     assert result.content == "Test Content"
 
+    assert mock_run_taskgroup.called
+
 
 @pytest.mark.anyio
 async def test_extract_bytes_async(
     mock_version_check: None,
-    mock_run_taskgroup: Mock,
+    mock_run_taskgroup: AsyncMock,
     mock_temp_file: None,
     mock_async_path: None,
     test_config: ExtractionConfig,
 ) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
+
     mock_run_taskgroup.return_value = ({"title": "Test Document"}, "Test Content")
 
     result = await extractor.extract_bytes_async(b"Test Content")
@@ -214,12 +218,15 @@ async def test_extract_bytes_async(
     assert result.metadata["title"] == "Test Document"
     assert result.content == "Test Content"
 
+    assert mock_run_taskgroup.called
+
 
 @pytest.mark.anyio
 async def test_validate_pandoc_version_file_not_found(mocker: MockerFixture, test_config: ExtractionConfig) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
     extractor._checked_version = False
-    mock_run = mocker.patch("kreuzberg._extractors._pandoc.run_process")
+
+    mock_run = mocker.patch("kreuzberg._extractors._pandoc.run_process", new_callable=AsyncMock)
     mock_run.side_effect = FileNotFoundError()
 
     with pytest.raises(
@@ -230,13 +237,19 @@ async def test_validate_pandoc_version_file_not_found(mocker: MockerFixture, tes
     ):
         await extractor._validate_pandoc_version()
 
+    assert mock_run.called
+
 
 @pytest.mark.anyio
 async def test_validate_pandoc_version_invalid_output(mocker: MockerFixture, test_config: ExtractionConfig) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
     extractor._checked_version = False
-    mock_run = mocker.patch("kreuzberg._extractors._pandoc.run_process")
-    mock_run.return_value.stdout = b"invalid version output"
+
+    mock_run = mocker.patch("kreuzberg._extractors._pandoc.run_process", new_callable=AsyncMock)
+
+    mock_return = Mock()
+    mock_return.stdout = b"invalid version output"
+    mock_run.return_value = mock_return
 
     with pytest.raises(
         MissingDependencyError,
@@ -245,14 +258,20 @@ async def test_validate_pandoc_version_invalid_output(mocker: MockerFixture, tes
         ),
     ):
         await extractor._validate_pandoc_version()
+
+    assert mock_run.called
 
 
 @pytest.mark.anyio
 async def test_validate_pandoc_version_parse_error(mocker: MockerFixture, test_config: ExtractionConfig) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
     extractor._checked_version = False
-    mock_run = mocker.patch("kreuzberg._extractors._pandoc.run_process")
-    mock_run.return_value.stdout = b"pandoc abc"
+
+    mock_run = mocker.patch("kreuzberg._extractors._pandoc.run_process", new_callable=AsyncMock)
+
+    mock_return = Mock()
+    mock_return.stdout = b"pandoc abc"
+    mock_run.return_value = mock_return
 
     with pytest.raises(
         MissingDependencyError,
@@ -262,10 +281,12 @@ async def test_validate_pandoc_version_parse_error(mocker: MockerFixture, test_c
     ):
         await extractor._validate_pandoc_version()
 
+    assert mock_run.called
+
 
 @pytest.mark.anyio
 async def test_handle_extract_metadata_runtime_error(
-    mock_run_process: Mock, mock_temp_file: None, mock_async_path: None, test_config: ExtractionConfig
+    mock_run_process: AsyncMock, mock_temp_file: None, mock_async_path: None, test_config: ExtractionConfig
 ) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
     mock_run_process.side_effect = RuntimeError("Test error")
@@ -273,10 +294,12 @@ async def test_handle_extract_metadata_runtime_error(
     with pytest.raises(ParsingError):
         await extractor._handle_extract_metadata(Path("/tmp/test"))
 
+    assert mock_run_process.called
+
 
 @pytest.mark.anyio
 async def test_handle_extract_file_runtime_error(
-    mock_run_process: Mock, mock_temp_file: None, mock_async_path: None, test_config: ExtractionConfig
+    mock_run_process: AsyncMock, mock_temp_file: None, mock_async_path: None, test_config: ExtractionConfig
 ) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
     mock_run_process.side_effect = RuntimeError("Test error")
@@ -284,13 +307,15 @@ async def test_handle_extract_file_runtime_error(
     with pytest.raises(ParsingError):
         await extractor._handle_extract_file(Path("/tmp/test"))
 
+    assert mock_run_process.called
+
 
 @pytest.mark.anyio
 async def test_extract_bytes_async_runtime_error(
     mock_version_check: None,
     mock_temp_file: None,
     mock_async_path: None,
-    mock_run_process: Mock,
+    mock_run_process: AsyncMock,
     test_config: ExtractionConfig,
 ) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
@@ -298,6 +323,8 @@ async def test_extract_bytes_async_runtime_error(
 
     with pytest.raises(ParsingError):
         await extractor.extract_bytes_async(b"Test content")
+
+    assert mock_run_process.called
 
 
 def test_get_pandoc_type_unsupported_mime(test_config: ExtractionConfig) -> None:
@@ -313,26 +340,36 @@ def test_get_pandoc_type_prefix_match(test_config: ExtractionConfig) -> None:
 
 @pytest.mark.anyio
 async def test_handle_extract_metadata_error(
-    mock_run_process: Mock, mock_temp_file: None, mock_async_path: None, test_config: ExtractionConfig
+    mock_run_process: AsyncMock, mock_temp_file: None, mock_async_path: None, test_config: ExtractionConfig
 ) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
-    mock_run_process.return_value.returncode = 1
-    mock_run_process.return_value.stderr = b"Test error"
+
+    mock_return = Mock()
+    mock_return.returncode = 1
+    mock_return.stderr = b"Test error"
+    mock_run_process.return_value = mock_return
 
     with pytest.raises(ParsingError):
         await extractor._handle_extract_metadata(Path("/tmp/test"))
 
+    assert mock_run_process.called
+
 
 @pytest.mark.anyio
 async def test_handle_extract_file_error(
-    mock_run_process: Mock, mock_temp_file: None, mock_async_path: None, test_config: ExtractionConfig
+    mock_run_process: AsyncMock, mock_temp_file: None, mock_async_path: None, test_config: ExtractionConfig
 ) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
-    mock_run_process.return_value.returncode = 1
-    mock_run_process.return_value.stderr = b"Test error"
+
+    mock_return = Mock()
+    mock_return.returncode = 1
+    mock_return.stderr = b"Test error"
+    mock_run_process.return_value = mock_return
 
     with pytest.raises(ParsingError):
         await extractor._handle_extract_file(Path("/tmp/test"))
+
+    assert mock_run_process.called
 
 
 @pytest.mark.anyio
@@ -340,12 +377,17 @@ async def test_extract_bytes_async_error(
     mock_version_check: None,
     mock_temp_file: None,
     mock_async_path: None,
-    mock_run_process: Mock,
+    mock_run_process: AsyncMock,
     test_config: ExtractionConfig,
 ) -> None:
     extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
-    mock_run_process.return_value.returncode = 1
-    mock_run_process.return_value.stderr = b"Test error"
+
+    mock_return = Mock()
+    mock_return.returncode = 1
+    mock_return.stderr = b"Test error"
+    mock_run_process.return_value = mock_return
 
     with pytest.raises(ParsingError):
         await extractor.extract_bytes_async(b"Test content")
+
+    assert mock_run_process.called
