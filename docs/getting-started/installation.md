@@ -86,16 +86,20 @@ pip install "kreuzberg[easyocr]"
 pip install "kreuzberg[paddleocr]"
 ```
 
-!!! warning "Python Compatibility"
-
-    PaddleOCR is only available on Python 3.12 and below. PaddlePaddle does not support Python 3.13 and above.
-
 ### Chunking
 
 Chunking is an optional feature - useful for RAG applications among others. Kreuzberg uses the excellent `semantic-text-splitter` package for chunking. To install Kreuzberg with chunking support, you can use:
 
 ```shell
 pip install "kreuzberg[chunking]"
+```
+
+### Table Extraction
+
+Table extraction is an optional feature that allows Kreuzberg to extract tables from PDFs. It uses the [GMFT](https://github.com/conjuncts/gmft) package. To install Kreuzberg with table extraction support, you can use:
+
+```shell
+pip install "kreuzberg[gmft]"
 ```
 
 ### All Optional Dependencies
@@ -109,9 +113,5 @@ pip install "kreuzberg[all]"
 This is equivalent to:
 
 ```shell
-pip install "kreuzberg[chunking,easyocr,paddleocr]"
+pip install "kreuzberg[chunking,easyocr,gmft,paddleocr]"
 ```
-
-!!! note
-
-    Remember that even when installing with the `all` extra group, PaddleOCR will only be available on Python 3.12 and below.

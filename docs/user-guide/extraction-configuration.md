@@ -8,6 +8,7 @@ All extraction functions accept an optional `config` parameter of type `Extracti
 
 - Control OCR behavior with `force_ocr` and `ocr_backend`
 - Provide engine-specific OCR configuration via `ocr_config`
+- Enable table extraction with `extract_tables` and configure it via `gmft_config`
 - Add validation and post-processing hooks
 - Configure custom extractors
 
@@ -61,6 +62,42 @@ result = await extract_file(
 result = await extract_file(
     "chinese_document.jpg", config=ExtractionConfig(ocr_backend="paddleocr", ocr_config=PaddleOCRConfig(language="ch"))
 )
+```
+
+### Table Extraction
+
+Kreuzberg can extract tables from PDF documents using the [GMFT](https://github.com/conjuncts/gmft) package:
+
+```python
+from kreuzberg import extract_file, ExtractionConfig, GMFTConfig
+
+# Extract tables with default configuration
+result = await extract_file("document_with_tables.pdf", config=ExtractionConfig(extract_tables=True))
+
+# Extract tables with custom configuration
+config = ExtractionConfig(
+    extract_tables=True,
+    gmft_config=GMFTConfig(
+        detector_base_threshold=0.85,  # Minimum confidence score required for a table
+        remove_null_rows=True,  # Remove rows with no text
+        enable_multi_header=True,  # Enable multi-indices in the dataframe
+    ),
+)
+result = await extract_file("document_with_tables.pdf", config=config)
+
+# Access extracted tables
+for i, table in enumerate(result.tables):
+    print(f"Table {i+1} on page {table.page_number}:")
+    print(table.text)  # Markdown formatted table text
+    # You can also access the pandas DataFrame directly
+    df = table.df
+    print(df.shape)  # (rows, columns)
+```
+
+Note that table extraction requires the `gmft` dependency. You can install it with:
+
+```shell
+pip install "kreuzberg[gmft]"
 ```
 
 ### Batch Processing

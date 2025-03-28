@@ -79,6 +79,43 @@ async def extract_with_different_backends():
     print(f"No OCR result: {result.content[:100]}...")
 ```
 
+## Table Extraction
+
+```python
+from kreuzberg import extract_file, ExtractionConfig, GMFTConfig
+
+async def extract_tables_from_pdf():
+    # Enable table extraction with default settings
+    result = await extract_file("document_with_tables.pdf", config=ExtractionConfig(extract_tables=True))
+
+    # Process extracted tables
+    print(f"Found {len(result.tables)} tables")
+    for i, table in enumerate(result.tables):
+        print(f"Table {i+1} on page {table.page_number}:")
+        print(table.text)  # Markdown formatted table
+
+        # Work with the pandas DataFrame
+        df = table.df
+        print(f"Table shape: {df.shape}")
+
+        # The cropped table image is also available
+        # table.cropped_image.save(f"table_{i+1}.png")
+
+    # With custom GMFT configuration
+    custom_config = ExtractionConfig(
+        extract_tables=True,
+        gmft_config=GMFTConfig(
+            detector_base_threshold=0.85,  # Min confidence for table detection
+            enable_multi_header=True,  # Support multi-level headers
+            semantic_spanning_cells=True,  # Handle spanning cells
+            semantic_hierarchical_left_fill="deep",  # Handle hierarchical headers
+        ),
+    )
+
+    result = await extract_file("complex_tables.pdf", config=custom_config)
+    # Process tables...
+```
+
 ## Batch Processing
 
 ```python

@@ -13,6 +13,8 @@ Kreuzberg is a Python library for text extraction from documents. It provides a 
 - **Resource Efficient**: Lightweight processing without GPU requirements
 - **Format Support**: Comprehensive support for documents, images, and text formats
 - **Multiple OCR Engines**: Support for Tesseract, EasyOCR, and PaddleOCR
+- **Metadata Extraction**: Get document metadata alongside text content
+- **Table Extraction**: Extract tables from documents using the excellent GMFT library
 - **Modern Python**: Built with async/await, type hints, and a functional-first approach
 - **Permissive OSS**: MIT licensed with permissively licensed dependencies
 
@@ -107,17 +109,9 @@ This library is open to contribution. Feel free to open issues or submit PRs. It
 ### Local Development
 
 1. Clone the repo
-
 1. Install the system dependencies
-
 1. Install the full dependencies with `uv sync`
-
-1. Install the pre-commit hooks with:
-
-    ```shell
-    pre-commit install && pre-commit install --hook-type commit-msg
-    ```
-
+1. Install the pre-commit hooks with: `pre-commit install && pre-commit install --hook-type commit-msg`
 1. Make your changes and submit a PR
 
 ## License

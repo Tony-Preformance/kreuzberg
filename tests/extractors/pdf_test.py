@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pandas as pd
 import pytest
+from PIL.Image import Image
 
 from kreuzberg import ExtractionResult
 from kreuzberg._extractors._pdf import PDFExtractor
 from kreuzberg._types import ExtractionConfig
 from kreuzberg.exceptions import ParsingError
 from kreuzberg.extraction import DEFAULT_CONFIG
+from tests.conftest import pdfs_with_tables
 
 
 @pytest.fixture
@@ -200,3 +203,23 @@ async def test_extract_pdf_bytes_with_metadata(extractor: PDFExtractor, test_art
     assert isinstance(metadata["title"], str)
 
     assert not any(isinstance(value, bytes) for value in metadata.values())
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("pdf_with_table", pdfs_with_tables)
+async def test_extract_tables_from_pdf(pdf_with_table: Path) -> None:
+    extractor = PDFExtractor(mime_type="application/pdf", config=ExtractionConfig(extract_tables=True))
+    result = await extractor.extract_path_async(pdf_with_table)
+
+    assert result.tables
+    assert isinstance(result.tables, list)
+    assert all(isinstance(table, dict) for table in result.tables)
+
+    for table in result.tables:
+        assert "page_number" in table
+        assert isinstance(table["page_number"], int)
+        assert "text" in table
+        assert isinstance(table["text"], str)
+        assert "df" in table
+        assert isinstance(table["df"], pd.DataFrame)
+        assert isinstance(table["cropped_image"], Image)

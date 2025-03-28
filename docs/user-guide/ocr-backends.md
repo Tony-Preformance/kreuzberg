@@ -91,10 +91,6 @@ result = await extract_file(
 
 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) is an OCR toolkit developed by Baidu. It's particularly strong for Chinese and other Asian languages.
 
-!!! warning "Python Compatibility"
-
-    PaddleOCR is only available on Python 3.12 and below. PaddlePaddle does not support Python 3.13 and above.
-
 **Installation Requirements:**
 
 - Requires the `paddleocr` optional dependency
@@ -225,7 +221,7 @@ pip install kreuzberg
 # With EasyOCR support
 pip install "kreuzberg[easyocr]"
 
-# With PaddleOCR support (Python 3.12 and below only)
+# With PaddleOCR support
 pip install "kreuzberg[paddleocr]"
 
 # With chunking support

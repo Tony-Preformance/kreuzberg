@@ -4,7 +4,7 @@ Core data structures for extraction results, configuration, and metadata.
 
 ## ExtractionResult
 
-The result of a file extraction, containing the extracted text, MIME type, and metadata:
+The result of a file extraction, containing the extracted text, MIME type, metadata, and table data:
 
 ::: kreuzberg.ExtractionResult
 
@@ -13,6 +13,12 @@ The result of a file extraction, containing the extracted text, MIME type, and m
 Configuration options for extraction functions:
 
 ::: kreuzberg.ExtractionConfig
+
+## TableData
+
+A TypedDict that contains data extracted from tables in documents:
+
+::: kreuzberg.TableData
 
 ## OCR Configuration
 
@@ -27,6 +33,12 @@ Configuration options for extraction functions:
 ### PaddleOCRConfig
 
 ::: kreuzberg.PaddleOCRConfig
+
+## GMFT Configuration
+
+Configuration options for the GMFT table extraction engine:
+
+::: kreuzberg.GMFTConfig
 
 ## PSMMode (Page Segmentation Mode)
 

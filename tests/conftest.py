@@ -70,3 +70,11 @@ def excel_document() -> Path:
 @pytest.fixture(scope="session")
 def excel_multi_sheet_document() -> Path:
     return test_source_files_folder / "excel-multi-sheet.xlsx"
+
+
+@pytest.fixture(scope="session")
+def tiny_pdf_with_tables() -> Path:
+    return test_source_files_folder / "pdfs_with_tables" / "tiny.pdf"
+
+
+pdfs_with_tables = sorted((test_source_files_folder / "pdfs_with_tables").glob("*.pdf"))

@@ -27,6 +27,7 @@ from kreuzberg.extraction import (
     extract_file,
     extract_file_sync,
 )
+from tests.conftest import pdfs_with_tables
 
 if TYPE_CHECKING:
     from kreuzberg._types import ExtractionResult
@@ -276,6 +277,16 @@ async def test_batch_extract_file_mixed(test_article: Path) -> None:
             assert_extraction_result(result, mime_type=MARKDOWN_MIME_TYPE)
         else:
             assert_extraction_result(result, mime_type=PLAIN_TEXT_MIME_TYPE)
+
+
+@pytest.mark.anyio
+async def test_batch_extract_pdf_tables() -> None:
+    # note the point of this test is to ensure we dont hit segmentation errors during concurrency ~keep
+    config = ExtractionConfig(extract_tables=True)
+    results = await batch_extract_file(list(pdfs_with_tables), config=config)
+    assert len(results) == len(pdfs_with_tables)
+    for result in results:
+        assert result.tables
 
 
 @pytest.mark.anyio

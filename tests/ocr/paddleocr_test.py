@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock, patch
 
@@ -16,9 +15,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest_mock import MockerFixture
-
-if sys.version_info >= (3, 13):  # pragma: no cover
-    pytest.skip(reason="paddle is only available in python 3.12 and below", allow_module_level=True)
 
 
 @pytest.fixture
