@@ -87,6 +87,34 @@ async def test_validate_pandoc_version(
     mock_run_process.assert_called_with(["pandoc", "--version"])
 
 
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "major_version, should_raise",
+    [
+        (1, True),
+        (2, False),
+        (3, False),
+    ],
+)
+async def test_validate_pandoc_version_short(
+    mocker: MockerFixture, mock_run_process: Mock, major_version: int, should_raise: bool, test_config: ExtractionConfig
+) -> None:
+    extractor = MarkdownExtractor(mime_type="text/x-markdown", config=test_config)
+    extractor._checked_version = False
+
+    mock_run_process.return_value.returncode = 0
+    mock_run_process.return_value.stderr = b""
+    mock_run_process.return_value.stdout = f"pandoc {major_version}.1".encode()
+
+    if should_raise:
+        with pytest.raises(MissingDependencyError):
+            await extractor._validate_pandoc_version()
+    else:
+        await extractor._validate_pandoc_version()
+
+    mock_run_process.assert_called_with(["pandoc", "--version"])
+
+
 @pytest.mark.parametrize(
     "node, expected_output",
     [

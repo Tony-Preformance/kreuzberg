@@ -238,15 +238,6 @@ def test_extract_file_sync_not_exists() -> None:
 
 
 def assert_extraction_result(result: ExtractionResult, *, mime_type: str) -> None:
-    """Assert that an extraction result has the expected properties.
-
-    Args:
-        result: The extraction result to check.
-        mime_type: The expected mime type.
-
-    Raises:
-        AssertionError: If the extraction result does not have the expected properties.
-    """
     assert isinstance(result.content, str)
     assert result.content.strip()
     assert result.mime_type == mime_type
@@ -264,8 +255,6 @@ async def test_batch_extract_pdf_files(scanned_pdf: Path, test_article: Path) ->
 
 @pytest.mark.anyio
 async def test_batch_extract_file_mixed(test_article: Path) -> None:
-    """Test batch extraction of multiple files of different types."""
-
     test_files = [test_article]
     test_files.extend((Path(__file__).parent / "source").glob("*.docx"))
     test_files.extend((Path(__file__).parent / "source").glob("*.xlsx"))
@@ -291,14 +280,12 @@ async def test_batch_extract_pdf_tables() -> None:
 
 @pytest.mark.anyio
 async def test_batch_extract_file_empty() -> None:
-    """Test batch extraction with empty input."""
     results = await batch_extract_file([])
     assert len(results) == 0
 
 
 @pytest.mark.anyio
 async def test_batch_extract_file_invalid(tmp_path: Path) -> None:
-    """Test batch extraction with a file that exists but has an invalid extension."""
     invalid_file = tmp_path / "invalid-file.xyz"
     invalid_file.write_text("Invalid file content")
 
@@ -312,8 +299,6 @@ async def test_batch_extract_file_invalid(tmp_path: Path) -> None:
 
 @pytest.mark.anyio
 async def test_batch_extract_bytes_mixed(searchable_pdf: Path, docx_document: Path) -> None:
-    """Test batch extraction of multiple byte contents of different types."""
-
     contents = [
         (b"This is plain text", PLAIN_TEXT_MIME_TYPE),
         (
@@ -335,14 +320,12 @@ async def test_batch_extract_bytes_mixed(searchable_pdf: Path, docx_document: Pa
 
 @pytest.mark.anyio
 async def test_batch_extract_bytes_empty() -> None:
-    """Test batch extraction with empty input."""
     results = await batch_extract_bytes([])
     assert len(results) == 0
 
 
 @pytest.mark.anyio
 async def test_batch_extract_bytes_invalid() -> None:
-    """Test batch extraction with an invalid mime type."""
     with pytest.raises(ExceptionGroup) as exc_info:
         await batch_extract_bytes([(b"content", "application/invalid")])
     assert isinstance(exc_info.value.exceptions[0], ValidationError)
@@ -350,8 +333,6 @@ async def test_batch_extract_bytes_invalid() -> None:
 
 
 def test_batch_extract_file_sync_mixed(test_article: Path) -> None:
-    """Test synchronous batch extraction of multiple files of different types."""
-
     test_files = [test_article]
     test_files.extend((Path(__file__).parent / "source").glob("*.docx"))
     test_files.extend((Path(__file__).parent / "source").glob("*.xlsx"))
@@ -366,8 +347,6 @@ def test_batch_extract_file_sync_mixed(test_article: Path) -> None:
 
 
 def test_batch_extract_bytes_sync_mixed(searchable_pdf: Path, docx_document: Path) -> None:
-    """Test synchronous batch extraction of multiple byte contents of different types."""
-
     contents = [
         (b"This is plain text", PLAIN_TEXT_MIME_TYPE),
         (
