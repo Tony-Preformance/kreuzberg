@@ -37,19 +37,15 @@ async def test_tesseract_tsv_output_integration(table_image_path: Path) -> None:
     """Test that TSV output format produces extracted text from the image."""
     backend = TesseractBackend()
 
-    # Test TSV output without table detection (extracts plain text)
     result = await backend.process_file(table_image_path, output_format="tsv", enable_table_detection=False)
 
     assert result is not None
     assert isinstance(result.content, str)
     assert len(result.content) > 0
 
-    # When TSV format is used without table detection, it extracts text
-    # The content should contain the table data as plain text
     assert "Product" in result.content or "product" in result.content.lower(), "Should extract 'Product' text"
     assert "Price" in result.content or "price" in result.content.lower(), "Should extract 'Price' text"
 
-    # Content should be multi-line
     lines = result.content.strip().split("\n")
     assert len(lines) >= 1, "Should have at least one line of text"
 
@@ -60,7 +56,6 @@ async def test_tesseract_process_image_with_table_detection(table_image_path: Pa
     backend = TesseractBackend()
 
     with Image.open(table_image_path) as img:
-        # Process image with table detection (uses TSV internally)
         result = await backend.process_image(
             img,
             enable_table_detection=True,
@@ -72,26 +67,22 @@ async def test_tesseract_process_image_with_table_detection(table_image_path: Pa
     assert result is not None
     assert result.content, "Should extract text content"
 
-    # Validate content extraction
     content_lower = result.content.lower()
     assert "product" in content_lower or "price" in content_lower, "Should extract table text"
 
-    # Check if tables were detected
     if result.tables:
         assert len(result.tables) > 0, "Should detect at least one table"
         table = result.tables[0]
 
-        # Validate table structure
         assert isinstance(table, dict), "Table should be a dictionary"
         assert "text" in table, "Table should have 'text' key containing markdown"
         assert "metadata" in table, "Table should have 'metadata' key"
         assert "page_number" in table, "Table should have 'page_number' key"
 
-        # Validate markdown format if present
         if table["text"]:
             table_text = table["text"]
             assert isinstance(table_text, str), "Table text should be string"
-            if "|" in table_text:  # Markdown table
+            if "|" in table_text:
                 lines = [line.strip() for line in table_text.split("\n") if line.strip()]
                 assert len(lines) >= 2, "Markdown table needs at least header and separator"
 
@@ -101,7 +92,6 @@ async def test_table_detection_with_tsv_format(table_image_path: Path) -> None:
     """Test table detection when using TSV output format."""
     backend = TesseractBackend()
 
-    # Test with TSV format and table detection enabled
     result = await backend.process_file(
         table_image_path,
         output_format="tsv",
@@ -114,29 +104,22 @@ async def test_table_detection_with_tsv_format(table_image_path: Path) -> None:
     assert result is not None
     assert result.content, "Should have extracted content"
 
-    # With TSV + table detection, tables should be extracted
     if result.tables:
         assert len(result.tables) > 0, "Should detect at least one table"
         table = result.tables[0]
 
-        # Validate table dictionary structure
         assert "text" in table, "Table must have 'text' key"
-        # Note: When using TSV format, some fields may be None
         assert "page_number" in table, "Table should have page number field"
 
-        # Validate markdown format
         table_text = table["text"]
         assert isinstance(table_text, str), "Table text should be string"
         assert "|" in table_text, "Table should be in markdown format"
 
-        # Validate markdown structure
         lines = [line.strip() for line in table_text.split("\n") if line.strip()]
         assert len(lines) >= 3, "Markdown table needs header, separator, and data rows"
 
-        # Check separator line
         assert "---" in lines[1], "Second line should have markdown separator"
 
-        # Consistent column count
         header_cols = lines[0].count("|")
         assert all(line.count("|") == header_cols for line in lines), "All lines should have same column count"
 
@@ -155,7 +138,6 @@ def test_table_extractor_with_real_tsv() -> None:
 5\t1\t3\t1\t1\t2\t250\t200\t60\t30\t92.0\t$1.20
 5\t1\t3\t1\t1\t3\t400\t200\t40\t30\t93.0\t15"""
 
-    # Test word extraction with confidence filtering
     words = extract_words(tsv_data, min_confidence=90.0)
     assert len(words) == 9, "Should extract 9 words above 90% confidence"
     assert words[0]["text"] == "Product", "First word should be 'Product'"
@@ -163,28 +145,24 @@ def test_table_extractor_with_real_tsv() -> None:
     assert words[0]["left"] == 100, "Product X position should be 100"
     assert words[0]["top"] == 100, "Product Y position should be 100"
 
-    # Test column detection with specific thresholds
     cols = detect_columns(words, column_threshold=20)
     assert len(cols) == 3, "Should detect 3 columns"
     assert cols[0] == 100, "First column should be at X=100"
     assert cols[1] == 250, "Second column should be at X=250"
     assert cols[2] == 400, "Third column should be at X=400"
 
-    # Test row detection
     rows = detect_rows(words, row_threshold_ratio=0.5)
     assert len(rows) == 3, "Should detect 3 rows"
     assert rows[0] == 115, "First row center should be at Y=115"
     assert rows[1] == 165, "Second row center should be at Y=165"
     assert rows[2] == 215, "Third row center should be at Y=215"
 
-    # Test table reconstruction
     table = reconstruct_table(words, column_threshold=20, row_threshold_ratio=0.5)
     assert len(table) == 3, "Reconstructed table should have 3 rows"
     assert table[0] == ["Product", "Price", "Quantity"], "Header row exact match"
     assert table[1] == ["Apples", "$2.50", "10"], "First data row exact match"
     assert table[2] == ["Bananas", "$1.20", "15"], "Second data row exact match"
 
-    # Test markdown conversion
     markdown = to_markdown(table)
     expected_lines = [
         "| Product | Price | Quantity |",
@@ -204,24 +182,20 @@ def test_extract_table_from_tsv_convenience() -> None:
 5\t1\t2\t1\t1\t1\t50\t100\t40\t20\t93.0\t1
 5\t1\t2\t1\t1\t2\t150\t100\t40\t20\t92.0\t2"""
 
-    # Test with default parameters
     markdown = extract_table_from_tsv(tsv_data)
     assert markdown != "", "Should produce markdown output"
 
-    # Validate exact markdown structure
     expected = """| A | B |
 | --- | --- |
 | 1 | 2 |"""
     assert markdown == expected, f"Expected:\n{expected}\nGot:\n{markdown}"
 
-    # Test with custom parameters
     markdown_custom = extract_table_from_tsv(
         tsv_data,
-        column_threshold=200,  # Should merge columns
+        column_threshold=200,
         row_threshold_ratio=0.5,
         min_confidence=30.0,
     )
-    # With high column threshold, columns might merge
     assert markdown_custom != "", "Should produce output even with different parameters"
 
 
@@ -237,17 +211,14 @@ def test_table_extraction_with_empty_cells() -> None:
     words = extract_words(tsv_data, min_confidence=30.0)
     assert len(words) == 5, "Should extract all 5 words"
 
-    # Verify column detection handles gaps
     cols = detect_columns(words, column_threshold=20)
     assert len(cols) == 3, "Should detect 3 columns despite missing middle cell"
 
-    # Test table reconstruction with empty cell
     table = reconstruct_table(words, column_threshold=20, row_threshold_ratio=0.5)
     assert len(table) == 2, "Should have 2 rows"
     assert table[0] == ["Header1", "Header2", "Header3"], "Header row should be complete"
     assert table[1] == ["Data1", "", "Data3"], "Data row should have empty middle cell"
 
-    # Verify markdown handles empty cells correctly
     markdown = to_markdown(table)
     assert "| Data1 |  | Data3 |" in markdown, "Empty cell should be represented as empty string in markdown"
 
@@ -259,7 +230,6 @@ def test_table_extraction_confidence_threshold() -> None:
 5\t1\t1\t1\t1\t2\t150\t50\t60\t30\t20.0\tBad
 5\t1\t1\t1\t1\t3\t250\t50\t60\t30\t85.0\tAlsoGood"""
 
-    # Test with default threshold (30.0)
     words_default = extract_words(tsv_data, min_confidence=30.0)
     assert len(words_default) == 2, "Should filter out word with 20% confidence"
     assert words_default[0]["text"] == "Good", "First word should be 'Good'"
@@ -267,12 +237,10 @@ def test_table_extraction_confidence_threshold() -> None:
     assert words_default[1]["text"] == "AlsoGood", "Second word should be 'AlsoGood'"
     assert words_default[1]["conf"] == 85.0, "AlsoGood confidence should be 85.0"
 
-    # Test with high threshold
     words_high = extract_words(tsv_data, min_confidence=90.0)
     assert len(words_high) == 1, "Only one word above 90% confidence"
     assert words_high[0]["text"] == "Good", "Only 'Good' should pass 90% threshold"
 
-    # Test with very low threshold
     words_low = extract_words(tsv_data, min_confidence=10.0)
     assert len(words_low) == 3, "All words should pass 10% threshold"
     assert [w["text"] for w in words_low] == ["Good", "Bad", "AlsoGood"], "All words in order"
@@ -281,9 +249,9 @@ def test_table_extraction_confidence_threshold() -> None:
 @pytest.mark.parametrize(
     "column_threshold,expected_cols,expected_positions",
     [
-        (10, 3, [50, 80, 200]),  # Small threshold: 3 separate columns
-        (50, 2, [65, 200]),  # Medium threshold: first two merge (median of 50,80)
-        (200, 1, [80]),  # Large threshold: all merge into one (median of 50,80,200)
+        (10, 3, [50, 80, 200]),
+        (50, 2, [65, 200]),
+        (200, 1, [80]),
     ],
 )
 def test_column_clustering_thresholds(column_threshold: int, expected_cols: int, expected_positions: list[int]) -> None:
@@ -300,7 +268,6 @@ def test_column_clustering_thresholds(column_threshold: int, expected_cols: int,
     assert len(cols) == expected_cols, f"Should detect {expected_cols} columns with threshold {column_threshold}"
     assert cols == expected_positions, f"Column positions should be {expected_positions}"
 
-    # Verify table reconstruction with detected columns
     table = reconstruct_table(words, column_threshold=column_threshold, row_threshold_ratio=0.5)
     if expected_cols == 3:
         assert table == [["A", "B", "C"]], "Three separate columns"

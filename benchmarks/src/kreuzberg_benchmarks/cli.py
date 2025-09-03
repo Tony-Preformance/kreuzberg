@@ -317,6 +317,134 @@ def compare(
 
 
 @app.command()
+def tesseract(
+    test_file: Path | None = typer.Option(
+        None,
+        "--test-file",
+        "-f",
+        help="Specific file to test (otherwise uses default test files)",
+    ),
+    output_dir: Path = typer.Option(
+        Path("benchmarks/results"),
+        "--output-dir",
+        "-o",
+        help="Directory to save benchmark results",
+    ),  # noqa: B008
+    formats: str = typer.Option(
+        "all",
+        "--formats",
+        help="Comma-separated list of formats to test (text,hocr,markdown,tsv,all)",
+    ),
+    include_tables: bool = typer.Option(
+        True,
+        "--include-tables",
+        help="Include TSV with table detection in benchmarks",
+    ),
+    test_thresholds: bool = typer.Option(
+        False,
+        "--test-thresholds",
+        help="Test different table detection threshold parameters",
+    ),
+    profile_overhead: bool = typer.Option(
+        False,
+        "--profile-overhead",
+        help="Profile conversion overhead for each format",
+    ),
+) -> None:
+    """Run Tesseract OCR output format benchmarks."""
+    import asyncio
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+    from tesseract_output_benchmark import TesseractOutputBenchmark
+
+    console.print("[bold blue]Tesseract Output Format Benchmarks[/bold blue]")
+
+    benchmark = TesseractOutputBenchmark(console)
+
+    if test_file:
+        if not test_file.exists():
+            console.print(f"[red]Error: File not found: {test_file}[/red]")
+            raise typer.Exit(1)
+        test_files = {"custom": test_file}
+    else:
+        test_files = {
+            "simple_text": Path("tests/test_source_files/searchable.pdf"),
+            "scanned_pdf": Path("tests/test_source_files/scanned.pdf"),
+            "ocr_image": Path("tests/test_source_files/ocr-image.jpg"),
+            "simple_table": Path("tests/test_source_files/tables/simple_table.png"),
+        }
+
+    if formats == "all":
+        pass
+    else:
+        [f.strip() for f in formats.split(",")]
+
+    results = {}
+
+    async def run_benchmarks():
+        console.print("\n[bold]Format Comparison[/bold]")
+        for name, file_path in test_files.items():
+            if not file_path.exists():
+                console.print(f"[yellow]Skipping {name}: file not found[/yellow]")
+                continue
+
+            console.print(f"\nTesting: {name}")
+            comparison = await benchmark.benchmark_all_formats(
+                file_path, include_table_detection=include_tables
+            )
+            benchmark.print_comparison_report(comparison)
+            results[f"comparison_{name}"] = comparison
+
+        if test_thresholds:
+            console.print("\n[bold]Table Detection Threshold Testing[/bold]")
+            table_image = Path("tests/test_source_files/tables/simple_table.png")
+            if table_image.exists():
+                threshold_results = benchmark.benchmark_table_detection_thresholds(
+                    table_image
+                )
+                results["threshold_testing"] = threshold_results
+
+                console.print(f"Tested {len(threshold_results)} threshold combinations")
+                best = min(threshold_results.items(), key=lambda x: x[1].duration)
+                console.print(f"Fastest: {best[0]} at {best[1].duration:.3f}s")
+
+        if profile_overhead:
+            console.print("\n[bold]Conversion Overhead Profiling[/bold]")
+            test_image = Path("tests/test_source_files/ocr-image.jpg")
+            if test_image.exists():
+                overhead = await benchmark.profile_conversion_overhead(test_image)
+                results["conversion_overhead"] = overhead
+
+                for fmt, timings in overhead.items():
+                    overhead_pct = (
+                        (timings["conversion"] / timings["total"] * 100)
+                        if timings["total"] > 0
+                        else 0
+                    )
+                    console.print(f"{fmt}: {overhead_pct:.1f}% conversion overhead")
+
+        return results
+
+    try:
+        results = asyncio.run(run_benchmarks())
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+        import time
+
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        output_file = output_dir / f"tesseract_benchmark_{timestamp}.json"
+
+        benchmark.save_results(results, output_file)
+        console.print(f"\n[green]Results saved to: {output_file}[/green]")
+
+    except Exception as e:
+        console.print(f"[red]Benchmark failed: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@app.command()
 def analyze(
     result_file: Path = typer.Argument(..., help="Benchmark result file to analyze"),
     quality_report: bool = typer.Option(
