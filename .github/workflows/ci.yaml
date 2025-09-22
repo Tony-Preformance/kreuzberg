@@ -44,15 +44,20 @@ jobs:
             uv sync --all-extras --dev
           shell: bash
 
-      - name: Load Cached Pre-Commit Dependencies
-        id: cached-pre-commit-dependencies
+      - name: Install prek
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/j178/prek/releases/download/v0.2.1/prek-installer.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Load Cached Prek Dependencies
+        id: cached-prek-dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.cache/pre-commit/
-          key: pre-commit|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/prek/
+          key: prek|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
-      - name: Execute Pre-Commit
-        run: uv run pre-commit run --show-diff-on-failure --color=always --all-files
+      - name: Execute Prek
+        run: prek run --show-diff-on-failure --color=always --all-files
 
   coverage:
     needs: validate

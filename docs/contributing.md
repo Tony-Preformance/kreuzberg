@@ -18,10 +18,10 @@ Thank you for contributing to Kreuzberg!
     uv sync --all-extras --dev
     ```
 
-1. **Install pre-commit hooks**:
+1. **Install prek hooks**:
 
     ```bash
-    pre-commit install && pre-commit install --hook-type commit-msg
+    prek install && prek install --hook-type commit-msg
     ```
 
 ## Development
@@ -42,8 +42,8 @@ uv run ruff check                  # Lint
 uv run ruff check --fix            # Auto-fix issues
 uv run mypy                        # Type check
 
-# Pre-commit
-uv run pre-commit run --all-files  # Run all checks manually
+# Prek
+prek run --all-files  # Run all checks manually
 
 # Documentation
 uv run mkdocs serve                # Serve docs locally
@@ -70,7 +70,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 - Python 3.10-3.13 supported
 - System dependencies (optional): Tesseract, Pandoc
-- Pre-commit runs automatically on commit
+- Prek runs automatically on commit
 - Join our [Discord](https://discord.gg/pXxagNK2zN) for help
 
 ## License
