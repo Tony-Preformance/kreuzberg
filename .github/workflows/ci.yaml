@@ -170,6 +170,7 @@ jobs:
           retention-days: 7
 
   python-tests:
+    needs: [validate]
     if: needs.validate.result == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
