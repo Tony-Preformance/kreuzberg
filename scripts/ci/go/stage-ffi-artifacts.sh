@@ -8,7 +8,7 @@ set -euo pipefail
 # Copies compiled libraries, headers, and pkg-config files to staging directory.
 
 STAGING_DIR="${1:-artifact-staging/kreuzberg-ffi}"
-BUILD_FEATURES="${2:-default}"
+export BUILD_FEATURES="${2:-default}"
 
 echo "=== Staging FFI artifacts to ${STAGING_DIR} ==="
 

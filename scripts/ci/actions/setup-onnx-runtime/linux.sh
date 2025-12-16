@@ -69,11 +69,12 @@ else
 fi
 
 {
+	ort_lib=$(find "$ort_root/lib" -name "libonnxruntime*.so*" -print -quit)
 	echo "ORT_LIB_LOCATION=$ort_root/lib"
 	echo "ORT_PREFER_DYNAMIC_LINK=1"
 	echo "ORT_SKIP_DOWNLOAD=1"
 	echo "ORT_STRATEGY=system"
-	echo "ORT_DYLIB_PATH=$ort_root/lib/$(ls "$ort_root/lib"/libonnxruntime*.so* | head -1 | xargs basename)"
+	echo "ORT_DYLIB_PATH=$ort_root/lib/${ort_lib##*/}"
 	echo "LD_LIBRARY_PATH=$ort_root/lib:$dest:${LD_LIBRARY_PATH:-}"
 	echo "LIBRARY_PATH=$ort_root/lib:$dest:${LIBRARY_PATH:-}"
 	echo "RUSTFLAGS=$rustflags"
