@@ -47,7 +47,7 @@ while [ $attempt -le $max_attempts ]; do
 
 	if [ -n "$response" ]; then
 		count=$(echo "$response" | jq -r '.response.numFound' 2>/dev/null || echo "0")
-		if [ "$count" != "0" ] || [ "$count" = "0" ]; then
+		if [ "$count" != "0" ]; then
 			break
 		fi
 	fi
