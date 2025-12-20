@@ -38,7 +38,7 @@ jobs:
   setup:
     name: Build harness + native libs
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     outputs:
@@ -99,7 +99,7 @@ jobs:
     name: kreuzberg-native (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -159,7 +159,7 @@ jobs:
     name: kreuzberg-python-sync (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -228,7 +228,7 @@ jobs:
     name: kreuzberg-python-async (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -297,7 +297,7 @@ jobs:
     name: kreuzberg-python-batch (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -366,7 +366,7 @@ jobs:
     name: kreuzberg-node-async (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -437,7 +437,7 @@ jobs:
     name: kreuzberg-node-batch (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -508,7 +508,7 @@ jobs:
     name: kreuzberg-wasm-async (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -569,7 +569,7 @@ jobs:
     name: kreuzberg-wasm-batch (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -630,7 +630,7 @@ jobs:
     name: kreuzberg-ruby-sync (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -703,7 +703,7 @@ jobs:
     name: kreuzberg-ruby-batch (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -776,7 +776,7 @@ jobs:
     name: kreuzberg-go-sync (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -850,7 +850,7 @@ jobs:
     name: kreuzberg-go-batch (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -924,7 +924,7 @@ jobs:
     name: kreuzberg-java-sync (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -993,7 +993,7 @@ jobs:
     name: kreuzberg-csharp-sync (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -1061,7 +1061,7 @@ jobs:
     name: docling (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -1130,7 +1130,7 @@ jobs:
     name: docling-batch (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -1199,7 +1199,7 @@ jobs:
     name: markitdown (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -1268,7 +1268,7 @@ jobs:
     name: unstructured (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -1337,7 +1337,7 @@ jobs:
     name: tika-sync (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
@@ -1403,7 +1403,7 @@ jobs:
     name: tika-batch (${{ matrix.mode }})
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     permissions:
       contents: read
     strategy:
