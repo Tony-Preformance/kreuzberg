@@ -225,7 +225,8 @@ EOF
 		;;
 	Windows | MINGW* | MSYS* | CYGWIN*)
 		# Windows doesn't use rpath; static linking flags ensure static CRT linkage
-		export CGO_LDFLAGS="-L${repo_root}/target/x86_64-pc-windows-gnu/release -L${repo_root}/target/release -lkreuzberg_ffi -static-libgcc -static-libstdc++ -lws2_32 -luserenv -lbcrypt"
+		# Only use the x86_64-pc-windows-gnu target as it's the only valid target on Windows
+		export CGO_LDFLAGS="-L${repo_root}/target/x86_64-pc-windows-gnu/release -lkreuzberg_ffi -static-libgcc -static-libstdc++ -lws2_32 -luserenv -lbcrypt"
 		;;
 	esac
 
