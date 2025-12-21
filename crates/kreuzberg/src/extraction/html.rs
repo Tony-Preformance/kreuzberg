@@ -134,6 +134,7 @@ fn resolve_conversion_options(options: Option<ConversionOptions>) -> ConversionO
     })
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn html_requires_large_stack(len: usize) -> bool {
     len >= LARGE_HTML_STACK_THRESHOLD_BYTES
 }
