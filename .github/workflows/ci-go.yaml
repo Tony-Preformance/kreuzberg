@@ -18,6 +18,8 @@ on:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.cargo/config.toml'
+      - 'packages/go/v4/go.mod'
+      - 'packages/go/v4/go.sum'
   pull_request:
     branches: [main]
     paths:
@@ -35,6 +37,8 @@ on:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.cargo/config.toml'
+      - 'packages/go/v4/go.mod'
+      - 'packages/go/v4/go.sum'
 
 concurrency:
   group: ci-go-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
