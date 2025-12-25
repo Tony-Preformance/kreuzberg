@@ -199,7 +199,7 @@ jobs:
           echo ""
           echo "=== Java Version ==="
           java -version 2>&1
-          java -XshowSettings:properties 2>&1 | head -20
+          (java -XshowSettings:properties 2>&1 || true) | head -20
           echo ""
           echo "=== Maven Version ==="
           mvn --version

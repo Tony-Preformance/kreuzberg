@@ -199,9 +199,9 @@ if [ -d "$REPO_ROOT/crates/kreuzberg-ffi" ]; then
 	grep '^name\|^version' "$REPO_ROOT/crates/kreuzberg-ffi/Cargo.toml" | head -2 | sed 's/^/  /'
 fi
 
-print_status INFO "FFI header file: $REPO_ROOT/crates/kreuzberg-ffi/include/kreuzberg.h"
-if [ -f "$REPO_ROOT/crates/kreuzberg-ffi/include/kreuzberg.h" ]; then
-	print_status OK "FFI header exists ($(wc -l <"$REPO_ROOT/crates/kreuzberg-ffi/include/kreuzberg.h") lines)"
+print_status INFO "FFI header file: $REPO_ROOT/crates/kreuzberg-ffi/kreuzberg.h"
+if [ -f "$REPO_ROOT/crates/kreuzberg-ffi/kreuzberg.h" ]; then
+	print_status OK "FFI header exists ($(wc -l <"$REPO_ROOT/crates/kreuzberg-ffi/kreuzberg.h") lines)"
 else
 	print_status FAIL "FFI header not found"
 fi

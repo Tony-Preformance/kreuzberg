@@ -91,7 +91,7 @@ public static class TestHelpers
     public static void SkipIfLegacyOfficeDisabled(string relativePath)
     {
         var flag = Environment.GetEnvironmentVariable("KREUZBERG_SKIP_LEGACY_OFFICE");
-        if (string.IsNullOrWhiteSpace(flag) || !OperatingSystem.IsWindows())
+        if (string.IsNullOrWhiteSpace(flag) && OperatingSystem.IsWindows())
         {
             return;
         }
