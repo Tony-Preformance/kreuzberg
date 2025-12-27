@@ -27,26 +27,43 @@ tasks:
 
   # Build Tasks
   build:
-    desc: Build PHP extension
+    desc: Build PHP extension (uses {{.BUILD_PROFILE}})
     dir: packages/php
     cmds:
-      - cmd: bash scripts/ci/php/build-extension.sh
-        platforms: [linux, darwin]
+      - task: build:{{.BUILD_PROFILE | default "release"}}
 
   build:dev:
     desc: Build PHP extension in debug mode
-    dir: packages/php
     cmds:
-      - cmd: bash scripts/ci/php/build-extension.sh --debug
-        platforms: [linux, darwin]
+      - cmd: cargo build --package kreuzberg-php
+        platforms: [linux, darwin, windows]
+
+  build:release:
+    desc: Build PHP extension in release mode (optimized)
+    cmds:
+      - cmd: cargo build --release --package kreuzberg-php
+        platforms: [linux, darwin, windows]
+
+  build:ci:
+    desc: Build PHP extension in CI mode (with debug info)
+    env:
+      RUSTFLAGS: '-C debuginfo=2'
+    cmds:
+      - cmd: cargo build --release --package kreuzberg-php
+        platforms: [linux, darwin, windows]
 
   # Test Tasks
   test:
     desc: Run PHP tests with PHPUnit
     dir: packages/php
     cmds:
-      - cmd: bash scripts/ci/php/run-tests.sh
-        platforms: [linux, darwin]
+      - composer exec -- phpunit
+
+  test:ci:
+    desc: Run PHP tests in CI mode
+    dir: packages/php
+    cmds:
+      - composer exec -- phpunit
 
   test:quick:
     desc: Run PHP unit tests only (no integration tests)
