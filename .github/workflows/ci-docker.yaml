@@ -3,32 +3,32 @@ name: CI Docker Build & Test
 on:
   push:
     branches: [main]
-    # paths:
-    #   - '.github/actions/**'
-    #   - 'crates/kreuzberg/**'
-    #   - 'crates/kreuzberg-cli/**'
-    #   - 'crates/kreuzberg-tesseract/**'
-    #   - 'docker/**'
-    #   - '.dockerignore'
-    #   - 'Cargo.toml'
-    #   - 'Cargo.lock'
-    #   - '.cargo/config.toml'
-    #   - 'scripts/ci/docker/**'
-    #   - '.github/workflows/ci-docker.yaml'
+    paths:
+      - '.github/actions/**'
+      - 'crates/kreuzberg/**'
+      - 'crates/kreuzberg-cli/**'
+      - 'crates/kreuzberg-tesseract/**'
+      - 'docker/**'
+      - '.dockerignore'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.cargo/config.toml'
+      - 'scripts/ci/docker/**'
+      - '.github/workflows/ci-docker.yaml'
   pull_request:
     branches: [main]
-    # paths:
-    #   - '.github/actions/**'
-    #   - 'crates/kreuzberg/**'
-    #   - 'crates/kreuzberg-cli/**'
-    #   - 'crates/kreuzberg-tesseract/**'
-    #   - 'docker/**'
-    #   - '.dockerignore'
-    #   - 'Cargo.toml'
-    #   - 'Cargo.lock'
-    #   - '.cargo/config.toml'
-    #   - 'scripts/ci/docker/**'
-    #   - '.github/workflows/ci-docker.yaml'
+    paths:
+      - '.github/actions/**'
+      - 'crates/kreuzberg/**'
+      - 'crates/kreuzberg-cli/**'
+      - 'crates/kreuzberg-tesseract/**'
+      - 'docker/**'
+      - '.dockerignore'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.cargo/config.toml'
+      - 'scripts/ci/docker/**'
+      - '.github/workflows/ci-docker.yaml'
   workflow_dispatch:
     inputs:
       skip_tests:
