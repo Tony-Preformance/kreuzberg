@@ -18,10 +18,10 @@
 
 import { describe, expect, it } from "vitest";
 import type {
-	ExtractionConfig,
 	ExtractedImage,
-	ImageExtractionConfig,
+	ExtractionConfig,
 	ExtractionResult,
+	ImageExtractionConfig,
 	PageContent,
 } from "./types.js";
 
@@ -397,12 +397,6 @@ describe("Image Extraction Configuration (WASM Bindings)", () => {
 
 	describe("Image format handling", () => {
 		it("should support PNG image format", () => {
-			const config: ExtractionConfig = {
-				images: {
-					enabled: true,
-				},
-			};
-
 			const image: ExtractedImage = {
 				data: new Uint8Array(),
 				format: "PNG",
@@ -478,7 +472,12 @@ describe("Image Extraction Configuration (WASM Bindings)", () => {
 				maxDpi: 300,
 			};
 
-			expect(config.minDpi).toBeLessThanOrEqual(config.maxDpi!);
+			const { minDpi, maxDpi } = config;
+			expect(minDpi).toBe(72);
+			expect(maxDpi).toBe(300);
+			if (minDpi !== undefined && maxDpi !== undefined) {
+				expect(minDpi).toBeLessThanOrEqual(maxDpi);
+			}
 		});
 	});
 

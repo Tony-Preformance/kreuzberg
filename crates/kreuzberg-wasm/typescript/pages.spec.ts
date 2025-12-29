@@ -11,8 +11,8 @@
 
 import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
-import type { ExtractionConfig, PageContent } from "./types.js";
 import { extractBytesSync, initWasm } from "./index.js";
+import type { ExtractionConfig, PageContent } from "./types.js";
 
 let samplePdfBytes: Uint8Array;
 
@@ -154,11 +154,7 @@ describe("Pages Extraction (WASM Bindings)", () => {
 		});
 
 		it("should handle multiple custom marker formats", async () => {
-			const formats = [
-				"--- PAGE {page_num} ---",
-				"[Page {page_num}]",
-				"Page {page_num}:",
-			];
+			const formats = ["--- PAGE {page_num} ---", "[Page {page_num}]", "Page {page_num}:"];
 
 			for (const markerFormat of formats) {
 				const config: ExtractionConfig = {
@@ -258,9 +254,7 @@ describe("Pages Extraction (WASM Bindings)", () => {
 
 			if (result.pages && result.pages.length > 1) {
 				for (let i = 0; i < result.pages.length - 1; i++) {
-					expect(result.pages[i].pageNumber).toBeLessThan(
-						result.pages[i + 1].pageNumber
-					);
+					expect(result.pages[i].pageNumber).toBeLessThan(result.pages[i + 1].pageNumber);
 				}
 			}
 		});
@@ -575,9 +569,7 @@ describe("Pages Extraction (WASM Bindings)", () => {
 
 			for (let i = 0; i < result1.pages.length; i++) {
 				expect(result1.pages[i].pageNumber).toBe(result2.pages[i].pageNumber);
-				expect(result1.pages[i].content.length).toBe(
-					result2.pages[i].content.length
-				);
+				expect(result1.pages[i].content.length).toBe(result2.pages[i].content.length);
 			}
 		});
 
