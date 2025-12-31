@@ -69,7 +69,8 @@ class TestEmbeddingDimensions:
             for chunk in result.chunks:
                 if chunk.get("embedding") is not None:
                     embedding = chunk["embedding"]
-                    assert len(embedding) > 0
+                    if embedding is not None:
+                        assert len(embedding) > 0
 
     def test_embeddings_have_consistent_dimensions(self) -> None:
         """Verify all embeddings have same dimensions."""
@@ -88,7 +89,11 @@ class TestEmbeddingDimensions:
 
         assert result is not None
         if result.chunks and len(result.chunks) > 1:
-            dimensions = [len(chunk["embedding"]) for chunk in result.chunks if chunk.get("embedding") is not None]
+            dimensions = []
+            for chunk in result.chunks:
+                embedding = chunk.get("embedding")
+                if embedding is not None:
+                    dimensions.append(len(embedding))
 
             if len(dimensions) > 1:
                 # All dimensions should be equal
@@ -189,10 +194,11 @@ class TestEmbeddingNormalization:
             for chunk in result.chunks:
                 if chunk.get("embedding") is not None:
                     embedding = chunk["embedding"]
-                    # Calculate L2 norm
-                    norm = math.sqrt(sum(x**2 for x in embedding))
-                    # Normalized vectors should have norm close to 1
-                    assert 0.9 < norm < 1.1, f"Norm should be ~1.0, got {norm}"
+                    if embedding is not None:
+                        # Calculate L2 norm
+                        norm = math.sqrt(sum(x**2 for x in embedding))
+                        # Normalized vectors should have norm close to 1
+                        assert 0.9 < norm < 1.1, f"Norm should be ~1.0, got {norm}"
 
     def test_non_normalized_embeddings_exist(self) -> None:
         """Verify non-normalized embeddings can be generated."""
@@ -241,10 +247,11 @@ class TestEmbeddingValidity:
             for chunk in result.chunks:
                 if chunk.get("embedding") is not None:
                     embedding = chunk["embedding"]
-                    for value in embedding:
-                        assert isinstance(value, float)
-                        assert not math.isnan(value), "Embedding contains NaN"
-                        assert not math.isinf(value), "Embedding contains Inf"
+                    if embedding is not None:
+                        for value in embedding:
+                            assert isinstance(value, float)
+                            assert not math.isnan(value), "Embedding contains NaN"
+                            assert not math.isinf(value), "Embedding contains Inf"
 
     def test_embedding_no_negative_infinity(self) -> None:
         """Verify embeddings don't contain negative infinity."""
@@ -266,9 +273,10 @@ class TestEmbeddingValidity:
             for chunk in result.chunks:
                 if chunk.get("embedding") is not None:
                     embedding = chunk["embedding"]
-                    for value in embedding:
-                        assert value != float("inf")
-                        assert value != float("-inf")
+                    if embedding is not None:
+                        for value in embedding:
+                            assert value != float("inf")
+                            assert value != float("-inf")
 
     def test_embedding_reasonable_magnitude(self) -> None:
         """Verify embedding values have reasonable magnitude."""
@@ -290,9 +298,10 @@ class TestEmbeddingValidity:
             for chunk in result.chunks:
                 if chunk.get("embedding") is not None:
                     embedding = chunk["embedding"]
-                    # For normalized embeddings, values should be in [-1, 1]
-                    for value in embedding:
-                        assert -2.0 < value < 2.0, f"Value {value} out of reasonable range"
+                    if embedding is not None:
+                        # For normalized embeddings, values should be in [-1, 1]
+                        for value in embedding:
+                            assert -2.0 < value < 2.0, f"Value {value} out of reasonable range"
 
 
 class TestEmbeddingConsistency:

@@ -204,15 +204,15 @@ defmodule Kreuzberg.ExtractionConfig do
 
   def to_map(%__MODULE__{} = config) do
     %{
-      "chunking" => config.chunking,
-      "ocr" => config.ocr,
-      "language_detection" => config.language_detection,
-      "postprocessor" => config.postprocessor,
-      "images" => config.images,
-      "pages" => config.pages,
-      "token_reduction" => config.token_reduction,
+      "chunking" => normalize_nested_config(config.chunking),
+      "ocr" => normalize_nested_config(config.ocr),
+      "language_detection" => normalize_nested_config(config.language_detection),
+      "postprocessor" => normalize_nested_config(config.postprocessor),
+      "images" => normalize_nested_config(config.images),
+      "pages" => normalize_nested_config(config.pages),
+      "token_reduction" => normalize_nested_config(config.token_reduction),
       "keywords" => normalize_keywords_config(config.keywords),
-      "pdf_options" => config.pdf_options,
+      "pdf_options" => normalize_nested_config(config.pdf_options),
       "use_cache" => config.use_cache,
       "enable_quality_processing" => config.enable_quality_processing,
       "force_ocr" => config.force_ocr
@@ -239,16 +239,55 @@ defmodule Kreuzberg.ExtractionConfig do
   end
 
   @doc false
+  defp normalize_nested_config(nil), do: nil
+
+  @doc false
+  defp normalize_nested_config(config) when is_map(config) do
+    normalize_map_keys(config)
+  end
+
+  @doc false
   defp normalize_keywords_config(nil), do: nil
 
   @doc false
   defp normalize_keywords_config(keywords_config) when is_map(keywords_config) do
-    # Add default values for required fields if missing
-    keywords_config
-    |> Map.put_new("min_score", 0.0)
-    |> Map.put_new("ngram_range", [1, 1])
-    |> Map.put_new("algorithm", "yake")
-    |> Map.put_new("max_keywords", 10)
+    # Normalize the keys and add defaults if not present
+    # The Rust backend requires algorithm, max_keywords, min_score, and ngram_range
+    normalized = normalize_map_keys(keywords_config)
+
+    # Add default algorithm if not present (yake is the default)
+    normalized =
+      if Map.has_key?(normalized, "algorithm") do
+        normalized
+      else
+        Map.put(normalized, "algorithm", "yake")
+      end
+
+    # Add default max_keywords if not present
+    normalized =
+      if Map.has_key?(normalized, "max_keywords") do
+        normalized
+      else
+        Map.put(normalized, "max_keywords", 10)
+      end
+
+    # Add default min_score if not present
+    normalized =
+      if Map.has_key?(normalized, "min_score") do
+        normalized
+      else
+        Map.put(normalized, "min_score", 0.0)
+      end
+
+    # Add default ngram_range [1, 3] if not present
+    normalized =
+      if Map.has_key?(normalized, "ngram_range") do
+        normalized
+      else
+        Map.put(normalized, "ngram_range", [1, 3])
+      end
+
+    normalized
   end
 
   @doc false

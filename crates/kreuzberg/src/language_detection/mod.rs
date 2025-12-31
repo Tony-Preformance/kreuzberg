@@ -185,6 +185,44 @@ fn lang_to_iso639_3(lang: Lang) -> String {
     .to_string()
 }
 
+/// Register the language detection processor with the global registry.
+///
+/// This function should be called once at application startup to register
+/// the language detection post-processor.
+///
+/// **Note:** This is called automatically on first use.
+/// Explicit calling is optional.
+pub fn register_language_detection_processor() -> Result<()> {
+    let registry = crate::plugins::registry::get_post_processor_registry();
+    let mut registry = registry
+        .write()
+        .map_err(|e| crate::KreuzbergError::Other(format!("Post-processor registry lock poisoned: {}", e)))?;
+
+    registry.register(Arc::new(LanguageDetector), 40)?;
+
+    Ok(())
+}
+
+/// Lazy-initialized flag that ensures language detection processor is registered exactly once.
+///
+/// This static is accessed on first use to automatically register the
+/// language detection processor with the plugin registry.
+static PROCESSOR_INITIALIZED: Lazy<Result<()>> = Lazy::new(register_language_detection_processor);
+
+/// Ensure the language detection processor is registered.
+///
+/// This function is called automatically when needed.
+/// It's safe to call multiple times - registration only happens once.
+pub fn ensure_initialized() -> Result<()> {
+    PROCESSOR_INITIALIZED
+        .as_ref()
+        .map(|_| ())
+        .map_err(|e| crate::KreuzbergError::Plugin {
+            message: format!("Failed to register language detection processor: {}", e),
+            plugin_name: "language-detection".to_string(),
+        })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -682,6 +720,57 @@ mod tests {
     }
 
     #[test]
+    fn test_medical_terminology() {
+        let text = "The patient presented with acute myocardial infarction and was administered thrombolytic therapy. \
+                   The electrocardiogram showed significant ST-segment elevation in the anterior leads. \
+                   Cardiac biomarkers including troponin and creatine kinase were significantly elevated.";
+        let config = LanguageDetectionConfig {
+            enabled: true,
+            min_confidence: 0.5,
+            detect_multiple: false,
+        };
+
+        let result = detect_languages(text, &config).unwrap();
+        assert!(result.is_some());
+        let langs = result.unwrap();
+        assert_eq!(langs[0], "eng");
+    }
+
+    #[test]
+    fn test_legal_terminology() {
+        let text = "The plaintiff hereby alleges that the defendant breached the contractual obligations as stipulated in the aforementioned agreement. \
+                   Pursuant to clause 5.2, the defendant was required to provide adequate consideration within thirty days of execution. \
+                   The court finds that the preponderance of evidence supports the plaintiff's claims.";
+        let config = LanguageDetectionConfig {
+            enabled: true,
+            min_confidence: 0.5,
+            detect_multiple: false,
+        };
+
+        let result = detect_languages(text, &config).unwrap();
+        assert!(result.is_some());
+        let langs = result.unwrap();
+        assert_eq!(langs[0], "eng");
+    }
+
+    #[test]
+    fn test_scientific_terminology() {
+        let text = "The experimental protocol involved spectrophotometric analysis using ultraviolet-visible spectroscopy. \
+                   Quantum mechanical calculations were performed using density functional theory at the B3LYP level. \
+                   The results demonstrated significant correlation between molecular structure and optical properties.";
+        let config = LanguageDetectionConfig {
+            enabled: true,
+            min_confidence: 0.5,
+            detect_multiple: false,
+        };
+
+        let result = detect_languages(text, &config).unwrap();
+        assert!(result.is_some());
+        let langs = result.unwrap();
+        assert_eq!(langs[0], "eng");
+    }
+
+    #[test]
     fn test_code_with_comments() {
         let text = r#"
             // This function calculates the factorial of a number
@@ -744,57 +833,6 @@ mod tests {
             The detection algorithm analyzes character patterns and word frequencies to determine the most likely language.
             Modern detection systems achieve high accuracy rates across dozens of languages.
         "#;
-        let config = LanguageDetectionConfig {
-            enabled: true,
-            min_confidence: 0.5,
-            detect_multiple: false,
-        };
-
-        let result = detect_languages(text, &config).unwrap();
-        assert!(result.is_some());
-        let langs = result.unwrap();
-        assert_eq!(langs[0], "eng");
-    }
-
-    #[test]
-    fn test_medical_terminology() {
-        let text = "The patient presented with acute myocardial infarction and was administered thrombolytic therapy. \
-                   The electrocardiogram showed significant ST-segment elevation in the anterior leads. \
-                   Cardiac biomarkers including troponin and creatine kinase were significantly elevated.";
-        let config = LanguageDetectionConfig {
-            enabled: true,
-            min_confidence: 0.5,
-            detect_multiple: false,
-        };
-
-        let result = detect_languages(text, &config).unwrap();
-        assert!(result.is_some());
-        let langs = result.unwrap();
-        assert_eq!(langs[0], "eng");
-    }
-
-    #[test]
-    fn test_legal_terminology() {
-        let text = "The plaintiff hereby alleges that the defendant breached the contractual obligations as stipulated in the aforementioned agreement. \
-                   Pursuant to clause 5.2, the defendant was required to provide adequate consideration within thirty days of execution. \
-                   The court finds that the preponderance of evidence supports the plaintiff's claims.";
-        let config = LanguageDetectionConfig {
-            enabled: true,
-            min_confidence: 0.5,
-            detect_multiple: false,
-        };
-
-        let result = detect_languages(text, &config).unwrap();
-        assert!(result.is_some());
-        let langs = result.unwrap();
-        assert_eq!(langs[0], "eng");
-    }
-
-    #[test]
-    fn test_scientific_terminology() {
-        let text = "The experimental protocol involved spectrophotometric analysis using ultraviolet-visible spectroscopy. \
-                   Quantum mechanical calculations were performed using density functional theory at the B3LYP level. \
-                   The results demonstrated significant correlation between molecular structure and optical properties.";
         let config = LanguageDetectionConfig {
             enabled: true,
             min_confidence: 0.5,
@@ -944,42 +982,4 @@ mod tests {
         let langs = result.unwrap();
         assert_eq!(langs[0], "eng");
     }
-}
-
-/// Lazy-initialized flag that ensures language detection processor is registered exactly once.
-///
-/// This static is accessed on first use to automatically register the
-/// language detection processor with the plugin registry.
-static PROCESSOR_INITIALIZED: Lazy<Result<()>> = Lazy::new(register_language_detection_processor);
-
-/// Ensure the language detection processor is registered.
-///
-/// This function is called automatically when needed.
-/// It's safe to call multiple times - registration only happens once.
-pub fn ensure_initialized() -> Result<()> {
-    PROCESSOR_INITIALIZED
-        .as_ref()
-        .map(|_| ())
-        .map_err(|e| crate::KreuzbergError::Plugin {
-            message: format!("Failed to register language detection processor: {}", e),
-            plugin_name: "language-detection".to_string(),
-        })
-}
-
-/// Register the language detection processor with the global registry.
-///
-/// This function should be called once at application startup to register
-/// the language detection post-processor.
-///
-/// **Note:** This is called automatically on first use.
-/// Explicit calling is optional.
-pub fn register_language_detection_processor() -> Result<()> {
-    let registry = crate::plugins::registry::get_post_processor_registry();
-    let mut registry = registry
-        .write()
-        .map_err(|e| crate::KreuzbergError::Other(format!("Post-processor registry lock poisoned: {}", e)))?;
-
-    registry.register(Arc::new(LanguageDetector), 40)?;
-
-    Ok(())
 }

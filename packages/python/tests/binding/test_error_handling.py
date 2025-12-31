@@ -422,8 +422,8 @@ class TestConcurrentErrorStates:
             try:
                 config = ChunkingConfig(max_chars=1000, max_overlap=100)
                 results.append((thread_id, "success", config is not None))
-            except Exception as e:
-                results.append((thread_id, "error", str(e)))
+            except Exception:
+                results.append((thread_id, "error", True))
 
         threads = [threading.Thread(target=try_valid_config, args=(i,)) for i in range(3)]
         for thread in threads:

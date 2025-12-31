@@ -1530,7 +1530,7 @@ mod tests {
             page_number: 1,
         });
 
-        let tables_before = vec![Arc::clone(&shared_table), Arc::clone(&shared_table)];
+        let tables_before = [Arc::clone(&shared_table), Arc::clone(&shared_table)].to_vec();
         assert_eq!(Arc::strong_count(&tables_before[0]), 3);
         assert_eq!(Arc::strong_count(&tables_before[1]), 3);
         assert!(Arc::ptr_eq(&tables_before[0], &tables_before[1]));

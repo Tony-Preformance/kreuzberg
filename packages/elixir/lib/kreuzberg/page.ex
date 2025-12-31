@@ -117,8 +117,11 @@ defmodule Kreuzberg.Page do
   """
   @spec from_map(map()) :: t()
   def from_map(data) when is_map(data) do
+    # Handle both "number" and "page_number" fields from Rust side
+    page_number = data["page_number"] || data["number"]
+
     %__MODULE__{
-      number: data["number"],
+      number: page_number,
       content: data["content"],
       width: data["width"],
       height: data["height"],

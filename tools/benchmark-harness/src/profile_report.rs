@@ -787,9 +787,10 @@ mod tests {
 
     #[test]
     fn test_sample_quality_label() {
-        let mut report = ProfileReport::default();
-
-        report.sample_count = 25;
+        let mut report = ProfileReport {
+            sample_count: 25,
+            ..Default::default()
+        };
         assert_eq!(report.sample_quality_label(), "Very Low");
 
         report.sample_count = 75;
@@ -863,25 +864,27 @@ mod tests {
 
     #[test]
     fn test_generate_html_with_hotspots() {
-        let mut report = ProfileReport::default();
-        report.sample_count = 1000;
-        report.duration = Duration::from_millis(1000);
-        report.effective_frequency = 1000.0;
-        report.top_hotspots = vec![
-            Hotspot {
-                function_name: "extraction_function".to_string(),
-                samples: 500,
-                percentage: 50.0,
-                file_location: None,
-            },
-            Hotspot {
-                function_name: "text_processing".to_string(),
-                samples: 300,
-                percentage: 30.0,
-                file_location: None,
-            },
-        ];
-        report.recommendations = vec!["Good profile quality".to_string()];
+        let report = ProfileReport {
+            sample_count: 1000,
+            duration: Duration::from_millis(1000),
+            effective_frequency: 1000.0,
+            top_hotspots: vec![
+                Hotspot {
+                    function_name: "extraction_function".to_string(),
+                    samples: 500,
+                    percentage: 50.0,
+                    file_location: None,
+                },
+                Hotspot {
+                    function_name: "text_processing".to_string(),
+                    samples: 300,
+                    percentage: 30.0,
+                    file_location: None,
+                },
+            ],
+            recommendations: vec!["Good profile quality".to_string()],
+            ..Default::default()
+        };
 
         let html = report.generate_html();
 
@@ -922,21 +925,23 @@ mod tests {
 
     #[test]
     fn test_hotspots_render_with_data() {
-        let mut report = ProfileReport::default();
-        report.top_hotspots = vec![
-            Hotspot {
-                function_name: "func_one".to_string(),
-                samples: 100,
-                percentage: 50.0,
-                file_location: None,
-            },
-            Hotspot {
-                function_name: "func_two".to_string(),
-                samples: 50,
-                percentage: 25.0,
-                file_location: None,
-            },
-        ];
+        let report = ProfileReport {
+            top_hotspots: vec![
+                Hotspot {
+                    function_name: "func_one".to_string(),
+                    samples: 100,
+                    percentage: 50.0,
+                    file_location: None,
+                },
+                Hotspot {
+                    function_name: "func_two".to_string(),
+                    samples: 50,
+                    percentage: 25.0,
+                    file_location: None,
+                },
+            ],
+            ..Default::default()
+        };
 
         let html = report.render_hotspots_table();
         assert!(html.contains("func_one"));

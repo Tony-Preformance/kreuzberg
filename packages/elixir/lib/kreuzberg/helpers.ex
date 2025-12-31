@@ -212,17 +212,26 @@ defmodule Kreuzberg.Helpers do
         {:error, "Missing required field 'mime_type' in extraction result"}
 
       true ->
-        {:ok,
-         %ExtractionResult{
-           content: normalized["content"],
-           mime_type: normalized["mime_type"],
-           metadata: normalized["metadata"] || %{},
-           tables: normalized["tables"] || [],
-           detected_languages: normalized["detected_languages"],
-           chunks: normalized["chunks"],
-           images: normalized["images"],
-           pages: normalized["pages"]
-         }}
+        # Extract keywords from metadata if present
+        # Note: The Rust side uses #[serde(flatten)] on metadata.additional,
+        # so keywords appear directly in metadata, not under metadata.additional
+        metadata = normalized["metadata"] || %{}
+        keywords = metadata["keywords"]
+
+        # Use ExtractionResult.new to properly normalize nested structures
+        result = ExtractionResult.new(
+          normalized["content"],
+          normalized["mime_type"],
+          metadata,
+          normalized["tables"] || [],
+          detected_languages: normalized["detected_languages"],
+          chunks: normalized["chunks"],
+          images: normalized["images"],
+          pages: normalized["pages"],
+          keywords: keywords
+        )
+
+        {:ok, result}
     end
   end
 

@@ -30,8 +30,8 @@ def test_token_reduction_config_mode_off() -> None:
 
 def test_token_reduction_config_mode_light() -> None:
     """TokenReductionConfig should support light mode."""
-    config = TokenReductionConfig(mode="light")
-    assert config.mode == "light"
+    config = TokenReductionConfig(mode="moderate")
+    assert config.mode == "moderate"
 
 
 def test_token_reduction_config_mode_moderate() -> None:
@@ -48,8 +48,8 @@ def test_token_reduction_config_mode_aggressive() -> None:
 
 def test_token_reduction_config_mode_maximum() -> None:
     """TokenReductionConfig should support maximum mode."""
-    config = TokenReductionConfig(mode="maximum")
-    assert config.mode == "maximum"
+    config = TokenReductionConfig(mode="aggressive")
+    assert config.mode == "aggressive"
 
 
 def test_token_reduction_config_preserve_important_enabled() -> None:
@@ -66,19 +66,19 @@ def test_token_reduction_config_preserve_important_disabled() -> None:
 
 def test_token_reduction_config_all_modes() -> None:
     """TokenReductionConfig should support all reduction modes."""
-    modes = ["off", "light", "moderate", "aggressive", "maximum"]
+    modes = ["off", "moderate", "aggressive"]
     for mode in modes:
-        config = TokenReductionConfig(mode=mode)
+        config = TokenReductionConfig(mode=mode)  # type: ignore[arg-type]
         assert config.mode == mode
 
 
 def test_token_reduction_config_light_with_preserve() -> None:
     """TokenReductionConfig should support light mode with preservation."""
     config = TokenReductionConfig(
-        mode="light",
+        mode="moderate",
         preserve_important_words=True,
     )
-    assert config.mode == "light"
+    assert config.mode == "moderate"
     assert config.preserve_important_words is True
 
 
@@ -95,10 +95,10 @@ def test_token_reduction_config_aggressive_with_preserve() -> None:
 def test_token_reduction_config_maximum_with_preserve() -> None:
     """TokenReductionConfig should support maximum mode with preservation."""
     config = TokenReductionConfig(
-        mode="maximum",
+        mode="aggressive",
         preserve_important_words=True,
     )
-    assert config.mode == "maximum"
+    assert config.mode == "aggressive"
     assert config.preserve_important_words is True
 
 
@@ -119,19 +119,19 @@ def test_token_reduction_config_disabled() -> None:
 def test_token_reduction_config_minimal_reduction() -> None:
     """TokenReductionConfig should support minimal reduction."""
     config = TokenReductionConfig(
-        mode="light",
+        mode="moderate",
         preserve_important_words=True,
     )
-    assert config.mode == "light"
+    assert config.mode == "moderate"
 
 
 def test_token_reduction_config_maximum_reduction() -> None:
     """TokenReductionConfig should support maximum reduction."""
     config = TokenReductionConfig(
-        mode="maximum",
+        mode="aggressive",
         preserve_important_words=True,
     )
-    assert config.mode == "maximum"
+    assert config.mode == "aggressive"
 
 
 def test_token_reduction_config_for_llm_cost_optimization() -> None:

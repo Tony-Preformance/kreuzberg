@@ -559,8 +559,8 @@ mod tests {
     #[test]
     fn test_get_script_path() {
         let result = get_script_path("kreuzberg_extract.py");
-        if result.is_ok() {
-            assert!(result.unwrap().exists());
+        if let Ok(path) = result {
+            assert!(path.exists());
         }
     }
 
@@ -573,13 +573,12 @@ mod tests {
     #[test]
     fn test_find_node() {
         let result = find_node();
-        if result.is_err() {
+        if let Ok((cmd, _args)) = result {
+            assert!(!cmd.as_os_str().is_empty());
+        } else {
             assert!(which::which("tsx").is_err());
             assert!(which::which("ts-node").is_err());
             assert!(which::which("pnpm").is_err());
-        } else {
-            let (cmd, _args) = result.unwrap();
-            assert!(!cmd.as_os_str().is_empty());
         }
     }
 }

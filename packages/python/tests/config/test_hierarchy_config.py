@@ -91,6 +91,7 @@ def test_hierarchy_config_ocr_coverage_threshold_mid_range() -> None:
 def test_hierarchy_config_ocr_coverage_threshold_high() -> None:
     """HierarchyConfig should accept high ocr_coverage_threshold."""
     config = HierarchyConfig(ocr_coverage_threshold=0.9)
+    assert config.ocr_coverage_threshold is not None
     assert abs(config.ocr_coverage_threshold - 0.9) < 0.01
 
 
@@ -144,6 +145,7 @@ def test_hierarchy_config_with_ocr_threshold() -> None:
         k_clusters=6,
         ocr_coverage_threshold=0.7,
     )
+    assert config.ocr_coverage_threshold is not None
     assert abs(config.ocr_coverage_threshold - 0.7) < 0.01
 
 
@@ -183,6 +185,7 @@ def test_hierarchy_config_all_parameters() -> None:
     assert config.enabled is True
     assert config.k_clusters == 8
     assert config.include_bbox is True
+    assert config.ocr_coverage_threshold is not None
     assert abs(config.ocr_coverage_threshold - 0.6) < 0.01
 
 

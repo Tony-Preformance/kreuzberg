@@ -21,7 +21,8 @@ defmodule KreuzbergTest.E2E.PDFExtractionTest do
     assert %Kreuzberg.ExtractionResult{} = result
     assert is_binary(result.content)
     assert result.mime_type == "application/pdf"
-    assert is_list(result.pages)
+    # Pages may be nil if page extraction is not enabled
+    assert is_nil(result.pages) or is_list(result.pages)
   end
 
   @tag :e2e
@@ -30,10 +31,13 @@ defmodule KreuzbergTest.E2E.PDFExtractionTest do
 
     {:ok, result} = Kreuzberg.extract(pdf_binary, "application/pdf")
 
-    assert is_map(result.metadata)
-    # Metadata structure is valid - all keys are strings/atoms and values are valid terms
-    Enum.each(result.metadata, fn {key, value} ->
-      assert is_atom(key) or is_binary(key)
+    assert %Kreuzberg.Metadata{} = result.metadata
+    # Metadata structure is valid - all keys are atoms and values are valid terms
+    # Convert struct to map for enumeration
+    metadata_map = Map.from_struct(result.metadata)
+
+    Enum.each(metadata_map, fn {key, value} ->
+      assert is_atom(key)
       assert valid_erlang_term?(value)
     end)
   end
@@ -44,9 +48,11 @@ defmodule KreuzbergTest.E2E.PDFExtractionTest do
 
     {:ok, result} = Kreuzberg.extract(pdf_binary, "application/pdf")
 
-    assert is_list(result.pages)
+    # Pages may be nil if page extraction is not enabled
+    assert is_nil(result.pages) or is_list(result.pages)
+
     # Pages should contain structured data (each page is a map with expected fields)
-    if result.pages != [] do
+    if result.pages not in [nil, []] do
       Enum.each(result.pages, fn page ->
         assert is_map(page) or is_binary(page), "Page should be map or binary with content"
       end)

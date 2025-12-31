@@ -5,23 +5,18 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 
 /// Cached state for lazy Pdfium initialization.
-struct PdfiumCache {
-    state: InitializationState,
-    pdfium: Option<Pdfium>,
-}
-
+///
+/// This cache only stores the initialization state and library directory.
+/// Fresh Pdfium instances are created on each call to avoid lifetime issues
+/// with the underlying C library when multiple documents are processed concurrently.
 enum InitializationState {
     Uninitialized,
     Initialized { lib_dir: Option<PathBuf> },
     Failed(String),
 }
 
-static PDFIUM_CACHE: Lazy<Mutex<PdfiumCache>> = Lazy::new(|| {
-    Mutex::new(PdfiumCache {
-        state: InitializationState::Uninitialized,
-        pdfium: None,
-    })
-});
+static PDFIUM_INIT_STATE: Lazy<Mutex<InitializationState>> =
+    Lazy::new(|| Mutex::new(InitializationState::Uninitialized));
 
 fn extract_and_get_lib_dir() -> Result<Option<PathBuf>, String> {
     #[cfg(all(feature = "pdf", feature = "bundled-pdfium", not(target_arch = "wasm32")))]
@@ -63,8 +58,7 @@ fn bind_to_pdfium(lib_dir: &Option<PathBuf>) -> Result<Box<dyn PdfiumLibraryBind
 ///
 /// The first call to this function triggers initialization. On that first call,
 /// if using `bundled-pdfium`, the library is extracted to a temporary directory.
-/// Subsequent calls quickly create fresh bindings from the cached state without
-/// re-extraction.
+/// Subsequent calls quickly create fresh Pdfium instances from the cached library path.
 ///
 /// # Arguments
 ///
@@ -73,43 +67,47 @@ fn bind_to_pdfium(lib_dir: &Option<PathBuf>) -> Result<Box<dyn PdfiumLibraryBind
 ///
 /// # Returns
 ///
-/// Freshly-created PDFium bindings, or an error if initialization failed.
+/// A freshly-created Pdfium instance, or an error if initialization failed.
 ///
 /// # Performance Impact
 ///
 /// - **First call**: Performs initialization (8-12ms for bundled extraction) plus binding.
-/// - **Subsequent calls**: Creates binding from cached state (< 0.1ms).
+/// - **Subsequent calls**: Creates fresh Pdfium instance from cached library path (< 1ms).
 ///
 /// This defers Pdfium initialization until first PDF is processed, improving cold start
 /// for non-PDF workloads by 8-12ms. See Phase 3A Optimization #4 in profiling plan.
 ///
+/// # Design Rationale
+///
+/// Each call creates a fresh Pdfium instance rather than reusing a cached one.
+/// This avoids potential double-free errors when multiple PDFs are processed concurrently,
+/// as the underlying C library may not safely handle overlapping document lifecycles
+/// from the same Pdfium instance. Fresh instances ensure proper resource cleanup
+/// without conflicts.
+///
 /// # Lock Poisoning Recovery
 ///
-/// If a previous holder panicked while holding `PDFIUM_STATE`, the lock becomes poisoned.
+/// If a previous holder panicked while holding `PDFIUM_INIT_STATE`, the lock becomes poisoned.
 /// Instead of failing permanently, we recover by extracting the inner value from the
 /// poisoned lock and proceeding. This ensures PDF extraction can continue even if an
 /// earlier panic occurred, as long as the state is consistent.
 pub(crate) fn bind_pdfium(map_err: fn(String) -> PdfError, context: &'static str) -> Result<Pdfium, PdfError> {
-    let mut cache = PDFIUM_CACHE.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-
-    // If Pdfium already exists, clone and return it
-    // Pdfium cloning is cheap - it's just Arc reference counting
-    if let Some(ref pdfium) = cache.pdfium {
-        return Ok(pdfium.clone());
-    }
+    let mut state = PDFIUM_INIT_STATE
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
 
     // Get lib_dir (extract on first call, reuse on subsequent calls)
-    let lib_dir = match &cache.state {
+    let lib_dir = match &*state {
         InitializationState::Uninitialized => {
             // Extract bundled library (only happens once)
             match extract_and_get_lib_dir() {
                 Ok(lib_dir) => {
                     let lib_dir_clone = lib_dir.clone();
-                    cache.state = InitializationState::Initialized { lib_dir };
+                    *state = InitializationState::Initialized { lib_dir };
                     lib_dir_clone
                 }
                 Err(err) => {
-                    cache.state = InitializationState::Failed(err.clone());
+                    *state = InitializationState::Failed(err.clone());
                     return Err(map_err(format!("Pdfium extraction failed ({}): {}", context, err)));
                 }
             }
@@ -124,14 +122,12 @@ pub(crate) fn bind_pdfium(map_err: fn(String) -> PdfError, context: &'static str
         InitializationState::Initialized { lib_dir } => lib_dir.clone(),
     };
 
-    // Create bindings and Pdfium instance
-    // This only happens once per process - subsequent calls return cached instance above
+    // Create fresh bindings and Pdfium instance
+    // Creating a fresh instance for each call avoids potential double-free errors
+    // when multiple documents are processed, as each instance has independent lifetimes
     let bindings =
         bind_to_pdfium(&lib_dir).map_err(|e| map_err(format!("Pdfium binding failed ({}): {}", context, e)))?;
     let pdfium = Pdfium::new(bindings);
-
-    // Store in cache for reuse
-    cache.pdfium = Some(pdfium.clone());
 
     Ok(pdfium)
 }

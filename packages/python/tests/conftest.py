@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from kreuzberg import ExtractionResult
 
 
-@pytest.fixture  # type: ignore[untyped-decorator]
+@pytest.fixture
 def docx_document() -> Path:
     """Path to DOCX test file used across binding-specific suites."""
     path = Path(__file__).parent.parent.parent.parent / "test_documents" / "documents" / "lorem_ipsum.docx"
@@ -22,7 +22,7 @@ def docx_document() -> Path:
     return path
 
 
-@pytest.fixture(scope="session")  # type: ignore[untyped-decorator]
+@pytest.fixture(scope="session")
 def test_documents() -> Path:
     """Path to test_documents directory containing PDF and other test files."""
     path = Path(__file__).parent.parent.parent.parent / "test_documents"
@@ -81,7 +81,7 @@ def get_cached_pdf_extraction(pdf_path: str, config: Any) -> ExtractionResult | 
     return _pdf_extraction_cache.get(pdf_path)
 
 
-@pytest.fixture(scope="session", autouse=True)  # type: ignore[untyped-decorator]
+@pytest.fixture(scope="session", autouse=True)
 def _pdfium_session_management() -> Generator[None, None, None]:
     """Manage PDFium initialization state for the session.
 

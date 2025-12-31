@@ -349,9 +349,11 @@ mod tests {
     fn create_test_result() -> ExtractionResult {
         use kreuzberg::types::{Metadata, PageStructure, PageUnitType};
 
-        let mut metadata = Metadata::default();
-        metadata.title = Some("Test Document".to_string());
-        metadata.language = Some("en".to_string());
+        let mut metadata = Metadata {
+            title: Some("Test Document".to_string()),
+            language: Some("en".to_string()),
+            ..Default::default()
+        };
 
         let page_structure = PageStructure {
             total_count: 10,

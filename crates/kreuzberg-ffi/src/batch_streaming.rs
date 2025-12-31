@@ -437,7 +437,7 @@ mod tests {
         user_data: *mut c_void,
     ) -> c_int {
         let ctx = unsafe { &mut *(user_data as *mut Mutex<TestContext>) };
-        let mut guard = ctx.lock().unwrap();
+        let guard = ctx.get_mut().unwrap();
 
         if !result.is_null() {
             let view = unsafe { &*result };
@@ -456,7 +456,7 @@ mod tests {
 
     unsafe extern "C" fn test_error_callback(file_index: usize, error_msg: *const c_char, user_data: *mut c_void) {
         let ctx = unsafe { &mut *(user_data as *mut Mutex<TestContext>) };
-        let mut guard = ctx.lock().unwrap();
+        let guard = ctx.get_mut().unwrap();
 
         let msg = unsafe { CStr::from_ptr(error_msg).to_string_lossy().to_string() };
         guard.errors.push(format!("File {}: {}", file_index, msg));
@@ -472,7 +472,7 @@ mod tests {
 
         let path1 = CString::new(file1.to_str().unwrap()).unwrap();
         let path2 = CString::new(file2.to_str().unwrap()).unwrap();
-        let files = vec![path1.as_ptr(), path2.as_ptr()];
+        let files = [path1.as_ptr(), path2.as_ptr()];
 
         let context = Mutex::new(TestContext {
             results: Vec::new(),
@@ -500,7 +500,7 @@ mod tests {
     #[test]
     fn test_batch_streaming_with_errors() {
         let path1 = CString::new("/nonexistent/file.txt").unwrap();
-        let files = vec![path1.as_ptr()];
+        let files = [path1.as_ptr()];
 
         let context = Mutex::new(TestContext {
             results: Vec::new(),
@@ -543,7 +543,7 @@ mod tests {
 
         let path1 = CString::new(file1.to_str().unwrap()).unwrap();
         let path2 = CString::new(file2.to_str().unwrap()).unwrap();
-        let files = vec![path1.as_ptr(), path2.as_ptr()];
+        let files = [path1.as_ptr(), path2.as_ptr()];
 
         let result = unsafe {
             kreuzberg_extract_batch_streaming(

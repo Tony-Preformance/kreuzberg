@@ -734,7 +734,7 @@ mod tests {
     fn test_error_code_copy_clone() {
         let err = ErrorCode::Validation;
         let err_copy = err;
-        let err_clone = err.clone();
+        let err_clone = err;
 
         assert_eq!(err, err_copy);
         assert_eq!(err, err_clone);

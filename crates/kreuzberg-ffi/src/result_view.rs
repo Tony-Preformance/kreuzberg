@@ -401,11 +401,13 @@ mod tests {
     use std::mem;
 
     fn create_test_result() -> ExtractionResult {
-        let mut metadata = Metadata::default();
-        metadata.title = Some("Test Document".to_string());
-        metadata.language = Some("en".to_string());
-        metadata.created_at = Some("2025-01-01".to_string());
-        metadata.subject = Some("Test Subject".to_string());
+        let mut metadata = Metadata {
+            title: Some("Test Document".to_string()),
+            language: Some("en".to_string()),
+            created_at: Some("2025-01-01".to_string()),
+            subject: Some("Test Subject".to_string()),
+            ..Default::default()
+        };
 
         let page_structure = PageStructure {
             total_count: 10,

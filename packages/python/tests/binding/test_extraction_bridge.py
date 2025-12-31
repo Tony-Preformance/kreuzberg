@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-@pytest.mark.asyncio  # type: ignore[untyped-decorator]
+@pytest.mark.asyncio
 async def test_extract_bytes_with_valid_mime_type() -> None:
     """Test async extraction from bytes with explicit MIME type."""
     content = b"Hello, World!"
@@ -63,7 +63,7 @@ def test_extract_bytes_sync_with_valid_mime_type() -> None:
     assert "word_count" in format_meta
 
 
-@pytest.mark.asyncio  # type: ignore[untyped-decorator]
+@pytest.mark.asyncio
 async def test_extract_file_nonexistent_file() -> None:
     """Test that extracting a nonexistent file raises an error."""
     nonexistent_path = "/nonexistent/file.txt"
@@ -80,7 +80,7 @@ def test_extract_file_sync_nonexistent_file() -> None:
         extract_file_sync(nonexistent_path)
 
 
-@pytest.mark.asyncio  # type: ignore[untyped-decorator]
+@pytest.mark.asyncio
 async def test_extract_file_with_cache_disabled(tmp_path: Path) -> None:
     """Test extraction with caching disabled."""
     test_file = tmp_path / "test.txt"
@@ -105,7 +105,7 @@ def test_extract_file_sync_with_cache_disabled(tmp_path: Path) -> None:
     assert result.mime_type == "text/plain"
 
 
-@pytest.mark.asyncio  # type: ignore[untyped-decorator]
+@pytest.mark.asyncio
 async def test_extract_file_with_cache_hit(tmp_path: Path) -> None:
     """Test that caching works correctly (async)."""
     test_file = tmp_path / "test.txt"
@@ -136,7 +136,7 @@ def test_extract_file_sync_with_cache_hit(tmp_path: Path) -> None:
     assert result1.mime_type == result2.mime_type == "text/plain"
 
 
-@pytest.mark.asyncio  # type: ignore[untyped-decorator]
+@pytest.mark.asyncio
 async def test_extract_bytes_with_chunking() -> None:
     """Test extraction with chunking enabled."""
     content = b"This is a long text that should be chunked into smaller pieces for processing."
@@ -159,7 +159,7 @@ def test_extract_bytes_sync_with_chunking() -> None:
     assert result.get_chunk_count() > 0
 
 
-@pytest.mark.asyncio  # type: ignore[untyped-decorator]
+@pytest.mark.asyncio
 async def test_extract_bytes_with_language_detection() -> None:
     """Test extraction with language detection enabled."""
     content = b"This is some English text for language detection."
@@ -182,7 +182,7 @@ def test_extract_bytes_sync_with_language_detection() -> None:
     assert result.detected_languages is not None
 
 
-@pytest.mark.asyncio  # type: ignore[untyped-decorator]
+@pytest.mark.asyncio
 async def test_extract_bytes_with_postprocessor_config() -> None:
     """Test extraction with postprocessor config."""
     content = b"Test content"
@@ -218,7 +218,7 @@ def test_extract_bytes_sync_with_postprocessor_config() -> None:
     assert result.mime_type == "text/plain"
 
 
-@pytest.mark.asyncio  # type: ignore[untyped-decorator]
+@pytest.mark.asyncio
 async def test_extract_file_with_html_extractor(tmp_path: Path) -> None:
     """Test HTML extraction."""
     test_file = tmp_path / "test.html"

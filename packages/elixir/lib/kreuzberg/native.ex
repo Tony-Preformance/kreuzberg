@@ -1,13 +1,11 @@
 defmodule Kreuzberg.Native do
   @moduledoc false
 
-  version = Mix.Project.config()[:version]
-
   use RustlerPrecompiled,
     otp_app: :kreuzberg,
     crate: "kreuzberg_rustler",
-    base_url: "https://github.com/kreuzberg-dev/kreuzberg/releases/download/v#{version}",
-    version: version,
+    base_url: "https://github.com/kreuzberg-dev/kreuzberg/releases/download/v#{Mix.Project.config()[:version]}",
+    version: Mix.Project.config()[:version],
     force_build: System.get_env("KREUZBERG_BUILD") in ["1", "true"],
     targets: ~w(
       aarch64-apple-darwin

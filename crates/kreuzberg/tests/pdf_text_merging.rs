@@ -27,7 +27,7 @@ fn test_extract_chars_basic() {
     let pdf_path = get_test_file_path("pdfs_with_tables/tiny.pdf");
 
     // Load PDF
-    let pdfium = Pdfium::default();
+    let pdfium = Pdfium;
     let document = pdfium
         .load_pdf_from_file(pdf_path.to_str().unwrap(), None)
         .expect("Failed to load test PDF");
@@ -60,7 +60,7 @@ fn test_extract_chars_preserves_order() {
     let pdf_path = get_test_file_path("pdfs_with_tables/tiny.pdf");
 
     // Load PDF
-    let pdfium = Pdfium::default();
+    let pdfium = Pdfium;
     let document = pdfium
         .load_pdf_from_file(pdf_path.to_str().unwrap(), None)
         .expect("Failed to load test PDF");
@@ -364,14 +364,14 @@ fn test_iou_zero_area_boxes() {
     // Should not panic and should return 0 or similar
     let iou = bbox1.iou(&bbox2);
     assert!(
-        iou >= 0.0 && iou <= 1.0,
+        (0.0..=1.0).contains(&iou),
         "IOU should be in valid range for zero-area boxes"
     );
 
     // Intersection ratio should also be safe
     let ratio = bbox1.intersection_ratio(&bbox2);
     assert!(
-        ratio >= 0.0 && ratio <= 1.0,
+        (0.0..=1.0).contains(&ratio),
         "Intersection ratio should be in valid range"
     );
 }

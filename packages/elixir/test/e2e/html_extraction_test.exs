@@ -41,13 +41,17 @@ defmodule KreuzbergTest.E2E.HTMLExtractionTest do
 
     {:ok, result} = Kreuzberg.extract(html_binary, "text/html")
 
-    assert is_map(result.metadata)
-    # Metadata structure should be valid with string keys and proper values
-    Enum.each(result.metadata, fn {key, value} ->
-      assert is_atom(key) or is_binary(key), "Metadata key should be atom or binary"
+    assert %Kreuzberg.Metadata{} = result.metadata
+    # Metadata structure should be valid with atom keys and proper values
+    # Convert struct to map for enumeration
+    metadata_map = Map.from_struct(result.metadata)
 
-      assert is_binary(value) or is_atom(value) or is_number(value),
-             "Metadata value should be serializable"
+    Enum.each(metadata_map, fn {key, value} ->
+      assert is_atom(key), "Metadata key should be atom"
+
+      assert is_binary(value) or is_atom(value) or is_number(value) or is_nil(value) or
+               is_list(value),
+             "Metadata value should be serializable or nil"
     end)
   end
 

@@ -448,14 +448,10 @@ fn parse_extraction_config(_env: Env, options: Term) -> Result<kreuzberg::core::
             config.language_detection = deserialized.language_detection;
             config.postprocessor = deserialized.postprocessor;
             config.token_reduction = deserialized.token_reduction;
-            #[cfg(any(feature = "keywords-yake", feature = "keywords-rake"))]
-            {
-                config.keywords = deserialized.keywords;
-            }
-            #[cfg(feature = "pdf")]
-            {
-                config.pdf_options = deserialized.pdf_options;
-            }
+            // Keywords are always available since kreuzberg is compiled with "full" feature
+            config.keywords = deserialized.keywords;
+            // PDF options are always available since kreuzberg is compiled with "full" feature
+            config.pdf_options = deserialized.pdf_options;
         }
         Err(e) => {
             // Nested structure deserialization failed

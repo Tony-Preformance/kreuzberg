@@ -46,7 +46,7 @@ fn test_ocr_trigger_low_coverage() {
         return;
     }
 
-    let pdfium = Pdfium::default();
+    let pdfium = Pdfium;
     let document = pdfium
         .load_pdf_from_file(get_test_pdf_path().as_str(), None)
         .expect("Should load PDF document");
@@ -96,7 +96,7 @@ fn test_ocr_no_trigger_high_coverage() {
         return;
     }
 
-    let pdfium = Pdfium::default();
+    let pdfium = Pdfium;
     let document = pdfium
         .load_pdf_from_file(get_test_pdf_path().as_str(), None)
         .expect("Should load PDF document");
@@ -135,7 +135,7 @@ fn test_ocr_trigger_exact_threshold() {
         return;
     }
 
-    let pdfium = Pdfium::default();
+    let pdfium = Pdfium;
     let document = pdfium
         .load_pdf_from_file(get_test_pdf_path().as_str(), None)
         .expect("Should load PDF document");
@@ -178,7 +178,7 @@ fn test_ocr_overlapping_blocks() {
         return;
     }
 
-    let pdfium = Pdfium::default();
+    let pdfium = Pdfium;
     let document = pdfium
         .load_pdf_from_file(get_test_pdf_path().as_str(), None)
         .expect("Should load PDF document");
@@ -230,7 +230,7 @@ fn test_ocr_empty_blocks() {
         return;
     }
 
-    let pdfium = Pdfium::default();
+    let pdfium = Pdfium;
     let document = pdfium
         .load_pdf_from_file(get_test_pdf_path().as_str(), None)
         .expect("Should load PDF document");
@@ -257,7 +257,7 @@ fn test_ocr_custom_threshold() {
         return;
     }
 
-    let pdfium = Pdfium::default();
+    let pdfium = Pdfium;
     let document = pdfium
         .load_pdf_from_file(get_test_pdf_path().as_str(), None)
         .expect("Should load PDF document");

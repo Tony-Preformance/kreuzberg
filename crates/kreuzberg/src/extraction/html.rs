@@ -1466,12 +1466,12 @@ mod tests {
 
         assert!(!metadata.images.is_empty(), "Should extract images");
         let hero_image = metadata.images.iter().find(|img| {
-            img.alt.as_ref().map_or(false, |a| {
-                a.contains("Hero") || a.contains("development") || a.contains("hero")
-            })
+            img.alt
+                .as_ref()
+                .is_some_and(|a| a.contains("Hero") || a.contains("development") || a.contains("hero"))
         });
         if hero_image.is_none() {
-            assert!(metadata.images.len() >= 1, "Should have extracted at least one image");
+            assert!(!metadata.images.is_empty(), "Should have extracted at least one image");
         }
 
         assert!(

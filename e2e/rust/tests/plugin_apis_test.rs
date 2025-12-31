@@ -58,7 +58,7 @@ enabled = false
     assert_eq!(config.chunking.as_ref().unwrap().max_chars, 100);
     assert_eq!(config.chunking.as_ref().unwrap().max_overlap, 20);
     let _ = &config.language_detection;
-    assert_eq!(config.language_detection.as_ref().unwrap().enabled, false);
+    assert!(!config.language_detection.as_ref().unwrap().enabled);
 }
 
 #[test]

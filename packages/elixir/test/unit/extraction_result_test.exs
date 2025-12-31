@@ -16,12 +16,13 @@ defmodule KreuzbergTest.Unit.ExtractionResultTest do
 
       assert result.content == "Hello World"
       assert result.mime_type == "text/plain"
-      assert result.metadata == %{}
+      assert result.metadata == %Kreuzberg.Metadata{}
       assert result.tables == []
       assert result.detected_languages == nil
       assert result.chunks == nil
       assert result.images == nil
       assert result.pages == nil
+      assert result.keywords == nil
     end
 
     test "handles empty content string" do
@@ -64,18 +65,19 @@ defmodule KreuzbergTest.Unit.ExtractionResultTest do
 
   describe "new/3 - constructor with metadata" do
     test "adds metadata to result" do
-      metadata = %{"pages" => 10, "author" => "John Doe"}
+      metadata = %{"page_count" => 10, "author" => "John Doe"}
       result = ExtractionResult.new("content", "application/pdf", metadata)
 
       assert result.content == "content"
-      assert result.metadata == metadata
+      assert result.metadata.author == "John Doe"
+      assert result.metadata.page_count == 10
       assert result.tables == []
     end
 
     test "handles empty metadata map" do
       result = ExtractionResult.new("content", "text/plain", %{})
 
-      assert result.metadata == %{}
+      assert result.metadata == %Kreuzberg.Metadata{}
     end
 
     test "handles nested metadata structures" do
@@ -115,8 +117,11 @@ defmodule KreuzbergTest.Unit.ExtractionResultTest do
       result = ExtractionResult.new("content", "application/pdf", %{}, tables)
 
       assert result.content == "content"
-      assert result.tables == tables
       assert length(result.tables) == 2
+      assert Enum.at(result.tables, 0).headers == ["Col1", "Col2"]
+      assert Enum.at(result.tables, 0).rows == [["a", "b"], ["c", "d"]]
+      assert Enum.at(result.tables, 1).headers == ["X", "Y"]
+      assert Enum.at(result.tables, 1).rows == [["1", "2"]]
     end
 
     test "handles empty tables list" do
@@ -130,7 +135,7 @@ defmodule KreuzbergTest.Unit.ExtractionResultTest do
       result = ExtractionResult.new("content", "text/plain", %{}, tables)
 
       assert length(result.tables) == 1
-      assert result.tables |> List.first() |> Map.get("headers") == ["Name"]
+      assert result.tables |> List.first() |> Map.get(:headers) == ["Name"]
     end
 
     test "handles complex table structures with nested data" do
@@ -184,8 +189,11 @@ defmodule KreuzbergTest.Unit.ExtractionResultTest do
       opts = [chunks: chunks]
       result = ExtractionResult.new("content", "text/plain", %{}, [], opts)
 
-      assert result.chunks == chunks
       assert length(result.chunks) == 2
+      assert Enum.at(result.chunks, 0).text == "chunk1"
+      assert Enum.at(result.chunks, 0).embedding == [0.1, 0.2]
+      assert Enum.at(result.chunks, 1).text == "chunk2"
+      assert Enum.at(result.chunks, 1).embedding == [0.3, 0.4]
     end
 
     test "adds images from options" do
@@ -197,8 +205,9 @@ defmodule KreuzbergTest.Unit.ExtractionResultTest do
       opts = [images: images]
       result = ExtractionResult.new("content", "text/plain", %{}, [], opts)
 
-      assert result.images == images
       assert length(result.images) == 2
+      assert Enum.at(result.images, 0).ocr_text == "text in image 1"
+      assert Enum.at(result.images, 1).ocr_text == "text in image 2"
     end
 
     test "adds pages from options" do
@@ -210,8 +219,11 @@ defmodule KreuzbergTest.Unit.ExtractionResultTest do
       opts = [pages: pages]
       result = ExtractionResult.new("content", "text/plain", %{}, [], opts)
 
-      assert result.pages == pages
       assert length(result.pages) == 2
+      assert Enum.at(result.pages, 0).number == 1
+      assert Enum.at(result.pages, 0).content == "Page 1 content"
+      assert Enum.at(result.pages, 1).number == 2
+      assert Enum.at(result.pages, 1).content == "Page 2 content"
     end
 
     test "combines all options together" do
@@ -233,12 +245,15 @@ defmodule KreuzbergTest.Unit.ExtractionResultTest do
 
       assert result.content == "content"
       assert result.mime_type == "application/pdf"
-      assert result.metadata == metadata
-      assert result.tables == tables
+      assert result.metadata.title == "Test"
+      assert length(result.tables) == 1
+      assert Enum.at(result.tables, 0).headers == ["A"]
       assert result.detected_languages == languages
-      assert result.chunks == chunks
-      assert result.images == images
-      assert result.pages == pages
+      assert length(result.chunks) == 1
+      assert Enum.at(result.chunks, 0).text == "chunk"
+      assert length(result.images) == 1
+      assert length(result.pages) == 1
+      assert Enum.at(result.pages, 0).number == 1
     end
 
     test "handles empty options list" do

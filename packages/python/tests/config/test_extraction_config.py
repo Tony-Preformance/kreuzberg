@@ -186,7 +186,7 @@ def test_extraction_config_all_options_together() -> None:
         chunking=ChunkingConfig(max_chars=1024),
         images=ImageExtractionConfig(extract_images=True),
         pdf_options=PdfConfig(extract_metadata=True),
-        token_reduction=TokenReductionConfig(mode="light"),
+        token_reduction=TokenReductionConfig(mode="moderate"),
         language_detection=LanguageDetectionConfig(enabled=True),
         keywords=KeywordConfig(max_keywords=15),
         pages=PageConfig(extract_pages=True),

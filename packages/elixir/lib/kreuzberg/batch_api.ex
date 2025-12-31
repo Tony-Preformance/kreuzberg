@@ -41,7 +41,17 @@ defmodule Kreuzberg.BatchAPI do
           String.t() | nil,
           ExtractionConfig.t() | map() | keyword() | nil
         ) :: {:ok, [ExtractionResult.t()]} | {:error, String.t()}
-  def batch_extract_files(paths, mime_type \\ nil, config \\ nil)
+  # Handle case where second arg is a config (struct/map/keyword) not a mime_type
+  def batch_extract_files(paths, config, third_arg \\ nil)
+      when is_list(paths) and
+             (is_map(config) or is_list(config)) and
+             not is_binary(config) and
+             is_nil(third_arg) do
+    # Second arg is the config, mime_type should be nil
+    batch_extract_files(paths, nil, config)
+  end
+
+  def batch_extract_files(paths, mime_type, config)
       when is_list(paths) and (is_nil(mime_type) or is_binary(mime_type)) do
     # Convert all paths to strings
     string_paths = Enum.map(paths, &to_string/1)
@@ -70,7 +80,17 @@ defmodule Kreuzberg.BatchAPI do
           String.t() | nil,
           ExtractionConfig.t() | map() | keyword() | nil
         ) :: [ExtractionResult.t()]
-  def batch_extract_files!(paths, mime_type \\ nil, config \\ nil) do
+  # Handle case where second arg is a config (struct/map/keyword) not a mime_type
+  def batch_extract_files!(paths, config, third_arg \\ nil)
+      when is_list(paths) and
+             (is_map(config) or is_list(config)) and
+             not is_binary(config) and
+             is_nil(third_arg) do
+    # Second arg is the config, mime_type should be nil
+    batch_extract_files!(paths, nil, config)
+  end
+
+  def batch_extract_files!(paths, mime_type, config) do
     case batch_extract_files(paths, mime_type, config) do
       {:ok, results} ->
         results

@@ -245,7 +245,7 @@ class TestLinkMetadataFields:
                 "href": "https://example.com",
                 "text": "Link",
                 "title": None,
-                "link_type": link_type,  # type: ignore[assignment]
+                "link_type": link_type,  # type: ignore[typeddict-item]
                 "rel": [],
                 "attributes": {},
             }
@@ -308,7 +308,7 @@ class TestImageMetadataFields:
 
     def test_image_metadata_structure(self) -> None:
         """Verify ImageMetadata has all required fields."""
-        image: ImageMetadata = {
+        image: ImageMetadata = {  # type: ignore[typeddict-unknown-key]
             "src": "https://example.com/image.jpg",
             "alt": "Image description",
             "title": "Image Title",
@@ -317,31 +317,31 @@ class TestImageMetadataFields:
             "attributes": {"class": "hero-image", "loading": "lazy"},
         }
 
-        assert image["src"] == "https://example.com/image.jpg"
-        assert image["alt"] == "Image description"
-        assert image["title"] == "Image Title"
-        assert image["dimensions"] == (800, 600)
-        assert image["image_type"] == "external"
-        assert image["attributes"] == {"class": "hero-image", "loading": "lazy"}
+        assert image.get("src") == "https://example.com/image.jpg"
+        assert image.get("alt") == "Image description"
+        assert image.get("title") == "Image Title"
+        assert image.get("dimensions") == (800, 600)
+        assert image.get("image_type") == "external"
+        assert image.get("attributes") == {"class": "hero-image", "loading": "lazy"}
 
     def test_image_type_literal_values(self) -> None:
         """Verify image_type accepts literal values."""
         image_types: list[str] = ["data_uri", "inline_svg", "external", "relative"]
 
         for image_type in image_types:
-            image: ImageMetadata = {
+            image: ImageMetadata = {  # type: ignore[typeddict-unknown-key]
                 "src": "https://example.com/image.jpg",
                 "alt": None,
                 "title": None,
                 "dimensions": None,
-                "image_type": image_type,  # type: ignore[assignment]
+                "image_type": image_type,
                 "attributes": {},
             }
-            assert image["image_type"] == image_type
+            assert image.get("image_type") == image_type
 
     def test_image_metadata_optional_fields(self) -> None:
         """Verify ImageMetadata optional fields can be None."""
-        image: ImageMetadata = {
+        image: ImageMetadata = {  # type: ignore[typeddict-unknown-key]
             "src": "image.png",
             "alt": None,
             "title": None,
@@ -350,13 +350,13 @@ class TestImageMetadataFields:
             "attributes": {},
         }
 
-        assert image["alt"] is None
-        assert image["title"] is None
-        assert image["dimensions"] is None
+        assert image.get("alt") is None
+        assert image.get("title") is None
+        assert image.get("dimensions") is None
 
     def test_image_metadata_dimensions_tuple(self) -> None:
         """Verify dimensions is tuple[int, int] or None."""
-        image_with_dims: ImageMetadata = {
+        image_with_dims: ImageMetadata = {  # type: ignore[typeddict-unknown-key]
             "src": "image.jpg",
             "alt": None,
             "title": None,
@@ -365,7 +365,7 @@ class TestImageMetadataFields:
             "attributes": {},
         }
 
-        image_without_dims: ImageMetadata = {
+        image_without_dims: ImageMetadata = {  # type: ignore[typeddict-unknown-key]
             "src": "image.jpg",
             "alt": None,
             "title": None,
@@ -374,13 +374,14 @@ class TestImageMetadataFields:
             "attributes": {},
         }
 
-        assert isinstance(image_with_dims["dimensions"], tuple)
-        assert len(image_with_dims["dimensions"]) == 2
-        assert image_without_dims["dimensions"] is None
+        dims_with = image_with_dims.get("dimensions")
+        assert isinstance(dims_with, tuple)
+        assert len(dims_with) == 2
+        assert image_without_dims.get("dimensions") is None
 
     def test_image_metadata_attributes_is_dict(self) -> None:
         """Verify ImageMetadata attributes field is dict[str, str]."""
-        image: ImageMetadata = {
+        image: ImageMetadata = {  # type: ignore[typeddict-unknown-key]
             "src": "image.jpg",
             "alt": None,
             "title": None,
@@ -389,8 +390,9 @@ class TestImageMetadataFields:
             "attributes": {"srcset": "image-2x.jpg 2x", "width": "100"},
         }
 
-        assert isinstance(image["attributes"], dict)
-        assert all(isinstance(k, str) and isinstance(v, str) for k, v in image["attributes"].items())
+        attrs = image.get("attributes")
+        assert isinstance(attrs, dict)
+        assert all(isinstance(k, str) and isinstance(v, str) for k, v in attrs.items())
 
 
 class TestStructuredDataFields:
@@ -414,7 +416,7 @@ class TestStructuredDataFields:
 
         for data_type in data_types:
             structured: StructuredData = {
-                "data_type": data_type,  # type: ignore[assignment]
+                "data_type": data_type,  # type: ignore[typeddict-item]
                 "raw_json": "{}",
                 "schema_type": "Type",
             }
@@ -511,11 +513,11 @@ class TestHtmlExtractionIntegration:
 
         assert isinstance(metadata, dict)
         if "html_headers" in metadata:
-            assert isinstance(metadata["html_headers"], list)
+            assert isinstance(metadata.get("html_headers"), list)
         if "html_links" in metadata:
-            assert isinstance(metadata["html_links"], list)
+            assert isinstance(metadata.get("html_links"), list)
         if "html_images" in metadata:
-            assert isinstance(metadata["html_images"], list)
+            assert isinstance(metadata.get("html_images"), list)
 
     def test_metadata_keyword_array(self, html_file: Path) -> None:
         """Extract HTML with keywords, verify as list not string."""
@@ -557,9 +559,9 @@ class TestHtmlExtractionIntegration:
         metadata = result.metadata
 
         if "open_graph" in metadata:
-            og = metadata["open_graph"]
-            assert isinstance(og, dict), "open_graph must be dict"
-            assert all(isinstance(k, str) and isinstance(v, str) for k, v in og.items())
+            og = metadata.get("open_graph")
+            if isinstance(og, dict):
+                assert all(isinstance(k, str) and isinstance(v, str) for k, v in og.items())
 
     def test_metadata_headers_list(self, html_file: Path) -> None:
         """Extract headers, verify as list of HeaderMetadata."""
@@ -580,7 +582,7 @@ class TestHtmlExtractionIntegration:
         metadata = result.metadata
 
         if "html_headers" in metadata:
-            headers = metadata["html_headers"]
+            headers = metadata.get("html_headers")
             assert isinstance(headers, list), "headers must be list"
 
             for header in headers:
@@ -609,7 +611,7 @@ class TestHtmlExtractionIntegration:
         metadata = result.metadata
 
         if "html_links" in metadata:
-            links = metadata["html_links"]
+            links = metadata.get("html_links")
             assert isinstance(links, list), "links must be list"
 
             for link in links:
@@ -641,7 +643,7 @@ class TestHtmlExtractionIntegration:
         metadata = result.metadata
 
         if "html_images" in metadata:
-            images = metadata["html_images"]
+            images = metadata.get("html_images")
             assert isinstance(images, list), "images must be list"
 
             for image in images:
@@ -697,15 +699,15 @@ class TestMetadataEdgeCases:
         metadata = result.metadata
 
         if "html_headers" in metadata:
-            headers = metadata["html_headers"]
+            headers = metadata.get("html_headers")
             assert isinstance(headers, list)
 
         if "html_links" in metadata:
-            links = metadata["html_links"]
+            links = metadata.get("html_links")
             assert isinstance(links, list)
 
         if "html_images" in metadata:
-            images = metadata["html_images"]
+            images = metadata.get("html_images")
             assert isinstance(images, list)
 
     def test_metadata_special_characters(self) -> None:
@@ -871,8 +873,8 @@ class TestMetadataEdgeCases:
 
         assert isinstance(metadata, dict)
         if "html_headers" in metadata:
-            headers = metadata["html_headers"]
-            if len(headers) > 0:
+            headers = metadata.get("html_headers")
+            if isinstance(headers, list) and len(headers) > 0:
                 h1s = [h for h in headers if h.get("level") == 1]
                 assert len(h1s) >= 1
 
@@ -1028,14 +1030,14 @@ class TestConcurrentExtractionThreadSafety:
         """
 
         extraction_count = 10
-        results = []
-        exceptions = []
+        results: list[dict[str, object]] = []
+        exceptions: list[tuple[object, str]] = []
 
-        def extract_html() -> dict:
+        def extract_html() -> dict[str, object]:
             """Extract HTML and return metadata."""
             try:
                 result = extract_bytes_sync(html_content, "text/html")
-                return result.metadata
+                return result.metadata  # type: ignore[return-value]
             except Exception as e:
                 exceptions.append((e, traceback.format_exc()))
                 raise
@@ -1199,7 +1201,7 @@ class TestInvalidEncodingHandling:
 
         try:
             for test_case in test_cases:
-                result = extract_bytes_sync(test_case["content"], "text/html")
+                result = extract_bytes_sync(test_case["content"], "text/html")  # type: ignore[arg-type]
                 assert hasattr(result, "metadata"), f"{test_case['name']}: result should have metadata"
         except Exception as e:
             assert isinstance(e, (UnicodeDecodeError, ValueError, Exception)), (

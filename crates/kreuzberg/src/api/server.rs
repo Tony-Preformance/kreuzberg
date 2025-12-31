@@ -429,8 +429,8 @@ mod tests {
         }
 
         let limits = parse_size_limits_from_env();
-        assert_eq!(limits.max_request_body_bytes, 1 * 1024 * 1024 * 1024);
-        assert_eq!(limits.max_multipart_field_bytes, 1 * 1024 * 1024 * 1024);
+        assert_eq!(limits.max_request_body_bytes, 1024 * 1024 * 1024);
+        assert_eq!(limits.max_multipart_field_bytes, 1024 * 1024 * 1024);
 
         unsafe {
             std::env::remove_var("KREUZBERG_MAX_REQUEST_BODY_BYTES");
@@ -499,7 +499,7 @@ mod tests {
         }
 
         let limits = parse_size_limits_from_env();
-        assert_eq!(limits.max_request_body_bytes, 1 * 1024 * 1024 * 1024);
+        assert_eq!(limits.max_request_body_bytes, 1024 * 1024 * 1024);
         assert_ne!(limits.max_request_body_bytes, 5000 * 1024 * 1024);
 
         unsafe {

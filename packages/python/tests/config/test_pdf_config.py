@@ -53,6 +53,7 @@ def test_pdf_config_single_password() -> None:
 def test_pdf_config_multiple_passwords() -> None:
     """PdfConfig should support multiple passwords."""
     config = PdfConfig(passwords=["password1", "password2", "password3"])
+    assert config.passwords is not None
     assert len(config.passwords) == 3
     assert "password1" in config.passwords
     assert "password2" in config.passwords
@@ -99,6 +100,7 @@ def test_pdf_config_encrypted_pdf_passwords() -> None:
     """PdfConfig should support encrypted PDF password handling."""
     passwords = ["attempt1", "attempt2", "correct_password"]
     config = PdfConfig(passwords=passwords)
+    assert config.passwords is not None
     assert len(config.passwords) == 3
     assert config.passwords[2] == "correct_password"
 
@@ -119,6 +121,7 @@ def test_pdf_config_with_all_options() -> None:
 
     assert config.extract_images is True
     assert config.extract_metadata is True
+    assert config.passwords is not None
     assert len(config.passwords) == 2
     assert config.hierarchy is not None
     assert config.hierarchy.enabled is True
@@ -133,6 +136,7 @@ def test_pdf_config_special_characters_in_password() -> None:
 def test_pdf_config_unicode_passwords() -> None:
     """PdfConfig should accept unicode passwords."""
     config = PdfConfig(passwords=["пароль", "密码", "パスワード"])
+    assert config.passwords is not None
     assert len(config.passwords) == 3
 
 
@@ -140,6 +144,7 @@ def test_pdf_config_long_password_list() -> None:
     """PdfConfig should support long password lists."""
     passwords = [f"password_{i}" for i in range(100)]
     config = PdfConfig(passwords=passwords)
+    assert config.passwords is not None
     assert len(config.passwords) == 100
 
 
@@ -169,6 +174,7 @@ def test_pdf_config_hierarchy_without_images() -> None:
 def test_pdf_config_minimal_encrypted_pdf() -> None:
     """PdfConfig should support minimal encrypted PDF setup."""
     config = PdfConfig(passwords=["secret"])
+    assert config.passwords is not None
     assert len(config.passwords) == 1
     assert config.passwords[0] == "secret"
 
@@ -184,5 +190,6 @@ def test_pdf_config_realistic_scenario() -> None:
 
     assert config.extract_images is True
     assert config.extract_metadata is True
+    assert config.passwords is not None
     assert len(config.passwords) == 2
     assert config.hierarchy is not None

@@ -525,6 +525,44 @@ pub fn chunk_texts_batch(texts: &[&str], config: &ChunkingConfig) -> Result<Vec<
     texts.iter().map(|text| chunk_text(text, config, None)).collect()
 }
 
+/// Lazy-initialized flag that ensures chunking processor is registered exactly once.
+///
+/// This static is accessed on first use to automatically register the
+/// chunking processor with the plugin registry.
+static PROCESSOR_INITIALIZED: Lazy<Result<()>> = Lazy::new(register_chunking_processor);
+
+/// Ensure the chunking processor is registered.
+///
+/// This function is called automatically when needed.
+/// It's safe to call multiple times - registration only happens once.
+pub fn ensure_initialized() -> Result<()> {
+    PROCESSOR_INITIALIZED
+        .as_ref()
+        .map(|_| ())
+        .map_err(|e| crate::KreuzbergError::Plugin {
+            message: format!("Failed to register chunking processor: {}", e),
+            plugin_name: "text-chunking".to_string(),
+        })
+}
+
+/// Register the chunking processor with the global registry.
+///
+/// This function should be called once at application startup to register
+/// the chunking post-processor.
+///
+/// **Note:** This is called automatically on first use.
+/// Explicit calling is optional.
+pub fn register_chunking_processor() -> Result<()> {
+    let registry = crate::plugins::registry::get_post_processor_registry();
+    let mut registry = registry
+        .write()
+        .map_err(|e| crate::KreuzbergError::Other(format!("Post-processor registry lock poisoned: {}", e)))?;
+
+    registry.register(Arc::new(ChunkingProcessor), 50)?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1999,16 +2037,17 @@ mod tests {
                 (i + 1) * step
             };
 
-            if start < end && start <= text_len && end <= text_len {
-                if let Some(boundary_start) = text[..start].char_indices().last().map(|(idx, _)| idx) {
-                    if let Some(boundary_end) = text[..end].char_indices().last().map(|(idx, _)| idx) {
-                        boundaries.push(PageBoundary {
-                            byte_start: boundary_start,
-                            byte_end: boundary_end,
-                            page_number: i + 1,
-                        });
-                    }
-                }
+            if start < end
+                && start <= text_len
+                && end <= text_len
+                && let Some(boundary_start) = text[..start].char_indices().last().map(|(idx, _)| idx)
+                && let Some(boundary_end) = text[..end].char_indices().last().map(|(idx, _)| idx)
+            {
+                boundaries.push(PageBoundary {
+                    byte_start: boundary_start,
+                    byte_end: boundary_end,
+                    page_number: i + 1,
+                });
             }
         }
 
@@ -2077,7 +2116,7 @@ mod tests {
         assert!(result.is_ok());
 
         let chunks = result.unwrap();
-        assert!(chunks.chunks.len() > 0);
+        assert!(!chunks.chunks.is_empty());
 
         for chunk in &chunks.chunks {
             assert!(!chunk.content.is_empty());
@@ -2145,22 +2184,21 @@ mod tests {
                 (i + 1) * step
             };
 
-            if start < end && start <= text_len && end <= text_len {
-                if let Some(boundary_start) = text[..start.min(text_len - 1)]
+            if start < end
+                && start <= text_len
+                && end <= text_len
+                && let Some(boundary_start) = text[..start.min(text_len - 1)]
                     .char_indices()
                     .last()
                     .map(|(idx, _)| idx)
-                {
-                    if let Some(boundary_end) = text[..end.min(text_len)].char_indices().last().map(|(idx, _)| idx) {
-                        if boundary_start < boundary_end {
-                            boundaries.push(PageBoundary {
-                                byte_start: boundary_start,
-                                byte_end: boundary_end,
-                                page_number: i + 1,
-                            });
-                        }
-                    }
-                }
+                && let Some(boundary_end) = text[..end.min(text_len)].char_indices().last().map(|(idx, _)| idx)
+                && boundary_start < boundary_end
+            {
+                boundaries.push(PageBoundary {
+                    byte_start: boundary_start,
+                    byte_end: boundary_end,
+                    page_number: i + 1,
+                });
             }
         }
 
@@ -2195,22 +2233,21 @@ mod tests {
                 (i + 1) * step
             };
 
-            if start < end && start <= text_len && end <= text_len {
-                if let Some(boundary_start) = text[..start.min(text_len - 1)]
+            if start < end
+                && start <= text_len
+                && end <= text_len
+                && let Some(boundary_start) = text[..start.min(text_len - 1)]
                     .char_indices()
                     .last()
                     .map(|(idx, _)| idx)
-                {
-                    if let Some(boundary_end) = text[..end.min(text_len)].char_indices().last().map(|(idx, _)| idx) {
-                        if boundary_start < boundary_end {
-                            boundaries.push(PageBoundary {
-                                byte_start: boundary_start,
-                                byte_end: boundary_end,
-                                page_number: i + 1,
-                            });
-                        }
-                    }
-                }
+                && let Some(boundary_end) = text[..end.min(text_len)].char_indices().last().map(|(idx, _)| idx)
+                && boundary_start < boundary_end
+            {
+                boundaries.push(PageBoundary {
+                    byte_start: boundary_start,
+                    byte_end: boundary_end,
+                    page_number: i + 1,
+                });
             }
         }
 
@@ -2263,42 +2300,4 @@ mod tests {
         let result = chunk_text(&text, &config, Some(&boundaries));
         let _ = result;
     }
-}
-
-/// Lazy-initialized flag that ensures chunking processor is registered exactly once.
-///
-/// This static is accessed on first use to automatically register the
-/// chunking processor with the plugin registry.
-static PROCESSOR_INITIALIZED: Lazy<Result<()>> = Lazy::new(register_chunking_processor);
-
-/// Ensure the chunking processor is registered.
-///
-/// This function is called automatically when needed.
-/// It's safe to call multiple times - registration only happens once.
-pub fn ensure_initialized() -> Result<()> {
-    PROCESSOR_INITIALIZED
-        .as_ref()
-        .map(|_| ())
-        .map_err(|e| crate::KreuzbergError::Plugin {
-            message: format!("Failed to register chunking processor: {}", e),
-            plugin_name: "text-chunking".to_string(),
-        })
-}
-
-/// Register the chunking processor with the global registry.
-///
-/// This function should be called once at application startup to register
-/// the chunking post-processor.
-///
-/// **Note:** This is called automatically on first use.
-/// Explicit calling is optional.
-pub fn register_chunking_processor() -> Result<()> {
-    let registry = crate::plugins::registry::get_post_processor_registry();
-    let mut registry = registry
-        .write()
-        .map_err(|e| crate::KreuzbergError::Other(format!("Post-processor registry lock poisoned: {}", e)))?;
-
-    registry.register(Arc::new(ChunkingProcessor), 50)?;
-
-    Ok(())
 }

@@ -747,7 +747,7 @@ mod tests {
 
         assert_eq!(&*buffer, "hello");
         assert_eq!(buffer.as_str(), "hello");
-        assert!(buffer.len() > 0);
+        assert!(!buffer.is_empty());
     }
 
     #[test]

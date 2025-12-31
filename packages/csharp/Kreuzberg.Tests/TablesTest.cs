@@ -586,7 +586,7 @@ public class TablesTest
     [Fact]
     public void TableExtraction_FromDocumentWithoutTables_ReturnsEmptyOrNull()
     {
-        var pdfPath = NativeTestHelper.GetDocumentPath("pdfs/simple.pdf");
+        var pdfPath = NativeTestHelper.GetDocumentPath("pdfs/fake_memo.pdf");
         var config = new ExtractionConfig();
 
         var result = KreuzbergClient.ExtractFileSync(pdfPath, config);

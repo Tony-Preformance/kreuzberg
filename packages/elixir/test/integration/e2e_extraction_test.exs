@@ -469,7 +469,7 @@ defmodule KreuzbergTest.Integration.E2EExtractionTest do
       results =
         documents
         |> Enum.map(fn doc ->
-          {:ok, Kreuzberg.extract(doc, "text/plain")}
+          Kreuzberg.extract(doc, "text/plain")
         end)
 
       assert length(results) == 3

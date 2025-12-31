@@ -573,28 +573,16 @@ mod tests {
     #[test]
     fn test_validate_binarization_method_valid() {
         unsafe {
-            assert_eq!(
-                kreuzberg_validate_binarization_method(b"otsu\0".as_ptr() as *const c_char),
-                1
-            );
-            assert_eq!(
-                kreuzberg_validate_binarization_method(b"adaptive\0".as_ptr() as *const c_char),
-                1
-            );
-            assert_eq!(
-                kreuzberg_validate_binarization_method(b"sauvola\0".as_ptr() as *const c_char),
-                1
-            );
+            assert_eq!(kreuzberg_validate_binarization_method(c"otsu".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_binarization_method(c"adaptive".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_binarization_method(c"sauvola".as_ptr()), 1);
         }
     }
 
     #[test]
     fn test_validate_binarization_method_invalid() {
         unsafe {
-            assert_eq!(
-                kreuzberg_validate_binarization_method(b"invalid\0".as_ptr() as *const c_char),
-                0
-            );
+            assert_eq!(kreuzberg_validate_binarization_method(c"invalid".as_ptr()), 0);
         }
     }
 
@@ -608,28 +596,16 @@ mod tests {
     #[test]
     fn test_validate_ocr_backend_valid() {
         unsafe {
-            assert_eq!(
-                kreuzberg_validate_ocr_backend(b"tesseract\0".as_ptr() as *const c_char),
-                1
-            );
-            assert_eq!(
-                kreuzberg_validate_ocr_backend(b"easyocr\0".as_ptr() as *const c_char),
-                1
-            );
-            assert_eq!(
-                kreuzberg_validate_ocr_backend(b"paddleocr\0".as_ptr() as *const c_char),
-                1
-            );
+            assert_eq!(kreuzberg_validate_ocr_backend(c"tesseract".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_ocr_backend(c"easyocr".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_ocr_backend(c"paddleocr".as_ptr()), 1);
         }
     }
 
     #[test]
     fn test_validate_ocr_backend_invalid() {
         unsafe {
-            assert_eq!(
-                kreuzberg_validate_ocr_backend(b"invalid_backend\0".as_ptr() as *const c_char),
-                0
-            );
+            assert_eq!(kreuzberg_validate_ocr_backend(c"invalid_backend".as_ptr()), 0);
         }
     }
 
@@ -643,29 +619,26 @@ mod tests {
     #[test]
     fn test_validate_language_code_valid_2letter() {
         unsafe {
-            assert_eq!(kreuzberg_validate_language_code(b"en\0".as_ptr() as *const c_char), 1);
-            assert_eq!(kreuzberg_validate_language_code(b"de\0".as_ptr() as *const c_char), 1);
-            assert_eq!(kreuzberg_validate_language_code(b"fr\0".as_ptr() as *const c_char), 1);
+            assert_eq!(kreuzberg_validate_language_code(c"en".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_language_code(c"de".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_language_code(c"fr".as_ptr()), 1);
         }
     }
 
     #[test]
     fn test_validate_language_code_valid_3letter() {
         unsafe {
-            assert_eq!(kreuzberg_validate_language_code(b"eng\0".as_ptr() as *const c_char), 1);
-            assert_eq!(kreuzberg_validate_language_code(b"deu\0".as_ptr() as *const c_char), 1);
-            assert_eq!(kreuzberg_validate_language_code(b"fra\0".as_ptr() as *const c_char), 1);
+            assert_eq!(kreuzberg_validate_language_code(c"eng".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_language_code(c"deu".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_language_code(c"fra".as_ptr()), 1);
         }
     }
 
     #[test]
     fn test_validate_language_code_invalid() {
         unsafe {
-            assert_eq!(
-                kreuzberg_validate_language_code(b"invalid\0".as_ptr() as *const c_char),
-                0
-            );
-            assert_eq!(kreuzberg_validate_language_code(b"xx\0".as_ptr() as *const c_char), 0);
+            assert_eq!(kreuzberg_validate_language_code(c"invalid".as_ptr()), 0);
+            assert_eq!(kreuzberg_validate_language_code(c"xx".as_ptr()), 0);
         }
     }
 
@@ -679,36 +652,18 @@ mod tests {
     #[test]
     fn test_validate_token_reduction_level_valid() {
         unsafe {
-            assert_eq!(
-                kreuzberg_validate_token_reduction_level(b"off\0".as_ptr() as *const c_char),
-                1
-            );
-            assert_eq!(
-                kreuzberg_validate_token_reduction_level(b"light\0".as_ptr() as *const c_char),
-                1
-            );
-            assert_eq!(
-                kreuzberg_validate_token_reduction_level(b"moderate\0".as_ptr() as *const c_char),
-                1
-            );
-            assert_eq!(
-                kreuzberg_validate_token_reduction_level(b"aggressive\0".as_ptr() as *const c_char),
-                1
-            );
-            assert_eq!(
-                kreuzberg_validate_token_reduction_level(b"maximum\0".as_ptr() as *const c_char),
-                1
-            );
+            assert_eq!(kreuzberg_validate_token_reduction_level(c"off".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_token_reduction_level(c"light".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_token_reduction_level(c"moderate".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_token_reduction_level(c"aggressive".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_token_reduction_level(c"maximum".as_ptr()), 1);
         }
     }
 
     #[test]
     fn test_validate_token_reduction_level_invalid() {
         unsafe {
-            assert_eq!(
-                kreuzberg_validate_token_reduction_level(b"extreme\0".as_ptr() as *const c_char),
-                0
-            );
+            assert_eq!(kreuzberg_validate_token_reduction_level(c"extreme".as_ptr()), 0);
         }
     }
 
@@ -750,18 +705,15 @@ mod tests {
     #[test]
     fn test_validate_output_format_valid() {
         unsafe {
-            assert_eq!(kreuzberg_validate_output_format(b"text\0".as_ptr() as *const c_char), 1);
-            assert_eq!(
-                kreuzberg_validate_output_format(b"markdown\0".as_ptr() as *const c_char),
-                1
-            );
+            assert_eq!(kreuzberg_validate_output_format(c"text".as_ptr()), 1);
+            assert_eq!(kreuzberg_validate_output_format(c"markdown".as_ptr()), 1);
         }
     }
 
     #[test]
     fn test_validate_output_format_invalid() {
         unsafe {
-            assert_eq!(kreuzberg_validate_output_format(b"json\0".as_ptr() as *const c_char), 0);
+            assert_eq!(kreuzberg_validate_output_format(c"json".as_ptr()), 0);
         }
     }
 

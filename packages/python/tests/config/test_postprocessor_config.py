@@ -44,6 +44,7 @@ def test_postprocessor_config_single_enabled_processor() -> None:
 def test_postprocessor_config_multiple_enabled_processors() -> None:
     """PostProcessorConfig should support multiple enabled processors."""
     config = PostProcessorConfig(enabled_processors=["normalize", "fix_encoding", "trim"])
+    assert config.enabled_processors is not None
     assert len(config.enabled_processors) == 3
     assert "normalize" in config.enabled_processors
 
@@ -57,6 +58,7 @@ def test_postprocessor_config_single_disabled_processor() -> None:
 def test_postprocessor_config_multiple_disabled_processors() -> None:
     """PostProcessorConfig should support multiple disabled processors."""
     config = PostProcessorConfig(disabled_processors=["experimental", "beta_feature"])
+    assert config.disabled_processors is not None
     assert len(config.disabled_processors) == 2
     assert "experimental" in config.disabled_processors
 
@@ -128,6 +130,7 @@ def test_postprocessor_config_many_processors() -> None:
     """PostProcessorConfig should support many processors."""
     enabled = [f"processor_{i}" for i in range(50)]
     config = PostProcessorConfig(enabled_processors=enabled)
+    assert config.enabled_processors is not None
     assert len(config.enabled_processors) == 50
 
 
@@ -141,12 +144,14 @@ def test_postprocessor_config_complex_processor_names() -> None:
             "collapse_line_breaks",
         ]
     )
+    assert config.enabled_processors is not None
     assert len(config.enabled_processors) == 4
 
 
 def test_postprocessor_config_special_characters_in_names() -> None:
     """PostProcessorConfig should accept special characters in processor names."""
     config = PostProcessorConfig(enabled_processors=["processor-v2", "processor_beta", "processor.test"])
+    assert config.enabled_processors is not None
     assert "processor-v2" in config.enabled_processors
 
 
@@ -159,7 +164,9 @@ def test_postprocessor_config_all_parameters() -> None:
     )
 
     assert config.enabled is True
+    assert config.enabled_processors is not None
     assert len(config.enabled_processors) == 2
+    assert config.disabled_processors is not None
     assert len(config.disabled_processors) == 1
 
 

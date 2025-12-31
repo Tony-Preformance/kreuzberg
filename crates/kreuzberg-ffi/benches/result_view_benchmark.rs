@@ -1,16 +1,19 @@
-use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use kreuzberg::types::{Chunk, ChunkMetadata, ExtractionResult, Metadata, PageStructure, PageUnitType};
 use kreuzberg_ffi::{CExtractionResultView, kreuzberg_get_result_view};
 use std::ffi::CString;
+use std::hint;
 use std::mem;
 
 /// Create a test extraction result with configurable complexity
 fn create_test_result(content_size: usize, chunk_count: usize) -> ExtractionResult {
-    let mut metadata = Metadata::default();
-    metadata.title = Some("Benchmark Test Document".to_string());
-    metadata.language = Some("en".to_string());
-    metadata.created_at = Some("2025-01-01T00:00:00Z".to_string());
-    metadata.subject = Some("Performance Testing".to_string());
+    let mut metadata = Metadata {
+        title: Some("Benchmark Test Document".to_string()),
+        language: Some("en".to_string()),
+        created_at: Some("2025-01-01T00:00:00Z".to_string()),
+        subject: Some("Performance Testing".to_string()),
+        ..Default::default()
+    };
 
     let page_structure = PageStructure {
         total_count: 100,
@@ -83,9 +86,9 @@ fn bench_zero_copy_view_creation(c: &mut Criterion) {
             b.iter(|| {
                 let mut view: CExtractionResultView = unsafe { mem::zeroed() };
                 unsafe {
-                    kreuzberg_get_result_view(black_box(result_ptr), &mut view);
+                    kreuzberg_get_result_view(hint::black_box(result_ptr), &mut view);
                 }
-                black_box(view);
+                hint::black_box(view);
             });
         });
     }
@@ -116,10 +119,10 @@ fn bench_copy_based_approach(c: &mut Criterion) {
                     .as_ref()
                     .map(|s| CString::new(s.as_str()).unwrap());
 
-                black_box(content_cstr);
-                black_box(mime_cstr);
-                black_box(language_cstr);
-                black_box(title_cstr);
+                hint::black_box(content_cstr);
+                hint::black_box(mime_cstr);
+                hint::black_box(language_cstr);
+                hint::black_box(title_cstr);
             });
         });
     }
@@ -140,24 +143,24 @@ fn bench_zero_copy_field_access(c: &mut Criterion) {
 
     group.bench_function("access_content_length", |b| {
         b.iter(|| {
-            black_box(view.content_len);
+            hint::black_box(view.content_len);
         });
     });
 
     group.bench_function("access_all_counts", |b| {
         b.iter(|| {
-            black_box(view.table_count);
-            black_box(view.chunk_count);
-            black_box(view.detected_language_count);
-            black_box(view.image_count);
-            black_box(view.page_count);
+            hint::black_box(view.table_count);
+            hint::black_box(view.chunk_count);
+            hint::black_box(view.detected_language_count);
+            hint::black_box(view.image_count);
+            hint::black_box(view.page_count);
         });
     });
 
     group.bench_function("read_content_slice", |b| {
         b.iter(|| {
             let content_slice = unsafe { std::slice::from_raw_parts(view.content_ptr, view.content_len) };
-            black_box(content_slice);
+            hint::black_box(content_slice);
         });
     });
 
@@ -174,9 +177,9 @@ fn bench_multiple_views(c: &mut Criterion) {
             for _ in 0..10 {
                 let mut view: CExtractionResultView = unsafe { mem::zeroed() };
                 unsafe {
-                    kreuzberg_get_result_view(black_box(result_ptr), &mut view);
+                    kreuzberg_get_result_view(hint::black_box(result_ptr), &mut view);
                 }
-                black_box(view);
+                hint::black_box(view);
             }
         });
     });
@@ -196,16 +199,16 @@ fn bench_vs_json_serialization(c: &mut Criterion) {
             b.iter(|| {
                 let mut view: CExtractionResultView = unsafe { mem::zeroed() };
                 unsafe {
-                    kreuzberg_get_result_view(black_box(result_ptr), &mut view);
+                    kreuzberg_get_result_view(hint::black_box(result_ptr), &mut view);
                 }
-                black_box(view);
+                hint::black_box(view);
             });
         });
 
         group.bench_with_input(BenchmarkId::new("json_serialize", size), size, |b, _| {
             b.iter(|| {
                 let json = serde_json::to_string(&result.metadata).unwrap();
-                black_box(json);
+                hint::black_box(json);
             });
         });
     }

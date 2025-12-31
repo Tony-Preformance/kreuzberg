@@ -267,7 +267,7 @@ mod tests {
         let test_size = 5_000_000;
         let test_data = vec![0u8; test_size];
 
-        if let Ok(_) = fs::write(&test_file, &test_data) {
+        if fs::write(&test_file, &test_data).is_ok() {
             let is_valid = is_extracted_library_valid(&test_file, test_size);
             assert!(is_valid);
             let _ = fs::remove_file(&test_file);
@@ -284,7 +284,7 @@ mod tests {
         let actual_size = original_size - tolerance / 2;
         let test_data = vec![0u8; actual_size];
 
-        if let Ok(_) = fs::write(&test_file, &test_data) {
+        if fs::write(&test_file, &test_data).is_ok() {
             let is_valid = is_extracted_library_valid(&test_file, original_size);
             assert!(is_valid);
             let _ = fs::remove_file(&test_file);
@@ -300,7 +300,7 @@ mod tests {
         let actual_size = (original_size as f64 * 0.85) as usize;
         let test_data = vec![0u8; actual_size];
 
-        if let Ok(_) = fs::write(&test_file, &test_data) {
+        if fs::write(&test_file, &test_data).is_ok() {
             let is_valid = is_extracted_library_valid(&test_file, original_size);
             assert!(!is_valid);
             let _ = fs::remove_file(&test_file);

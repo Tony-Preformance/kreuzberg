@@ -321,6 +321,404 @@ internal class ByteArrayConverter : JsonConverter<byte[]>
     }
 }
 
+internal class MetadataConverter : JsonConverter<Metadata>
+{
+    public override Metadata? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartObject)
+        {
+            throw new JsonException("Expected StartObject");
+        }
+
+        var metadata = new Metadata();
+        var formatFields = new JsonObject();
+
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.EndObject)
+            {
+                break;
+            }
+
+            if (reader.TokenType != JsonTokenType.PropertyName)
+            {
+                continue;
+            }
+
+            var propertyName = reader.GetString();
+            reader.Read();
+
+            switch (propertyName?.ToLowerInvariant())
+            {
+                case "language":
+                    metadata.Language = reader.TokenType == JsonTokenType.Null ? null : reader.GetString();
+                    break;
+                case "date":
+                    metadata.Date = reader.TokenType == JsonTokenType.Null ? null : reader.GetString();
+                    break;
+                case "subject":
+                    metadata.Subject = reader.TokenType == JsonTokenType.Null ? null : reader.GetString();
+                    break;
+                case "format_type":
+                    var formatStr = reader.TokenType == JsonTokenType.Null ? null : reader.GetString();
+                    if (!string.IsNullOrEmpty(formatStr))
+                    {
+                        metadata.FormatType = Serialization.ParseFormatType(formatStr);
+                        metadata.Format.Type = metadata.FormatType;
+                    }
+                    break;
+                case "image_preprocessing":
+                    if (reader.TokenType != JsonTokenType.Null)
+                    {
+                        metadata.ImagePreprocessing = JsonSerializer.Deserialize<ImagePreprocessingMetadata>(ref reader, options);
+                    }
+                    break;
+                case "json_schema":
+                    if (reader.TokenType != JsonTokenType.Null)
+                    {
+                        metadata.JsonSchema = JsonNode.Parse(JsonDocument.Parse(ref reader).RootElement.GetRawText());
+                    }
+                    break;
+                case "error":
+                    if (reader.TokenType != JsonTokenType.Null)
+                    {
+                        metadata.Error = JsonSerializer.Deserialize<ErrorMetadata>(ref reader, options);
+                    }
+                    break;
+                case "pages":
+                    if (reader.TokenType != JsonTokenType.Null)
+                    {
+                        metadata.Pages = JsonSerializer.Deserialize<PageStructure>(ref reader, options);
+                    }
+                    break;
+                default:
+                    // Store format-specific fields
+                    if (reader.TokenType == JsonTokenType.StartObject)
+                    {
+                        using var doc = JsonDocument.Parse(ref reader);
+                        formatFields[propertyName!] = JsonNode.Parse(doc.RootElement.GetRawText());
+                    }
+                    else if (reader.TokenType == JsonTokenType.StartArray)
+                    {
+                        using var doc = JsonDocument.Parse(ref reader);
+                        formatFields[propertyName!] = JsonNode.Parse(doc.RootElement.GetRawText());
+                    }
+                    else if (reader.TokenType != JsonTokenType.Null)
+                    {
+                        var node = JsonNode.Parse(reader.GetString() ?? "null");
+                        if (node != null)
+                        {
+                            formatFields[propertyName!] = node;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        // Apply format-specific metadata
+        ApplyFormatMetadataFromNode(metadata, formatFields);
+
+        return metadata;
+    }
+
+    public override void Write(Utf8JsonWriter writer, Metadata value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+
+        if (!string.IsNullOrWhiteSpace(value.Language))
+        {
+            writer.WritePropertyName(options.PropertyNamingPolicy?.ConvertName("Language") ?? "Language");
+            writer.WriteStringValue(value.Language);
+        }
+
+        if (!string.IsNullOrWhiteSpace(value.Date))
+        {
+            writer.WritePropertyName(options.PropertyNamingPolicy?.ConvertName("Date") ?? "Date");
+            writer.WriteStringValue(value.Date);
+        }
+
+        if (!string.IsNullOrWhiteSpace(value.Subject))
+        {
+            writer.WritePropertyName(options.PropertyNamingPolicy?.ConvertName("Subject") ?? "Subject");
+            writer.WriteStringValue(value.Subject);
+        }
+
+        writer.WritePropertyName(options.PropertyNamingPolicy?.ConvertName("FormatType") ?? "FormatType");
+        writer.WriteStringValue(Serialization.FormatTypeToString(value.FormatType));
+
+        if (value.ImagePreprocessing != null)
+        {
+            writer.WritePropertyName(options.PropertyNamingPolicy?.ConvertName("ImagePreprocessing") ?? "ImagePreprocessing");
+            JsonSerializer.Serialize(writer, value.ImagePreprocessing, options);
+        }
+
+        if (value.JsonSchema != null)
+        {
+            writer.WritePropertyName(options.PropertyNamingPolicy?.ConvertName("JsonSchema") ?? "JsonSchema");
+            JsonSerializer.Serialize(writer, value.JsonSchema, options);
+        }
+
+        if (value.Error != null)
+        {
+            writer.WritePropertyName(options.PropertyNamingPolicy?.ConvertName("Error") ?? "Error");
+            JsonSerializer.Serialize(writer, value.Error, options);
+        }
+
+        if (value.Pages != null)
+        {
+            writer.WritePropertyName(options.PropertyNamingPolicy?.ConvertName("Pages") ?? "Pages");
+            JsonSerializer.Serialize(writer, value.Pages, options);
+        }
+
+        // Write format-specific fields
+        WriteFormatFields(writer, value, options);
+
+        if (value.Additional != null)
+        {
+            foreach (var kvp in value.Additional)
+            {
+                writer.WritePropertyName(kvp.Key);
+                JsonSerializer.Serialize(writer, kvp.Value, options);
+            }
+        }
+
+        writer.WriteEndObject();
+    }
+
+    private static void WriteFormatFields(Utf8JsonWriter writer, Metadata metadata, JsonSerializerOptions options)
+    {
+        void SerializeFormatField<T>(T? payload)
+        {
+            if (payload == null)
+            {
+                return;
+            }
+            var node = JsonSerializer.SerializeToNode(payload, options) as JsonObject;
+            if (node == null)
+            {
+                return;
+            }
+            foreach (var kvp in node)
+            {
+                writer.WritePropertyName(kvp.Key);
+                JsonSerializer.Serialize(writer, kvp.Value, options);
+            }
+        }
+
+        switch (metadata.FormatType)
+        {
+            case FormatType.Pdf:
+                SerializeFormatField(metadata.Format.Pdf);
+                break;
+            case FormatType.Excel:
+                SerializeFormatField(metadata.Format.Excel);
+                break;
+            case FormatType.Email:
+                SerializeFormatField(metadata.Format.Email);
+                break;
+            case FormatType.Pptx:
+                SerializeFormatField(metadata.Format.Pptx);
+                break;
+            case FormatType.Archive:
+                SerializeFormatField(metadata.Format.Archive);
+                break;
+            case FormatType.Image:
+                SerializeFormatField(metadata.Format.Image);
+                break;
+            case FormatType.Xml:
+                SerializeFormatField(metadata.Format.Xml);
+                break;
+            case FormatType.Text:
+                SerializeFormatField(metadata.Format.Text);
+                break;
+            case FormatType.Html:
+                SerializeFormatField(metadata.Format.Html);
+                break;
+            case FormatType.Ocr:
+                SerializeFormatField(metadata.Format.Ocr);
+                break;
+        }
+    }
+
+    private static void ApplyFormatMetadataFromNode(Metadata metadata, JsonObject formatFields)
+    {
+        if (formatFields.Count == 0)
+        {
+            return;
+        }
+
+        switch (metadata.FormatType)
+        {
+            case FormatType.Pdf:
+                metadata.Format.Pdf = DeserializeFromNode<PdfMetadata>(formatFields);
+                break;
+            case FormatType.Excel:
+                metadata.Format.Excel = DeserializeFromNode<ExcelMetadata>(formatFields);
+                break;
+            case FormatType.Email:
+                metadata.Format.Email = DeserializeFromNode<EmailMetadata>(formatFields);
+                break;
+            case FormatType.Pptx:
+                metadata.Format.Pptx = DeserializeFromNode<PptxMetadata>(formatFields);
+                break;
+            case FormatType.Archive:
+                metadata.Format.Archive = DeserializeFromNode<ArchiveMetadata>(formatFields);
+                break;
+            case FormatType.Image:
+                metadata.Format.Image = DeserializeFromNode<ImageMetadata>(formatFields);
+                break;
+            case FormatType.Xml:
+                metadata.Format.Xml = DeserializeFromNode<XmlMetadata>(formatFields);
+                break;
+            case FormatType.Text:
+                metadata.Format.Text = DeserializeFromNode<TextMetadata>(formatFields);
+                break;
+            case FormatType.Html:
+                metadata.Format.Html = DeserializeHtmlMetadataFromNode(formatFields);
+                break;
+            case FormatType.Ocr:
+                metadata.Format.Ocr = DeserializeFromNode<OcrMetadata>(formatFields);
+                break;
+        }
+    }
+
+    private static T? DeserializeFromNode<T>(JsonObject node)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<T>(node.ToJsonString(), Serialization.Options);
+        }
+        catch
+        {
+            return default;
+        }
+    }
+
+    private static HtmlMetadata? DeserializeHtmlMetadataFromNode(JsonObject node)
+    {
+        try
+        {
+            var htmlMetadata = new HtmlMetadata();
+
+            // Extract scalar fields
+            if (node.TryGetPropertyValue("title", out var title) && title?.GetValueKind() != JsonValueKind.Null)
+            {
+                htmlMetadata.Title = title?.AsValue().GetValue<string>();
+            }
+            if (node.TryGetPropertyValue("description", out var description) && description?.GetValueKind() != JsonValueKind.Null)
+            {
+                htmlMetadata.Description = description?.AsValue().GetValue<string>();
+            }
+            if (node.TryGetPropertyValue("author", out var author) && author?.GetValueKind() != JsonValueKind.Null)
+            {
+                htmlMetadata.Author = author?.AsValue().GetValue<string>();
+            }
+            if (node.TryGetPropertyValue("canonical_url", out var canonicalUrl) && canonicalUrl?.GetValueKind() != JsonValueKind.Null)
+            {
+                htmlMetadata.CanonicalUrl = canonicalUrl?.AsValue().GetValue<string>();
+            }
+            if (node.TryGetPropertyValue("base_href", out var baseHref) && baseHref?.GetValueKind() != JsonValueKind.Null)
+            {
+                htmlMetadata.BaseHref = baseHref?.AsValue().GetValue<string>();
+            }
+            if (node.TryGetPropertyValue("language", out var language) && language?.GetValueKind() != JsonValueKind.Null)
+            {
+                htmlMetadata.Language = language?.AsValue().GetValue<string>();
+            }
+            if (node.TryGetPropertyValue("text_direction", out var textDirection) && textDirection?.GetValueKind() != JsonValueKind.Null)
+            {
+                htmlMetadata.TextDirection = textDirection?.AsValue().GetValue<string>();
+            }
+
+            // Extract keywords list
+            if (node.TryGetPropertyValue("keywords", out var keywords) && keywords?.GetValueKind() != JsonValueKind.Null)
+            {
+                var keywordsList = JsonSerializer.Deserialize<List<string>>(keywords.ToJsonString(), Serialization.Options);
+                if (keywordsList != null && keywordsList.Count > 0)
+                {
+                    htmlMetadata.Keywords = keywordsList;
+                }
+            }
+
+            // Extract open_graph dictionary
+            if (node.TryGetPropertyValue("open_graph", out var openGraph) && openGraph?.GetValueKind() != JsonValueKind.Null)
+            {
+                var ogDict = JsonSerializer.Deserialize<Dictionary<string, string>>(openGraph.ToJsonString(), Serialization.Options);
+                if (ogDict != null && ogDict.Count > 0)
+                {
+                    htmlMetadata.OpenGraph = ogDict;
+                }
+            }
+
+            // Extract twitter_card dictionary
+            if (node.TryGetPropertyValue("twitter_card", out var twitterCard) && twitterCard?.GetValueKind() != JsonValueKind.Null)
+            {
+                var tcDict = JsonSerializer.Deserialize<Dictionary<string, string>>(twitterCard.ToJsonString(), Serialization.Options);
+                if (tcDict != null && tcDict.Count > 0)
+                {
+                    htmlMetadata.TwitterCard = tcDict;
+                }
+            }
+
+            // Extract meta_tags dictionary
+            if (node.TryGetPropertyValue("meta_tags", out var metaTags) && metaTags?.GetValueKind() != JsonValueKind.Null)
+            {
+                var mtDict = JsonSerializer.Deserialize<Dictionary<string, string>>(metaTags.ToJsonString(), Serialization.Options);
+                if (mtDict != null && mtDict.Count > 0)
+                {
+                    htmlMetadata.MetaTags = mtDict;
+                }
+            }
+
+            // Extract headers list
+            if (node.TryGetPropertyValue("headers", out var headers) && headers?.GetValueKind() != JsonValueKind.Null)
+            {
+                var headersList = JsonSerializer.Deserialize<List<HeaderMetadata>>(headers.ToJsonString(), Serialization.Options);
+                if (headersList != null && headersList.Count > 0)
+                {
+                    htmlMetadata.Headers = headersList;
+                }
+            }
+
+            // Extract links list
+            if (node.TryGetPropertyValue("links", out var links) && links?.GetValueKind() != JsonValueKind.Null)
+            {
+                var linksList = JsonSerializer.Deserialize<List<LinkMetadata>>(links.ToJsonString(), Serialization.Options);
+                if (linksList != null && linksList.Count > 0)
+                {
+                    htmlMetadata.Links = linksList;
+                }
+            }
+
+            // Extract images list
+            if (node.TryGetPropertyValue("images", out var images) && images?.GetValueKind() != JsonValueKind.Null)
+            {
+                var imagesList = JsonSerializer.Deserialize<List<HtmlImageMetadata>>(images.ToJsonString(), Serialization.Options);
+                if (imagesList != null && imagesList.Count > 0)
+                {
+                    htmlMetadata.Images = imagesList;
+                }
+            }
+
+            // Extract structured_data list
+            if (node.TryGetPropertyValue("structured_data", out var structuredData) && structuredData?.GetValueKind() != JsonValueKind.Null)
+            {
+                var sdList = JsonSerializer.Deserialize<List<StructuredData>>(structuredData.ToJsonString(), Serialization.Options);
+                if (sdList != null && sdList.Count > 0)
+                {
+                    htmlMetadata.StructuredData = sdList;
+                }
+            }
+
+            return htmlMetadata;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}
+
 internal static class Serialization
 {
     /// <summary>
@@ -332,7 +730,7 @@ internal static class Serialization
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         WriteIndented = false,
-        Converters = { new ByteArrayConverter() }
+        Converters = { new MetadataConverter(), new ByteArrayConverter() }
     };
 
     /// <summary>
@@ -344,7 +742,7 @@ internal static class Serialization
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         WriteIndented = false,
-        Converters = { new PageConfigConverter(), new KeywordConfigConverter(), new ByteArrayConverter() }
+        Converters = { new MetadataConverter(), new PageConfigConverter(), new KeywordConfigConverter(), new ByteArrayConverter() }
     };
 
     /// <summary>
@@ -541,7 +939,7 @@ internal static class Serialization
 
         if (root.TryGetProperty("format_type", out var formatType))
         {
-            metadata.FormatType = ParseFormat(formatType.GetString());
+            metadata.FormatType = ParseFormatType(formatType.GetString());
             metadata.Format.Type = metadata.FormatType;
             recognized.UnionWith(FormatFields.GetValueOrDefault(metadata.FormatType, Array.Empty<string>()));
         }
@@ -874,7 +1272,7 @@ internal static class Serialization
         }
     }
 
-    private static FormatType ParseFormat(string? format)
+    internal static FormatType ParseFormatType(string? format)
     {
         return format?.ToLowerInvariant() switch
         {
@@ -892,7 +1290,7 @@ internal static class Serialization
         };
     }
 
-    private static string? FormatTypeToString(FormatType format)
+    internal static string? FormatTypeToString(FormatType format)
     {
         return format switch
         {

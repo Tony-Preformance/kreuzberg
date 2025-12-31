@@ -218,8 +218,8 @@ def test_pages_type_hint_with_mypy(test_documents: Path) -> None:
         for page in pages:
             page_num: int = page["page_number"]
             content: str = page["content"]
-            tables: list = page["tables"]
-            images: list = page["images"]
+            tables = page["tables"]
+            images = page["images"]
             assert isinstance(page_num, int)
             assert isinstance(content, str)
             assert isinstance(tables, list)

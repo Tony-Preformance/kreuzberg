@@ -49,6 +49,11 @@ defmodule Kreuzberg.ExtractionResult do
       - Each page is a Kreuzberg.Page struct with number, content, and dimensions
       - Useful for documents where position and structure matter
 
+    * `:keywords` - Optional list of extracted keyword maps
+      - nil if keyword extraction is disabled
+      - Each keyword is a map with "text" and "score" fields
+      - Used for document classification, tagging, and search optimization
+
   ## Examples
 
       # Basic extraction result
@@ -99,7 +104,8 @@ defmodule Kreuzberg.ExtractionResult do
           detected_languages: list(String.t()) | nil,
           chunks: list(Kreuzberg.Chunk.t()) | nil,
           images: list(Kreuzberg.Image.t()) | nil,
-          pages: list(Kreuzberg.Page.t()) | nil
+          pages: list(Kreuzberg.Page.t()) | nil,
+          keywords: list(map()) | nil
         }
 
   defstruct [
@@ -109,6 +115,7 @@ defmodule Kreuzberg.ExtractionResult do
     :chunks,
     :images,
     :pages,
+    :keywords,
     metadata: %Kreuzberg.Metadata{},
     tables: []
   ]
@@ -127,6 +134,7 @@ defmodule Kreuzberg.ExtractionResult do
       * `:chunks` - List of chunk structs or maps
       * `:images` - List of image structs or maps
       * `:pages` - List of page structs or maps
+      * `:keywords` - List of keyword structs or maps
 
   ## Returns
 
@@ -176,7 +184,8 @@ defmodule Kreuzberg.ExtractionResult do
       detected_languages: Keyword.get(opts, :detected_languages),
       chunks: normalize_chunks(Keyword.get(opts, :chunks)),
       images: normalize_images(Keyword.get(opts, :images)),
-      pages: normalize_pages(Keyword.get(opts, :pages))
+      pages: normalize_pages(Keyword.get(opts, :pages)),
+      keywords: normalize_keywords(Keyword.get(opts, :keywords))
     }
   end
 
@@ -237,4 +246,10 @@ defmodule Kreuzberg.ExtractionResult do
       other -> other
     end)
   end
+
+  @doc false
+  @spec normalize_keywords(list() | nil) :: list(map()) | nil
+  defp normalize_keywords(nil), do: nil
+  defp normalize_keywords([]), do: []
+  defp normalize_keywords(keywords) when is_list(keywords), do: keywords
 end

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-@pytest.fixture(scope="session", autouse=True)  # type: ignore[untyped-decorator]
+@pytest.fixture(scope="session", autouse=True)
 def mock_ocr_libraries() -> Generator[None, None, None]:
     """Mock easyocr and paddleocr modules to allow tests to run without them installed.
 

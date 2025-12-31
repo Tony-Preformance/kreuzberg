@@ -71,9 +71,12 @@ defmodule KreuzbergTest.E2E.NIFIntegrationTest do
 
     {:ok, result} = Kreuzberg.extract(text, "text/plain")
 
-    assert is_map(result.metadata)
+    assert %Kreuzberg.Metadata{} = result.metadata
     # All values in metadata should be valid Erlang terms
-    Enum.each(result.metadata, fn {_key, value} ->
+    # Convert struct to map for enumeration
+    metadata_map = Map.from_struct(result.metadata)
+
+    Enum.each(metadata_map, fn {_key, value} ->
       assert valid_erlang_term?(value)
     end)
   end
@@ -317,10 +320,11 @@ defmodule KreuzbergTest.E2E.NIFIntegrationTest do
     assert is_binary(result.mime_type)
     assert is_map(result.metadata)
     assert is_list(result.tables)
-    assert is_list(result.pages)
-    assert is_list(result.chunks)
-    assert is_list(result.images)
-    assert is_list(result.detected_languages)
+    # Optional fields may be nil if not enabled
+    assert is_nil(result.pages) or is_list(result.pages)
+    assert is_nil(result.chunks) or is_list(result.chunks)
+    assert is_nil(result.images) or is_list(result.images)
+    assert is_nil(result.detected_languages) or is_list(result.detected_languages)
   end
 
   @tag :e2e
@@ -340,18 +344,19 @@ defmodule KreuzbergTest.E2E.NIFIntegrationTest do
     assert is_binary(result.content)
     # Verify result struct has all required fields after crossing NIF boundary
     assert is_map(result.metadata)
-    assert is_list(result.pages)
+    # Pages may be nil if page extraction is not enabled
+    assert is_nil(result.pages) or is_list(result.pages)
   end
 
   @tag :e2e
   test "list structures with mixed types survive NIF boundary" do
     {:ok, result} = Kreuzberg.extract("Test", "text/plain")
 
-    # Pages list should be properly formed
-    assert is_list(result.pages)
+    # Pages list should be properly formed (or nil if not enabled)
+    assert is_nil(result.pages) or is_list(result.pages)
 
-    # Chunks list should be properly formed
-    assert is_list(result.chunks)
+    # Chunks list should be properly formed (or nil if not enabled)
+    assert is_nil(result.chunks) or is_list(result.chunks)
   end
 
   # ===== Error Propagation from NIF =====
@@ -431,7 +436,7 @@ defmodule KreuzbergTest.E2E.NIFIntegrationTest do
     # Verify each result is valid
     successful_results =
       Enum.filter(results, fn
-        {:ok, result} -> %Kreuzberg.ExtractionResult{} = result and is_binary(result.content)
+        {:ok, result} -> match?(%Kreuzberg.ExtractionResult{}, result) and is_binary(result.content)
         _ -> false
       end)
 
