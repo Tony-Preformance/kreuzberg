@@ -142,6 +142,26 @@ runs:
         echo "  ORT version:    $ORT_VERSION"
         echo "  Cache version:  $CACHE_VERSION"
 
+    # Determine target-specific directory
+    - name: Determine build target directory
+      id: target-dir
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        TARGET_DIR="${CARGO_TARGET_DIR:-target}"
+
+        # If CARGO_BUILD_TARGET is set, use target-specific subdirectory
+        if [[ -n "${CARGO_BUILD_TARGET:-}" ]]; then
+          RELEASE_DIR="$TARGET_DIR/$CARGO_BUILD_TARGET/release"
+          echo "release-dir=$RELEASE_DIR" >> "$GITHUB_OUTPUT"
+          echo "Using target-specific directory: $RELEASE_DIR"
+        else
+          RELEASE_DIR="$TARGET_DIR/release"
+          echo "release-dir=$RELEASE_DIR" >> "$GITHUB_OUTPUT"
+          echo "Using default directory: $RELEASE_DIR"
+        fi
+
     # Restore from cache
     - name: Restore FFI library from cache
       id: cache-restore
@@ -153,7 +173,7 @@ runs:
           ffi-${{ inputs.ffi-crate }}-${{ inputs.platform }}-rust-
           ffi-${{ inputs.ffi-crate }}-${{ inputs.platform }}-
         cache-paths: |
-          ${{ env.CARGO_TARGET_DIR || 'target' }}/release/
+          ${{ steps.target-dir.outputs.release-dir }}/
           crates/kreuzberg-ffi/kreuzberg-ffi.pc
         operation: restore
 
@@ -213,11 +233,19 @@ runs:
 
         # Detect library path based on FFI crate
         TARGET_DIR="${CARGO_TARGET_DIR:-target}"
+
+        # Determine release directory (with target-specific subdirectory if CARGO_BUILD_TARGET is set)
+        if [[ -n "${CARGO_BUILD_TARGET:-}" ]]; then
+          RELEASE_DIR="$TARGET_DIR/$CARGO_BUILD_TARGET/release"
+        else
+          RELEASE_DIR="$TARGET_DIR/release"
+        fi
+
         LIBRARY_PATH=""
-        for candidate in "$TARGET_DIR/release/libkreuzberg_ffi.so" \
-                         "$TARGET_DIR/release/libkreuzberg_ffi.dylib" \
-                         "$TARGET_DIR/release/kreuzberg_ffi.dll" \
-                         "$TARGET_DIR/release/libkreuzberg_ffi.a"; do
+        for candidate in "$RELEASE_DIR/libkreuzberg_ffi.so" \
+                         "$RELEASE_DIR/libkreuzberg_ffi.dylib" \
+                         "$RELEASE_DIR/kreuzberg_ffi.dll" \
+                         "$RELEASE_DIR/libkreuzberg_ffi.a"; do
           if [[ -e "$candidate" ]]; then
             LIBRARY_PATH="$candidate"
             break
@@ -241,9 +269,12 @@ runs:
 
         echo "=== Validating FFI Artifacts ==="
 
-        TARGET_DIR="${CARGO_TARGET_DIR:-target}"
+        # Use the release directory determined earlier
+        RELEASE_DIR="${{ steps.target-dir.outputs.release-dir }}"
+        echo "Validating artifacts in: $RELEASE_DIR"
+
         # Run validation script with directory path
-        scripts/ci/cache/validate-cache.sh ffi "$TARGET_DIR/release/" || {
+        scripts/ci/cache/validate-cache.sh ffi "$RELEASE_DIR/" || {
           echo "❌ Validation failed"
           exit 1
         }
@@ -258,7 +289,7 @@ runs:
         binding-name: ${{ inputs.ffi-crate }}
         cache-key: ${{ steps.generate-cache-key.outputs.cache-key }}
         cache-paths: |
-          ${{ env.CARGO_TARGET_DIR || 'target' }}/release/
+          ${{ steps.target-dir.outputs.release-dir }}/
           crates/kreuzberg-ffi/kreuzberg-ffi.pc
         operation: save
 
