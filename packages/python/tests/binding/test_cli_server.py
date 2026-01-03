@@ -34,6 +34,30 @@ def _get_free_port() -> int:
         return addr[1]
 
 
+def _wait_for_server_ready(port: int, timeout: float = 30.0, check_interval: float = 0.5) -> bool:
+    """Poll the server health endpoint until it's ready or timeout is reached.
+
+    Args:
+        port: The port the server is running on
+        timeout: Maximum time to wait in seconds (default: 30)
+        check_interval: Time between checks in seconds (default: 0.5)
+
+    Returns:
+        True if server became ready, False if timeout was reached
+    """
+    start_time = time.time()
+    with httpx.Client() as client:
+        while time.time() - start_time < timeout:
+            try:
+                response = client.get(f"http://127.0.0.1:{port}/health", timeout=2.0)
+                if response.status_code == 200:
+                    return True
+            except (httpx.ConnectError, httpx.TimeoutException):
+                pass
+            time.sleep(check_interval)
+    return False
+
+
 def _cli_feature_unavailable_skip(command: str, stderr: str) -> None:
     """Skip test with helpful message about missing CLI features."""
     message = (
@@ -116,13 +140,18 @@ def test_serve_command_starts_and_responds() -> None:
     )
 
     try:
-        time.sleep(5)
-
-        if process.poll() is not None:
+        # Wait for server to be ready with proper polling
+        if not _wait_for_server_ready(port, timeout=30.0):
+            # Check if process died
+            if process.poll() is not None:
+                stdout, stderr = process.communicate()
+                if "unrecognized subcommand" in stderr.lower() or "not found" in stderr.lower():
+                    _cli_feature_unavailable_skip("serve", stderr)
+                raise AssertionError(f"Server process died. stdout: {stdout}, stderr: {stderr}")
+            # Process still running but server not ready
+            process.kill()
             stdout, stderr = process.communicate()
-            if "unrecognized subcommand" in stderr.lower() or "not found" in stderr.lower():
-                _cli_feature_unavailable_skip("serve", stderr)
-            raise AssertionError(f"Server process died. stdout: {stdout}, stderr: {stderr}")
+            raise AssertionError(f"Server did not become ready within 30 seconds. stdout: {stdout}, stderr: {stderr}")
 
         with httpx.Client() as client:
             response = client.get(f"http://127.0.0.1:{port}/health", timeout=5.0)
@@ -187,13 +216,18 @@ language = "eng"
     )
 
     try:
-        time.sleep(5)
-
-        if process.poll() is not None:
+        # Wait for server to be ready with proper polling
+        if not _wait_for_server_ready(port, timeout=30.0):
+            # Check if process died
+            if process.poll() is not None:
+                stdout, stderr = process.communicate()
+                if "unrecognized subcommand" in stderr.lower() or "not found" in stderr.lower():
+                    _cli_feature_unavailable_skip("serve", stderr)
+                raise AssertionError(f"Server process died. stdout: {stdout}, stderr: {stderr}")
+            # Process still running but server not ready
+            process.kill()
             stdout, stderr = process.communicate()
-            if "unrecognized subcommand" in stderr.lower() or "not found" in stderr.lower():
-                _cli_feature_unavailable_skip("serve", stderr)
-            raise AssertionError(f"Server process died. stdout: {stdout}, stderr: {stderr}")
+            raise AssertionError(f"Server did not become ready within 30 seconds. stdout: {stdout}, stderr: {stderr}")
 
         with httpx.Client() as client:
             response = client.get(f"http://127.0.0.1:{port}/health", timeout=5.0)
@@ -227,13 +261,18 @@ def test_serve_command_extract_endpoint(tmp_path: Path) -> None:
     )
 
     try:
-        time.sleep(5)
-
-        if process.poll() is not None:
+        # Wait for server to be ready with proper polling
+        if not _wait_for_server_ready(port, timeout=30.0):
+            # Check if process died
+            if process.poll() is not None:
+                stdout, stderr = process.communicate()
+                if "unrecognized subcommand" in stderr.lower() or "not found" in stderr.lower():
+                    _cli_feature_unavailable_skip("serve", stderr)
+                raise AssertionError(f"Server process died. stdout: {stdout}, stderr: {stderr}")
+            # Process still running but server not ready
+            process.kill()
             stdout, stderr = process.communicate()
-            if "unrecognized subcommand" in stderr.lower() or "not found" in stderr.lower():
-                _cli_feature_unavailable_skip("serve", stderr)
-            raise AssertionError(f"Server process died. stdout: {stdout}, stderr: {stderr}")
+            raise AssertionError(f"Server did not become ready within 30 seconds. stdout: {stdout}, stderr: {stderr}")
 
         test_file = tmp_path / "test.txt"
         test_file.write_text("Hello, Kreuzberg API!")
