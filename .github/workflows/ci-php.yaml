@@ -169,7 +169,6 @@ jobs:
           cargo build --release --package kreuzberg-php
 
       - name: Clean cargo cache to avoid fingerprint conflicts
-        if: matrix.os == 'macos-latest'
         shell: bash
         run: |
           cargo clean --release -p kreuzberg-php 2>/dev/null || true
@@ -260,7 +259,6 @@ jobs:
           cargo build --release --package kreuzberg-php
 
       - name: Clean cargo cache to avoid fingerprint conflicts
-        if: matrix.os == 'macos-latest'
         shell: bash
         run: |
           cargo clean --release -p kreuzberg-php 2>/dev/null || true

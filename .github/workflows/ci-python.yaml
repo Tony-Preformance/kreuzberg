@@ -144,9 +144,9 @@ jobs:
           cargo build --release --package kreuzberg-cli --features all
           mkdir -p packages/python/kreuzberg
           if [ "${{ runner.os }}" = "Windows" ]; then
-            cp target/release/kreuzberg-cli.exe packages/python/kreuzberg/
+            cp target/release/kreuzberg.exe packages/python/kreuzberg/
           else
-            cp target/release/kreuzberg-cli packages/python/kreuzberg/
+            cp target/release/kreuzberg packages/python/kreuzberg/
           fi
 
       - name: Build FFI library

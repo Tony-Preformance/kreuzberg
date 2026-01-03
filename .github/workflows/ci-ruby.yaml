@@ -275,12 +275,45 @@ jobs:
 
       - name: Clean cargo fingerprints to avoid Windows path conflicts
         if: runner.os == 'Windows'
-        shell: bash
+        shell: pwsh
         run: |
-          echo "Cleaning Cargo fingerprints (Windows MAX_PATH mitigation uses different target dir)"
-          rm -rf packages/ruby/tmp 2>/dev/null || true
-          find target -name ".fingerprint" -type d -exec rm -rf {} + 2>/dev/null || true
-          echo "Done"
+          Write-Host "Cleaning Cargo fingerprints (Windows MAX_PATH mitigation uses different target dir)"
+
+          # Clean packages/ruby/tmp
+          $rubyTmpPath = "packages\ruby\tmp"
+          if (Test-Path $rubyTmpPath) {
+            Write-Host "Cleaning $rubyTmpPath..."
+            Remove-Item -Path $rubyTmpPath -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          # Clean regular target directory fingerprints
+          $targetPath = "target\.fingerprint"
+          if (Test-Path $targetPath) {
+            Write-Host "Cleaning target/.fingerprint..."
+            Get-ChildItem -Path "target" -Filter ".fingerprint" -Recurse -Force -ErrorAction SilentlyContinue |
+              Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          # Clean C:\t directory (the actual CARGO_TARGET_DIR on Windows)
+          $ctPath = "C:\t"
+          if (Test-Path $ctPath) {
+            Write-Host "Cleaning C:\t (CARGO_TARGET_DIR)..."
+            try {
+              # Remove .fingerprint directories recursively
+              Get-ChildItem -Path $ctPath -Filter ".fingerprint" -Recurse -Force -ErrorAction SilentlyContinue |
+                Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
+              # Also try to clean the whole directory if possible
+              Remove-Item -Path $ctPath -Recurse -Force -ErrorAction SilentlyContinue
+              Write-Host "Successfully cleaned C:\t"
+            } catch {
+              Write-Host "Warning: Could not fully clean C:\t, but fingerprints removed: $_"
+            }
+          } else {
+            Write-Host "C:\t not found (will be created during build)"
+          }
+
+          Write-Host "Done"
 
       - name: Build FFI library
         id: ffi

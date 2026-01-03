@@ -84,6 +84,13 @@ type BytesWithMime struct {
 
 // ExtractFileSync extracts content and metadata from the file at the provided path.
 func ExtractFileSync(path string, config *ExtractionConfig) (*ExtractionResult, error) {
+	// Validate chunking parameters if provided in config
+	if config != nil && config.Chunking != nil {
+		if err := validateChunkingConfig(config.Chunking); err != nil {
+			return nil, err
+		}
+	}
+
 	cPath := C.CString(path)
 	defer C.free(unsafe.Pointer(cPath))
 
@@ -121,6 +128,13 @@ func ExtractBytesSync(data []byte, mimeType string, config *ExtractionConfig) (*
 	}
 	if mimeType == "" {
 		return nil, newValidationErrorWithContext("mimeType is required", nil, ErrorCodeValidation, nil)
+	}
+
+	// Validate chunking parameters if provided in config
+	if config != nil && config.Chunking != nil {
+		if err := validateChunkingConfig(config.Chunking); err != nil {
+			return nil, err
+		}
 	}
 
 	buf := C.CBytes(data)
@@ -162,6 +176,13 @@ func BatchExtractFilesSync(paths []string, config *ExtractionConfig) ([]*Extract
 		return []*ExtractionResult{}, nil
 	}
 
+	// Validate chunking parameters if provided in config
+	if config != nil && config.Chunking != nil {
+		if err := validateChunkingConfig(config.Chunking); err != nil {
+			return nil, err
+		}
+	}
+
 	cStrings := make([]*C.char, len(paths))
 	for i, path := range paths {
 		if path == "" {
@@ -200,6 +221,13 @@ func BatchExtractFilesSync(paths []string, config *ExtractionConfig) ([]*Extract
 func BatchExtractBytesSync(items []BytesWithMime, config *ExtractionConfig) ([]*ExtractionResult, error) {
 	if len(items) == 0 {
 		return []*ExtractionResult{}, nil
+	}
+
+	// Validate chunking parameters if provided in config
+	if config != nil && config.Chunking != nil {
+		if err := validateChunkingConfig(config.Chunking); err != nil {
+			return nil, err
+		}
 	}
 
 	cItems := make([]C.CBytesWithMime, len(items))
@@ -669,4 +697,73 @@ func GetEmbeddingPreset(name string) (*EmbeddingPreset, error) {
 		return nil, newSerializationErrorWithContext("failed to decode embedding preset", err, ErrorCodeValidation, nil)
 	}
 	return &preset, nil
+}
+
+// validateChunkingConfig validates chunking configuration parameters.
+// It checks that ChunkSize and ChunkOverlap are positive when set, and that overlap < chunk size.
+// These validations are performed before FFI calls.
+func validateChunkingConfig(cfg *ChunkingConfig) error {
+	// Maximum reasonable chunk size (100MB)
+	const maxReasonableChunkSize = 104857600
+
+	// Validate ChunkSize if provided
+	if cfg.ChunkSize != nil {
+		if *cfg.ChunkSize < 0 {
+			return newValidationErrorWithContext(
+				fmt.Sprintf("invalid chunk size: %d (must be >= 0)", *cfg.ChunkSize),
+				nil, ErrorCodeValidation, nil)
+		}
+		if *cfg.ChunkSize > maxReasonableChunkSize {
+			return newValidationErrorWithContext(
+				fmt.Sprintf("invalid chunk size: %d (exceeds maximum reasonable size of %d bytes)", *cfg.ChunkSize, maxReasonableChunkSize),
+				nil, ErrorCodeValidation, nil)
+		}
+	}
+
+	// Validate ChunkOverlap if provided
+	if cfg.ChunkOverlap != nil && *cfg.ChunkOverlap < 0 {
+		return newValidationErrorWithContext(
+			fmt.Sprintf("invalid chunk overlap: %d (must be >= 0)", *cfg.ChunkOverlap),
+			nil, ErrorCodeValidation, nil)
+	}
+
+	// If both are set, validate that overlap < chunk size
+	if cfg.ChunkSize != nil && cfg.ChunkOverlap != nil {
+		if *cfg.ChunkOverlap >= *cfg.ChunkSize {
+			return newValidationErrorWithContext(
+				fmt.Sprintf("invalid chunking parameters: chunk overlap (%d) must be < chunk size (%d)", *cfg.ChunkOverlap, *cfg.ChunkSize),
+				nil, ErrorCodeValidation, nil)
+		}
+	}
+
+	// Also validate MaxChars and MaxOverlap if provided (for backward compatibility)
+	if cfg.MaxChars != nil {
+		if *cfg.MaxChars <= 0 {
+			return newValidationErrorWithContext(
+				fmt.Sprintf("invalid max_chars: %d (must be > 0)", *cfg.MaxChars),
+				nil, ErrorCodeValidation, nil)
+		}
+		if *cfg.MaxChars > maxReasonableChunkSize {
+			return newValidationErrorWithContext(
+				fmt.Sprintf("invalid max_chars: %d (exceeds maximum reasonable size of %d bytes)", *cfg.MaxChars, maxReasonableChunkSize),
+				nil, ErrorCodeValidation, nil)
+		}
+	}
+
+	if cfg.MaxOverlap != nil && *cfg.MaxOverlap < 0 {
+		return newValidationErrorWithContext(
+			fmt.Sprintf("invalid max_overlap: %d (must be >= 0)", *cfg.MaxOverlap),
+			nil, ErrorCodeValidation, nil)
+	}
+
+	// If both MaxChars and MaxOverlap are set, validate that overlap < max_chars
+	if cfg.MaxChars != nil && cfg.MaxOverlap != nil {
+		if *cfg.MaxOverlap >= *cfg.MaxChars {
+			return newValidationErrorWithContext(
+				fmt.Sprintf("invalid chunking parameters: max_overlap (%d) must be < max_chars (%d)", *cfg.MaxOverlap, *cfg.MaxChars),
+				nil, ErrorCodeValidation, nil)
+		}
+	}
+
+	return nil
 }

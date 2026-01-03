@@ -90,10 +90,13 @@ public static class TestHelpers
     public static void SkipIfLegacyOfficeDisabled(string relativePath)
     {
         var flag = Environment.GetEnvironmentVariable("KREUZBERG_SKIP_LEGACY_OFFICE");
-        if (string.IsNullOrWhiteSpace(flag) && OperatingSystem.IsWindows())
+        var skipLegacy = !string.IsNullOrWhiteSpace(flag) && (flag == "1" || flag.Equals("true", StringComparison.OrdinalIgnoreCase));
+
+        if (!skipLegacy)
         {
             return;
         }
+
         var ext = Path.GetExtension(relativePath).ToLowerInvariant();
         if (ext == ".ppt" || ext == ".doc" || ext == ".xls")
         {
