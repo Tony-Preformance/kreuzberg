@@ -75,6 +75,10 @@ criterion = { version = "0.8", features = ["html_reports"] }
 
 lzma-rust2 = { version = "0.15.6" }
 
+# Fix for WASM builds: ensure getrandom has js feature enabled
+# This is needed because ring/rustls depend on getrandom without the js feature
+getrandom = { version = "0.2", features = ["js"] }
+
 [profile.release]
 lto = "thin"
 codegen-units = 1

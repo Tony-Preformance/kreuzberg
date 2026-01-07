@@ -580,6 +580,7 @@ mod build_tesseract {
 
         let client = reqwest::blocking::Client::builder()
             .timeout(std::time::Duration::from_secs(300))
+            .http1_only()
             .build()
             .expect("Failed to create HTTP client");
 
