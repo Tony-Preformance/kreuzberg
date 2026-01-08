@@ -111,8 +111,8 @@ jobs:
         uses: ./.github/actions/setup-rust
         with:
           cache-key-prefix: ruby-${{ matrix.os }}
-          toolchain: ${{ runner.os == 'Windows' && 'stable-x86_64-pc-windows-gnu' || '' }}
-          target: ${{ runner.os == 'Windows' && 'x86_64-pc-windows-gnu' || '' }}
+          toolchain: ${{ runner.os == 'Windows' && 'stable-x86_64-pc-windows-msvc' || '' }}
+          target: ${{ runner.os == 'Windows' && 'x86_64-pc-windows-msvc' || '' }}
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -154,7 +154,7 @@ jobs:
           echo "OS: $(uname -s)"
           echo "Arch: $(uname -m)"
           if [ "$RUNNER_OS" = "Windows" ]; then
-            echo "Windows build: x86_64-pc-windows-gnu"
+            echo "Windows build: x86_64-pc-windows-msvc"
           fi
 
       - name: Configure short paths for Windows MAX_PATH mitigation
@@ -246,23 +246,13 @@ jobs:
         shell: bash
         run: |
           echo "=== Windows Toolchain Verification ==="
-          echo "Checking MinGW/GCC toolchain..."
-          which gcc || echo "gcc not found in PATH"
-          which g++ || echo "g++ not found in PATH"
-          gcc --version 2>/dev/null || echo "gcc version check failed"
-          g++ --version 2>/dev/null || echo "g++ version check failed"
+          echo "Using MSVC toolchain (x86_64-pc-windows-msvc)"
           echo ""
-          echo "Checking x86_64-pc-windows-gnu target..."
-          rustup target list | grep x86_64-pc-windows-gnu
+          echo "Checking x86_64-pc-windows-msvc target..."
+          rustup target list | grep x86_64-pc-windows-msvc
           echo ""
-          echo "Checking linker..."
-          rustc --print target-cpus 2>/dev/null | head -5 || true
-          echo ""
-          echo "PATH (first 10 entries):"
-          echo "$PATH" | tr ':' '\n' | head -10
-          echo ""
-          echo "MSYSTEM: ${MSYSTEM:-not set}"
-          echo "MSYSTEM_PREFIX: ${MSYSTEM_PREFIX:-not set}"
+          echo "Checking MSVC linker..."
+          which link.exe 2>/dev/null || echo "link.exe not directly in PATH (normal for MSVC)"
           echo ""
           echo "=== Bindgen Configuration ==="
           env | grep BINDGEN || echo "No BINDGEN vars set yet"
@@ -324,7 +314,7 @@ jobs:
             export RUST_BACKTRACE=1
             echo "Windows build: Using verbose cargo logging"
             echo "CARGO_LOG=$CARGO_LOG"
-            echo "Target: x86_64-pc-windows-gnu"
+            echo "Target: x86_64-pc-windows-msvc"
             echo ""
           fi
 
@@ -346,8 +336,8 @@ jobs:
               echo "Checking for bindgen errors..."
               grep -i "bindgen.*error\|clang.*error" /tmp/cargo-build.log | tail -20 || echo "No bindgen errors found in log"
               echo ""
-              echo "Checking GCC/MinGW availability..."
-              which gcc g++ x86_64-w64-mingw32-gcc 2>/dev/null || echo "MinGW tools not in PATH"
+              echo "Checking MSVC availability..."
+              which link.exe cl.exe 2>/dev/null || echo "MSVC tools not directly in PATH (normal)"
             fi
             exit $EXIT_CODE
           }
@@ -457,9 +447,9 @@ jobs:
           echo "FFI artifacts:"
           echo "  target/release/:"
           ls -lh target/release/libkreuzberg_ffi* 2>/dev/null || echo "    (none found)"
-          if [[ -d "target/x86_64-pc-windows-gnu/release" ]]; then
-            echo "  target/x86_64-pc-windows-gnu/release/:"
-            ls -lh target/x86_64-pc-windows-gnu/release/libkreuzberg_ffi* 2>/dev/null || echo "    (none found)"
+          if [[ -d "target/x86_64-pc-windows-msvc/release" ]]; then
+            echo "  target/x86_64-pc-windows-msvc/release/:"
+            ls -lh target/x86_64-pc-windows-msvc/release/libkreuzberg_ffi* 2>/dev/null || echo "    (none found)"
           fi
           echo "  pkg-config file:"
           ls -lh crates/kreuzberg-ffi/kreuzberg-ffi.pc 2>/dev/null || echo "    (not found)"
@@ -505,8 +495,8 @@ jobs:
         uses: ./.github/actions/setup-rust
         with:
           cache-key-prefix: ruby-test-${{ matrix.os }}
-          toolchain: ${{ runner.os == 'Windows' && 'stable-x86_64-pc-windows-gnu' || '' }}
-          target: ${{ runner.os == 'Windows' && 'x86_64-pc-windows-gnu' || '' }}
+          toolchain: ${{ runner.os == 'Windows' && 'stable-x86_64-pc-windows-msvc' || '' }}
+          target: ${{ runner.os == 'Windows' && 'x86_64-pc-windows-msvc' || '' }}
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1

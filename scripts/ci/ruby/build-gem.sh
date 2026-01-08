@@ -31,8 +31,8 @@ if [ "$(uname)" = "Linux" ]; then
 elif [ "$(uname)" = "Darwin" ]; then
   echo "OS: macOS"
   echo "Arch: $(uname -m)"
-elif [ "$(uname)" = "MINGW64_NT" ] || [ "$(uname)" = "MSYS_NT" ]; then
-  echo "OS: Windows (MINGW/MSYS)"
+elif [ "$(uname)" = "MINGW64_NT" ] || [ "$(uname)" = "MSYS_NT" ] || [ "${OS:-}" = "Windows_NT" ]; then
+  echo "OS: Windows (MSVC)"
 else
   echo "OS: $(uname -s)"
 fi

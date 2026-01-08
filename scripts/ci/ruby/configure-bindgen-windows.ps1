@@ -11,8 +11,7 @@ Write-Host ""
 # Check environment
 Write-Host "Environment check:" -ForegroundColor Yellow
 Write-Host "  GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
-Write-Host "  MSYSTEM: $($env:MSYSTEM ?? 'not set')"
-Write-Host "  MSYSTEM_PREFIX: $($env:MSYSTEM_PREFIX ?? 'not set')"
+Write-Host "  Target: MSVC (x86_64-pc-windows-msvc)"
 Write-Host ""
 
 $includeRoot = "$env:GITHUB_WORKSPACE\packages\ruby\ext\kreuzberg_rb\native\include"
@@ -63,16 +62,10 @@ if (Test-Path $llvmInclude) {
     }
 }
 
-# Check for MSYS2/MinGW sysroot
-if ($env:MSYSTEM_PREFIX) {
-    $sysroot = "$env:MSYSTEM_PREFIX" -replace '\\','/'
-    $extra += " --target=x86_64-pc-windows-gnu --sysroot=$sysroot"
-    Write-Host "MSYS2 detected:" -ForegroundColor Yellow
-    Write-Host "  Sysroot: $sysroot" -ForegroundColor Green
-    Write-Host "  Target: x86_64-pc-windows-gnu" -ForegroundColor Green
-} else {
-    Write-Host "MSYS2 not detected (MSYSTEM_PREFIX not set)" -ForegroundColor Yellow
-}
+# For MSVC target, we use the Windows SDK headers via clang's MSVC compatibility
+# No sysroot needed - clang finds MSVC headers automatically on Windows
+$extra += " --target=x86_64-pc-windows-msvc"
+Write-Host "Target: x86_64-pc-windows-msvc" -ForegroundColor Green
 Write-Host ""
 
 # Check for clang
@@ -93,13 +86,11 @@ if ($clangPath) {
 }
 Write-Host ""
 
-# Set for all possible target formats (bindgen uses different naming conventions)
+# Set for MSVC target formats (bindgen uses different naming conventions)
 Write-Host "Setting BINDGEN_EXTRA_CLANG_ARGS environment variables:" -ForegroundColor Yellow
 Add-Content -Path $env:GITHUB_ENV -Value "BINDGEN_EXTRA_CLANG_ARGS=$extra"
 Add-Content -Path $env:GITHUB_ENV -Value "BINDGEN_EXTRA_CLANG_ARGS_x86_64-pc-windows-msvc=$extra"
 Add-Content -Path $env:GITHUB_ENV -Value "BINDGEN_EXTRA_CLANG_ARGS_x86_64_pc_windows_msvc=$extra"
-Add-Content -Path $env:GITHUB_ENV -Value "BINDGEN_EXTRA_CLANG_ARGS_x86_64-pc-windows-gnu=$extra"
-Add-Content -Path $env:GITHUB_ENV -Value "BINDGEN_EXTRA_CLANG_ARGS_x86_64_pc_windows_gnu=$extra"
 
 Write-Host "  BINDGEN_EXTRA_CLANG_ARGS = $extra" -ForegroundColor Green
 Write-Host ""

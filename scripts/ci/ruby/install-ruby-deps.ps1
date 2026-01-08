@@ -26,7 +26,7 @@ $osInfo = Get-ComputerInfo
 Write-Host "OS: $($osInfo.OsName)"
 $osArch = (Get-CimInstance Win32_OperatingSystem).OSArchitecture
 Write-Host "Architecture: $osArch"
-Write-Host "Compiler: x86_64-pc-windows-gnu"
+Write-Host "Compiler: x86_64-pc-windows-msvc"
 
 Write-Host ""
 Write-Host "=== Environment Variables ===" -ForegroundColor Yellow

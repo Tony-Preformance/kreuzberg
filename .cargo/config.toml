@@ -21,14 +21,19 @@ rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
 [target.x86_64-pc-windows-msvc]
 
 [target.x86_64-pc-windows-gnu]
-linker = "x86_64-w64-mingw32-gcc"
+# NOTE: Windows GNU target has a known issue with linker arg CRLF handling
+# The -Wl,--dynamicbase flag gets corrupted to --dynamicbase\r-Wl
+# This causes linking to fail for proc-macro and dylib crates
+# Workaround: Use MSVC target or wait for Rust fix
+linker = "gcc"
 ar = "ar"
 
 [target.wasm32-unknown-unknown]
 rustflags = ["-C", "target-feature=+bulk-memory"]
 
-[unstable]
-build-std = ["panic_abort", "std"]
+# Temporarily disabled build-std due to linker arg issues
+# [unstable]
+# build-std = ["panic_abort", "std"]
 
 [net]
 git-fetch-with-cli = false
