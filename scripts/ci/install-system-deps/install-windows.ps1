@@ -175,24 +175,48 @@ catch {
 
 Write-Host ""
 Write-Host "Tesseract (optional for build):"
-$tesseractCmd = Get-Command tesseract -ErrorAction SilentlyContinue
-if ($tesseractCmd) {
+try {
+  $tesseractCmd = Get-Command tesseract -ErrorAction Stop
   $tesseractPath = $tesseractCmd.Path
   Write-Host "  Found at: $tesseractPath"
+  Write-Host "  Command type: $($tesseractCmd.CommandType)"
   try {
-    & tesseract --version
+    $version = & tesseract --version 2>&1
+    Write-Host "  Version output: $version"
     Write-Host "✓ Tesseract available and working"
 
     Write-Host ""
     Write-Host "Available Tesseract languages:"
-    & tesseract --list-langs
+    & tesseract --list-langs 2>&1 | ForEach-Object { Write-Host "  $_" }
   }
   catch {
-    Write-Host "⚠ Warning: Tesseract found but failed to run"
+    Write-Host "⚠ Warning: Tesseract found but failed to run: $($_.Exception.Message)"
   }
 }
-else {
-  Write-Host "⚠ Tesseract not found on PATH (not required for gem build)"
+catch {
+  Write-Host "⚠ Tesseract not found on PATH (not required for build)"
+  Write-Host "  Error details: $($_.Exception.Message)"
+  Write-Host "  Searching common installation locations..."
+
+  $commonPaths = @(
+    "C:\Program Files\Tesseract-OCR\tesseract.exe",
+    "C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+    "${env:ProgramFiles}\Tesseract-OCR\tesseract.exe",
+    "${env:ProgramFiles(x86)}\Tesseract-OCR\tesseract.exe"
+  )
+
+  $found = $false
+  foreach ($path in $commonPaths) {
+    if (Test-Path $path) {
+      Write-Host "  Found Tesseract at: $path (not on PATH)"
+      $found = $true
+      break
+    }
+  }
+
+  if (-not $found) {
+    Write-Host "  Tesseract not found in common locations"
+  }
 }
 
 Write-Host ""
