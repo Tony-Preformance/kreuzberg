@@ -18,11 +18,11 @@
     <img src="https://img.shields.io/npm/v/@kreuzberg/wasm?label=WASM&color=007ec6" alt="WASM">
   </a>
 
-<a href="https://central.sonatype.com/artifact/dev.kreuzberg/kreuzberg">
+  <a href="https://central.sonatype.com/artifact/dev.kreuzberg/kreuzberg">
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/kreuzberg?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://github.com/kreuzberg-dev/kreuzberg/releases">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/kreuzberg?label=Go&color=007ec6&filter=v4.0.0-*" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/kreuzberg?label=Go&color=007ec6&filter=v4.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/Kreuzberg/">
     <img src="https://img.shields.io/nuget/v/Kreuzberg?label=C%23&color=007ec6" alt="C#">
@@ -34,9 +34,8 @@
     <img src="https://img.shields.io/gem/v/kreuzberg?label=Ruby&color=007ec6" alt="Ruby">
   </a>
 
-<!-- Project Info -->
-
-<a href="https://github.com/kreuzberg-dev/kreuzberg/blob/main/LICENSE">
+  <!-- Project Info -->
+  <a href="https://github.com/kreuzberg-dev/kreuzberg/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
   </a>
   <a href="https://docs.kreuzberg.dev">
@@ -52,15 +51,16 @@
   </a>
 </div>
 
+
 Extract text, tables, images, and metadata from 56 file formats including PDF, Office documents, and images. PHP bindings with modern PHP 8.2+ support and type-safe API.
 
-> **Version 4.0.0 Release Candidate**
-> Kreuzberg v4.0.0 is in **Release Candidate** stage. Bugs and breaking changes are expected.
-> This is a pre-release version. Please test the library and [report any issues](https://github.com/kreuzberg-dev/kreuzberg/issues) you encounter.
 
 ## Installation
 
 ### Package Installation
+
+
+
 
 Install via Composer:
 
@@ -68,22 +68,16 @@ Install via Composer:
 composer require kreuzberg/kreuzberg
 ```
 
+
+
+
 ### System Requirements
 
 - **PHP 8.0+** required
 - Optional: [ONNX Runtime](https://github.com/microsoft/onnxruntime/releases) version 1.22.x for embeddings support
 - Optional: [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) for OCR functionality
 
-### Platform Support
 
-Precompiled native libraries are bundled in the Composer package for the following platforms:
-
-- ✅ Linux x86_64
-- ✅ Linux aarch64 (ARM64)
-- ✅ macOS aarch64 (Apple Silicon)
-- ✅ Windows x86_64
-
-The appropriate native library is automatically loaded at runtime based on your platform.
 
 ## Quick Start
 
@@ -131,132 +125,13 @@ if (count($result->tables) > 0) {
 }
 ```
 
-### Configuration with Factory Methods
-
-All configuration classes support factory methods for easy creation from arrays, JSON, or files:
-
-**Using fromArray():**
-
-```php
-<?php
-
-declare(strict_types=1);
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Kreuzberg\Kreuzberg;
-use Kreuzberg\Config\ExtractionConfig;
-use Kreuzberg\Config\HierarchyConfig;
-
-// Create HierarchyConfig from array
-$hierarchyData = [
-    'enabled' => true,
-    'k_clusters' => 8,
-    'include_bbox' => true,
-    'ocr_coverage_threshold' => 0.8,
-];
-
-$hierarchyConfig = HierarchyConfig::fromArray($hierarchyData);
-
-// Use the config in extraction
-$config = new ExtractionConfig();
-$kreuzberg = new Kreuzberg($config);
-
-$result = $kreuzberg->extractFile('document.pdf');
-echo "Extraction completed with hierarchy detection\n";
-```
-
-**Using fromJson():**
-
-```php
-<?php
-
-declare(strict_types=1);
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Kreuzberg\Config\TokenReductionConfig;
-
-// Create TokenReductionConfig from JSON string
-$jsonConfig = '{
-    "mode": "balanced",
-    "preserve_important_words": true
-}';
-
-$tokenConfig = TokenReductionConfig::fromJson($jsonConfig);
-
-echo "Token reduction mode: " . $tokenConfig->mode . "\n";
-echo "Preserve important words: " . ($tokenConfig->preserveImportantWords ? 'yes' : 'no') . "\n";
-```
-
-**Using fromFile():**
-
-```php
-<?php
-
-declare(strict_types=1);
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Kreuzberg\Kreuzberg;
-use Kreuzberg\Config\ExtractionConfig;
-
-// Load entire extraction config from JSON file
-$config = ExtractionConfig::fromFile('/path/to/config.json');
-
-$kreuzberg = new Kreuzberg($config);
-$result = $kreuzberg->extractFile('document.pdf');
-
-echo "Extraction completed with config from file\n";
-```
-
-**Converting back to JSON/Array:**
-
-```php
-<?php
-
-declare(strict_types=1);
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Kreuzberg\Config\HierarchyConfig;
-
-// Create config
-$config = new HierarchyConfig(
-    enabled: true,
-    kClusters: 10,
-    includeBbox: false
-);
-
-// Convert to array
-$arrayData = $config->toArray();
-print_r($arrayData);
-// Output:
-// Array (
-//     [enabled] => 1
-//     [k_clusters] => 10
-//     [include_bbox] =>
-// )
-
-// Convert to JSON
-$jsonString = $config->toJson();
-echo $jsonString;
-// Output:
-// {
-//     "enabled": true,
-//     "k_clusters": 10,
-//     "include_bbox": false
-// }
-
-// Save to file
-file_put_contents('hierarchy-config.json', $jsonString);
-```
 
 ### Common Use Cases
 
 #### Extract with Custom Configuration
 
 Most use cases benefit from configuration to control extraction behavior:
+
 
 **With OCR (for scanned documents):**
 
@@ -294,7 +169,7 @@ echo $result->content . "\n\n";
 $multilingualConfig = new ExtractionConfig(
     ocr: new OcrConfig(
         backend: 'tesseract',
-        language: 'eng+fra+deu'
+        language: 'eng+fra+deu'  
     )
 );
 
@@ -388,11 +263,18 @@ if ($avgCharsPerPage < 100) {
 }
 ```
 
+
+
+
 #### Table Extraction
 
-See [Table Extraction Guide](https://docs.kreuzberg.dev/features/table-extraction/) for detailed examples.
+
+See [Table Extraction Guide](https://kreuzberg.dev/features/table-extraction/) for detailed examples.
+
+
 
 #### Processing Multiple Files
+
 
 ```php
 <?php
@@ -443,7 +325,7 @@ if (!empty($files)) {
 
 $config = new ExtractionConfig(
     extractTables: true,
-    extractImages: false
+    extractImages: false  
 );
 
 $kreuzberg = new Kreuzberg($config);
@@ -549,13 +431,22 @@ foreach ($batches as $index => $batch) {
 echo "\n\nCompleted! Processed $totalProcessed files.\n";
 ```
 
+
+
+
+
+
+
+
 ### Next Steps
 
-- **[Installation Guide](https://docs.kreuzberg.dev/getting-started/installation/)** - Platform-specific setup
-- **[API Documentation](https://docs.kreuzberg.dev/api/)** - Complete API reference
-- **[Examples & Guides](https://docs.kreuzberg.dev/guides/)** - Full code examples and usage guides
-- **[Configuration Guide](https://docs.kreuzberg.dev/configuration/)** - Advanced configuration options
-- **[Troubleshooting](https://docs.kreuzberg.dev/troubleshooting/)** - Common issues and solutions
+- **[Installation Guide](https://kreuzberg.dev/getting-started/installation/)** - Platform-specific setup
+- **[API Documentation](https://kreuzberg.dev/api/)** - Complete API reference
+- **[Examples & Guides](https://kreuzberg.dev/guides/)** - Full code examples and usage guides
+- **[Configuration Guide](https://kreuzberg.dev/configuration/)** - Advanced configuration options
+- **[Troubleshooting](https://kreuzberg.dev/troubleshooting/)** - Common issues and solutions
+
+
 
 ## Features
 
@@ -604,57 +495,26 @@ echo "\n\nCompleted! Processed $totalProcessed files.\n";
 | **Scientific** | `.tex`, `.latex`, `.typst`, `.jats`, `.ipynb`, `.docbook` | LaTeX, Jupyter notebooks, PubMed JATS |
 | **Documentation** | `.opml`, `.pod`, `.mdoc`, `.troff` | Technical documentation formats |
 
-**[Complete Format Reference](https://docs.kreuzberg.dev/reference/formats/)**
+**[Complete Format Reference](https://kreuzberg.dev/reference/formats/)**
 
 ### Key Capabilities
 
 - **Text Extraction** - Extract all text content with position and formatting information
-
 - **Metadata Extraction** - Retrieve document properties, creation date, author, etc.
-
 - **Table Extraction** - Parse tables with structure and cell content preservation
-
 - **Image Extraction** - Extract embedded images and render page previews
-
 - **OCR Support** - Integrate multiple OCR backends for scanned documents
 
+
 - **Plugin System** - Extensible post-processing for custom text transformation
+
 
 - **Embeddings** - Generate vector embeddings using ONNX Runtime models
 
 - **Batch Processing** - Efficiently process multiple documents in parallel
-
 - **Memory Efficient** - Stream large files without loading entirely into memory
-
 - **Language Detection** - Detect and support multiple languages in documents
-
 - **Configuration** - Fine-grained control over extraction behavior
-
-### Limitations
-
-**Asynchronous Operations**
-
-PHP does not support async operations. All extraction calls are synchronous and blocking.
-
-- ❌ No async/await support (unlike Node.js and Python bindings)
-- ❌ No Promise-based operations
-- ❌ Operations block until completion
-
-**Alternative: Use Batch Processing for Parallelism**
-
-While PHP doesn't support async/await, you can still process multiple documents in parallel using the batch API:
-
-```php
-$files = ['doc1.pdf', 'doc2.pdf', 'doc3.pdf'];
-$config = ExtractionConfig::fromArray([]);
-
-// Batch processing uses multiple threads internally for concurrent extraction
-$results = Kreuzberg\batch_extract_files($files, $config);
-```
-
-Kreuzberg's batch API uses multiple threads to extract documents concurrently, providing parallelism without requiring async language features.
-
-**Migration Note**: If you're migrating from Node.js or Python bindings that use async/await, replace `await extractFile()` with the synchronous `extract_file()` or use batch operations for parallel processing.
 
 ### Performance Characteristics
 
@@ -666,11 +526,15 @@ Kreuzberg's batch API uses multiple threads to extract documents concurrently, p
 | **Archives** | 5-50 MB/s | ~200MB per doc | ZIP, TAR, etc. |
 | **Web formats** | 50-200 MB/s | Streaming | HTML, XML, JSON |
 
+
+
 ## OCR Support
 
 Kreuzberg supports multiple OCR backends for extracting text from scanned documents and images:
 
+
 - **Tesseract**
+
 
 ### OCR Configuration Example
 
@@ -708,7 +572,7 @@ echo $result->content . "\n\n";
 $multilingualConfig = new ExtractionConfig(
     ocr: new OcrConfig(
         backend: 'tesseract',
-        language: 'eng+fra+deu'
+        language: 'eng+fra+deu'  
     )
 );
 
@@ -802,17 +666,26 @@ if ($avgCharsPerPage < 100) {
 }
 ```
 
+
+
+
+
 ## Plugin System
 
 Kreuzberg supports extensible post-processing plugins for custom text transformation and filtering.
 
-For detailed plugin documentation, visit [Plugin System Guide](https://docs.kreuzberg.dev/plugins/).
+For detailed plugin documentation, visit [Plugin System Guide](https://kreuzberg.dev/plugins/).
+
+
+
 
 ## Embeddings Support
 
 Generate vector embeddings for extracted text using the built-in ONNX Runtime support. Requires ONNX Runtime installation.
 
-**[Embeddings Guide](https://docs.kreuzberg.dev/features/#embeddings)**
+**[Embeddings Guide](https://kreuzberg.dev/features/#embeddings)**
+
+
 
 ## Batch Processing
 
@@ -867,7 +740,7 @@ if (!empty($files)) {
 
 $config = new ExtractionConfig(
     extractTables: true,
-    extractImages: false
+    extractImages: false  
 );
 
 $kreuzberg = new Kreuzberg($config);
@@ -973,21 +846,24 @@ foreach ($batches as $index => $batch) {
 echo "\n\nCompleted! Processed $totalProcessed files.\n";
 ```
 
+
+
+
 ## Configuration
 
 For advanced configuration options including language detection, table extraction, OCR settings, and more:
 
-**[Configuration Guide](https://docs.kreuzberg.dev/configuration/)**
+**[Configuration Guide](https://kreuzberg.dev/configuration/)**
 
 ## Documentation
 
 - **[Official Documentation](https://kreuzberg.dev/)**
-- **[API Reference](https://docs.kreuzberg.dev/reference/api-php/)**
-- **[Examples & Guides](https://docs.kreuzberg.dev/guides/)**
+- **[API Reference](https://kreuzberg.dev/reference/api-php/)**
+- **[Examples & Guides](https://kreuzberg.dev/guides/)**
 
 ## Troubleshooting
 
-For common issues and solutions, visit [Troubleshooting Guide](https://docs.kreuzberg.dev/troubleshooting/).
+For common issues and solutions, visit [Troubleshooting Guide](https://kreuzberg.dev/troubleshooting/).
 
 ## Contributing
 

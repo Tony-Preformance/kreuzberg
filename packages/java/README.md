@@ -18,11 +18,11 @@
     <img src="https://img.shields.io/npm/v/@kreuzberg/wasm?label=WASM&color=007ec6" alt="WASM">
   </a>
 
-<a href="https://central.sonatype.com/artifact/dev.kreuzberg/kreuzberg">
+  <a href="https://central.sonatype.com/artifact/dev.kreuzberg/kreuzberg">
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/kreuzberg?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://github.com/kreuzberg-dev/kreuzberg/releases">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/kreuzberg?label=Go&color=007ec6&filter=v4.0.0-*" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/kreuzberg?label=Go&color=007ec6&filter=v4.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/Kreuzberg/">
     <img src="https://img.shields.io/nuget/v/Kreuzberg?label=C%23&color=007ec6" alt="C#">
@@ -34,9 +34,8 @@
     <img src="https://img.shields.io/gem/v/kreuzberg?label=Ruby&color=007ec6" alt="Ruby">
   </a>
 
-<!-- Project Info -->
-
-<a href="https://github.com/kreuzberg-dev/kreuzberg/blob/main/LICENSE">
+  <!-- Project Info -->
+  <a href="https://github.com/kreuzberg-dev/kreuzberg/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
   </a>
   <a href="https://docs.kreuzberg.dev">
@@ -52,75 +51,47 @@
   </a>
 </div>
 
+
 Extract text, tables, images, and metadata from 56 file formats including PDF, Office documents, and images. Java bindings with type-safe API, Foreign Function & Memory API integration, and native performance.
 
-> **Version 4.0.0 Release Candidate**
-> Kreuzberg v4.0.0 is in **Release Candidate** stage. Bugs and breaking changes are expected.
-> This is a pre-release version. Please test the library and [report any issues](https://github.com/kreuzberg-dev/kreuzberg/issues) you encounter.
 
 ## Installation
 
 ### Package Installation
 
+
 Install via one of the supported package managers:
 
-**Maven:**
 
+
+**Maven:**
 ```xml
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>kreuzberg</artifactId>
-    <version>4.0.0-rc.29</version>
+    <version>4.0.0</version>
 </dependency>
 ```
+
+
+
 
 **Gradle:**
-
 ```gradle
-implementation 'dev.kreuzberg:kreuzberg:4.0.0-rc.29'
+implementation 'dev.kreuzberg:kreuzberg:4.0.0'
 ```
 
-**Maven with Specific Classifier (if needed):**
 
-For platform-specific native libraries, Maven handles automatic classifier selection. If you need explicit control:
 
-```xml
-<dependency>
-    <groupId>dev.kreuzberg</groupId>
-    <artifactId>kreuzberg</artifactId>
-    <version>4.0.0-rc.29</version>
-    <!-- Classifiers: linux-x86_64, linux-aarch64, macos-aarch64, windows-x86_64 -->
-</dependency>
-```
+
 
 ### System Requirements
 
-- **Java 21+** required (Java 25 recommended for best FFM API performance)
-- **FFM API** enabled by default (no additional flags needed in Java 21+)
+- **Java 11+** required
 - Optional: [ONNX Runtime](https://github.com/microsoft/onnxruntime/releases) version 1.22.x for embeddings support
 - Optional: [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) for OCR functionality
 
-### Platform Support
 
-Precompiled native libraries are bundled in the Maven artifact for the following platforms:
-
-- ✅ Linux x86_64
-- ✅ Linux aarch64 (ARM64)
-- ✅ macOS aarch64 (Apple Silicon)
-- ✅ Windows x86_64
-
-The appropriate native library is automatically loaded at runtime based on your platform.
-
-### FFM API (Foreign Function & Memory API)
-
-Kreuzberg uses the modern Foreign Function & Memory API (FFM API) for native interop instead of JNI. This provides:
-
-- Type-safe native access without unsafe native code
-- Better performance with reduced overhead
-- Memory safety guarantees with Arena allocation
-- Cleaner API without JNI boilerplate
-
-No additional configuration is required. The FFM API is enabled by default in Java 21+.
 
 ## Quick Start
 
@@ -154,11 +125,13 @@ public class BasicUsage {
 }
 ```
 
+
 ### Common Use Cases
 
-#### Extract with Custom Configuration Using Builder Pattern
+#### Extract with Custom Configuration
 
-Kreuzberg uses a fluent builder pattern for configuring extraction behavior. All configuration is optional:
+Most use cases benefit from configuration to control extraction behavior:
+
 
 **With OCR (for scanned documents):**
 
@@ -189,41 +162,18 @@ public class Main {
 }
 ```
 
-**Building Complex Configurations:**
 
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.config.ExtractionConfig;
-import dev.kreuzberg.config.OcrConfig;
-import dev.kreuzberg.config.TableConfig;
 
-public class ConfigurationExample {
-    public static void main(String[] args) throws Exception {
-        // Build a comprehensive configuration using fluent API
-        ExtractionConfig config = ExtractionConfig.builder()
-            .ocr(OcrConfig.builder()
-                .backend("tesseract")
-                .language("eng")
-                .build())
-            .extractTables(true)
-            .extractImages(true)
-            .useCache(true)
-            .build();
-
-        ExtractionResult result = Kreuzberg.extractFile("document.pdf", config);
-
-        System.out.println("Text: " + result.getContent());
-        System.out.println("Tables: " + result.getTables().size());
-        System.out.println("Images: " + result.getImages().size());
-    }
-}
-```
 
 #### Table Extraction
 
-See [Table Extraction Guide](https://docs.kreuzberg.dev/features/table-extraction/) for detailed examples.
+
+See [Table Extraction Guide](https://kreuzberg.dev/features/table-extraction/) for detailed examples.
+
+
 
 #### Processing Multiple Files
+
 
 ```java
 import dev.kreuzberg.Kreuzberg;
@@ -246,6 +196,10 @@ try {
     e.printStackTrace();
 }
 ```
+
+
+
+
 
 #### Async Processing
 
@@ -270,13 +224,20 @@ public class Example {
 }
 ```
 
+
+
+
+
+
 ### Next Steps
 
-- **[Installation Guide](https://docs.kreuzberg.dev/getting-started/installation/)** - Platform-specific setup
-- **[API Documentation](https://docs.kreuzberg.dev/api/)** - Complete API reference
-- **[Examples & Guides](https://docs.kreuzberg.dev/guides/)** - Full code examples and usage guides
-- **[Configuration Guide](https://docs.kreuzberg.dev/configuration/)** - Advanced configuration options
-- **[Troubleshooting](https://docs.kreuzberg.dev/troubleshooting/)** - Common issues and solutions
+- **[Installation Guide](https://kreuzberg.dev/getting-started/installation/)** - Platform-specific setup
+- **[API Documentation](https://kreuzberg.dev/api/)** - Complete API reference
+- **[Examples & Guides](https://kreuzberg.dev/guides/)** - Full code examples and usage guides
+- **[Configuration Guide](https://kreuzberg.dev/configuration/)** - Advanced configuration options
+- **[Troubleshooting](https://kreuzberg.dev/troubleshooting/)** - Common issues and solutions
+
+
 
 ## Features
 
@@ -325,32 +286,27 @@ public class Example {
 | **Scientific** | `.tex`, `.latex`, `.typst`, `.jats`, `.ipynb`, `.docbook` | LaTeX, Jupyter notebooks, PubMed JATS |
 | **Documentation** | `.opml`, `.pod`, `.mdoc`, `.troff` | Technical documentation formats |
 
-**[Complete Format Reference](https://docs.kreuzberg.dev/reference/formats/)**
+**[Complete Format Reference](https://kreuzberg.dev/reference/formats/)**
 
 ### Key Capabilities
 
 - **Text Extraction** - Extract all text content with position and formatting information
-
 - **Metadata Extraction** - Retrieve document properties, creation date, author, etc.
-
 - **Table Extraction** - Parse tables with structure and cell content preservation
-
 - **Image Extraction** - Extract embedded images and render page previews
-
 - **OCR Support** - Integrate multiple OCR backends for scanned documents
 
 - **Async/Await** - Non-blocking document processing with concurrent operations
 
+
 - **Plugin System** - Extensible post-processing for custom text transformation
+
 
 - **Embeddings** - Generate vector embeddings using ONNX Runtime models
 
 - **Batch Processing** - Efficiently process multiple documents in parallel
-
 - **Memory Efficient** - Stream large files without loading entirely into memory
-
 - **Language Detection** - Detect and support multiple languages in documents
-
 - **Configuration** - Fine-grained control over extraction behavior
 
 ### Performance Characteristics
@@ -363,11 +319,15 @@ public class Example {
 | **Archives** | 5-50 MB/s | ~200MB per doc | ZIP, TAR, etc. |
 | **Web formats** | 50-200 MB/s | Streaming | HTML, XML, JSON |
 
+
+
 ## OCR Support
 
 Kreuzberg supports multiple OCR backends for extracting text from scanned documents and images:
 
+
 - **Tesseract**
+
 
 ### OCR Configuration Example
 
@@ -398,6 +358,9 @@ public class Main {
 }
 ```
 
+
+
+
 ## Async Support
 
 This binding provides full async/await support for non-blocking document processing:
@@ -421,533 +384,25 @@ public class Example {
 }
 ```
 
-### Keywords Extraction
-
-Extract key terms and concepts from documents using YAKE or RAKE algorithms:
-
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.ExtractionResult;
-import dev.kreuzberg.KreuzbergException;
-import dev.kreuzberg.config.ExtractionConfig;
-import dev.kreuzberg.config.KeywordConfig;
-import java.io.IOException;
-
-public class KeywordExample {
-    public static void main(String[] args) {
-        try {
-            // Extract keywords using YAKE algorithm
-            ExtractionConfig config = ExtractionConfig.builder()
-                .keywords(KeywordConfig.builder()
-                    .algorithm("yake")
-                    .maxKeywords(10)
-                    .minScore(0.5)
-                    .language("en")
-                    .yakeParams(KeywordConfig.YakeParams.builder()
-                        .windowSize(3)
-                        .build())
-                    .build())
-                .build();
-
-            ExtractionResult result = Kreuzberg.extractFile("document.pdf", config);
-            System.out.println("Keywords extracted successfully");
-
-            // Or use RAKE algorithm
-            ExtractionConfig rakeConfig = ExtractionConfig.builder()
-                .keywords(KeywordConfig.builder()
-                    .algorithm("rake")
-                    .maxKeywords(15)
-                    .rakeParams(KeywordConfig.RakeParams.builder()
-                        .minWordLength(3)
-                        .maxWordsPerPhrase(3)
-                        .build())
-                    .build())
-                .build();
-        } catch (IOException | KreuzbergException e) {
-            System.err.println("Keyword extraction failed: " + e.getMessage());
-        }
-    }
-}
-```
 
 
-### Table Extraction with Detailed Access
-
-Extract tables with cell-level access and Markdown representation:
-
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.ExtractionResult;
-import dev.kreuzberg.Table;
-import dev.kreuzberg.KreuzbergException;
-import dev.kreuzberg.config.ExtractionConfig;
-import java.io.IOException;
-
-public class TableExtractionExample {
-    public static void main(String[] args) {
-        try {
-            ExtractionConfig config = ExtractionConfig.builder()
-                .extractTables(true)
-                .build();
-
-            ExtractionResult result = Kreuzberg.extractFile("spreadsheet.xlsx", config);
-
-            for (Table table : result.getTables()) {
-                System.out.println("Table on page: " + table.pageNumber());
-                System.out.println("Dimensions: " + table.getRowCount() + "x" + table.getColumnCount());
-
-                // Access individual cells
-                for (int row = 0; row < table.getRowCount(); row++) {
-                    for (int col = 0; col < table.getColumnCount(); col++) {
-                        String cell = table.getCell(row, col);
-                        System.out.print(cell + " | ");
-                    }
-                    System.out.println();
-                }
-
-                // Get headers (first row)
-                if (table.getRowCount() > 0) {
-                    System.out.println("\nHeaders: " + table.cells().get(0));
-                }
-
-                // Get Markdown representation
-                System.out.println("\nMarkdown:\n" + table.markdown());
-            }
-        } catch (IOException | KreuzbergException e) {
-            System.err.println("Table extraction failed: " + e.getMessage());
-        }
-    }
-}
-```
-
-### Image Extraction with Metadata
-
-Extract images and access their metadata:
-
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.ExtractionResult;
-import dev.kreuzberg.ExtractedImage;
-import dev.kreuzberg.KreuzbergException;
-import dev.kreuzberg.config.ExtractionConfig;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-public class ImageExtractionExample {
-    public static void main(String[] args) {
-        try {
-            ExtractionConfig config = ExtractionConfig.builder()
-                .extractImages(true)
-                .build();
-
-            ExtractionResult result = Kreuzberg.extractFile("document.pdf", config);
-
-            for (ExtractedImage image : result.getImages()) {
-                System.out.println("Image Index: " + image.getImageIndex());
-                System.out.println("Format: " + image.getFormat());
-
-                // Access metadata
-                if (image.getPageNumber().isPresent()) {
-                    System.out.println("Page: " + image.getPageNumber().get());
-                }
-                if (image.getWidth().isPresent() && image.getHeight().isPresent()) {
-                    System.out.println("Dimensions: " + image.getWidth().get()
-                        + "x" + image.getHeight().get());
-                }
-                if (image.getColorspace().isPresent()) {
-                    System.out.println("Colorspace: " + image.getColorspace().get());
-                }
-                if (image.getDescription().isPresent()) {
-                    System.out.println("Description: " + image.getDescription().get());
-                }
-
-                // Save image to file
-                byte[] imageData = image.getData();
-                Path outputPath = Path.of("image_" + image.getImageIndex() + "." + image.getFormat());
-                Files.write(outputPath, imageData);
-                System.out.println("Saved to: " + outputPath);
-            }
-        } catch (IOException | KreuzbergException e) {
-            System.err.println("Image extraction failed: " + e.getMessage());
-        }
-    }
-}
-```
-
-### Pages Extraction
-
-Track and access page information and boundaries:
-
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.ExtractionResult;
-import dev.kreuzberg.PageStructure;
-import dev.kreuzberg.KreuzbergException;
-import dev.kreuzberg.config.ExtractionConfig;
-import dev.kreuzberg.config.PageConfig;
-import java.io.IOException;
-import java.util.Optional;
-
-public class PagesExtractionExample {
-    public static void main(String[] args) {
-        try {
-            // Extract with page tracking enabled
-            ExtractionConfig config = ExtractionConfig.builder()
-                .page(PageConfig.builder()
-                    .extractPages(true)
-                    .insertPageMarkers(true)
-                    .markerFormat("\n\n<!-- PAGE {page_num} -->\n\n")
-                    .build())
-                .build();
-
-            ExtractionResult result = Kreuzberg.extractFile("document.pdf", config);
-
-            System.out.println("Total pages: " + result.getPageCount());
-            System.out.println("Content length: " + result.getContent().length());
-
-            // Access page structure if available
-            Optional<PageStructure> pageStructure = result.getPageStructure();
-            if (pageStructure.isPresent()) {
-                PageStructure pages = pageStructure.get();
-                System.out.println("Page structure available");
-                // Page markers are inserted in the content as: <!-- PAGE 1 -->, <!-- PAGE 2 -->, etc.
-            }
-        } catch (IOException | KreuzbergException e) {
-            System.err.println("Pages extraction failed: " + e.getMessage());
-        }
-    }
-}
-```
-
-### PostProcessor Registration
-
-Create and register custom post-processors to transform extraction results:
-
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.ExtractionResult;
-import dev.kreuzberg.PostProcessor;
-import dev.kreuzberg.ProcessingStage;
-import dev.kreuzberg.KreuzbergException;
-import java.io.IOException;
-
-public class PostProcessorExample {
-    public static void main(String[] args) {
-        try {
-            // Create a custom post-processor for trimming whitespace
-            PostProcessor trimProcessor = new PostProcessor() {
-                @Override
-                public ExtractionResult process(ExtractionResult result) {
-                    return result.withContent(result.getContent().trim());
-                }
-
-                @Override
-                public ProcessingStage processingStage() {
-                    return ProcessingStage.FINAL;
-                }
-
-                @Override
-                public int priority() {
-                    return 100;
-                }
-            };
-
-            // Register the post-processor
-            Kreuzberg.registerPostProcessor("trim-whitespace", trimProcessor);
-
-            // Use it during extraction
-            ExtractionResult result = Kreuzberg.extractFile("document.pdf");
-            System.out.println("Content (trimmed): " + result.getContent());
-
-            // List registered processors
-            var processors = Kreuzberg.listPostProcessors();
-            System.out.println("Registered processors: " + processors);
-
-            // Unregister when done
-            Kreuzberg.unregisterPostProcessor("trim-whitespace");
-        } catch (IOException | KreuzbergException e) {
-            System.err.println("PostProcessor registration failed: " + e.getMessage());
-        }
-    }
-}
-```
-
-### Validator Registration
-
-Create and register custom validators to check extraction quality:
-
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.ExtractionResult;
-import dev.kreuzberg.Validator;
-import dev.kreuzberg.ValidationException;
-import dev.kreuzberg.KreuzbergException;
-import java.io.IOException;
-
-public class ValidatorExample {
-    public static void main(String[] args) {
-        try {
-            // Create a custom validator for minimum content length
-            Validator minLengthValidator = new Validator() {
-                private static final int MIN_CHARS = 100;
-
-                @Override
-                public void validate(ExtractionResult result) throws ValidationException {
-                    if (result.getContent().length() < MIN_CHARS) {
-                        throw new ValidationException(
-                            "Content too short: " + result.getContent().length()
-                            + " chars (minimum: " + MIN_CHARS + ")");
-                    }
-                }
-
-                @Override
-                public int priority() {
-                    return 50;
-                }
-            };
-
-            // Create a validator for table extraction
-            Validator tableValidator = result -> {
-                if (result.getTables().isEmpty()) {
-                    throw new ValidationException("No tables found in document");
-                }
-            };
-
-            // Register validators
-            Kreuzberg.registerValidator("min-length", minLengthValidator);
-            Kreuzberg.registerValidator("has-tables", tableValidator, 100);
-
-            // Extract and validate
-            ExtractionResult result = Kreuzberg.extractFile("document.pdf");
-
-            try {
-                minLengthValidator.validate(result);
-                System.out.println("Content length validation passed");
-            } catch (ValidationException e) {
-                System.err.println("Validation failed: " + e.getMessage());
-            }
-
-            // Clean up
-            Kreuzberg.unregisterValidator("min-length");
-            Kreuzberg.unregisterValidator("has-tables");
-        } catch (IOException | KreuzbergException e) {
-            System.err.println("Validator registration failed: " + e.getMessage());
-        }
-    }
-}
-```
-
-### Plugin System Overview
-
-Kreuzberg provides a comprehensive plugin architecture with post-processors and validators:
-
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.ExtractionResult;
-import dev.kreuzberg.PostProcessor;
-import dev.kreuzberg.Validator;
-import dev.kreuzberg.ValidationException;
-import dev.kreuzberg.ProcessingStage;
-import dev.kreuzberg.KreuzbergException;
-import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
-
-public class PluginSystemExample {
-    public static void main(String[] args) {
-        try {
-            // Create a preprocessing validator
-            Validator fileTypeValidator = result -> {
-                String mimeType = result.getMimeType();
-                if (!mimeType.startsWith("application/pdf")) {
-                    throw new ValidationException("Expected PDF, got: " + mimeType);
-                }
-            };
-
-            // Create a post-processor that enriches metadata
-            PostProcessor metadataEnricher = new PostProcessor() {
-                @Override
-                public ExtractionResult process(ExtractionResult result) {
-                    Map<String, Object> enrichedMetadata = new HashMap<>(result.getMetadata());
-                    enrichedMetadata.put("processed_at", System.currentTimeMillis());
-                    enrichedMetadata.put("table_count", result.getTables().size());
-                    enrichedMetadata.put("image_count", result.getImages().size());
-                    return result.withMetadata(enrichedMetadata);
-                }
-
-                @Override
-                public ProcessingStage processingStage() {
-                    return ProcessingStage.FINAL;
-                }
-            };
-
-            // Create a cleaning post-processor
-            PostProcessor contentCleaner = result -> {
-                String cleaned = result.getContent()
-                    .replaceAll("\\s+", " ")  // Normalize whitespace
-                    .trim();
-                return result.withContent(cleaned);
-            };
-
-            // Register the pipeline
-            Kreuzberg.registerValidator("file-type-check", fileTypeValidator, 100);
-            Kreuzberg.registerPostProcessor("metadata-enricher", metadataEnricher, 50);
-            Kreuzberg.registerPostProcessor("content-cleaner", contentCleaner, 75);
-
-            // Extract with the plugin pipeline
-            ExtractionResult result = Kreuzberg.extractFile("document.pdf");
-
-            System.out.println("Extraction completed with plugins:");
-            System.out.println("- Content length: " + result.getContent().length());
-            System.out.println("- Tables: " + result.getTables().size());
-            System.out.println("- Images: " + result.getImages().size());
-            System.out.println("- Processing time: "
-                + result.getMetadata().get("processed_at"));
-
-            // List all registered plugins
-            System.out.println("\nRegistered post-processors: " + Kreuzberg.listPostProcessors());
-
-            // Clean up
-            Kreuzberg.clearPostProcessors();
-            Kreuzberg.unregisterValidator("file-type-check");
-        } catch (IOException | KreuzbergException e) {
-            System.err.println("Plugin system error: " + e.getMessage());
-        }
-    }
-}
-```
 
 ## Plugin System
 
 Kreuzberg supports extensible post-processing plugins for custom text transformation and filtering.
 
-For detailed plugin documentation, visit [Plugin System Guide](https://docs.kreuzberg.dev/plugins/).
+For detailed plugin documentation, visit [Plugin System Guide](https://kreuzberg.dev/plugins/).
+
+
+
 
 ## Embeddings Support
 
-Kreuzberg provides vector embedding support for semantic search and similarity analysis using ONNX Runtime models.
+Generate vector embeddings for extracted text using the built-in ONNX Runtime support. Requires ONNX Runtime installation.
 
-### Embeddings Configuration
+**[Embeddings Guide](https://kreuzberg.dev/features/#embeddings)**
 
-Embeddings are configured using the `EmbeddingConfig` class, which provides type-safe configuration for embedding generation:
 
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.ExtractionResult;
-import dev.kreuzberg.KreuzbergException;
-import dev.kreuzberg.config.ExtractionConfig;
-import dev.kreuzberg.config.EmbeddingConfig;
-import java.io.IOException;
-
-public class EmbeddingsExample {
-    public static void main(String[] args) {
-        try {
-            // Configure embeddings with EmbeddingConfig
-            EmbeddingConfig embeddingConfig = EmbeddingConfig.builder()
-                .model("all-MiniLM-L6-v2")
-                .dimensions(384)
-                .normalize(true)
-                .batchSize(64)
-                .useCache(true)
-                .build();
-
-            ExtractionConfig config = ExtractionConfig.builder()
-                .embedding(embeddingConfig)
-                .build();
-
-            ExtractionResult result = Kreuzberg.extractFile("document.pdf", config);
-            System.out.println("Extracted with embeddings");
-        } catch (IOException | KreuzbergException e) {
-            System.err.println("Embeddings extraction failed: " + e.getMessage());
-        }
-    }
-}
-```
-
-### Available Embedding Models
-
-Common embedding models supported by Kreuzberg:
-
-| Model | Dimensions | Use Case |
-|-------|------------|----------|
-| `all-MiniLM-L6-v2` | 384 | Lightweight, fast, good for general purpose |
-| `all-MiniLM-L12-v2` | 384 | Balanced quality/speed |
-| `all-mpnet-base-v2` | 768 | High quality embeddings |
-| `paraphrase-MiniLM-L6-v2` | 384 | Optimized for semantic similarity |
-| `multi-qa-MiniLM-L6-cos-v1` | 384 | Optimized for Q&A and search |
-
-### Embedding Presets
-
-List and use embedding presets for quick configuration:
-
-```java
-import dev.kreuzberg.Kreuzberg;
-import dev.kreuzberg.EmbeddingPreset;
-import dev.kreuzberg.KreuzbergException;
-import java.util.List;
-import java.util.Optional;
-
-public class EmbeddingPresetsExample {
-    public static void main(String[] args) {
-        try {
-            // List available embedding presets
-            List<String> presets = Kreuzberg.listEmbeddingPresets();
-            System.out.println("Available embedding presets:");
-            for (String preset : presets) {
-                System.out.println("  - " + preset);
-            }
-
-            // Get details about a specific preset
-            Optional<EmbeddingPreset> preset = Kreuzberg.getEmbeddingPreset("multilingual-e5-small");
-            if (preset.isPresent()) {
-                EmbeddingPreset embeddingPreset = preset.get();
-                System.out.println("Preset: " + embeddingPreset.getName());
-                System.out.println("Model: " + embeddingPreset.getModel());
-                System.out.println("Dimensions: " + embeddingPreset.getDimensions());
-            }
-        } catch (KreuzbergException e) {
-            System.err.println("Failed to list embeddings: " + e.getMessage());
-        }
-    }
-}
-```
-
-### Advanced Embedding Configuration
-
-Configure embeddings for specific use cases:
-
-```java
-// Lightweight model for memory-constrained environments
-EmbeddingConfig lightweightConfig = EmbeddingConfig.builder()
-    .model("all-MiniLM-L6-v2")
-    .dimensions(384)
-    .batchSize(16)
-    .normalize(true)
-    .useCache(true)
-    .build();
-
-// High-quality model with download progress
-EmbeddingConfig highQualityConfig = EmbeddingConfig.builder()
-    .model("all-mpnet-base-v2")
-    .dimensions(768)
-    .batchSize(32)
-    .normalize(true)
-    .showDownloadProgress(true)
-    .cacheDir("/custom/cache/path")
-    .build();
-
-// Q&A optimized configuration
-EmbeddingConfig qaConfig = EmbeddingConfig.builder()
-    .model("multi-qa-MiniLM-L6-cos-v1")
-    .dimensions(384)
-    .batchSize(128)
-    .normalize(true)
-    .useCache(true)
-    .build();
-```
-
-**[Embeddings Guide](https://docs.kreuzberg.dev/features/#embeddings)**
 
 ## Batch Processing
 
@@ -975,21 +430,24 @@ try {
 }
 ```
 
+
+
+
 ## Configuration
 
 For advanced configuration options including language detection, table extraction, OCR settings, and more:
 
-**[Configuration Guide](https://docs.kreuzberg.dev/configuration/)**
+**[Configuration Guide](https://kreuzberg.dev/configuration/)**
 
 ## Documentation
 
 - **[Official Documentation](https://kreuzberg.dev/)**
-- **[API Reference](https://docs.kreuzberg.dev/reference/api-java/)**
-- **[Examples & Guides](https://docs.kreuzberg.dev/guides/)**
+- **[API Reference](https://kreuzberg.dev/reference/api-java/)**
+- **[Examples & Guides](https://kreuzberg.dev/guides/)**
 
 ## Troubleshooting
 
-For common issues and solutions, visit [Troubleshooting Guide](https://docs.kreuzberg.dev/troubleshooting/).
+For common issues and solutions, visit [Troubleshooting Guide](https://kreuzberg.dev/troubleshooting/).
 
 ## Contributing
 

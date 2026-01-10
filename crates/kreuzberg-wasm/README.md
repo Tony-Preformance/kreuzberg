@@ -1,4 +1,4 @@
-# WebAssembly Bindings
+# WebAssembly
 
 <div align="center" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0;">
   <!-- Language Bindings -->
@@ -18,11 +18,11 @@
     <img src="https://img.shields.io/npm/v/@kreuzberg/wasm?label=WASM&color=007ec6" alt="WASM">
   </a>
 
-<a href="https://central.sonatype.com/artifact/dev.kreuzberg/kreuzberg">
+  <a href="https://central.sonatype.com/artifact/dev.kreuzberg/kreuzberg">
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/kreuzberg?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://github.com/kreuzberg-dev/kreuzberg/releases">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/kreuzberg?label=Go&color=007ec6&filter=v4.0.0-*" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/kreuzberg?label=Go&color=007ec6&filter=v4.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/Kreuzberg/">
     <img src="https://img.shields.io/nuget/v/Kreuzberg?label=C%23&color=007ec6" alt="C#">
@@ -34,9 +34,8 @@
     <img src="https://img.shields.io/gem/v/kreuzberg?label=Ruby&color=007ec6" alt="Ruby">
   </a>
 
-<!-- Project Info -->
-
-<a href="https://github.com/kreuzberg-dev/kreuzberg/blob/main/LICENSE">
+  <!-- Project Info -->
+  <a href="https://github.com/kreuzberg-dev/kreuzberg/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
   </a>
   <a href="https://docs.kreuzberg.dev">
@@ -52,65 +51,50 @@
   </a>
 </div>
 
-Extract text, tables, images, and metadata from 56 file formats including PDF, Office documents, and images. WebAssembly bindings for browsers, Node.js, Deno, and Cloudflare Workers with portable deployment and optional multi-threading support.
 
-> **Version 4.0.0 Release Candidate**
-> Kreuzberg v4.0.0 is in **Release Candidate** stage. Bugs and breaking changes are expected.
-> This is a pre-release version. Please test the library and [report any issues](https://github.com/kreuzberg-dev/kreuzberg/issues) you encounter.
+Extract text, tables, images, and metadata from 56 file formats including PDF, Office documents, and images. WebAssembly bindings for browsers, Deno, and Cloudflare Workers with portable deployment and multi-threading support.
+
 
 ## Installation
 
 ### Package Installation
 
+
 Install via one of the supported package managers:
 
-**npm:**
 
+
+**npm:**
 ```bash
 npm install @kreuzberg/wasm
 ```
 
-**pnpm:**
 
+
+
+**pnpm:**
 ```bash
 pnpm add @kreuzberg/wasm
 ```
 
-**yarn:**
 
+
+
+**yarn:**
 ```bash
 yarn add @kreuzberg/wasm
 ```
 
-### Platform Support
 
-Runs on:
-- Modern browsers (Chrome, Firefox, Safari, Edge with WebAssembly support)
-- Node.js 16+ (with WASM runtime)
-- Deno 1.0+
-- Cloudflare Workers
-- Any JavaScript environment with WebAssembly support
+
+
 
 ### System Requirements
 
-- WebAssembly support in runtime environment
-- 50 MB minimum free memory for extraction
+- Modern browser with WebAssembly support, or Deno 1.0+, or Cloudflare Workers
 - Optional: [Tesseract WASM](https://github.com/naptha/tesseract.js) for OCR functionality
 
-### Runtime Detection
 
-Check platform capabilities before extraction:
-
-```typescript
-import { getWasmCapabilities } from '@kreuzberg/wasm';
-
-const caps = getWasmCapabilities();
-console.log('WASM available:', caps.hasWasm);
-console.log('Web Workers available:', caps.hasWorkers);
-console.log('Module Workers available:', caps.hasModuleWorkers);
-console.log('File API available:', caps.hasFileApi);
-console.log('SharedArrayBuffer available:', caps.hasSharedArrayBuffer);
-```
 
 ## Quick Start
 
@@ -122,21 +106,22 @@ Extract text, metadata, and structure from any supported document format:
 import { extractBytes, initWasm } from "@kreuzberg/wasm";
 
 async function main() {
-  await initWasm();
+	await initWasm();
 
-  const buffer = await fetch("document.pdf").then((r) => r.arrayBuffer());
-  const bytes = new Uint8Array(buffer);
+	const buffer = await fetch("document.pdf").then((r) => r.arrayBuffer());
+	const bytes = new Uint8Array(buffer);
 
-  const result = await extractBytes(bytes, "application/pdf");
+	const result = await extractBytes(bytes, "application/pdf");
 
-  console.log("Extracted content:");
-  console.log(result.content);
-  console.log("MIME type:", result.mimeType);
-  console.log("Metadata:", result.metadata);
+	console.log("Extracted content:");
+	console.log(result.content);
+	console.log("MIME type:", result.mimeType);
+	console.log("Metadata:", result.metadata);
 }
 
 main().catch(console.error);
 ```
+
 
 ### Common Use Cases
 
@@ -144,372 +129,137 @@ main().catch(console.error);
 
 Most use cases benefit from configuration to control extraction behavior:
 
+
 **With OCR (for scanned documents):**
 
 ```ts
 import { enableOcr, extractBytes, initWasm } from "@kreuzberg/wasm";
 
 async function extractWithOcr() {
-  await initWasm();
+	await initWasm();
 
-  try {
-    await enableOcr();
-    console.log("OCR enabled successfully");
-  } catch (error) {
-    console.error("Failed to enable OCR:", error);
-    return;
-  }
+	try {
+		await enableOcr();
+		console.log("OCR enabled successfully");
+	} catch (error) {
+		console.error("Failed to enable OCR:", error);
+		return;
+	}
 
-  const bytes = new Uint8Array(await fetch("scanned-page.png").then((r) => r.arrayBuffer()));
+	const bytes = new Uint8Array(await fetch("scanned-page.png").then((r) => r.arrayBuffer()));
 
-  const result = await extractBytes(bytes, "image/png", {
-    ocr: {
-      backend: "tesseract-wasm",
-      language: "eng",
-    },
-  });
+	const result = await extractBytes(bytes, "image/png", {
+		ocr: {
+			backend: "tesseract-wasm",
+			language: "eng",
+		},
+	});
 
-  console.log("Extracted text:");
-  console.log(result.content);
+	console.log("Extracted text:");
+	console.log(result.content);
 }
 
 extractWithOcr().catch(console.error);
 ```
 
+
+
+
 #### Table Extraction
 
-See [Table Extraction Guide](https://docs.kreuzberg.dev/features/table-extraction/) for detailed examples.
+
+See [Table Extraction Guide](https://kreuzberg.dev/features/table-extraction/) for detailed examples.
+
+
 
 #### Processing Multiple Files
+
 
 ```ts
 import { extractBytes, initWasm } from "@kreuzberg/wasm";
 
 interface DocumentJob {
-  name: string;
-  bytes: Uint8Array;
-  mimeType: string;
+	name: string;
+	bytes: Uint8Array;
+	mimeType: string;
 }
 
-async function processBatch(documents: DocumentJob[], concurrency: number = 3) {
-  await initWasm();
+async function _processBatch(documents: DocumentJob[], concurrency: number = 3) {
+	await initWasm();
 
-  const results: Record<string, string> = {};
-  const queue = [...documents];
+	const results: Record<string, string> = {};
+	const queue = [...documents];
 
-  const workers = Array(concurrency)
-    .fill(null)
-    .map(async () => {
-      while (queue.length > 0) {
-        const doc = queue.shift();
-        if (!doc) break;
+	const workers = Array(concurrency)
+		.fill(null)
+		.map(async () => {
+			while (queue.length > 0) {
+				const doc = queue.shift();
+				if (!doc) break;
 
-        try {
-          const result = await extractBytes(doc.bytes, doc.mimeType);
-          results[doc.name] = result.content;
-        } catch (error) {
-          console.error(`Failed to process ${doc.name}:`, error);
-        }
-      }
-    });
+				try {
+					const result = await extractBytes(doc.bytes, doc.mimeType);
+					results[doc.name] = result.content;
+				} catch (error) {
+					console.error(`Failed to process ${doc.name}:`, error);
+				}
+			}
+		});
 
-  await Promise.all(workers);
-  return results;
+	await Promise.all(workers);
+	return results;
 }
 ```
+
+
+
+
 
 #### Async Processing
 
 For non-blocking document processing:
 
 ```ts
-import { extractBytes, initWasm, getWasmCapabilities } from "@kreuzberg/wasm";
+import { extractBytes, getWasmCapabilities, initWasm } from "@kreuzberg/wasm";
 
 async function extractDocuments(files: Uint8Array[], mimeTypes: string[]) {
-  const caps = getWasmCapabilities();
-  if (!caps.hasWasm) {
-    throw new Error("WebAssembly not supported");
-  }
+	const caps = getWasmCapabilities();
+	if (!caps.hasWasm) {
+		throw new Error("WebAssembly not supported");
+	}
 
-  await initWasm();
+	await initWasm();
 
-  const results = await Promise.all(
-    files.map((bytes, index) => extractBytes(bytes, mimeTypes[index]))
-  );
+	const results = await Promise.all(files.map((bytes, index) => extractBytes(bytes, mimeTypes[index])));
 
-  return results.map((r) => ({
-    content: r.content,
-    pageCount: r.metadata?.pageCount,
-  }));
+	return results.map((r) => ({
+		content: r.content,
+		pageCount: r.metadata?.pageCount,
+	}));
 }
 
 const fileBytes = [new Uint8Array([1, 2, 3])];
 const mimes = ["application/pdf"];
 
 extractDocuments(fileBytes, mimes)
-  .then((results) => console.log(results))
-  .catch(console.error);
+	.then((results) => console.log(results))
+	.catch(console.error);
 ```
 
-#### Worker Pool Usage
 
-When Web Workers are available, use worker threads for parallel document processing without blocking the main thread:
 
-```typescript
-import { extractBytes, initWasm, hasWorkers, hasModuleWorkers } from '@kreuzberg/wasm';
 
-class DocumentWorkerPool {
-  private workers: Worker[] = [];
-  private taskQueue: Array<{ id: number; data: Uint8Array; mimeType: string; resolve: Function; reject: Function }> = [];
-  private currentTaskId = 0;
 
-  constructor(workerCount: number = navigator.hardwareConcurrency || 4) {
-    // Module workers allow importing ES modules, standard workers are more compatible
-    const useModuleWorkers = hasModuleWorkers();
-
-    for (let i = 0; i < workerCount; i++) {
-      const worker = useModuleWorkers
-        ? new Worker(new URL('./extraction-worker.ts', import.meta.url), { type: 'module' })
-        : new Worker(new URL('./extraction-worker.js', import.meta.url));
-
-      worker.onmessage = (event) => this.handleWorkerMessage(event.data);
-      worker.onerror = (error) => this.handleWorkerError(error);
-      this.workers.push(worker);
-    }
-  }
-
-  async extract(data: Uint8Array, mimeType: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.taskQueue.push({
-        id: this.currentTaskId++,
-        data,
-        mimeType,
-        resolve,
-        reject
-      });
-      this.processQueue();
-    });
-  }
-
-  private processQueue(): void {
-    while (this.taskQueue.length > 0) {
-      const task = this.taskQueue.shift();
-      if (task) {
-        const worker = this.workers[task.id % this.workers.length];
-        worker.postMessage({ id: task.id, data: task.data, mimeType: task.mimeType });
-      }
-    }
-  }
-
-  private handleWorkerMessage(data: { id: number; result: string }): void {
-    const task = this.taskQueue.find(t => t.id === data.id);
-    if (task) {
-      task.resolve(data.result);
-      this.processQueue();
-    }
-  }
-
-  private handleWorkerError(error: ErrorEvent): void {
-    console.error('Worker error:', error.message);
-  }
-
-  terminate(): void {
-    this.workers.forEach(w => w.terminate());
-  }
-}
-
-// Usage
-async function processDocumentsInParallel() {
-  if (!hasWorkers()) {
-    console.log('Web Workers not available, falling back to main thread');
-    return;
-  }
-
-  await initWasm();
-  const pool = new DocumentWorkerPool(4);
-
-  const documents = [
-    { data: new Uint8Array([...]), mimeType: 'application/pdf' },
-    { data: new Uint8Array([...]), mimeType: 'application/pdf' },
-  ];
-
-  const results = await Promise.all(
-    documents.map(doc => pool.extract(doc.data, doc.mimeType))
-  );
-
-  pool.terminate();
-  return results;
-}
-```
-
-Worker code (`extraction-worker.ts`):
-
-```typescript
-import { extractBytes, initWasm } from '@kreuzberg/wasm';
-
-let wasmInitialized = false;
-
-self.onmessage = async (event) => {
-  if (!wasmInitialized) {
-    await initWasm();
-    wasmInitialized = true;
-  }
-
-  const { id, data, mimeType } = event.data;
-  try {
-    const result = await extractBytes(new Uint8Array(data), mimeType);
-    self.postMessage({ id, result: result.content });
-  } catch (error) {
-    self.postMessage({ id, error: (error as Error).message });
-  }
-};
-```
-
-### Memory Management
-
-WASM memory is managed by the JavaScript garbage collector:
-
-```typescript
-import { initWasm, extractBytes } from '@kreuzberg/wasm';
-
-async function extractWithMemoryAwareness() {
-  await initWasm();
-
-  // Process documents one at a time to control memory usage
-  const documents = [/* ... */];
-
-  for (const doc of documents) {
-    const result = await extractBytes(doc, 'application/pdf');
-
-    // Process result immediately
-    console.log(result.content);
-
-    // Result will be garbage collected when no longer referenced
-    // Explicitly clear large objects if needed
-    // gc(); // Requires --expose-gc flag
-  }
-}
-
-// Check available memory (browser only)
-if (performance.memory) {
-  console.log('Memory usage:', {
-    usedJSHeapSize: performance.memory.usedJSHeapSize,
-    totalJSHeapSize: performance.memory.totalJSHeapSize,
-    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
-  });
-}
-```
 
 ### Next Steps
 
-- **[Installation Guide](https://docs.kreuzberg.dev/getting-started/installation/)** - Platform-specific setup
-- **[API Documentation](https://docs.kreuzberg.dev/api/)** - Complete API reference
-- **[Examples & Guides](https://docs.kreuzberg.dev/guides/)** - Full code examples and usage guides
-- **[Configuration Guide](https://docs.kreuzberg.dev/configuration/)** - Advanced configuration options
-- **[Troubleshooting](https://docs.kreuzberg.dev/troubleshooting/)** - Common issues and solutions
+- **[Installation Guide](https://kreuzberg.dev/getting-started/installation/)** - Platform-specific setup
+- **[API Documentation](https://kreuzberg.dev/api/)** - Complete API reference
+- **[Examples & Guides](https://kreuzberg.dev/guides/)** - Full code examples and usage guides
+- **[Configuration Guide](https://kreuzberg.dev/configuration/)** - Advanced configuration options
+- **[Troubleshooting](https://kreuzberg.dev/troubleshooting/)** - Common issues and solutions
 
-## WASM-Specific Implementation Details
 
-### Initialization
-
-WASM binaries must be loaded before extraction:
-
-```typescript
-import { initWasm } from '@kreuzberg/wasm';
-
-// Initialize once at application startup
-await initWasm();
-
-// Now extraction functions can be used
-```
-
-The init function:
-- Downloads and instantiates the WASM binary
-- Initializes the memory space (linear memory module)
-- Prepares thread pools if available
-- Throws if WASM is not supported in the environment
-
-### Threading Model
-
-- Single-threaded by default (main thread execution)
-- Web Workers optional for background processing
-- Shared memory (SharedArrayBuffer) not required
-- Message passing used for worker communication
-- No blocking operations on main thread with worker pool
-
-### Memory Considerations
-
-- Each WASM instance has its own 4GB linear memory address space
-- Large documents (> 100 MB) may not fit in WASM memory
-- Binary data is copied between JavaScript and WASM boundaries
-- Garbage collection is handled by JavaScript runtime
-- No manual memory management required
-
-### Supported Extraction Targets
-
-Different file formats have varying support in WASM:
-
-| Format | Support | Notes |
-|--------|---------|-------|
-| PDF | Full | Text, images, metadata extraction |
-| Office (DOCX, XLSX, PPTX) | Full | All features supported |
-| Images (PNG, JPG, etc) | Full | EXIF metadata extraction |
-| Archives (ZIP, TAR) | Full | Listing and extraction |
-| OCR | Limited | Tesseract WASM only, main thread only |
-| Embeddings | Not Available | WASM has no ML model support |
-
-### Platform Limitations
-
-**LibreOffice-Dependent Formats Not Available**
-
-WASM cannot load native LibreOffice binaries, so older Office formats are **not supported**:
-
-- ❌ **DOC** (Microsoft Word 97-2003) - Use DOCX instead
-- ❌ **XLS** (Microsoft Excel 97-2003) - Use XLSX instead
-- ❌ **PPT** (Microsoft PowerPoint 97-2003) - Use PPTX instead
-- ❌ **RTF** (Rich Text Format with complex features)
-- ❌ **ODT/ODS/ODP** (LibreOffice/OpenOffice formats)
-
-Modern Office formats (DOCX, XLSX, PPTX) are fully supported and don't require LibreOffice.
-
-**Polars Integration Not Available**
-
-- ❌ Polars DataFrame extraction/conversion not available in WASM
-- ❌ Structured data operations limited compared to Node.js binding
-
-**Alternative: Use Node.js Binding**
-
-If you need support for older Office formats or Polars integration, use the `@kreuzberg/node` package instead:
-
-```bash
-npm install @kreuzberg/node
-```
-
-The Node.js binding provides:
-- ✅ Full LibreOffice format support (DOC, XLS, PPT, RTF, ODT)
-- ✅ Polars DataFrame integration
-- ✅ All OCR backends (Tesseract, EasyOCR, PaddleOCR)
-- ✅ Full embedding model support
-
-**Format Comparison Table**
-
-| Format Type | WASM Support | Node.js Support |
-|-------------|--------------|-----------------|
-| Modern Office (DOCX/XLSX/PPTX) | ✅ Full | ✅ Full |
-| Legacy Office (DOC/XLS/PPT) | ❌ Not Available | ✅ Requires LibreOffice |
-| OpenOffice (ODT/ODS/ODP) | ❌ Not Available | ✅ Requires LibreOffice |
-| PDF | ✅ Full | ✅ Full |
-| Images | ✅ Full | ✅ Full |
-| Embeddings | ❌ Not Available | ✅ With ONNX Runtime |
-| Polars | ❌ Not Available | ✅ Available |
-
-### Sandbox Security
-
-- WASM code runs in a sandbox with restricted capabilities
-- File system access requires user interaction (File API)
-- Network access follows CORS restrictions
-- No access to Node.js native modules
-- Content Security Policy (CSP) may restrict WASM loading
 
 ## Features
 
@@ -558,30 +308,25 @@ The Node.js binding provides:
 | **Scientific** | `.tex`, `.latex`, `.typst`, `.jats`, `.ipynb`, `.docbook` | LaTeX, Jupyter notebooks, PubMed JATS |
 | **Documentation** | `.opml`, `.pod`, `.mdoc`, `.troff` | Technical documentation formats |
 
-**[Complete Format Reference](https://docs.kreuzberg.dev/reference/formats/)**
+**[Complete Format Reference](https://kreuzberg.dev/reference/formats/)**
 
 ### Key Capabilities
 
 - **Text Extraction** - Extract all text content with position and formatting information
-
 - **Metadata Extraction** - Retrieve document properties, creation date, author, etc.
-
 - **Table Extraction** - Parse tables with structure and cell content preservation
-
 - **Image Extraction** - Extract embedded images and render page previews
-
 - **OCR Support** - Integrate multiple OCR backends for scanned documents
 
 - **Async/Await** - Non-blocking document processing with concurrent operations
 
+
 - **Plugin System** - Extensible post-processing for custom text transformation
 
+
 - **Batch Processing** - Efficiently process multiple documents in parallel
-
 - **Memory Efficient** - Stream large files without loading entirely into memory
-
 - **Language Detection** - Detect and support multiple languages in documents
-
 - **Configuration** - Fine-grained control over extraction behavior
 
 ### Performance Characteristics
@@ -594,11 +339,15 @@ The Node.js binding provides:
 | **Archives** | 5-50 MB/s | ~200MB per doc | ZIP, TAR, etc. |
 | **Web formats** | 50-200 MB/s | Streaming | HTML, XML, JSON |
 
+
+
 ## OCR Support
 
 Kreuzberg supports multiple OCR backends for extracting text from scanned documents and images:
 
+
 - **Tesseract-Wasm**
+
 
 ### OCR Configuration Example
 
@@ -606,70 +355,79 @@ Kreuzberg supports multiple OCR backends for extracting text from scanned docume
 import { enableOcr, extractBytes, initWasm } from "@kreuzberg/wasm";
 
 async function extractWithOcr() {
-  await initWasm();
+	await initWasm();
 
-  try {
-    await enableOcr();
-    console.log("OCR enabled successfully");
-  } catch (error) {
-    console.error("Failed to enable OCR:", error);
-    return;
-  }
+	try {
+		await enableOcr();
+		console.log("OCR enabled successfully");
+	} catch (error) {
+		console.error("Failed to enable OCR:", error);
+		return;
+	}
 
-  const bytes = new Uint8Array(await fetch("scanned-page.png").then((r) => r.arrayBuffer()));
+	const bytes = new Uint8Array(await fetch("scanned-page.png").then((r) => r.arrayBuffer()));
 
-  const result = await extractBytes(bytes, "image/png", {
-    ocr: {
-      backend: "tesseract-wasm",
-      language: "eng",
-    },
-  });
+	const result = await extractBytes(bytes, "image/png", {
+		ocr: {
+			backend: "tesseract-wasm",
+			language: "eng",
+		},
+	});
 
-  console.log("Extracted text:");
-  console.log(result.content);
+	console.log("Extracted text:");
+	console.log(result.content);
 }
 
 extractWithOcr().catch(console.error);
 ```
+
+
+
 
 ## Async Support
 
 This binding provides full async/await support for non-blocking document processing:
 
 ```ts
-import { extractBytes, initWasm, getWasmCapabilities } from "@kreuzberg/wasm";
+import { extractBytes, getWasmCapabilities, initWasm } from "@kreuzberg/wasm";
 
 async function extractDocuments(files: Uint8Array[], mimeTypes: string[]) {
-  const caps = getWasmCapabilities();
-  if (!caps.hasWasm) {
-    throw new Error("WebAssembly not supported");
-  }
+	const caps = getWasmCapabilities();
+	if (!caps.hasWasm) {
+		throw new Error("WebAssembly not supported");
+	}
 
-  await initWasm();
+	await initWasm();
 
-  const results = await Promise.all(
-    files.map((bytes, index) => extractBytes(bytes, mimeTypes[index]))
-  );
+	const results = await Promise.all(files.map((bytes, index) => extractBytes(bytes, mimeTypes[index])));
 
-  return results.map((r) => ({
-    content: r.content,
-    pageCount: r.metadata?.pageCount,
-  }));
+	return results.map((r) => ({
+		content: r.content,
+		pageCount: r.metadata?.pageCount,
+	}));
 }
 
 const fileBytes = [new Uint8Array([1, 2, 3])];
 const mimes = ["application/pdf"];
 
 extractDocuments(fileBytes, mimes)
-  .then((results) => console.log(results))
-  .catch(console.error);
+	.then((results) => console.log(results))
+	.catch(console.error);
 ```
+
+
+
 
 ## Plugin System
 
 Kreuzberg supports extensible post-processing plugins for custom text transformation and filtering.
 
-For detailed plugin documentation, visit [Plugin System Guide](https://docs.kreuzberg.dev/plugins/).
+For detailed plugin documentation, visit [Plugin System Guide](https://kreuzberg.dev/plugins/).
+
+
+
+
+
 
 ## Batch Processing
 
@@ -679,53 +437,56 @@ Process multiple documents efficiently:
 import { extractBytes, initWasm } from "@kreuzberg/wasm";
 
 interface DocumentJob {
-  name: string;
-  bytes: Uint8Array;
-  mimeType: string;
+	name: string;
+	bytes: Uint8Array;
+	mimeType: string;
 }
 
-async function processBatch(documents: DocumentJob[], concurrency: number = 3) {
-  await initWasm();
+async function _processBatch(documents: DocumentJob[], concurrency: number = 3) {
+	await initWasm();
 
-  const results: Record<string, string> = {};
-  const queue = [...documents];
+	const results: Record<string, string> = {};
+	const queue = [...documents];
 
-  const workers = Array(concurrency)
-    .fill(null)
-    .map(async () => {
-      while (queue.length > 0) {
-        const doc = queue.shift();
-        if (!doc) break;
+	const workers = Array(concurrency)
+		.fill(null)
+		.map(async () => {
+			while (queue.length > 0) {
+				const doc = queue.shift();
+				if (!doc) break;
 
-        try {
-          const result = await extractBytes(doc.bytes, doc.mimeType);
-          results[doc.name] = result.content;
-        } catch (error) {
-          console.error(`Failed to process ${doc.name}:`, error);
-        }
-      }
-    });
+				try {
+					const result = await extractBytes(doc.bytes, doc.mimeType);
+					results[doc.name] = result.content;
+				} catch (error) {
+					console.error(`Failed to process ${doc.name}:`, error);
+				}
+			}
+		});
 
-  await Promise.all(workers);
-  return results;
+	await Promise.all(workers);
+	return results;
 }
 ```
+
+
+
 
 ## Configuration
 
 For advanced configuration options including language detection, table extraction, OCR settings, and more:
 
-**[Configuration Guide](https://docs.kreuzberg.dev/configuration/)**
+**[Configuration Guide](https://kreuzberg.dev/configuration/)**
 
 ## Documentation
 
 - **[Official Documentation](https://kreuzberg.dev/)**
-- **[API Reference](https://docs.kreuzberg.dev/reference/api-wasm/)**
-- **[Examples & Guides](https://docs.kreuzberg.dev/guides/)**
+- **[API Reference](https://kreuzberg.dev/reference/api-wasm/)**
+- **[Examples & Guides](https://kreuzberg.dev/guides/)**
 
 ## Troubleshooting
 
-For common issues and solutions, visit [Troubleshooting Guide](https://docs.kreuzberg.dev/troubleshooting/).
+For common issues and solutions, visit [Troubleshooting Guide](https://kreuzberg.dev/troubleshooting/).
 
 ## Contributing
 

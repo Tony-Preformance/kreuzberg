@@ -22,7 +22,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/kreuzberg?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://github.com/kreuzberg-dev/kreuzberg/releases">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/kreuzberg?label=Go&color=007ec6&filter=v4.0.0-*" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/kreuzberg?label=Go&color=007ec6&filter=v4.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/Kreuzberg/">
     <img src="https://img.shields.io/nuget/v/Kreuzberg?label=C%23&color=007ec6" alt="C#">
@@ -55,10 +55,6 @@
 Extract text, tables, images, and metadata from 56 file formats including PDF, Office documents, and images. .NET bindings with full type safety, async/await support, and .NET 10.0+ compatibility.
 
 
-> **Version 4.0.0 Release Candidate**
-> Kreuzberg v4.0.0 is in **Release Candidate** stage. Bugs and breaking changes are expected.
-> This is a pre-release version. Please test the library and [report any issues](https://github.com/kreuzberg-dev/kreuzberg/issues) you encounter.
-
 ## Installation
 
 ### Package Installation
@@ -87,16 +83,7 @@ Install-Package Goldziher.Kreuzberg
 - Optional: [ONNX Runtime](https://github.com/microsoft/onnxruntime/releases) version 1.22.x for embeddings support
 - Optional: [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) for OCR functionality
 
-### Platform Support
 
-Precompiled native libraries are bundled in the NuGet package for the following platforms:
-
-- ✅ Linux x86_64
-- ✅ Linux aarch64 (ARM64)
-- ✅ macOS aarch64 (Apple Silicon)
-- ✅ Windows x86_64
-
-The appropriate native library is automatically loaded at runtime based on your platform.
 
 ## Quick Start
 
@@ -155,7 +142,7 @@ Console.WriteLine(result.Content);
 #### Table Extraction
 
 
-See [Table Extraction Guide](https://docs.kreuzberg.dev/features/table-extraction/) for detailed examples.
+See [Table Extraction Guide](https://kreuzberg.dev/features/table-extraction/) for detailed examples.
 
 
 
@@ -262,11 +249,11 @@ class Program
 
 ### Next Steps
 
-- **[Installation Guide](https://docs.kreuzberg.dev/getting-started/installation/)** - Platform-specific setup
-- **[API Documentation](https://docs.kreuzberg.dev/api/)** - Complete API reference
-- **[Examples & Guides](https://docs.kreuzberg.dev/guides/)** - Full code examples and usage guides
-- **[Configuration Guide](https://docs.kreuzberg.dev/configuration/)** - Advanced configuration options
-- **[Troubleshooting](https://docs.kreuzberg.dev/troubleshooting/)** - Common issues and solutions
+- **[Installation Guide](https://kreuzberg.dev/getting-started/installation/)** - Platform-specific setup
+- **[API Documentation](https://kreuzberg.dev/api/)** - Complete API reference
+- **[Examples & Guides](https://kreuzberg.dev/guides/)** - Full code examples and usage guides
+- **[Configuration Guide](https://kreuzberg.dev/configuration/)** - Advanced configuration options
+- **[Troubleshooting](https://kreuzberg.dev/troubleshooting/)** - Common issues and solutions
 
 
 
@@ -317,7 +304,7 @@ class Program
 | **Scientific** | `.tex`, `.latex`, `.typst`, `.jats`, `.ipynb`, `.docbook` | LaTeX, Jupyter notebooks, PubMed JATS |
 | **Documentation** | `.opml`, `.pod`, `.mdoc`, `.troff` | Technical documentation formats |
 
-**[Complete Format Reference](https://docs.kreuzberg.dev/reference/formats/)**
+**[Complete Format Reference](https://kreuzberg.dev/reference/formats/)**
 
 ### Key Capabilities
 
@@ -432,7 +419,7 @@ class Program
 
 Kreuzberg supports extensible post-processing plugins for custom text transformation and filtering.
 
-For detailed plugin documentation, visit [Plugin System Guide](https://docs.kreuzberg.dev/plugins/).
+For detailed plugin documentation, visit [Plugin System Guide](https://kreuzberg.dev/plugins/).
 
 
 
@@ -441,7 +428,7 @@ For detailed plugin documentation, visit [Plugin System Guide](https://docs.kreu
 
 Generate vector embeddings for extracted text using the built-in ONNX Runtime support. Requires ONNX Runtime installation.
 
-**[Embeddings Guide](https://docs.kreuzberg.dev/features/#embeddings)**
+**[Embeddings Guide](https://kreuzberg.dev/features/#embeddings)**
 
 
 
@@ -505,17 +492,17 @@ class Program
 
 For advanced configuration options including language detection, table extraction, OCR settings, and more:
 
-**[Configuration Guide](https://docs.kreuzberg.dev/configuration/)**
+**[Configuration Guide](https://kreuzberg.dev/configuration/)**
 
 ## Documentation
 
 - **[Official Documentation](https://kreuzberg.dev/)**
-- **[API Reference](https://docs.kreuzberg.dev/reference/api-csharp/)**
-- **[Examples & Guides](https://docs.kreuzberg.dev/guides/)**
+- **[API Reference](https://kreuzberg.dev/reference/api-csharp/)**
+- **[Examples & Guides](https://kreuzberg.dev/guides/)**
 
 ## Troubleshooting
 
-For common issues and solutions, visit [Troubleshooting Guide](https://docs.kreuzberg.dev/troubleshooting/).
+For common issues and solutions, visit [Troubleshooting Guide](https://kreuzberg.dev/troubleshooting/).
 
 ## Contributing
 
