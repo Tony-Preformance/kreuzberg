@@ -105,6 +105,7 @@ markdown_extensions:
 plugins:
   - search
   # TODO: Add Algolia DocSearch for enhanced search
+  - social
   - tags
   - minify:
       minify_html: true
