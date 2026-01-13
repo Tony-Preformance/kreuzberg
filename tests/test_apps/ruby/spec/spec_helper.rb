@@ -24,7 +24,8 @@ RSpec.configure do |config|
 
   config.include(Module.new do
     def test_document_path(relative_path)
-      File.expand_path(File.join(__dir__, '..', '..', '..', 'test_documents', relative_path))
+      # Navigate from spec/ -> ruby/ -> test_apps/ -> tests/ -> repo_root/ -> test_documents/
+      File.expand_path(File.join(__dir__, '..', '..', '..', '..', 'test_documents', relative_path))
     end
 
     def create_test_file(content, filename: 'test.txt')

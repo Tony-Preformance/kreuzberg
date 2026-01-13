@@ -2202,19 +2202,21 @@ jobs:
           TARGET="${{ matrix.settings.target }}"
           NIF_VERSION="2.16"
 
+          # LIB_NAME is the actual compiled library name
+          # ARCHIVE_EXT is the extension used in tarball naming (rustler_precompiled expects .so for Unix)
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            EXT="dll"
+            ARCHIVE_EXT="dll"
             LIB_NAME="kreuzberg_rustler.dll"
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            EXT="dylib"
+            ARCHIVE_EXT="so"  # rustler_precompiled expects .so for all Unix platforms
             LIB_NAME="libkreuzberg_rustler.dylib"
           else
-            EXT="so"
+            ARCHIVE_EXT="so"
             LIB_NAME="libkreuzberg_rustler.so"
           fi
 
           mkdir -p dist/elixir
-          ARTIFACT_NAME="libkreuzberg_rustler-v${VERSION}-nif-${NIF_VERSION}-${TARGET}.${EXT}"
+          ARTIFACT_NAME="libkreuzberg_rustler-v${VERSION}-nif-${NIF_VERSION}-${TARGET}.${ARCHIVE_EXT}"
           TARBALL="${ARTIFACT_NAME}.tar.gz"
 
           # Try expected location first (workspace target dir), fallback to root release dir
@@ -2245,18 +2247,20 @@ jobs:
           TARGET="${{ matrix.settings.target }}"
           NIF_VERSION="2.17"
 
+          # LIB_NAME is the actual compiled library name
+          # ARCHIVE_EXT is the extension used in tarball naming (rustler_precompiled expects .so for Unix)
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            EXT="dll"
+            ARCHIVE_EXT="dll"
             LIB_NAME="kreuzberg_rustler.dll"
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            EXT="dylib"
+            ARCHIVE_EXT="so"  # rustler_precompiled expects .so for all Unix platforms
             LIB_NAME="libkreuzberg_rustler.dylib"
           else
-            EXT="so"
+            ARCHIVE_EXT="so"
             LIB_NAME="libkreuzberg_rustler.so"
           fi
 
-          ARTIFACT_NAME="libkreuzberg_rustler-v${VERSION}-nif-${NIF_VERSION}-${TARGET}.${EXT}"
+          ARTIFACT_NAME="libkreuzberg_rustler-v${VERSION}-nif-${NIF_VERSION}-${TARGET}.${ARCHIVE_EXT}"
           TARBALL="${ARTIFACT_NAME}.tar.gz"
 
           # Try expected location first (workspace target dir), fallback to root release dir
