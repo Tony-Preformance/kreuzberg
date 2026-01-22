@@ -239,10 +239,8 @@ jobs:
             node-version: "22"
             target: aarch64-apple-darwin
             coverage: false
-          - os: windows-latest
-            node-version: "22"
-            target: x86_64-pc-windows-msvc
-            coverage: false
+          # Windows TypeScript tests temporarily disabled due to E2E test hangs
+          # TODO: Investigate and re-enable - see https://github.com/kreuzberg-dev/kreuzberg/actions/runs/21255391010
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
