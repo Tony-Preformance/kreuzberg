@@ -3,6 +3,8 @@ package dev.kreuzberg;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.kreuzberg.config.ExtractionConfig;
+import dev.kreuzberg.config.OcrConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,26 +28,24 @@ class SerializationTest {
 	@Test
 	@DisplayName("should serialize minimal config to JSON")
 	void testMinimalSerialization() throws Exception {
-		ExtractionConfig config = new ExtractionConfig();
-		String json = objectMapper.writeValueAsString(config);
+		ExtractionConfig config = ExtractionConfig.builder().build();
+		String json = config.toJson();
 
 		assertNotNull(json);
-		assertTrue(json.contains("useCache"));
-		assertTrue(json.contains("enableQualityProcessing"));
-		assertTrue(json.contains("forceOcr"));
+		assertTrue(json.contains("use_cache"));
+		assertTrue(json.contains("enable_quality_processing"));
+		assertTrue(json.contains("force_ocr"));
 	}
 
 	@Test
 	@DisplayName("should serialize config with custom values")
 	void testCustomValuesSerialization() throws Exception {
-		ExtractionConfig config = new ExtractionConfig();
-		config.setUseCache(true);
-		config.setEnableQualityProcessing(false);
-		config.setForceOcr(true);
+		ExtractionConfig config = ExtractionConfig.builder().useCache(true).enableQualityProcessing(false)
+				.forceOcr(true).build();
 
-		String json = objectMapper.writeValueAsString(config);
+		String json = config.toJson();
 
-		ExtractionConfig restored = objectMapper.readValue(json, ExtractionConfig.class);
+		ExtractionConfig restored = ExtractionConfig.fromJson(json);
 
 		assertEquals(true, restored.isUseCache());
 		assertEquals(false, restored.isEnableQualityProcessing());
@@ -55,12 +55,10 @@ class SerializationTest {
 	@Test
 	@DisplayName("should preserve field values after serialization")
 	void testFieldPreservation() throws Exception {
-		ExtractionConfig original = new ExtractionConfig();
-		original.setUseCache(false);
-		original.setEnableQualityProcessing(true);
+		ExtractionConfig original = ExtractionConfig.builder().useCache(false).enableQualityProcessing(true).build();
 
-		String json = objectMapper.writeValueAsString(original);
-		ExtractionConfig restored = objectMapper.readValue(json, ExtractionConfig.class);
+		String json = original.toJson();
+		ExtractionConfig restored = ExtractionConfig.fromJson(json);
 
 		assertEquals(original.isUseCache(), restored.isUseCache());
 		assertEquals(original.isEnableQualityProcessing(), restored.isEnableQualityProcessing());
@@ -69,17 +67,15 @@ class SerializationTest {
 	@Test
 	@DisplayName("should handle round-trip serialization")
 	void testRoundTripSerialization() throws Exception {
-		ExtractionConfig config1 = new ExtractionConfig();
-		config1.setUseCache(true);
-		config1.setEnableQualityProcessing(false);
+		ExtractionConfig config1 = ExtractionConfig.builder().useCache(true).enableQualityProcessing(false).build();
 
-		String json1 = objectMapper.writeValueAsString(config1);
-		ExtractionConfig config2 = objectMapper.readValue(json1, ExtractionConfig.class);
-		String json2 = objectMapper.writeValueAsString(config2);
+		String json1 = config1.toJson();
+		ExtractionConfig config2 = ExtractionConfig.fromJson(json1);
+		String json2 = config2.toJson();
 
 		// Should produce equivalent JSON
-		ExtractionConfig parsed1 = objectMapper.readValue(json1, ExtractionConfig.class);
-		ExtractionConfig parsed2 = objectMapper.readValue(json2, ExtractionConfig.class);
+		ExtractionConfig parsed1 = ExtractionConfig.fromJson(json1);
+		ExtractionConfig parsed2 = ExtractionConfig.fromJson(json2);
 
 		assertEquals(parsed1.isUseCache(), parsed2.isUseCache());
 		assertEquals(parsed1.isEnableQualityProcessing(), parsed2.isEnableQualityProcessing());
@@ -87,30 +83,24 @@ class SerializationTest {
 	}
 
 	@Test
-	@DisplayName("should use camelCase field names")
-	void testCamelCaseFieldNames() throws Exception {
-		ExtractionConfig config = new ExtractionConfig();
-		String json = objectMapper.writeValueAsString(config);
+	@DisplayName("should use snake_case field names in JSON")
+	void testSnakeCaseFieldNames() throws Exception {
+		ExtractionConfig config = ExtractionConfig.builder().build();
+		String json = config.toJson();
 
-		assertTrue(json.contains("useCache"));
-		assertTrue(json.contains("enableQualityProcessing"));
-		assertTrue(json.contains("forceOcr"));
-
-		assertFalse(json.contains("use_cache"));
-		assertFalse(json.contains("enable_quality_processing"));
-		assertFalse(json.contains("force_ocr"));
+		assertTrue(json.contains("use_cache"));
+		assertTrue(json.contains("enable_quality_processing"));
+		assertTrue(json.contains("force_ocr"));
 	}
 
 	@Test
 	@DisplayName("should serialize nested OCR config")
 	void testNestedOcrConfig() throws Exception {
-		ExtractionConfig config = new ExtractionConfig();
-		OcrConfig ocrConfig = new OcrConfig();
-		ocrConfig.setBackend("tesseract");
-		ocrConfig.setLanguage("eng");
-		config.setOcr(ocrConfig);
+		OcrConfig ocrConfig = OcrConfig.builder().backend("tesseract").language("eng").build();
 
-		String json = objectMapper.writeValueAsString(config);
+		ExtractionConfig config = ExtractionConfig.builder().ocr(ocrConfig).build();
+
+		String json = config.toJson();
 
 		assertTrue(json.contains("\"ocr\""));
 		assertTrue(json.contains("\"backend\""));
@@ -122,26 +112,23 @@ class SerializationTest {
 	@Test
 	@DisplayName("should handle null values correctly")
 	void testNullValueHandling() throws Exception {
-		ExtractionConfig config = new ExtractionConfig();
-		config.setOcr(null);
-		config.setChunking(null);
+		ExtractionConfig config = ExtractionConfig.builder().build();
 
-		String json = objectMapper.writeValueAsString(config);
-		ExtractionConfig restored = objectMapper.readValue(json, ExtractionConfig.class);
+		String json = config.toJson();
+		ExtractionConfig restored = ExtractionConfig.fromJson(json);
 
 		assertNull(restored.getOcr());
 		assertNull(restored.getChunking());
 	}
 
 	@Test
-	@DisplayName("should maintain immutability during serialization")
-	void testImmutabilityDuringSerialization() throws Exception {
-		ExtractionConfig config = new ExtractionConfig();
-		config.setUseCache(true);
+	@DisplayName("should maintain stability during serialization")
+	void testStabilityDuringSerialization() throws Exception {
+		ExtractionConfig config = ExtractionConfig.builder().useCache(true).build();
 
-		String json1 = objectMapper.writeValueAsString(config);
-		String json2 = objectMapper.writeValueAsString(config);
-		String json3 = objectMapper.writeValueAsString(config);
+		String json1 = config.toJson();
+		String json2 = config.toJson();
+		String json3 = config.toJson();
 
 		assertEquals(json1, json2);
 		assertEquals(json2, json3);
@@ -150,10 +137,10 @@ class SerializationTest {
 	@Test
 	@DisplayName("should serialize all mandatory fields")
 	void testMandatoryFields() throws Exception {
-		ExtractionConfig config = new ExtractionConfig();
-		String json = objectMapper.writeValueAsString(config);
+		ExtractionConfig config = ExtractionConfig.builder().build();
+		String json = config.toJson();
 
-		ExtractionConfig parsed = objectMapper.readValue(json, ExtractionConfig.class);
+		ExtractionConfig parsed = ExtractionConfig.fromJson(json);
 
 		assertNotNull(parsed.isUseCache());
 		assertNotNull(parsed.isEnableQualityProcessing());
@@ -163,9 +150,9 @@ class SerializationTest {
 	@Test
 	@DisplayName("should deserialize from JSON string")
 	void testDeserialization() throws Exception {
-		String json = "{\"useCache\":true,\"enableQualityProcessing\":false,\"forceOcr\":true}";
+		String json = "{\"use_cache\":true,\"enable_quality_processing\":false,\"force_ocr\":true}";
 
-		ExtractionConfig config = objectMapper.readValue(json, ExtractionConfig.class);
+		ExtractionConfig config = ExtractionConfig.fromJson(json);
 
 		assertEquals(true, config.isUseCache());
 		assertEquals(false, config.isEnableQualityProcessing());
