@@ -129,7 +129,7 @@ mod tests {
 
         let result = build_config(&default_config, Some(config_json));
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Invalid extraction config"));
+        assert!(result.unwrap_err().contains("Failed to deserialize"));
     }
 
     #[test]
