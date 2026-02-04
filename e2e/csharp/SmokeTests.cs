@@ -13,9 +13,9 @@ namespace Kreuzberg.E2E.Smoke {
         [SkippableFact]
         public void SmokeDocxBasic()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("documents/fake.docx");
-            TestHelpers.SkipIfOfficeTestOnWindows("documents/fake.docx");
-            var documentPath = TestHelpers.EnsureDocument("documents/fake.docx", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("docx/fake.docx");
+            TestHelpers.SkipIfOfficeTestOnWindows("docx/fake.docx");
+            var documentPath = TestHelpers.EnsureDocument("docx/fake.docx", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -27,9 +27,9 @@ namespace Kreuzberg.E2E.Smoke {
         [SkippableFact]
         public void SmokeHtmlBasic()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("web/simple_table.html");
-            TestHelpers.SkipIfOfficeTestOnWindows("web/simple_table.html");
-            var documentPath = TestHelpers.EnsureDocument("web/simple_table.html", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("html/simple_table.html");
+            TestHelpers.SkipIfOfficeTestOnWindows("html/simple_table.html");
+            var documentPath = TestHelpers.EnsureDocument("html/simple_table.html", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -68,9 +68,9 @@ namespace Kreuzberg.E2E.Smoke {
         [SkippableFact]
         public void SmokePdfBasic()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -95,9 +95,9 @@ namespace Kreuzberg.E2E.Smoke {
         [SkippableFact]
         public void SmokeXlsxBasic()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("spreadsheets/stanley_cups.xlsx");
-            TestHelpers.SkipIfOfficeTestOnWindows("spreadsheets/stanley_cups.xlsx");
-            var documentPath = TestHelpers.EnsureDocument("spreadsheets/stanley_cups.xlsx", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("xlsx/stanley_cups.xlsx");
+            TestHelpers.SkipIfOfficeTestOnWindows("xlsx/stanley_cups.xlsx");
+            var documentPath = TestHelpers.EnsureDocument("xlsx/stanley_cups.xlsx", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);

@@ -40,9 +40,9 @@ namespace Kreuzberg.E2E.Ocr {
         [SkippableFact]
         public void OcrPdfImageOnlyGerman()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/image_only_german_pdf.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/image_only_german_pdf.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/image_only_german_pdf.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/image_only_german_pdf.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/image_only_german_pdf.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/image_only_german_pdf.pdf", true);
             var config = TestHelpers.BuildConfig("{\"force_ocr\":true,\"ocr\":{\"backend\":\"tesseract\",\"language\":\"eng\"}}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -55,9 +55,9 @@ namespace Kreuzberg.E2E.Ocr {
         [SkippableFact]
         public void OcrPdfRotated90()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/ocr_test_rotated_90.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/ocr_test_rotated_90.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/ocr_test_rotated_90.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/ocr_test_rotated_90.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/ocr_test_rotated_90.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/ocr_test_rotated_90.pdf", true);
             var config = TestHelpers.BuildConfig("{\"force_ocr\":true,\"ocr\":{\"backend\":\"tesseract\",\"language\":\"eng\"}}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -68,9 +68,9 @@ namespace Kreuzberg.E2E.Ocr {
         [SkippableFact]
         public void OcrPdfTesseract()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/ocr_test.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/ocr_test.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/ocr_test.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/ocr_test.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/ocr_test.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/ocr_test.pdf", true);
             var config = TestHelpers.BuildConfig("{\"force_ocr\":true,\"ocr\":{\"backend\":\"tesseract\",\"language\":\"eng\"}}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);

@@ -13,9 +13,9 @@ namespace Kreuzberg.E2E.Html {
         [SkippableFact]
         public void HtmlComplexLayout()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("web/taylor_swift.html");
-            TestHelpers.SkipIfOfficeTestOnWindows("web/taylor_swift.html");
-            var documentPath = TestHelpers.EnsureDocument("web/taylor_swift.html", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("html/taylor_swift.html");
+            TestHelpers.SkipIfOfficeTestOnWindows("html/taylor_swift.html");
+            var documentPath = TestHelpers.EnsureDocument("html/taylor_swift.html", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -26,9 +26,9 @@ namespace Kreuzberg.E2E.Html {
         [SkippableFact]
         public void HtmlSimpleTable()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("web/simple_table.html");
-            TestHelpers.SkipIfOfficeTestOnWindows("web/simple_table.html");
-            var documentPath = TestHelpers.EnsureDocument("web/simple_table.html", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("html/simple_table.html");
+            TestHelpers.SkipIfOfficeTestOnWindows("html/simple_table.html");
+            var documentPath = TestHelpers.EnsureDocument("html/simple_table.html", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);

@@ -13,9 +13,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfAssemblyTechnical()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/assembly_language_for_beginners_al4_b_en.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/assembly_language_for_beginners_al4_b_en.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/assembly_language_for_beginners_al4_b_en.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/assembly_language_for_beginners_al4_b_en.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/assembly_language_for_beginners_al4_b_en.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/assembly_language_for_beginners_al4_b_en.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -29,9 +29,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfBayesianDataAnalysis()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/bayesian_data_analysis_third_edition_13th_feb_2020.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/bayesian_data_analysis_third_edition_13th_feb_2020.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/bayesian_data_analysis_third_edition_13th_feb_2020.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/bayesian_data_analysis_third_edition_13th_feb_2020.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/bayesian_data_analysis_third_edition_13th_feb_2020.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/bayesian_data_analysis_third_edition_13th_feb_2020.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -45,9 +45,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfCodeAndFormula()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/code_and_formula.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/code_and_formula.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/code_and_formula.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/code_and_formula.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/code_and_formula.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/code_and_formula.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -58,9 +58,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfDeepLearning()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fundamentals_of_deep_learning_2014.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fundamentals_of_deep_learning_2014.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fundamentals_of_deep_learning_2014.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fundamentals_of_deep_learning_2014.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fundamentals_of_deep_learning_2014.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fundamentals_of_deep_learning_2014.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -74,9 +74,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfEmbeddedImages()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/embedded_images_tables.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/embedded_images_tables.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/embedded_images_tables.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/embedded_images_tables.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/embedded_images_tables.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/embedded_images_tables.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -88,9 +88,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfGoogleDoc()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/google_doc_document.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/google_doc_document.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/google_doc_document.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/google_doc_document.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/google_doc_document.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/google_doc_document.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -103,9 +103,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfLargeCiml()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/a_course_in_machine_learning_ciml_v0_9_all.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/a_course_in_machine_learning_ciml_v0_9_all.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/a_course_in_machine_learning_ciml_v0_9_all.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/a_course_in_machine_learning_ciml_v0_9_all.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/a_course_in_machine_learning_ciml_v0_9_all.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/a_course_in_machine_learning_ciml_v0_9_all.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -119,9 +119,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfNonEnglishGerman()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/5_level_paging_and_5_level_ept_intel_revision_1_1_may_2017.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/5_level_paging_and_5_level_ept_intel_revision_1_1_may_2017.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/5_level_paging_and_5_level_ept_intel_revision_1_1_may_2017.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/5_level_paging_and_5_level_ept_intel_revision_1_1_may_2017.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/5_level_paging_and_5_level_ept_intel_revision_1_1_may_2017.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/5_level_paging_and_5_level_ept_intel_revision_1_1_may_2017.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -135,9 +135,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfRightToLeft()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/right_to_left_01.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/right_to_left_01.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/right_to_left_01.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/right_to_left_01.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/right_to_left_01.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/right_to_left_01.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -150,9 +150,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfSimpleText()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -207,9 +207,9 @@ namespace Kreuzberg.E2E.Pdf {
         [SkippableFact]
         public void PdfTechnicalStatLearning()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/an_introduction_to_statistical_learning_with_applications_in_r_islr_sixth_printing.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/an_introduction_to_statistical_learning_with_applications_in_r_islr_sixth_printing.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/an_introduction_to_statistical_learning_with_applications_in_r_islr_sixth_printing.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/an_introduction_to_statistical_learning_with_applications_in_r_islr_sixth_printing.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/an_introduction_to_statistical_learning_with_applications_in_r_islr_sixth_printing.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/an_introduction_to_statistical_learning_with_applications_in_r_islr_sixth_printing.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);

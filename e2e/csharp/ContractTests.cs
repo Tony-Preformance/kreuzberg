@@ -13,9 +13,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public async Task ApiBatchBytesAsync()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var fileBytes = await File.ReadAllBytesAsync(documentPath);
@@ -30,9 +30,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ApiBatchBytesSync()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var fileBytes = File.ReadAllBytes(documentPath);
@@ -47,9 +47,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public async Task ApiBatchFileAsync()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var results = await KreuzbergClient.BatchExtractFilesAsync(new[] { documentPath }, config);
@@ -62,9 +62,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ApiBatchFileSync()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var results = KreuzbergClient.BatchExtractFilesSync(new[] { documentPath }, config);
@@ -77,9 +77,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public async Task ApiExtractBytesAsync()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var fileBytes = await File.ReadAllBytesAsync(documentPath);
@@ -93,9 +93,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ApiExtractBytesSync()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var fileBytes = File.ReadAllBytes(documentPath);
@@ -109,9 +109,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public async Task ApiExtractFileAsync()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = await KreuzbergClient.ExtractFileAsync(documentPath, config);
@@ -123,9 +123,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ApiExtractFileSync()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig(null);
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -137,9 +137,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ConfigChunking()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"chunking\":{\"max_chars\":500,\"max_overlap\":50}}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -151,9 +151,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ConfigForceOcr()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"force_ocr\":true}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -164,9 +164,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ConfigImages()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/embedded_images_tables.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/embedded_images_tables.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/embedded_images_tables.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/embedded_images_tables.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/embedded_images_tables.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/embedded_images_tables.pdf", true);
             var config = TestHelpers.BuildConfig("{\"images\":{\"extract_images\":true}}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -177,9 +177,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ConfigLanguageDetection()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"language_detection\":{\"enabled\":true}}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -191,9 +191,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ConfigPages()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/multi_page.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/multi_page.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/multi_page.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/multi_page.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/multi_page.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/multi_page.pdf", true);
             var config = TestHelpers.BuildConfig("{\"pages\":{\"end\":3,\"start\":1}}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -204,9 +204,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ConfigUseCacheFalse()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"use_cache\":false}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -217,9 +217,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void OutputFormatDjot()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"output_format\":\"djot\"}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -230,9 +230,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void OutputFormatHtml()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"output_format\":\"html\"}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -243,9 +243,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void OutputFormatMarkdown()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"output_format\":\"markdown\"}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -256,9 +256,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void OutputFormatPlain()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"output_format\":\"plain\"}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -269,9 +269,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ResultFormatElementBased()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"result_format\":\"element_based\"}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);
@@ -282,9 +282,9 @@ namespace Kreuzberg.E2E.Contract {
         [SkippableFact]
         public void ResultFormatUnified()
         {
-            TestHelpers.SkipIfLegacyOfficeDisabled("pdfs/fake_memo.pdf");
-            TestHelpers.SkipIfOfficeTestOnWindows("pdfs/fake_memo.pdf");
-            var documentPath = TestHelpers.EnsureDocument("pdfs/fake_memo.pdf", true);
+            TestHelpers.SkipIfLegacyOfficeDisabled("pdf/fake_memo.pdf");
+            TestHelpers.SkipIfOfficeTestOnWindows("pdf/fake_memo.pdf");
+            var documentPath = TestHelpers.EnsureDocument("pdf/fake_memo.pdf", true);
             var config = TestHelpers.BuildConfig("{\"result_format\":\"unified\"}");
 
             var result = KreuzbergClient.ExtractFileSync(documentPath, config);

@@ -190,7 +190,7 @@ output=$(docker run --rm \
   --security-opt no-new-privileges \
   -v "${TEST_DOCS_DIR}:/data:ro" \
   "$IMAGE_NAME" \
-  detect /data/pdfs/searchable.pdf 2>&1 || true)
+  detect /data/pdf/searchable.pdf 2>&1 || true)
 log_verbose "MIME detection output: $output"
 
 if echo "$output" | grep -qi "application/pdf"; then
@@ -224,7 +224,7 @@ output=$(docker run --rm \
   --memory 512m \
   -v "${TEST_DOCS_DIR}:/data:ro" \
   "$IMAGE_NAME" \
-  extract /data/pdfs/searchable.pdf 2>&1 || true)
+  extract /data/pdf/searchable.pdf 2>&1 || true)
 log_verbose "PDF extraction output (first 100 chars): ${output:0:100}"
 
 if [ ${#output} -gt 50 ]; then
@@ -240,7 +240,7 @@ output=$(docker run --rm \
   --security-opt no-new-privileges \
   -v "${TEST_DOCS_DIR}:/data:ro" \
   "$IMAGE_NAME" \
-  extract /data/office/document.docx 2>&1 || true)
+  extract /data/docx/extraction_test.docx 2>&1 || true)
 log_verbose "DOCX extraction output (first 100 chars): ${output:0:100}"
 
 docx_length=${#output}
@@ -257,7 +257,7 @@ output=$(docker run --rm \
   --security-opt no-new-privileges \
   -v "${TEST_DOCS_DIR}:/data:ro" \
   "$IMAGE_NAME" \
-  extract /data/web/simple_table.html 2>&1 || true)
+  extract /data/html/simple_table.html 2>&1 || true)
 log_verbose "HTML extraction output (first 100 chars): ${output:0:100}"
 
 if [ ${#output} -gt 10 ]; then
@@ -292,7 +292,7 @@ if [ "$VARIANT" = "full" ]; then
     --memory 1g \
     -v "${TEST_DOCS_DIR}:/data:ro" \
     "$IMAGE_NAME" \
-    extract /data/legacy_office/unit_test_lists.doc 2>&1 || true)
+    extract /data/doc/unit_test_lists.doc 2>&1 || true)
   log_verbose "LibreOffice extraction output (first 100 chars): ${output:0:100}"
 
   if [ ${#output} -gt 20 ]; then
@@ -308,8 +308,8 @@ if [ "$VARIANT" = "full" ]; then
   start_test "LibreOffice PPT extraction (legacy .ppt file)"
   container=$(random_container_name)
 
-  if [ -f "${TEST_DOCS_DIR}/legacy_office/test.ppt" ] || [ -f "${TEST_DOCS_DIR}/legacy_office/sample.ppt" ]; then
-    PPT_FILE=$(find "${TEST_DOCS_DIR}/legacy_office" -maxdepth 1 -name '*.ppt' -print | head -n1)
+  if [ -f "${TEST_DOCS_DIR}/doc/test.ppt" ] || [ -f "${TEST_DOCS_DIR}/doc/sample.ppt" ]; then
+    PPT_FILE=$(find "${TEST_DOCS_DIR}/doc" -maxdepth 1 -name '*.ppt' -print | head -n1)
 
     if [ -n "$PPT_FILE" ]; then
       PPT_BASENAME=$(basename "$PPT_FILE")
@@ -319,7 +319,7 @@ if [ "$VARIANT" = "full" ]; then
         --memory 1g \
         -v "${TEST_DOCS_DIR}:/data:ro" \
         "$IMAGE_NAME" \
-        extract "/data/legacy_office/${PPT_BASENAME}" 2>&1 || true)
+        extract "/data/doc/${PPT_BASENAME}" 2>&1 || true)
       log_verbose "LibreOffice PPT extraction output (first 100 chars): ${output:0:100}"
 
       if [ ${#output} -gt 10 ]; then
@@ -583,7 +583,7 @@ output=$(docker run --rm \
   --security-opt no-new-privileges \
   -v "${TEST_DOCS_DIR}:/data:ro" \
   "$IMAGE_NAME" \
-  batch /data/text/contract.txt /data/pdfs/searchable.pdf --format json 2>&1 || true)
+  batch /data/text/contract.txt /data/pdf/searchable.pdf --format json 2>&1 || true)
 
 log_verbose "Batch command output (first 200 chars): ${output:0:200}"
 

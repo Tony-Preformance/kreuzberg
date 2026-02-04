@@ -163,8 +163,8 @@ jobs:
           fi
 
           # Find a test document (use any .pdf in test_documents if available)
-          if [ -d "test_documents" ] && [ -n "$(find test_documents -name '*.pdf' -type f | head -1)" ]; then
-            TEST_DOC=$(find test_documents -name '*.pdf' -type f | head -1)
+          if [ -d "test_documents" ] && [ -n "$(find test_documents -name '*.pdf' -type f 2>/dev/null | head -1)" ]; then
+            TEST_DOC=$(find test_documents -name '*.pdf' -type f 2>/dev/null | head -1)
             echo "Testing CLI with: $TEST_DOC"
             $CLI extract "$TEST_DOC" || echo "⚠ CLI extraction test failed (may be expected)"
           else
