@@ -8,9 +8,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.3.12",
     "@vitest/coverage-v8": "^4.0.18",
-    "adm-zip": "^0.5.16",
-    "exceljs": "^4.4.0",
-    "madge": "^8.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
@@ -18,12 +15,7 @@
   "pnpm": {
     "overrides": {
       "glob": "10.5.0"
-    },
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "workerd"
-    ]
+    }
   },
   "version": "4.2.10"
 }
