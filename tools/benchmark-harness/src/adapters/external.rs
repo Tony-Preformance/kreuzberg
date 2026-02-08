@@ -146,7 +146,7 @@ pub fn create_docling_adapter(ocr_enabled: bool) -> Result<SubprocessAdapter> {
     let supported_formats = get_supported_formats("docling");
     Ok(
         SubprocessAdapter::with_persistent_mode("docling", command, args, vec![], supported_formats)
-            .with_max_timeout(Duration::from_secs(240)),
+            .with_max_timeout(Duration::from_secs(180)),
     )
 }
 
@@ -164,7 +164,7 @@ pub fn create_unstructured_adapter(ocr_enabled: bool) -> Result<SubprocessAdapte
     let supported_formats = get_supported_formats("unstructured");
     Ok(
         SubprocessAdapter::with_persistent_mode("unstructured", command, args, vec![], supported_formats)
-            .with_max_timeout(Duration::from_secs(240)),
+            .with_max_timeout(Duration::from_secs(180)),
     )
 }
 
@@ -179,7 +179,7 @@ pub fn create_markitdown_adapter(ocr_enabled: bool) -> Result<SubprocessAdapter>
     let supported_formats = get_supported_formats("markitdown");
     Ok(
         SubprocessAdapter::with_persistent_mode("markitdown", command, args, vec![], supported_formats)
-            .with_max_timeout(Duration::from_secs(240)),
+            .with_max_timeout(Duration::from_secs(180)),
     )
 }
 
@@ -198,7 +198,7 @@ pub fn create_pandoc_adapter() -> Result<SubprocessAdapter> {
     let supported_formats = get_supported_formats("pandoc");
     Ok(
         SubprocessAdapter::new("pandoc", command, args, vec![], supported_formats)
-            .with_max_timeout(Duration::from_secs(240)),
+            .with_max_timeout(Duration::from_secs(180)),
     )
 }
 
@@ -326,7 +326,7 @@ pub fn create_tika_adapter(ocr_enabled: bool) -> Result<SubprocessAdapter> {
     let supported_formats = get_supported_formats("tika");
     Ok(
         SubprocessAdapter::with_persistent_mode("tika", command, args, vec![], supported_formats)
-            .with_max_timeout(Duration::from_secs(240)),
+            .with_max_timeout(Duration::from_secs(180)),
     )
 }
 
@@ -341,7 +341,7 @@ pub fn create_pymupdf4llm_adapter(ocr_enabled: bool) -> Result<SubprocessAdapter
     let supported_formats = get_supported_formats("pymupdf4llm");
     Ok(
         SubprocessAdapter::with_persistent_mode("pymupdf4llm", command, args, vec![], supported_formats)
-            .with_max_timeout(Duration::from_secs(240)),
+            .with_max_timeout(Duration::from_secs(180)),
     )
 }
 
@@ -356,7 +356,7 @@ pub fn create_pdfplumber_adapter(ocr_enabled: bool) -> Result<SubprocessAdapter>
     let supported_formats = get_supported_formats("pdfplumber");
     Ok(
         SubprocessAdapter::with_persistent_mode("pdfplumber", command, args, vec![], supported_formats)
-            .with_max_timeout(Duration::from_secs(240)),
+            .with_max_timeout(Duration::from_secs(180)),
     )
 }
 
@@ -374,7 +374,7 @@ pub fn create_mineru_adapter(ocr_enabled: bool) -> Result<SubprocessAdapter> {
     let supported_formats = get_supported_formats("mineru");
     Ok(
         SubprocessAdapter::with_persistent_mode("mineru", command, args, vec![], supported_formats)
-            .with_max_timeout(Duration::from_secs(240)),
+            .with_max_timeout(Duration::from_secs(180)),
     )
 }
 

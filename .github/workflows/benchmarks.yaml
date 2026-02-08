@@ -1020,7 +1020,7 @@ jobs:
           retention-days: 30
 
   bench-markitdown:
-    name: markitdown (${{ matrix.mode }})
+    name: markitdown (${{ matrix.mode }}, shard ${{ matrix.shard }}/3)
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -1030,6 +1030,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [single-file, batch]
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -1061,13 +1062,14 @@ jobs:
           ITERATIONS: ${{ env.ITERATIONS }}
           TIMEOUT: ${{ github.event.inputs.timeout }}
           OCR_ENABLED: "false"
+          SHARD: ${{ matrix.shard }}/3
         run: scripts/benchmarks/run-benchmark.sh
 
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmarks-markitdown-${{ matrix.mode }}-${{ github.run_id }}
+          name: benchmarks-markitdown-${{ matrix.mode }}-shard${{ matrix.shard }}-${{ github.run_id }}
           path: benchmark-results/
           retention-days: 30
 
@@ -1130,7 +1132,7 @@ jobs:
           retention-days: 30
 
   bench-unstructured:
-    name: unstructured (${{ matrix.mode }}, shard ${{ matrix.shard }}/3)
+    name: unstructured (${{ matrix.mode }}, shard ${{ matrix.shard }}/4)
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -1140,7 +1142,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [single-file, batch]
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -1176,7 +1178,7 @@ jobs:
           MODE: ${{ matrix.mode }}
           ITERATIONS: ${{ env.ITERATIONS }}
           TIMEOUT: ${{ github.event.inputs.timeout }}
-          SHARD: ${{ matrix.shard }}/3
+          SHARD: ${{ matrix.shard }}/4
         run: scripts/benchmarks/run-benchmark.sh
 
       - name: Upload artifacts
@@ -1241,7 +1243,7 @@ jobs:
           retention-days: 30
 
   bench-pymupdf4llm:
-    name: pymupdf4llm (${{ matrix.mode }})
+    name: pymupdf4llm (${{ matrix.mode }}, shard ${{ matrix.shard }}/3)
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -1251,6 +1253,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [single-file, batch]
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -1286,13 +1289,14 @@ jobs:
           ITERATIONS: ${{ env.ITERATIONS }}
           TIMEOUT: ${{ github.event.inputs.timeout }}
           TESSDATA_PREFIX: /usr/share/tesseract-ocr/5/tessdata
+          SHARD: ${{ matrix.shard }}/3
         run: scripts/benchmarks/run-benchmark.sh
 
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmarks-pymupdf4llm-${{ matrix.mode }}-${{ github.run_id }}
+          name: benchmarks-pymupdf4llm-${{ matrix.mode }}-shard${{ matrix.shard }}-${{ github.run_id }}
           path: benchmark-results/
           retention-days: 30
 
@@ -1349,7 +1353,7 @@ jobs:
           retention-days: 30
 
   bench-mineru:
-    name: mineru (${{ matrix.mode }})
+    name: mineru (${{ matrix.mode }}, shard ${{ matrix.shard }}/3)
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -1359,6 +1363,7 @@ jobs:
       fail-fast: false
       matrix:
         mode: [single-file, batch]
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -1389,13 +1394,14 @@ jobs:
           MODE: ${{ matrix.mode }}
           ITERATIONS: ${{ env.ITERATIONS }}
           TIMEOUT: ${{ github.event.inputs.timeout }}
+          SHARD: ${{ matrix.shard }}/3
         run: scripts/benchmarks/run-benchmark.sh
 
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmarks-mineru-${{ matrix.mode }}-${{ github.run_id }}
+          name: benchmarks-mineru-${{ matrix.mode }}-shard${{ matrix.shard }}-${{ github.run_id }}
           path: benchmark-results/
           retention-days: 30
 
@@ -1403,7 +1409,7 @@ jobs:
     name: Aggregate & Release Results
     needs: [setup, bench-native, bench-python, bench-node, bench-wasm, bench-ruby, bench-go, bench-java, bench-csharp, bench-elixir, bench-php, bench-docling, bench-markitdown, bench-pandoc, bench-unstructured, bench-tika, bench-pymupdf4llm, bench-pdfplumber, bench-mineru]
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') }}
+    if: ${{ always() && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') }}
     permissions:
       contents: write
     steps:
