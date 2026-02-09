@@ -131,7 +131,7 @@ def generate_vendor_cargo_toml(repo_root: Path, workspace_deps: dict[str, object
     deps_str = "\n".join(deps_lines)
 
     vendor_toml = f'''[workspace]
-members = ["kreuzberg", "kreuzberg-ffi", "kreuzberg-tesseract"]
+members = ["kreuzberg", "kreuzberg-ffi", "kreuzberg-tesseract", "kreuzberg-paddle-ocr"]
 
 [workspace.package]
 version = "{core_version}"
@@ -207,7 +207,7 @@ def main() -> None:
 
     print("Cleaned build artifacts")
 
-    for crate_dir in ["kreuzberg", "kreuzberg-ffi", "kreuzberg-tesseract"]:
+    for crate_dir in ["kreuzberg", "kreuzberg-ffi", "kreuzberg-tesseract", "kreuzberg-paddle-ocr"]:
         crate_toml = vendor_base / crate_dir / "Cargo.toml"
         if crate_toml.exists():
             with open(crate_toml, "r") as f:

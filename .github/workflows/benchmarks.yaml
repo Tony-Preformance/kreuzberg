@@ -501,7 +501,7 @@ jobs:
           echo "LD_LIBRARY_PATH=${{ github.workspace }}/target/release:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Vendor kreuzberg core for Ruby
-        run: scripts/ci/ruby/vendor-kreuzberg-core.sh
+        run: python3 scripts/ci/ruby/vendor-kreuzberg-core.py
 
       - name: Build Ruby native gem
         env:

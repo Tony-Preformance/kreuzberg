@@ -1182,7 +1182,7 @@ jobs:
 
       - name: Vendor kreuzberg core crate
         shell: bash
-        run: scripts/ci/ruby/vendor-kreuzberg-core.sh
+        run: python3 scripts/ci/ruby/vendor-kreuzberg-core.py
 
       - name: Ensure Ruby bundle config (Unix)
         if: runner.os != 'Windows'
@@ -2570,7 +2570,7 @@ jobs:
 
       - name: Vendor kreuzberg core crate
         shell: bash
-        run: scripts/ci/ruby/vendor-kreuzberg-core.sh
+        run: python3 scripts/ci/ruby/vendor-kreuzberg-core.py
 
       - name: Rebuild gems from source
         shell: bash

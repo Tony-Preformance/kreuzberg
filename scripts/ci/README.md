@@ -86,7 +86,7 @@ setup_all_library_paths
 ### Ruby (`ruby/`)
 - `install-ruby-deps.sh` - Install bundle dependencies (Unix)
 - `install-ruby-deps.ps1` - Install bundle dependencies (Windows)
-- `vendor-kreuzberg-core.sh` - Vendor core crate for packaging
+- `vendor-kreuzberg-core.py` - Vendor core crate for packaging
 - `configure-bindgen-windows.ps1` - Configure bindgen headers (Windows)
 - `configure-tesseract-windows.ps1` - Configure Tesseract (Windows)
 - `build-gem.sh` - Build Ruby gem

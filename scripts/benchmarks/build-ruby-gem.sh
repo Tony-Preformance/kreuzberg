@@ -34,7 +34,7 @@ echo "  DYLD_LIBRARY_PATH: ${DYLD_LIBRARY_PATH:-}"
 echo ""
 
 echo "Vendoring kreuzberg core..."
-bash "$REPO_ROOT/scripts/ci/ruby/vendor-kreuzberg-core.sh"
+python3 "$REPO_ROOT/scripts/ci/ruby/vendor-kreuzberg-core.py"
 echo ""
 
 cd "$REPO_ROOT/packages/ruby"

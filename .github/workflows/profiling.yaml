@@ -761,7 +761,7 @@ jobs:
           ort-version: ${{ env.ORT_VERSION }}
 
       - name: Vendor kreuzberg core for Ruby
-        run: scripts/ci/ruby/vendor-kreuzberg-core.sh
+        run: python3 scripts/ci/ruby/vendor-kreuzberg-core.py
 
       - name: Install Task
         uses: ./.github/actions/install-task
@@ -861,7 +861,7 @@ jobs:
           ort-version: ${{ env.ORT_VERSION }}
 
       - name: Vendor kreuzberg core for Ruby
-        run: scripts/ci/ruby/vendor-kreuzberg-core.sh
+        run: python3 scripts/ci/ruby/vendor-kreuzberg-core.py
 
       - name: Install Task
         uses: ./.github/actions/install-task
