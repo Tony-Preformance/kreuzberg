@@ -132,6 +132,12 @@ mod build_tesseract {
     /// headers shadow glibc's. Unlike libc++ (which uses wrapper `<stddef.h>` etc.
     /// with `#include_next`), libstdc++ includes C headers directly from `<cstdlib>`
     /// etc., so `-isystem` shadowing works correctly without `-nostdinc`.
+    ///
+    /// Additionally, some glibc-specific C++ platform headers (e.g. `os_defines.h`,
+    /// `libc-header-start.h`, `floatn.h`) still get picked up from gcc's built-in
+    /// include paths. These headers use `__GLIBC_PREREQ()` and `__GLIBC_USE()` macros
+    /// that musl doesn't define. We define these as no-op macros evaluating to 0 so
+    /// glibc-guarded code paths are correctly skipped.
     #[cfg(unix)]
     fn create_musl_cxx_wrapper(target: &str) -> Option<String> {
         use std::os::unix::fs::PermissionsExt;
@@ -158,7 +164,12 @@ mod build_tesseract {
             "#!/bin/sh\n\
              # Auto-generated musl-g++ wrapper for cross-compilation.\n\
              # Prepends musl C headers so they shadow glibc's.\n\
-             exec g++ -isystem \"{musl_include}\" \"$@\"\n"
+             # Defines glibc compat macros as 0 for musl -- handles os_defines.h,\n\
+             # libc-header-start.h, floatn.h etc. that use __GLIBC_PREREQ().\n\
+             exec g++ -isystem \"{musl_include}\" \\\n\
+               '-D__GLIBC_PREREQ(maj,min)=0' \\\n\
+               '-D__GLIBC_USE(F)=0' \\\n\
+               \"$@\"\n"
         );
 
         fs::write(&wrapper_path, &wrapper_content).ok()?;
