@@ -107,7 +107,12 @@ impl CrnnNet {
         let content = std::fs::read_to_string(path)?;
         let mut keys = Vec::new();
 
+        // Prepend CTC blank token and append space token to match get_keys() layout.
+        // The ONNX model's output index 0 = blank, last index = space.
+        keys.push("#".to_string());
         keys.extend(content.split('\n').map(|s| s.to_string()));
+        keys.push(" ".to_string());
+
         self.keys = keys;
         Ok(())
     }
@@ -221,5 +226,58 @@ impl CrnnNet {
             0.0
         };
         Ok(text_line)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_score_to_text_line_skips_blank_index() {
+        // keys[0] = "#" (CTC blank), keys[1] = "a", keys[2] = "b"
+        let keys = vec!["#".to_string(), "a".to_string(), "b".to_string()];
+        // 3 timesteps, 3 classes each. Simulate: blank, "a", "b"
+        let output = vec![
+            1.0, 0.0, 0.0, // timestep 0: max at index 0 (blank) -> skip
+            0.0, 0.9, 0.1, // timestep 1: max at index 1 ("a")
+            0.0, 0.1, 0.8, // timestep 2: max at index 2 ("b")
+        ];
+        let result = CrnnNet::score_to_text_line(&output, 3, 3, &keys).unwrap();
+        assert_eq!(result.text, "ab");
+    }
+
+    #[test]
+    fn test_score_to_text_line_deduplicates_consecutive() {
+        let keys = vec!["#".to_string(), "h".to_string(), "i".to_string()];
+        // 4 timesteps: "h", "h", "i", "i" -> should deduplicate to "hi"
+        let output = vec![
+            0.0, 0.9, 0.0, // "h"
+            0.0, 0.8, 0.0, // "h" again (same index, skip)
+            0.0, 0.0, 0.9, // "i"
+            0.0, 0.0, 0.8, // "i" again (same index, skip)
+        ];
+        let result = CrnnNet::score_to_text_line(&output, 4, 3, &keys).unwrap();
+        assert_eq!(result.text, "hi");
+    }
+
+    #[test]
+    fn test_read_keys_from_file_has_blank_and_space() {
+        let dir = std::env::temp_dir().join("kreuzberg_test_dict");
+        std::fs::create_dir_all(&dir).unwrap();
+        let dict_path = dir.join("test_dict.txt");
+        std::fs::write(&dict_path, "a\nb\nc").unwrap();
+
+        let mut net = CrnnNet::new();
+        net.read_keys_from_file(dict_path.to_str().unwrap()).unwrap();
+
+        // Should be: ["#", "a", "b", "c", " "]
+        assert_eq!(net.keys[0], "#");
+        assert_eq!(net.keys[1], "a");
+        assert_eq!(net.keys[2], "b");
+        assert_eq!(net.keys[3], "c");
+        assert_eq!(net.keys[net.keys.len() - 1], " ");
+
+        std::fs::remove_dir_all(&dir).ok();
     }
 }

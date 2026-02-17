@@ -37,7 +37,8 @@ pub struct PaddleOcrConfig {
     /// Optional custom cache directory for model files
     pub cache_dir: Option<PathBuf>,
 
-    /// Enable angle classification for rotated text (default: true)
+    /// Enable angle classification for rotated text (default: false).
+    /// Can misfire on short text regions, rotating crops incorrectly before recognition.
     pub use_angle_cls: bool,
 
     /// Enable table structure detection (default: false)
@@ -62,6 +63,10 @@ pub struct PaddleOcrConfig {
     /// Batch size for recognition inference (default: 6)
     /// Number of text regions to process simultaneously
     pub rec_batch_num: u32,
+
+    /// Padding in pixels added around the image before detection (default: 10).
+    /// Large values can include surrounding content like table gridlines.
+    pub padding: u32,
 }
 
 impl PaddleOcrConfig {
@@ -82,13 +87,14 @@ impl PaddleOcrConfig {
         Self {
             language: language.into(),
             cache_dir: None,
-            use_angle_cls: true,
+            use_angle_cls: false,
             enable_table_detection: false,
             det_db_thresh: 0.3,
             det_db_box_thresh: 0.5,
             det_db_unclip_ratio: 1.6,
             det_limit_side_len: 960,
             rec_batch_num: 6,
+            padding: 10,
         }
     }
 
@@ -188,6 +194,16 @@ impl PaddleOcrConfig {
     /// * `batch_size` - Number of text regions to process simultaneously
     pub fn with_rec_batch_num(mut self, batch_size: u32) -> Self {
         self.rec_batch_num = batch_size.clamp(1, 64);
+        self
+    }
+
+    /// Sets padding in pixels added around images before detection.
+    ///
+    /// # Arguments
+    ///
+    /// * `padding` - Padding in pixels (0-100)
+    pub fn with_padding(mut self, padding: u32) -> Self {
+        self.padding = padding.clamp(0, 100);
         self
     }
 
@@ -383,8 +399,9 @@ mod tests {
     fn test_new_config() {
         let config = PaddleOcrConfig::new("en");
         assert_eq!(config.language, "en");
-        assert!(config.use_angle_cls);
+        assert!(!config.use_angle_cls);
         assert!(!config.enable_table_detection);
+        assert_eq!(config.padding, 10);
     }
 
     #[test]
@@ -396,21 +413,24 @@ mod tests {
         assert_eq!(config.det_db_unclip_ratio, 1.6);
         assert_eq!(config.det_limit_side_len, 960);
         assert_eq!(config.rec_batch_num, 6);
+        assert_eq!(config.padding, 10);
     }
 
     #[test]
     fn test_builder_pattern() {
         let config = PaddleOcrConfig::new("ch")
-            .with_angle_cls(false)
+            .with_angle_cls(true)
             .with_table_detection(true)
             .with_det_db_thresh(0.4)
-            .with_rec_batch_num(12);
+            .with_rec_batch_num(12)
+            .with_padding(25);
 
         assert_eq!(config.language, "ch");
-        assert!(!config.use_angle_cls);
+        assert!(config.use_angle_cls);
         assert!(config.enable_table_detection);
         assert_eq!(config.det_db_thresh, 0.4);
         assert_eq!(config.rec_batch_num, 12);
+        assert_eq!(config.padding, 25);
     }
 
     #[test]
