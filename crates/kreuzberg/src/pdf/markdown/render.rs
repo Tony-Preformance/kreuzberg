@@ -1,0 +1,384 @@
+//! Markdown rendering for paragraphs and lines with inline bold/italic markup.
+
+use crate::pdf::hierarchy::SegmentData;
+
+use super::lines::needs_space_between;
+use super::types::{PdfLine, PdfParagraph};
+
+/// Render a single paragraph to the output string.
+pub(super) fn render_paragraph_to_output(para: &PdfParagraph, output: &mut String) {
+    if let Some(level) = para.heading_level {
+        let prefix = "#".repeat(level as usize);
+        let text = join_line_texts(&para.lines);
+        output.push_str(&prefix);
+        output.push(' ');
+        output.push_str(&text);
+    } else if para.is_list_item {
+        for (line_idx, line) in para.lines.iter().enumerate() {
+            if line_idx > 0 {
+                output.push('\n');
+            }
+            let text = render_line_with_inline_markup(line);
+            output.push_str(&text);
+        }
+    } else {
+        let text = render_paragraph_with_inline_markup(para);
+        output.push_str(&text);
+    }
+}
+
+/// Inject image placeholders into markdown based on page numbers.
+pub fn inject_image_placeholders(markdown: &str, images: &[crate::types::ExtractedImage]) -> String {
+    if images.is_empty() {
+        return markdown.to_string();
+    }
+
+    let mut images_by_page: std::collections::BTreeMap<usize, Vec<(usize, &crate::types::ExtractedImage)>> =
+        std::collections::BTreeMap::new();
+    for (idx, img) in images.iter().enumerate() {
+        let page = img.page_number.unwrap_or(0);
+        images_by_page.entry(page).or_default().push((idx, img));
+    }
+
+    if images_by_page.keys().all(|&k| k == 0) {
+        let mut result = markdown.to_string();
+        for img in images {
+            let ii = img.image_index;
+            result.push_str(&format!("\n\n![Image {}](embedded:i{})", ii, ii));
+            if let Some(ref ocr) = img.ocr_result {
+                let text = ocr.content.trim();
+                if !text.is_empty() {
+                    result.push_str(&format!("\n> *Image text: {}*", text));
+                }
+            }
+        }
+        return result;
+    }
+
+    let mut result = markdown.to_string();
+
+    for (&page, page_images) in &images_by_page {
+        for (_idx, img) in page_images {
+            let ii = img.image_index;
+            let label = if page > 0 {
+                format!("![Image {} (page {})](embedded:p{}_i{})", ii, page, page, ii)
+            } else {
+                format!("![Image {}](embedded:i{})", ii, ii)
+            };
+            result.push_str("\n\n");
+            result.push_str(&label);
+            if let Some(ref ocr) = img.ocr_result {
+                let text = ocr.content.trim();
+                if !text.is_empty() {
+                    result.push_str(&format!("\n> *Image text: {}*", text));
+                }
+            }
+        }
+    }
+
+    result
+}
+
+/// Join lines into a single string (no inline markup).
+fn join_line_texts(lines: &[PdfLine]) -> String {
+    let all_words: Vec<&str> = lines
+        .iter()
+        .flat_map(|l| l.segments.iter().flat_map(|s| s.text.split_whitespace()))
+        .collect();
+    join_texts_cjk_aware(&all_words)
+}
+
+/// Join text chunks with spaces, but omit the space when both adjacent chunks are CJK.
+fn join_texts_cjk_aware(texts: &[&str]) -> String {
+    if texts.is_empty() {
+        return String::new();
+    }
+    let mut result = String::from(texts[0]);
+    for pair in texts.windows(2) {
+        if needs_space_between(pair[0], pair[1]) {
+            result.push(' ');
+        }
+        result.push_str(pair[1]);
+    }
+    result
+}
+
+/// Render a single line with bold/italic inline markup.
+fn render_line_with_inline_markup(line: &PdfLine) -> String {
+    render_segments_with_markup(&line.segments)
+}
+
+/// Render an entire body paragraph with inline bold/italic markup.
+fn render_paragraph_with_inline_markup(para: &PdfParagraph) -> String {
+    let all_segments: Vec<&SegmentData> = para.lines.iter().flat_map(|l| l.segments.iter()).collect();
+    render_segment_refs_with_markup(&all_segments)
+}
+
+/// Render segments with run-length-encoded bold/italic markup.
+fn render_segments_with_markup(segments: &[SegmentData]) -> String {
+    let refs: Vec<&SegmentData> = segments.iter().collect();
+    render_segment_refs_with_markup(&refs)
+}
+
+/// Core inline markup renderer working on segment references.
+///
+/// Groups consecutive segments sharing the same bold/italic state, wraps groups
+/// in `**...**` or `*...*` as appropriate.
+fn render_segment_refs_with_markup(segments: &[&SegmentData]) -> String {
+    if segments.is_empty() {
+        return String::new();
+    }
+
+    let mut result = String::new();
+    let mut i = 0;
+
+    while i < segments.len() {
+        let bold = segments[i].is_bold;
+        let italic = segments[i].is_italic;
+
+        // Find the run of segments with the same formatting
+        let run_start = i;
+        while i < segments.len() && segments[i].is_bold == bold && segments[i].is_italic == italic {
+            i += 1;
+        }
+
+        // Split each segment's text into words for proper CJK-aware joining
+        let mut run_words: Vec<&str> = Vec::new();
+        for seg in &segments[run_start..i] {
+            for word in seg.text.split_whitespace() {
+                run_words.push(word);
+            }
+        }
+        let run_text = join_texts_cjk_aware(&run_words);
+
+        if !result.is_empty() {
+            let prev_last = segments[run_start - 1]
+                .text
+                .split_whitespace()
+                .next_back()
+                .unwrap_or("");
+            let next_first = segments[run_start].text.split_whitespace().next().unwrap_or("");
+            if needs_space_between(prev_last, next_first) {
+                result.push(' ');
+            }
+        }
+
+        match (bold, italic) {
+            (true, true) => {
+                result.push_str("***");
+                result.push_str(&run_text);
+                result.push_str("***");
+            }
+            (true, false) => {
+                result.push_str("**");
+                result.push_str(&run_text);
+                result.push_str("**");
+            }
+            (false, true) => {
+                result.push('*');
+                result.push_str(&run_text);
+                result.push('*');
+            }
+            (false, false) => {
+                result.push_str(&run_text);
+            }
+        }
+    }
+
+    result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_segment(text: &str, is_bold: bool, is_italic: bool) -> SegmentData {
+        SegmentData {
+            text: text.to_string(),
+            x: 0.0,
+            y: 0.0,
+            width: 0.0,
+            height: 12.0,
+            font_size: 12.0,
+            is_bold,
+            is_italic,
+            baseline_y: 700.0,
+        }
+    }
+
+    fn make_line(segments: Vec<SegmentData>) -> PdfLine {
+        PdfLine {
+            segments,
+            baseline_y: 700.0,
+            y_top: 688.0,
+            y_bottom: 700.0,
+            dominant_font_size: 12.0,
+            is_bold: false,
+            is_italic: false,
+        }
+    }
+
+    #[test]
+    fn test_render_plain_paragraph() {
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![
+                make_segment("Hello", false, false),
+                make_segment("world", false, false),
+            ])],
+            dominant_font_size: 12.0,
+            heading_level: None,
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "Hello world");
+    }
+
+    #[test]
+    fn test_render_heading() {
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![make_segment("Title", false, false)])],
+            dominant_font_size: 18.0,
+            heading_level: Some(2),
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "## Title");
+    }
+
+    #[test]
+    fn test_render_bold_markup() {
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![
+                make_segment("bold", true, false),
+                make_segment("text", true, false),
+            ])],
+            dominant_font_size: 12.0,
+            heading_level: None,
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "**bold text**");
+    }
+
+    #[test]
+    fn test_render_italic_markup() {
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![make_segment("italic", false, true)])],
+            dominant_font_size: 12.0,
+            heading_level: None,
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "*italic*");
+    }
+
+    #[test]
+    fn test_render_bold_italic_markup() {
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![make_segment("both", true, true)])],
+            dominant_font_size: 12.0,
+            heading_level: None,
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "***both***");
+    }
+
+    #[test]
+    fn test_render_mixed_formatting() {
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![
+                make_segment("normal", false, false),
+                make_segment("bold", true, false),
+                make_segment("normal2", false, false),
+            ])],
+            dominant_font_size: 12.0,
+            heading_level: None,
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "normal **bold** normal2");
+    }
+
+    #[test]
+    fn test_inject_image_placeholders_empty() {
+        let result = inject_image_placeholders("Hello", &[]);
+        assert_eq!(result, "Hello");
+    }
+
+    #[test]
+    fn test_render_multiword_segments_no_double_space() {
+        // Segments with trailing whitespace should not produce double spaces
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![
+                make_segment("hello ", false, false),
+                make_segment("world", false, false),
+            ])],
+            dominant_font_size: 12.0,
+            heading_level: None,
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "hello world");
+    }
+
+    #[test]
+    fn test_render_mixed_formatting_multiword() {
+        // Multi-word segments with formatting transitions
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![
+                make_segment("normal text", false, false),
+                make_segment("bold text", true, false),
+                make_segment("more normal", false, false),
+            ])],
+            dominant_font_size: 12.0,
+            heading_level: None,
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "normal text **bold text** more normal");
+    }
+
+    #[test]
+    fn test_heading_multiword_segments() {
+        // Heading with multi-word segments should join words correctly
+        let para = PdfParagraph {
+            lines: vec![make_line(vec![
+                make_segment("Chapter One", false, false),
+                make_segment("Title", false, false),
+            ])],
+            dominant_font_size: 18.0,
+            heading_level: Some(1),
+            is_bold: false,
+            is_italic: false,
+            is_list_item: false,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        assert_eq!(output, "# Chapter One Title");
+    }
+}

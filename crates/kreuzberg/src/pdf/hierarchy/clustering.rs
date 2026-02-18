@@ -168,17 +168,23 @@ pub fn cluster_font_sizes(blocks: &[TextBlock], k: usize) -> Result<Vec<FontSize
 ///
 /// Instead of naively mapping the largest font size to H1, this function
 /// identifies the cluster with the most members as body text. Only clusters
-/// with fewer members AND larger font size than body become headings.
+/// with fewer members AND sufficiently larger font size than body become headings.
 ///
 /// # Arguments
 ///
 /// * `clusters` - Slice of FontSizeCluster objects (sorted by centroid descending)
+/// * `min_heading_ratio` - Minimum ratio of heading centroid to body centroid (e.g. 1.15)
+/// * `min_heading_gap` - Minimum absolute font-size difference in points (e.g. 1.5)
 ///
 /// # Returns
 ///
 /// Vector of tuples `(centroid, heading_level)` where `None` means body text
 /// and `Some(1..=6)` means H1-H6. Sorted by centroid descending.
-pub fn assign_heading_levels_smart(clusters: &[FontSizeCluster]) -> Vec<(f32, Option<u8>)> {
+pub fn assign_heading_levels_smart(
+    clusters: &[FontSizeCluster],
+    min_heading_ratio: f32,
+    min_heading_gap: f32,
+) -> Vec<(f32, Option<u8>)> {
     if clusters.is_empty() {
         return Vec::new();
     }
@@ -198,11 +204,16 @@ pub fn assign_heading_levels_smart(clusters: &[FontSizeCluster]) -> Vec<(f32, Op
 
     let body_centroid = clusters[body_idx].centroid;
 
-    // Collect heading candidates: clusters with larger font size than body AND fewer members
+    // Collect heading candidates: clusters with sufficiently larger font size than body
+    // Must pass both ratio gate AND absolute gap gate
+    let min_heading_size = body_centroid * min_heading_ratio;
+    let min_heading_abs = body_centroid + min_heading_gap;
+    let heading_threshold = min_heading_size.max(min_heading_abs);
+
     let mut heading_candidates: Vec<(usize, f32)> = clusters
         .iter()
         .enumerate()
-        .filter(|(i, c)| *i != body_idx && c.centroid > body_centroid)
+        .filter(|(i, c)| *i != body_idx && c.centroid >= heading_threshold)
         .map(|(i, c)| (i, c.centroid))
         .collect();
 

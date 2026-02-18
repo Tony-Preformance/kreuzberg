@@ -44,9 +44,7 @@ pub fn detect_list_items(text: &str) -> Vec<ListItemMetadata> {
             let rest = &text.as_bytes()[byte_end..];
             if rest.starts_with(b"\r\n") {
                 byte_end + 2
-            } else if rest.starts_with(b"\n") {
-                byte_end + 1
-            } else if rest.starts_with(b"\r") {
+            } else if rest.starts_with(b"\n") || rest.starts_with(b"\r") {
                 byte_end + 1
             } else {
                 byte_end

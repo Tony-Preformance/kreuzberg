@@ -61,7 +61,7 @@ impl Default for HierarchyConfig {
     fn default() -> Self {
         Self {
             enabled: true,
-            k_clusters: 6,
+            k_clusters: 3,
             include_bbox: true,
             ocr_coverage_threshold: None,
         }
@@ -73,7 +73,7 @@ fn default_true() -> bool {
 }
 
 fn default_k_clusters() -> usize {
-    6
+    3
 }
 
 fn default_ocr_coverage_threshold() -> Option<f32> {
@@ -88,7 +88,7 @@ mod tests {
         use super::*;
         let config = HierarchyConfig::default();
         assert!(config.enabled);
-        assert_eq!(config.k_clusters, 6);
+        assert_eq!(config.k_clusters, 3);
         assert!(config.include_bbox);
         assert!(config.ocr_coverage_threshold.is_none());
     }
