@@ -250,8 +250,7 @@ fn normalize_text_encoding(text: &str) -> String {
             '\u{00AD}' => {
                 // Soft hyphen at end of text (or before whitespace): convert to regular
                 // hyphen so rendering code can rejoin word fragments.
-                let at_end = i == chars.len() - 1
-                    || chars.get(i + 1).is_some_and(|c| c.is_whitespace());
+                let at_end = i == chars.len() - 1 || chars.get(i + 1).is_some_and(|c| c.is_whitespace());
                 if at_end {
                     result.push('-');
                 }

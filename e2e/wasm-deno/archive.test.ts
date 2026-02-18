@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("archive_sevenz_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("archives/documents.7z");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("archives/documents.7z");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-7z-compressed", config);
 	} catch (error) {
@@ -30,10 +30,10 @@ Deno.test("archive_sevenz_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("archive_tar_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("archives/documents.tar");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("archives/documents.tar");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-tar", config);
 	} catch (error) {
@@ -50,10 +50,10 @@ Deno.test("archive_tar_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("archive_zip_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("archives/documents.zip");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("archives/documents.zip");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/zip", config);
 	} catch (error) {

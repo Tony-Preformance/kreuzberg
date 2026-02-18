@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("pdf_assembly_technical", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/assembly_language_for_beginners_al4_b_en.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/assembly_language_for_beginners_al4_b_en.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -32,10 +32,10 @@ Deno.test("pdf_assembly_technical", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("pdf_bayesian_data_analysis", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/bayesian_data_analysis_third_edition_13th_feb_2020.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/bayesian_data_analysis_third_edition_13th_feb_2020.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -54,10 +54,10 @@ Deno.test("pdf_bayesian_data_analysis", { permissions: { read: true } }, async (
 });
 
 Deno.test("pdf_bounding_boxes", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/tiny.pdf");
 	const config = buildConfig({ images: { extract_images: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/tiny.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -76,10 +76,10 @@ Deno.test("pdf_bounding_boxes", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_code_and_formula", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/code_and_formula.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/code_and_formula.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -96,10 +96,10 @@ Deno.test("pdf_code_and_formula", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_deep_learning", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fundamentals_of_deep_learning_2014.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fundamentals_of_deep_learning_2014.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -118,10 +118,10 @@ Deno.test("pdf_deep_learning", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_embedded_images", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/embedded_images_tables.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/embedded_images_tables.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -139,10 +139,10 @@ Deno.test("pdf_embedded_images", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_google_doc", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/google_doc_document.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/google_doc_document.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -160,10 +160,10 @@ Deno.test("pdf_google_doc", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_large_ciml", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/a_course_in_machine_learning_ciml_v0_9_all.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/a_course_in_machine_learning_ciml_v0_9_all.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -182,10 +182,10 @@ Deno.test("pdf_large_ciml", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_non_english_german", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/5_level_paging_and_5_level_ept_intel_revision_1_1_may_2017.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/5_level_paging_and_5_level_ept_intel_revision_1_1_may_2017.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -204,10 +204,10 @@ Deno.test("pdf_non_english_german", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("pdf_right_to_left", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/right_to_left_01.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/right_to_left_01.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -225,10 +225,10 @@ Deno.test("pdf_right_to_left", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_simple_text", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -246,10 +246,10 @@ Deno.test("pdf_simple_text", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_tables_large", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/large.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/large.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -266,10 +266,10 @@ Deno.test("pdf_tables_large", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_tables_medium", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/medium.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/medium.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -286,10 +286,10 @@ Deno.test("pdf_tables_medium", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_tables_small", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/tiny.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/tiny.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -315,12 +315,12 @@ Deno.test("pdf_tables_small", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("pdf_technical_stat_learning", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument(
-		"pdf/an_introduction_to_statistical_learning_with_applications_in_r_islr_sixth_printing.pdf",
-	);
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument(
+			"pdf/an_introduction_to_statistical_learning_with_applications_in_r_islr_sixth_printing.pdf",
+		);
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {

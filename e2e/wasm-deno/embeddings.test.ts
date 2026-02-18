@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("embedding_disabled", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ chunking: { max_chars: 500, max_overlap: 50 } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {

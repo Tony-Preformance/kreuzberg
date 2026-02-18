@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("structured_csv_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("csv/stanley_cups.csv");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("csv/stanley_cups.csv");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "text/csv", config);
 	} catch (error) {
@@ -30,10 +30,10 @@ Deno.test("structured_csv_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("structured_json_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("json/sample_document.json");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("json/sample_document.json");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/json", config);
 	} catch (error) {
@@ -51,10 +51,10 @@ Deno.test("structured_json_basic", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("structured_json_simple", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("json/simple.json");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("json/simple.json");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/json", config);
 	} catch (error) {
@@ -72,10 +72,10 @@ Deno.test("structured_json_simple", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("structured_toml_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("data_formats/cargo.toml");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("data_formats/cargo.toml");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/toml", config);
 	} catch (error) {
@@ -92,10 +92,10 @@ Deno.test("structured_toml_basic", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("structured_yaml_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("yaml/simple.yaml");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("yaml/simple.yaml");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/yaml", config);
 	} catch (error) {
@@ -112,10 +112,10 @@ Deno.test("structured_yaml_basic", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("structured_yaml_simple", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("yaml/simple.yaml");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("yaml/simple.yaml");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-yaml", config);
 	} catch (error) {

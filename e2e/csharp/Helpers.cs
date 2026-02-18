@@ -814,7 +814,7 @@ public static class TestHelpers
                 throw new XunitException("Expected djot content to be present");
             }
         }
-        if (minBlocks.HasValue && djotContent is not null && !string.IsNullOrEmpty(djotContent.PlainText))
+        if (minBlocks.HasValue && djotContent is not null)
         {
             var blockCount = djotContent.Blocks?.Count ?? 0;
             if (blockCount < minBlocks.Value)

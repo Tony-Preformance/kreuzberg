@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("token_reduction_aggressive", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ token_reduction: { mode: "aggressive" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -31,10 +31,10 @@ Deno.test("token_reduction_aggressive", { permissions: { read: true } }, async (
 });
 
 Deno.test("token_reduction_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ token_reduction: { mode: "moderate" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -52,10 +52,10 @@ Deno.test("token_reduction_basic", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("token_reduction_light", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ token_reduction: { mode: "light" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -73,10 +73,10 @@ Deno.test("token_reduction_light", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("token_reduction_with_chunking", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ chunking: { max_chars: 500, max_overlap: 50 }, token_reduction: { mode: "moderate" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {

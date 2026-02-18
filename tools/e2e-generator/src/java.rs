@@ -482,7 +482,7 @@ public final class E2EHelpers {
                 ExtractionResult result,
                 boolean hasElements,
                 boolean hasGeometry,
-                boolean hasConfidence,
+                Boolean hasConfidence,
                 Integer minCount
         ) {
             var ocrElements = result.getOcrElements();
@@ -495,7 +495,7 @@ public final class E2EHelpers {
                             String.format("OCR element %d expected to have geometry", i));
                 }
             }
-            if (hasConfidence) {
+            if (hasConfidence != null && hasConfidence) {
                 for (int i = 0; i < ocrElements.size(); i++) {
                     assertNotNull(ocrElements.get(i).getConfidence(),
                             String.format("OCR element %d expected to have confidence score", i));
@@ -585,7 +585,7 @@ public final class E2EHelpers {
             var tables = result.getTables();
             if (tables != null) {
                 for (int i = 0; i < tables.size(); i++) {
-                    assertNotNull(tables.get(i).getBoundingBox(),
+                    assertNotNull(tables.get(i).boundingBox(),
                             String.format("Table %d expected to have bounding box", i));
                 }
             }
@@ -597,7 +597,7 @@ public final class E2EHelpers {
             StringBuilder allContent = new StringBuilder();
             if (tables != null) {
                 for (var table : tables) {
-                    allContent.append(table.getContent() != null ? table.getContent().toLowerCase() : "").append(" ");
+                    allContent.append(table.markdown() != null ? table.markdown().toLowerCase() : "").append(" ");
                 }
             }
             String combined = allContent.toString();
@@ -633,7 +633,7 @@ public final class E2EHelpers {
         }
 
         public static void assertProcessingWarnings(ExtractionResult result, Integer maxCount, Boolean isEmpty) {
-            var warnings = result.getProcessingWarnings();
+            var warnings = result.getProcessingWarnings().orElse(null);
             int count = warnings != null ? warnings.size() : 0;
             if (isEmpty != null && isEmpty) {
                 assertTrue(count == 0,
@@ -648,13 +648,13 @@ public final class E2EHelpers {
         public static void assertDjotContent(ExtractionResult result, Boolean hasContent, Integer minBlocks) {
             var djotContent = result.getDjotContent().orElse(null);
             if (hasContent != null && hasContent) {
-                assertTrue(djotContent != null && !djotContent.isEmpty(),
+                assertTrue(djotContent != null && !djotContent.getPlainText().isEmpty(),
                         "Expected djot content to be present");
             }
-            if (minBlocks != null && djotContent != null && !djotContent.isEmpty()) {
-                String[] blocks = djotContent.split("\n\n");
-                assertTrue(blocks.length >= minBlocks,
-                        String.format("Expected at least %d djot blocks, got %d", minBlocks, blocks.length));
+            if (minBlocks != null && djotContent != null) {
+                int blockCount = djotContent.getBlocks() != null ? djotContent.getBlocks().size() : 0;
+                assertTrue(blockCount >= minBlocks,
+                        String.format("Expected at least %d djot blocks, got %d", minBlocks, blockCount));
             }
         }
     }

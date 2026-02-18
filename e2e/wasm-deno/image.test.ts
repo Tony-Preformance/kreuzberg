@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("image_metadata_only", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("images/example.jpg");
 	const config = buildConfig({ ocr: null });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("images/example.jpg");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "image/jpeg", config);
 	} catch (error) {
@@ -30,10 +30,10 @@ Deno.test("image_metadata_only", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("image_svg_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("xml/simple_svg.svg");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("xml/simple_svg.svg");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "image/svg+xml", config);
 	} catch (error) {

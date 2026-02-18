@@ -236,7 +236,7 @@ export function shouldSkipFixture(
 	const unsupportedFormat = lower.includes("unsupported mime type") || lower.includes("unsupported format");
 	const pdfiumError = lower.includes("pdfium") || lower.includes("pdf extraction requires proper wasm");
 	const stackOverflow = lower.includes("maximum call stack") || lower.includes("stack overflow");
-	const fileNotFound = lower.includes("no such file") || lower.includes("notfound");
+	const fileNotFound = lower.includes("notfound") || lower.includes("no such file") || lower.includes("not found");
 
 	if (missingDependency || unsupportedFormat || pdfiumError || stackOverflow || fileNotFound || requirementHit) {
 		const reason = missingDependency

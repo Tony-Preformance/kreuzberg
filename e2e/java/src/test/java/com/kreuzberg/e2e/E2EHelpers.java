@@ -615,11 +615,11 @@ public final class E2EHelpers {
       var djotContent = result.getDjotContent().orElse(null);
       if (hasContent != null && hasContent) {
         assertTrue(
-            djotContent != null && djotContent.getPlainText() != null && !djotContent.getPlainText().isEmpty(),
+            djotContent != null && !djotContent.getPlainText().isEmpty(),
             "Expected djot content to be present");
       }
-      if (minBlocks != null && djotContent != null && djotContent.getPlainText() != null && !djotContent.getPlainText().isEmpty()) {
-        int blockCount = djotContent.getBlocks().size();
+      if (minBlocks != null && djotContent != null) {
+        int blockCount = djotContent.getBlocks() != null ? djotContent.getBlocks().size() : 0;
         assertTrue(
             blockCount >= minBlocks,
             String.format("Expected at least %d djot blocks, got %d", minBlocks, blockCount));

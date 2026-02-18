@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("office_bibtex_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("bibtex/comprehensive.bib");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("bibtex/comprehensive.bib");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-bibtex", config);
 	} catch (error) {
@@ -30,10 +30,10 @@ Deno.test("office_bibtex_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_djot_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("markdown/tables.djot");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("markdown/tables.djot");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "text/x-djot", config);
 	} catch (error) {
@@ -50,10 +50,10 @@ Deno.test("office_djot_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_doc_legacy", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("doc/unit_test_lists.doc");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("doc/unit_test_lists.doc");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/msword", config);
 	} catch (error) {
@@ -70,10 +70,10 @@ Deno.test("office_doc_legacy", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_docbook_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docbook/docbook-reader.docbook");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docbook/docbook-reader.docbook");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/docbook+xml", config);
 	} catch (error) {
@@ -90,10 +90,10 @@ Deno.test("office_docbook_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_docx_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/sample_document.docx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/sample_document.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -114,10 +114,10 @@ Deno.test("office_docx_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_docx_equations", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/equations.docx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/equations.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -138,10 +138,10 @@ Deno.test("office_docx_equations", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("office_docx_fake", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/fake.docx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/fake.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -162,10 +162,10 @@ Deno.test("office_docx_fake", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_docx_formatting", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/unit_test_formatting.docx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/unit_test_formatting.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -186,10 +186,10 @@ Deno.test("office_docx_formatting", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("office_docx_headers", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/unit_test_headers.docx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/unit_test_headers.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -210,10 +210,10 @@ Deno.test("office_docx_headers", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_docx_lists", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/unit_test_lists.docx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/unit_test_lists.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -234,10 +234,10 @@ Deno.test("office_docx_lists", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_docx_tables", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/docx_tables.docx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/docx_tables.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -260,10 +260,10 @@ Deno.test("office_docx_tables", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_epub_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("epub/features.epub");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("epub/features.epub");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/epub+zip", config);
 	} catch (error) {
@@ -280,10 +280,10 @@ Deno.test("office_epub_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_fb2_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("fictionbook/basic.fb2");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("fictionbook/basic.fb2");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-fictionbook+xml", config);
 	} catch (error) {
@@ -300,10 +300,10 @@ Deno.test("office_fb2_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_fictionbook_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("fictionbook/basic.fb2");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("fictionbook/basic.fb2");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-fictionbook+xml", config);
 	} catch (error) {
@@ -320,10 +320,10 @@ Deno.test("office_fictionbook_basic", { permissions: { read: true } }, async () 
 });
 
 Deno.test("office_jats_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("jats/sample_article.jats");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("jats/sample_article.jats");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-jats+xml", config);
 	} catch (error) {
@@ -340,10 +340,10 @@ Deno.test("office_jats_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_latex_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("latex/basic_sections.tex");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("latex/basic_sections.tex");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-latex", config);
 	} catch (error) {
@@ -360,10 +360,10 @@ Deno.test("office_latex_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_markdown_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("markdown/comprehensive.md");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("markdown/comprehensive.md");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "text/markdown", config);
 	} catch (error) {
@@ -380,10 +380,10 @@ Deno.test("office_markdown_basic", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("office_ods_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("data_formats/test_01.ods");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("data_formats/test_01.ods");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/vnd.oasis.opendocument.spreadsheet", config);
 	} catch (error) {
@@ -400,10 +400,10 @@ Deno.test("office_ods_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_odt_bold", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("odt/bold.odt");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("odt/bold.odt");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/vnd.oasis.opendocument.text", config);
 	} catch (error) {
@@ -420,10 +420,10 @@ Deno.test("office_odt_bold", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_odt_list", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("odt/unorderedList.odt");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("odt/unorderedList.odt");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/vnd.oasis.opendocument.text", config);
 	} catch (error) {
@@ -441,10 +441,10 @@ Deno.test("office_odt_list", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_odt_simple", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("odt/simple.odt");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("odt/simple.odt");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/vnd.oasis.opendocument.text", config);
 	} catch (error) {
@@ -462,10 +462,10 @@ Deno.test("office_odt_simple", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_odt_table", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("odt/table.odt");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("odt/table.odt");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/vnd.oasis.opendocument.text", config);
 	} catch (error) {
@@ -483,10 +483,10 @@ Deno.test("office_odt_table", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_opml_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("opml/outline.opml");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("opml/outline.opml");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/xml+opml", config);
 	} catch (error) {
@@ -503,10 +503,10 @@ Deno.test("office_opml_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_org_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("org/comprehensive.org");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("org/comprehensive.org");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "text/x-org", config);
 	} catch (error) {
@@ -523,10 +523,10 @@ Deno.test("office_org_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_ppsx_slideshow", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pptx/sample.ppsx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pptx/sample.ppsx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -547,10 +547,10 @@ Deno.test("office_ppsx_slideshow", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("office_ppt_legacy", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("ppt/simple.ppt");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("ppt/simple.ppt");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/vnd.ms-powerpoint", config);
 	} catch (error) {
@@ -567,10 +567,10 @@ Deno.test("office_ppt_legacy", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_pptx_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pptx/simple.pptx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pptx/simple.pptx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -591,10 +591,10 @@ Deno.test("office_pptx_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_pptx_images", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pptx/powerpoint_with_image.pptx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pptx/powerpoint_with_image.pptx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -615,10 +615,10 @@ Deno.test("office_pptx_images", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_pptx_pitch_deck", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pptx/pitch_deck_presentation.pptx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pptx/pitch_deck_presentation.pptx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -639,10 +639,10 @@ Deno.test("office_pptx_pitch_deck", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("office_rst_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("rst/restructured_text.rst");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("rst/restructured_text.rst");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "text/x-rst", config);
 	} catch (error) {
@@ -659,10 +659,10 @@ Deno.test("office_rst_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_rtf_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("rtf/extraction_test.rtf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("rtf/extraction_test.rtf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/rtf", config);
 	} catch (error) {
@@ -679,10 +679,10 @@ Deno.test("office_rtf_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_typst_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("typst/headings.typ");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("typst/headings.typ");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/x-typst", config);
 	} catch (error) {
@@ -699,10 +699,10 @@ Deno.test("office_typst_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_xls_legacy", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("xls/test_excel.xls");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("xls/test_excel.xls");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/vnd.ms-excel", config);
 	} catch (error) {
@@ -719,10 +719,10 @@ Deno.test("office_xls_legacy", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_xlsx_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("xlsx/stanley_cups.xlsx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("xlsx/stanley_cups.xlsx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -747,10 +747,10 @@ Deno.test("office_xlsx_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("office_xlsx_multi_sheet", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("xlsx/excel_multi_sheet.xlsx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("xlsx/excel_multi_sheet.xlsx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -772,10 +772,10 @@ Deno.test("office_xlsx_multi_sheet", { permissions: { read: true } }, async () =
 });
 
 Deno.test("office_xlsx_office_example", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("xlsx/test_01.xlsx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("xlsx/test_01.xlsx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,

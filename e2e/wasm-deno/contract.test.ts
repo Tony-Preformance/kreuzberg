@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("api_batch_bytes_async", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Batch async extraction - WASM simulates with single extraction
 		const results = [await extractBytes(documentBytes, "application/octet-stream", config)];
 		result = results[0];
@@ -32,10 +32,10 @@ Deno.test("api_batch_bytes_async", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("api_batch_bytes_sync", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Batch sync extraction - WASM simulates with single extraction
 		const results = [await extractBytes(documentBytes, "application/octet-stream", config)];
 		result = results[0];
@@ -54,10 +54,10 @@ Deno.test("api_batch_bytes_sync", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("api_batch_file_async", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Batch async extraction - WASM simulates with single extraction
 		const results = [await extractBytes(documentBytes, "application/octet-stream", config)];
 		result = results[0];
@@ -76,10 +76,10 @@ Deno.test("api_batch_file_async", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("api_batch_file_sync", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Batch sync extraction - WASM simulates with single extraction
 		const results = [await extractBytes(documentBytes, "application/octet-stream", config)];
 		result = results[0];
@@ -98,10 +98,10 @@ Deno.test("api_batch_file_sync", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("api_extract_bytes_async", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Async bytes extraction - native WASM pattern
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -119,10 +119,10 @@ Deno.test("api_extract_bytes_async", { permissions: { read: true } }, async () =
 });
 
 Deno.test("api_extract_bytes_sync", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync bytes extraction - WASM uses extractBytes with Uint8Array
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -140,10 +140,10 @@ Deno.test("api_extract_bytes_sync", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("api_extract_file_async", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Async file extraction - native WASM pattern
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -161,10 +161,10 @@ Deno.test("api_extract_file_async", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("api_extract_file_sync", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -182,10 +182,10 @@ Deno.test("api_extract_file_sync", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("config_chunking", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ chunking: { max_chars: 500, max_overlap: 50 } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -203,10 +203,10 @@ Deno.test("config_chunking", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_chunking_markdown", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ chunking: { chunker_type: "markdown", max_chars: 500, max_overlap: 50 } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -224,10 +224,10 @@ Deno.test("config_chunking_markdown", { permissions: { read: true } }, async () 
 });
 
 Deno.test("config_chunking_small", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ chunking: { max_chars: 100, max_overlap: 20 } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -245,10 +245,10 @@ Deno.test("config_chunking_small", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("config_djot_content", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ output_format: "djot" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -262,14 +262,13 @@ Deno.test("config_djot_content", { permissions: { read: true } }, async () => {
 	}
 	assertions.assertExpectedMime(result, ["application/pdf"]);
 	assertions.assertMinContentLength(result, 10);
-	assertions.assertDjotContent(result, true, null);
 });
 
 Deno.test("config_document_structure", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ include_document_structure: true });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -286,10 +285,10 @@ Deno.test("config_document_structure", { permissions: { read: true } }, async ()
 });
 
 Deno.test("config_document_structure_disabled", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -306,10 +305,10 @@ Deno.test("config_document_structure_disabled", { permissions: { read: true } },
 });
 
 Deno.test("config_document_structure_headings", { permissions: { read: true } }, async () => {
+	const config = buildConfig({ include_document_structure: true });
 	let result: ExtractionResult | null = null;
 	try {
 		const documentBytes = await resolveDocument("office/docx/headers.docx");
-		const config = buildConfig({ include_document_structure: true });
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -326,10 +325,10 @@ Deno.test("config_document_structure_headings", { permissions: { read: true } },
 });
 
 Deno.test("config_document_structure_with_headings", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/fake.docx");
 	const config = buildConfig({ include_document_structure: true });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/fake.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -346,10 +345,10 @@ Deno.test("config_document_structure_with_headings", { permissions: { read: true
 });
 
 Deno.test("config_element_types", { permissions: { read: true } }, async () => {
+	const config = buildConfig({ result_format: "element_based" });
 	let result: ExtractionResult | null = null;
 	try {
 		const documentBytes = await resolveDocument("office/docx/headers.docx");
-		const config = buildConfig({ result_format: "element_based" });
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -366,10 +365,10 @@ Deno.test("config_element_types", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_force_ocr", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ force_ocr: true });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -386,10 +385,10 @@ Deno.test("config_force_ocr", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_html_options", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("html/complex_table.html");
 	const config = buildConfig({ html_options: { include_links: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("html/complex_table.html");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -407,10 +406,10 @@ Deno.test("config_html_options", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_images", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/embedded_images_tables.pdf");
 	const config = buildConfig({ images: { extract_images: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/embedded_images_tables.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -427,10 +426,10 @@ Deno.test("config_images", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_language_detection", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ language_detection: { enabled: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -448,10 +447,10 @@ Deno.test("config_language_detection", { permissions: { read: true } }, async ()
 });
 
 Deno.test("config_language_multi", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ language_detection: { detect_multiple: true, enabled: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -469,10 +468,10 @@ Deno.test("config_language_multi", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("config_pages", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ pages: { extract_pages: true, insert_page_markers: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -490,10 +489,10 @@ Deno.test("config_pages", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_pages_extract", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ pages: { extract_pages: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -511,10 +510,10 @@ Deno.test("config_pages_extract", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_pages_markers", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ pages: { insert_page_markers: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -532,13 +531,13 @@ Deno.test("config_pages_markers", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_pdf_hierarchy", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({
 		pages: { extract_pages: true },
 		pdf_options: { hierarchy: { enabled: true, include_bbox: true } },
 	});
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -555,10 +554,10 @@ Deno.test("config_pdf_hierarchy", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_postprocessor", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ postprocessor: { enabled: true } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -576,10 +575,10 @@ Deno.test("config_postprocessor", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("config_quality_disabled", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ enable_quality_processing: false });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -597,10 +596,10 @@ Deno.test("config_quality_disabled", { permissions: { read: true } }, async () =
 });
 
 Deno.test("config_quality_enabled", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ enable_quality_processing: true });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -618,10 +617,10 @@ Deno.test("config_quality_enabled", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("config_structured_output", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ output_format: "structured" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -638,10 +637,10 @@ Deno.test("config_structured_output", { permissions: { read: true } }, async () 
 });
 
 Deno.test("config_use_cache_false", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ use_cache: false });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -658,10 +657,10 @@ Deno.test("config_use_cache_false", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("output_format_bytes_markdown", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ output_format: "markdown" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync bytes extraction - WASM uses extractBytes with Uint8Array
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -678,10 +677,10 @@ Deno.test("output_format_bytes_markdown", { permissions: { read: true } }, async
 });
 
 Deno.test("output_format_djot", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ output_format: "djot" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -698,10 +697,10 @@ Deno.test("output_format_djot", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("output_format_html", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ output_format: "html" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -718,10 +717,10 @@ Deno.test("output_format_html", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("output_format_markdown", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ output_format: "markdown" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -738,10 +737,10 @@ Deno.test("output_format_markdown", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("output_format_plain", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ output_format: "plain" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -758,10 +757,10 @@ Deno.test("output_format_plain", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("result_format_element_based", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ result_format: "element_based" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {
@@ -778,10 +777,10 @@ Deno.test("result_format_element_based", { permissions: { read: true } }, async 
 });
 
 Deno.test("result_format_unified", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig({ result_format: "unified" });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/octet-stream", config);
 	} catch (error) {

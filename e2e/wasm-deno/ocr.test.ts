@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("ocr_image_hello_world", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("images/test_hello_world.png");
 	const config = buildConfig({ force_ocr: true, ocr: { backend: "tesseract", language: "eng" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("images/test_hello_world.png");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "image/png", config);
 	} catch (error) {
@@ -38,10 +38,10 @@ Deno.test("ocr_image_hello_world", { permissions: { read: true } }, async () => 
 });
 
 Deno.test("ocr_image_no_text", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("images/flower_no_text.jpg");
 	const config = buildConfig({ force_ocr: true, ocr: { backend: "tesseract", language: "eng" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("images/flower_no_text.jpg");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "image/jpeg", config);
 	} catch (error) {
@@ -58,10 +58,10 @@ Deno.test("ocr_image_no_text", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("ocr_pdf_image_only_german", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/image_only_german_pdf.pdf");
 	const config = buildConfig({ force_ocr: true, ocr: { backend: "tesseract", language: "deu" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/image_only_german_pdf.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -86,10 +86,10 @@ Deno.test("ocr_pdf_image_only_german", { permissions: { read: true } }, async ()
 });
 
 Deno.test("ocr_pdf_rotated_90", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/ocr_test_rotated_90.pdf");
 	const config = buildConfig({ force_ocr: true, ocr: { backend: "tesseract", language: "eng" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/ocr_test_rotated_90.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -108,10 +108,10 @@ Deno.test("ocr_pdf_rotated_90", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("ocr_pdf_tesseract", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/ocr_test.pdf");
 	const config = buildConfig({ force_ocr: true, ocr: { backend: "tesseract", language: "eng" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/ocr_test.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -131,13 +131,13 @@ Deno.test("ocr_pdf_tesseract", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("ocr_tesseract_elements", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("images/test_hello_world.png");
 	const config = buildConfig({
 		force_ocr: true,
 		ocr: { backend: "tesseract", element_config: { include_elements: true }, language: "eng" },
 	});
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("images/test_hello_world.png");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "image/png", config);
 	} catch (error) {
@@ -155,10 +155,10 @@ Deno.test("ocr_tesseract_elements", { permissions: { read: true } }, async () =>
 });
 
 Deno.test("ocr_tesseract_language_german", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/image_only_german_pdf.pdf");
 	const config = buildConfig({ force_ocr: true, ocr: { backend: "tesseract", language: "deu" } });
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/image_only_german_pdf.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {

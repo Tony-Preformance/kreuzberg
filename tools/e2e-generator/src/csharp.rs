@@ -747,7 +747,7 @@ public static class TestHelpers
         var list = snippets.ToArray();
         if (list.Length == 0) return;
         var tables = result.Tables;
-        var allContent = string.Join(" ", (tables ?? new List<Table>()).Select(t => (t.Content ?? "").ToLowerInvariant()));
+        var allContent = string.Join(" ", (tables ?? new List<Table>()).Select(t => (t.Markdown ?? "").ToLowerInvariant()));
         foreach (var snippet in list)
         {
             if (allContent.Contains(snippet.ToLowerInvariant()))
@@ -817,17 +817,17 @@ public static class TestHelpers
         var djotContent = result.DjotContent;
         if (hasContent == true)
         {
-            if (string.IsNullOrEmpty(djotContent))
+            if (djotContent is null || string.IsNullOrEmpty(djotContent.PlainText))
             {
                 throw new XunitException("Expected djot content to be present");
             }
         }
-        if (minBlocks.HasValue && !string.IsNullOrEmpty(djotContent))
+        if (minBlocks.HasValue && djotContent is not null)
         {
-            var blocks = djotContent.Split(new[] { "\n\n" }, StringSplitOptions.None);
-            if (blocks.Length < minBlocks.Value)
+            var blockCount = djotContent.Blocks?.Count ?? 0;
+            if (blockCount < minBlocks.Value)
             {
-                throw new XunitException($"Expected at least {minBlocks.Value} djot blocks, got {blocks.Length}");
+                throw new XunitException($"Expected at least {minBlocks.Value} djot blocks, got {blockCount}");
             }
         }
     }

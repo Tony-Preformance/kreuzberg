@@ -244,8 +244,9 @@ export function shouldSkipFixture(
     const unsupportedFormat = lower.includes("unsupported mime type") || lower.includes("unsupported format");
     const pdfiumError = lower.includes("pdfium") || lower.includes("pdf extraction requires proper wasm");
     const stackOverflow = lower.includes("maximum call stack") || lower.includes("stack overflow");
+    const fileNotFound = lower.includes("notfound") || lower.includes("no such file") || lower.includes("not found");
 
-    if (missingDependency || unsupportedFormat || pdfiumError || stackOverflow || requirementHit) {
+    if (missingDependency || unsupportedFormat || pdfiumError || stackOverflow || fileNotFound || requirementHit) {
         const reason = missingDependency
             ? "missing dependency"
             : unsupportedFormat
@@ -254,7 +255,9 @@ export function shouldSkipFixture(
                 ? "PDFium not available (non-browser environment)"
                 : stackOverflow
                   ? "stack overflow (document too large for WASM)"
-                  : requirements.join(", ");
+                  : fileNotFound
+                    ? "test document not found"
+                    : requirements.join(", ");
         console.warn(`Skipping ${fixtureId}: ${reason}. ${message}`);
         if (notes) {
             console.warn(`Notes: ${notes}`);
@@ -810,13 +813,6 @@ fn render_test(fixture: &Fixture) -> Result<String> {
         "Deno.test(\"{test_name}\", {{ permissions: {{ read: true }} }}, async () => {{"
     )?;
 
-    // Read document bytes - Deno always reads as Uint8Array
-    writeln!(
-        body,
-        "    const documentBytes = await resolveDocument(\"{}\");",
-        escape_ts_string(&fixture.document().path)
-    )?;
-
     match render_config_expression(&extraction.config)? {
         None => writeln!(body, "    const config = buildConfig(undefined);")?,
         Some(config_expr) => writeln!(body, "    const config = buildConfig({config_expr});")?,
@@ -830,6 +826,13 @@ fn render_test(fixture: &Fixture) -> Result<String> {
         .unwrap_or("application/octet-stream");
     writeln!(body, "    let result: ExtractionResult | null = null;")?;
     writeln!(body, "    try {{")?;
+
+    // Read document bytes inside try/catch so file-not-found errors are caught
+    writeln!(
+        body,
+        "      const documentBytes = await resolveDocument(\"{}\");",
+        escape_ts_string(&fixture.document().path)
+    )?;
 
     // Generate extraction call based on method and input_type
     // Note: WASM only has extractBytes available, but we document the intent

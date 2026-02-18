@@ -10,10 +10,10 @@ import { assertions, buildConfig, extractBytes, initWasm, resolveDocument, shoul
 await initWasm();
 
 Deno.test("smoke_docx_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("docx/fake.docx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("docx/fake.docx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
@@ -35,10 +35,10 @@ Deno.test("smoke_docx_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("smoke_html_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("html/simple_table.html");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("html/simple_table.html");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "text/html", config);
 	} catch (error) {
@@ -56,10 +56,10 @@ Deno.test("smoke_html_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("smoke_image_png", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("images/sample.png");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("images/sample.png");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "image/png", config);
 	} catch (error) {
@@ -76,10 +76,10 @@ Deno.test("smoke_image_png", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("smoke_json_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("json/simple.json");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("json/simple.json");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/json", config);
 	} catch (error) {
@@ -96,10 +96,10 @@ Deno.test("smoke_json_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("smoke_pdf_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("pdf/fake_memo.pdf");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "application/pdf", config);
 	} catch (error) {
@@ -117,10 +117,10 @@ Deno.test("smoke_pdf_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("smoke_txt_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("text/report.txt");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("text/report.txt");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(documentBytes, "text/plain", config);
 	} catch (error) {
@@ -137,10 +137,10 @@ Deno.test("smoke_txt_basic", { permissions: { read: true } }, async () => {
 });
 
 Deno.test("smoke_xlsx_basic", { permissions: { read: true } }, async () => {
-	const documentBytes = await resolveDocument("xlsx/stanley_cups.xlsx");
 	const config = buildConfig(undefined);
 	let result: ExtractionResult | null = null;
 	try {
+		const documentBytes = await resolveDocument("xlsx/stanley_cups.xlsx");
 		// Sync file extraction - WASM uses extractBytes with pre-read bytes
 		result = await extractBytes(
 			documentBytes,
