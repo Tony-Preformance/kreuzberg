@@ -7,3 +7,76 @@
 #' @usage NULL
 #' @useDynLib kreuzberg, .registration = TRUE
 NULL
+
+# Cache functions
+clear_cache_native <- function() invisible(.Call(wrap__clear_cache))
+
+cache_stats_native <- function() .Call(wrap__cache_stats)
+
+# Extraction functions
+extract_file_sync_native <- function(path, mime_type, config_json) .Call(wrap__extract_file_sync_native, path, mime_type, config_json)
+
+extract_file_native <- function(path, mime_type, config_json) .Call(wrap__extract_file_native, path, mime_type, config_json)
+
+extract_bytes_sync_native <- function(data, mime_type, config_json) .Call(wrap__extract_bytes_sync_native, data, mime_type, config_json)
+
+extract_bytes_native <- function(data, mime_type, config_json) .Call(wrap__extract_bytes_native, data, mime_type, config_json)
+
+# Batch extraction functions
+batch_extract_files_sync_native <- function(paths, config_json) .Call(wrap__batch_extract_files_sync_native, paths, config_json)
+
+batch_extract_files_native <- function(paths, config_json) .Call(wrap__batch_extract_files_native, paths, config_json)
+
+batch_extract_bytes_sync_native <- function(data_list, mime_types, config_json) .Call(wrap__batch_extract_bytes_sync_native, data_list, mime_types, config_json)
+
+batch_extract_bytes_native <- function(data_list, mime_types, config_json) .Call(wrap__batch_extract_bytes_native, data_list, mime_types, config_json)
+
+# Metadata functions
+detect_mime_type_native <- function(data) .Call(wrap__detect_mime_type_native, data)
+
+detect_mime_type_from_path_native <- function(path) .Call(wrap__detect_mime_type_from_path_native, path)
+
+get_extensions_for_mime_native <- function(mime_type) .Call(wrap__get_extensions_for_mime_native, mime_type)
+
+validate_mime_type_native <- function(mime_type) .Call(wrap__validate_mime_type_native, mime_type)
+
+# Plugin functions - Post-processors
+register_post_processor_native <- function(name, callback) invisible(.Call(wrap__register_post_processor_native, name, callback))
+
+unregister_post_processor_native <- function(name) invisible(.Call(wrap__unregister_post_processor_native, name))
+
+list_post_processors_native <- function() .Call(wrap__list_post_processors_native)
+
+clear_post_processors_native <- function() invisible(.Call(wrap__clear_post_processors_native))
+
+# Plugin functions - Validators
+register_validator_native <- function(name, callback) invisible(.Call(wrap__register_validator_native, name, callback))
+
+unregister_validator_native <- function(name) invisible(.Call(wrap__unregister_validator_native, name))
+
+list_validators_native <- function() .Call(wrap__list_validators_native)
+
+clear_validators_native <- function() invisible(.Call(wrap__clear_validators_native))
+
+# Plugin functions - OCR backends
+register_ocr_backend_native <- function(name, callback) invisible(.Call(wrap__register_ocr_backend_native, name, callback))
+
+unregister_ocr_backend_native <- function(name) invisible(.Call(wrap__unregister_ocr_backend_native, name))
+
+list_ocr_backends_native <- function() .Call(wrap__list_ocr_backends_native)
+
+clear_ocr_backends_native <- function() invisible(.Call(wrap__clear_ocr_backends_native))
+
+# Plugin functions - Document extractors
+list_document_extractors_native <- function() .Call(wrap__list_document_extractors_native)
+
+unregister_document_extractor_native <- function(name) invisible(.Call(wrap__unregister_document_extractor_native, name))
+
+clear_document_extractors_native <- function() invisible(.Call(wrap__clear_document_extractors_native))
+
+# Validation functions
+validate_ocr_backend_name_native <- function(backend) .Call(wrap__validate_ocr_backend_name_native, backend)
+
+validate_language_code_native <- function(code) .Call(wrap__validate_language_code_native, code)
+
+validate_output_format_native <- function(format) .Call(wrap__validate_output_format_native, format)

@@ -43,7 +43,7 @@ default = ["embeddings"]
 embeddings = ["kreuzberg/embeddings"]
 
 [dependencies]
-kreuzberg = { path = "../../../../crates/kreuzberg", default-features = false, features = [
+kreuzberg = { path = "../../vendor/kreuzberg", default-features = false, features = [
     "pdf",
     "excel",
     "office",
@@ -63,7 +63,6 @@ kreuzberg = { path = "../../../../crates/kreuzberg", default-features = false, f
     "bundled-pdfium",
     "tokio-runtime",
 ] }
-kreuzberg-ffi = { path = "../../../../crates/kreuzberg-ffi" }
 extendr-api = "0.8"
 serde_json = { workspace = true }
 tokio = { workspace = true }

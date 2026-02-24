@@ -39,7 +39,7 @@ test_that("extract_file_sync with config works", {
   writeLines("Config test", tmp)
   on.exit(unlink(tmp))
 
-  config <- extraction_config(output_format = "text")
+  config <- extraction_config(output_format = "plain")
   result <- extract_file_sync(tmp, config = config)
   expect_s3_class(result, "kreuzberg_result")
 })

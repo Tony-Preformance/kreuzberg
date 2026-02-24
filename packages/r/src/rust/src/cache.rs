@@ -4,7 +4,7 @@ use crate::error::to_r_error;
 use extendr_api::prelude::*;
 
 pub fn clear_cache_impl() -> extendr_api::Result<()> {
-    let cache_root = cache_root_dir()?;
+    let cache_root = cache_root_dir();
     if !cache_root.exists() {
         return Ok(());
     }
@@ -17,7 +17,7 @@ pub fn clear_cache_impl() -> extendr_api::Result<()> {
 }
 
 pub fn cache_stats_impl() -> extendr_api::Result<List> {
-    let cache_root = cache_root_dir()?;
+    let cache_root = cache_root_dir();
     let mut total_entries: usize = 0;
     let mut total_bytes: f64 = 0.0;
 
@@ -39,10 +39,30 @@ pub fn cache_stats_impl() -> extendr_api::Result<List> {
     Ok(List::from_names_and_values(names, values).unwrap())
 }
 
-fn cache_root_dir() -> extendr_api::Result<std::path::PathBuf> {
-    let base = dirs::cache_dir()
-        .ok_or_else(|| extendr_api::Error::Other("Cannot determine cache directory".to_string()))?;
-    Ok(base.join("kreuzberg"))
+fn cache_root_dir() -> std::path::PathBuf {
+    // Use platform-appropriate cache directory
+    #[cfg(target_os = "macos")]
+    {
+        if let Ok(home) = std::env::var("HOME") {
+            return std::path::PathBuf::from(home).join("Library/Caches/kreuzberg");
+        }
+    }
+    #[cfg(target_os = "linux")]
+    {
+        if let Ok(xdg) = std::env::var("XDG_CACHE_HOME") {
+            return std::path::PathBuf::from(xdg).join("kreuzberg");
+        }
+        if let Ok(home) = std::env::var("HOME") {
+            return std::path::PathBuf::from(home).join(".cache/kreuzberg");
+        }
+    }
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(local) = std::env::var("LOCALAPPDATA") {
+            return std::path::PathBuf::from(local).join("kreuzberg/cache");
+        }
+    }
+    std::path::PathBuf::from("/tmp/kreuzberg-cache")
 }
 
 fn cache_directories(root: &std::path::Path) -> extendr_api::Result<Vec<std::path::PathBuf>> {

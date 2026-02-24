@@ -4,3 +4,6 @@ linters: linters_with_defaults(
     object_usage_linter = NULL,
     commented_code_linter = NULL
   )
+exclusions: list(
+    "R/extendr-wrappers.R"
+  )

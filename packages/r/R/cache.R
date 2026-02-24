@@ -2,7 +2,7 @@
 #'
 #' @export
 clear_cache <- function() {
-  invisible(.Call("wrap__clear_cache"))
+  clear_cache_native()
 }
 
 #' Get cache statistics
@@ -10,5 +10,5 @@ clear_cache <- function() {
 #' @return Named list with total_entries and total_size_bytes.
 #' @export
 cache_stats <- function() {
-  .Call("wrap__cache_stats")
+  cache_stats_native()
 }
