@@ -28,30 +28,27 @@ pub fn parse_config(config: Option<JsValue>) -> Result<ExtractionConfig, JsValue
 
 /// Convert extraction result to JsValue for JavaScript consumption.
 ///
-/// Serializes the Rust ExtractionResult to a JavaScript object.
+/// Serializes to a JSON string via `serde_json` and then parses it with
+/// `js_sys::JSON::parse()`. This works around a `serde_wasm_bindgen` v0.6
+/// limitation: it doesn't properly handle `#[serde(flatten)]` combined with
+/// internally-tagged enums (`#[serde(tag = "...")]`). The `Metadata.format`
+/// field uses both, causing `format_type` and all format-specific fields to
+/// be silently dropped when serializing directly with `serde_wasm_bindgen`.
 ///
-/// # Arguments
-///
-/// * `result` - The ExtractionResult to convert
-///
-/// # Returns
-///
-/// Result containing the JsValue or a JsValue error
+/// By going through `serde_json` → JSON string → `JSON.parse()`, we bypass
+/// `serde_wasm_bindgen` entirely for output and preserve all metadata fields.
 pub fn result_to_js_value(result: &ExtractionResult) -> Result<JsValue, JsValue> {
-    serde_wasm_bindgen::to_value(result).map_err(|e| JsValue::from_str(&format!("Failed to convert result: {}", e)))
+    let json_string =
+        serde_json::to_string(result).map_err(|e| JsValue::from_str(&format!("Failed to serialize result: {e}")))?;
+    js_sys::JSON::parse(&json_string).map_err(|e| JsValue::from_str(&format!("Failed to parse JSON: {e:?}")))
 }
 
 /// Convert a vector of results to JsValue.
 ///
-/// Serializes multiple ExtractionResults to a JavaScript array.
-///
-/// # Arguments
-///
-/// * `results` - Vector of ExtractionResults
-///
-/// # Returns
-///
-/// Result containing the JsValue array or an error
+/// Uses the same `serde_json` → `JSON.parse()` approach as `result_to_js_value`
+/// to preserve flattened metadata fields.
 pub fn results_to_js_value(results: &[ExtractionResult]) -> Result<JsValue, JsValue> {
-    serde_wasm_bindgen::to_value(results).map_err(|e| JsValue::from_str(&format!("Failed to convert results: {}", e)))
+    let json_string =
+        serde_json::to_string(results).map_err(|e| JsValue::from_str(&format!("Failed to serialize results: {e}")))?;
+    js_sys::JSON::parse(&json_string).map_err(|e| JsValue::from_str(&format!("Failed to parse results JSON: {e:?}")))
 }
