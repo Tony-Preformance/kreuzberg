@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **WASM OCR not working** (`enableOcr()` regression): `enableOcr()` registered the OCR backend only in a JS-side registry, but the Rust extraction pipeline uses a separate Rust-side plugin registry. OCR via `extractBytes`/`extractFile` always failed with "OCR backend 'tesseract' not registered". The function now bridges both registries so OCR works end-to-end.
+- **WASM tessdata CDN URL returns 404**: The `NativeWasmOcrBackend` tessdata URL pointed to a non-existent path in the `tesseract-wasm` npm package. Updated to use the official `tesseract-ocr/tessdata_fast` GitHub repository.
 - **XML UTF-16 parsing fails on files with odd byte count**: The XML extractor rejected valid UTF-16 encoded files that had a trailing odd byte (e.g. `factbook-utf-16.xml`) with "Invalid UTF-16: odd byte count". The decoder now truncates to the nearest even byte boundary, matching the lenient approach already used in email extraction.
 - **R bindings crash on strings with embedded NUL bytes**: Extraction results containing NUL (`\0`) characters (e.g. from RTF files) caused the R FFI layer to error with "embedded nul in string" since R strings are C-based. NUL bytes are now stripped before passing strings to R.
 - **R bindings `%||%` operator incompatible with R < 4.4**: The R package used the `%||%` null-coalescing operator which is only available in base R >= 4.4, but the package declares `R >= 4.2`. Added a package-local polyfill for backwards compatibility.
