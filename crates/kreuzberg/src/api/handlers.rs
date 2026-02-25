@@ -124,7 +124,15 @@ pub async fn extract_handler(
                     .await
                     .map_err(|e| ApiError::validation(crate::error::KreuzbergError::validation(e.to_string())))?;
 
-                let mime_type = content_type.unwrap_or_else(|| "application/octet-stream".to_string());
+                let mut mime_type = content_type.unwrap_or_else(|| "application/octet-stream".to_string());
+
+                // When the client sends a generic content type, try to detect from the filename
+                if mime_type == "application/octet-stream"
+                    && let Some(ref name) = file_name
+                    && let Ok(detected) = crate::core::mime::detect_mime_type(name, false)
+                {
+                    mime_type = detected;
+                }
 
                 files.push((data.to_vec(), mime_type, file_name));
             }

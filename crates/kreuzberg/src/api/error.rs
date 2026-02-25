@@ -154,7 +154,7 @@ impl IntoResponse for ApiError {
 impl From<KreuzbergError> for ApiError {
     fn from(error: KreuzbergError) -> Self {
         match &error {
-            KreuzbergError::Validation { .. } => Self::validation(error),
+            KreuzbergError::Validation { .. } | KreuzbergError::UnsupportedFormat(_) => Self::validation(error),
             KreuzbergError::Parsing { .. } | KreuzbergError::Ocr { .. } => Self::unprocessable(error),
             _ => Self::internal(error),
         }

@@ -563,7 +563,7 @@ async fn test_extract_empty_file() {
     assert_eq!(results[0]["mime_type"], "text/plain");
 }
 
-/// Test extract endpoint with unsupported MIME type.
+/// Test extract endpoint with unsupported MIME type returns 400.
 #[tokio::test]
 async fn test_extract_unsupported_mime_type() {
     let app = create_router(ExtractionConfig::default());
@@ -593,9 +593,93 @@ async fn test_extract_unsupported_mime_type() {
         .await
         .expect("Operation failed");
 
-    assert!(
-        response.status() == StatusCode::UNPROCESSABLE_ENTITY || response.status() == StatusCode::INTERNAL_SERVER_ERROR
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .expect("Failed to read HTTP response body");
+    let error: serde_json::Value = serde_json::from_slice(&body).expect("Failed to deserialize JSON response");
+
+    assert_eq!(error["error_type"], "UnsupportedFormatError");
+    assert_eq!(error["status_code"], 400);
+}
+
+/// Test extract endpoint with octet-stream content type and a known filename extension
+/// auto-detects the MIME type from the filename.
+#[tokio::test]
+async fn test_extract_octet_stream_with_known_extension_detects_mime() {
+    let app = create_router(ExtractionConfig::default());
+
+    let boundary = "----boundary";
+    let file_content = "Hello, world!";
+
+    let body_content = format!(
+        "--{}\r\n\
+         Content-Disposition: form-data; name=\"files\"; filename=\"readme.txt\"\r\n\
+         Content-Type: application/octet-stream\r\n\
+         \r\n\
+         {}\r\n\
+         --{}--\r\n",
+        boundary, file_content, boundary
     );
+
+    let response = app
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/extract")
+                .header("content-type", format!("multipart/form-data; boundary={}", boundary))
+                .body(Body::from(body_content))
+                .expect("Operation failed"),
+        )
+        .await
+        .expect("Operation failed");
+
+    // Should succeed because .txt is auto-detected from the filename
+    assert_eq!(response.status(), StatusCode::OK);
+}
+
+/// Test extract endpoint with an explicit unsupported MIME type and a filename
+/// returns 400 with UnsupportedFormatError (not 500).
+#[tokio::test]
+async fn test_extract_unsupported_mime_type_returns_400_not_500() {
+    let app = create_router(ExtractionConfig::default());
+
+    let boundary = "----boundary";
+    let file_content = "some data";
+
+    let body_content = format!(
+        "--{}\r\n\
+         Content-Disposition: form-data; name=\"files\"; filename=\"report.xyz\"\r\n\
+         Content-Type: application/vnd.fake-unsupported-type\r\n\
+         \r\n\
+         {}\r\n\
+         --{}--\r\n",
+        boundary, file_content, boundary
+    );
+
+    let response = app
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/extract")
+                .header("content-type", format!("multipart/form-data; boundary={}", boundary))
+                .body(Body::from(body_content))
+                .expect("Operation failed"),
+        )
+        .await
+        .expect("Operation failed");
+
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .expect("Failed to read HTTP response body");
+    let error: serde_json::Value = serde_json::from_slice(&body).expect("Failed to deserialize JSON response");
+
+    assert_eq!(error["error_type"], "UnsupportedFormatError");
+    assert_eq!(error["status_code"], 400);
+    assert!(error["message"].as_str().unwrap_or("").contains("Unsupported format"));
 }
 
 /// Test extract endpoint without filename in multipart field.
