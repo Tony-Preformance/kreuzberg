@@ -1,16 +1,74 @@
 #!/usr/bin/env sh
 
-# Vendor kreuzberg core crates if vendor directory is not populated
+# Vendor kreuzberg core crates if vendor directory is not populated.
+#
+# Two strategies:
+#   1. Monorepo: if we're inside the kreuzberg monorepo, vendor directly from
+#      the local crates/ directory (fast, used by CI and local dev).
+#   2. Download: fetch the source archive from GitHub for the matching version
+#      tag and run the vendoring script against the extracted tree.
+#      This is the path taken by r-universe and anyone installing from a
+#      source tarball built outside the monorepo.
+
 if [ ! -f "vendor/kreuzberg/Cargo.toml" ]; then
-  # Detect monorepo root (two levels up from packages/r)
+  # Strategy 1: monorepo
   REPO_ROOT="$(cd ../.. 2>/dev/null && pwd)"
   VENDOR_SCRIPT="${REPO_ROOT}/scripts/ci/r/vendor-kreuzberg-core.py"
 
   if [ -f "${VENDOR_SCRIPT}" ] && [ -d "${REPO_ROOT}/crates/kreuzberg" ]; then
-    echo "Vendoring kreuzberg core crates from monorepo..."
+    echo "* vendoring kreuzberg core crates from monorepo..."
     REPO_ROOT="${REPO_ROOT}" python3 "${VENDOR_SCRIPT}" || {
-      echo "WARNING: Vendoring failed. Build may fail if vendor directory is empty."
+      echo "ERROR: vendoring from monorepo failed."
+      exit 1
     }
+  else
+    # Strategy 2: download source from GitHub
+    VERSION="$(grep '^Version:' DESCRIPTION | sed 's/Version:[[:space:]]*//')"
+    GITHUB_URL="https://github.com/kreuzberg-dev/kreuzberg/archive/refs/tags/v${VERSION}.tar.gz"
+
+    echo "* monorepo not detected — downloading kreuzberg v${VERSION} source..."
+
+    WORK="$(mktemp -d)"
+    cleanup() { rm -rf "${WORK}"; }
+    trap cleanup EXIT
+
+    TARBALL="${WORK}/kreuzberg-${VERSION}.tar.gz"
+
+    if command -v curl >/dev/null 2>&1; then
+      curl -fsSL "${GITHUB_URL}" -o "${TARBALL}"
+    elif command -v wget >/dev/null 2>&1; then
+      wget -q "${GITHUB_URL}" -O "${TARBALL}"
+    else
+      echo "ERROR: neither curl nor wget found. Cannot download kreuzberg source."
+      exit 1
+    fi
+
+    if [ ! -s "${TARBALL}" ]; then
+      echo "ERROR: failed to download kreuzberg source from ${GITHUB_URL}"
+      exit 1
+    fi
+
+    tar xzf "${TARBALL}" -C "${WORK}"
+    EXTRACTED="${WORK}/kreuzberg-${VERSION}"
+
+    if [ ! -d "${EXTRACTED}/crates/kreuzberg" ]; then
+      echo "ERROR: downloaded source does not contain expected crate structure."
+      exit 1
+    fi
+
+    echo "* running vendoring script against downloaded source..."
+    REPO_ROOT="${EXTRACTED}" python3 "${EXTRACTED}/scripts/ci/r/vendor-kreuzberg-core.py" || {
+      echo "ERROR: vendoring from downloaded source failed."
+      exit 1
+    }
+
+    if [ ! -d "${EXTRACTED}/packages/r/vendor/kreuzberg" ]; then
+      echo "ERROR: vendor directory was not created by vendoring script."
+      exit 1
+    fi
+
+    cp -R "${EXTRACTED}/packages/r/vendor" ./vendor
+    echo "* vendoring complete."
   fi
 fi
 
