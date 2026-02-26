@@ -17,6 +17,7 @@ var debugEnabled = os.Getenv("KREUZBERG_BENCHMARK_DEBUG") != ""
 
 func debug(msg string, args ...interface{}) {
 	if debugEnabled {
+		//nolint:gosec // G705: debug output to stderr is not an XSS vector
 		fmt.Fprintf(os.Stderr, "[DEBUG] "+msg+"\n", args...)
 	}
 }

@@ -10,23 +10,23 @@ export LD_LIBRARY_PATH="$REPO_ROOT/target/release:${LD_LIBRARY_PATH:-}"
 
 # Ensure PHP autoloader is available
 if [ ! -d "$REPO_ROOT/packages/php/vendor" ]; then
-    echo "Installing PHP dependencies..."
-    (cd "$REPO_ROOT/packages/php" && composer install --no-interaction --quiet)
+  echo "Installing PHP dependencies..."
+  (cd "$REPO_ROOT/packages/php" && composer install --no-interaction --quiet)
 fi
 
 # If the kreuzberg extension is not already loaded, try to load it via -d flag
 PHP_EXT_ARGS=""
 if ! php -m 2>/dev/null | grep -q kreuzberg; then
-    KREUZBERG_LIB="$REPO_ROOT/target/release/deps/libkreuzberg_php.dylib"
-    if [ ! -f "$KREUZBERG_LIB" ]; then
-        KREUZBERG_LIB="$REPO_ROOT/target/release/libkreuzberg_php.so"
-    fi
-    if [ -f "$KREUZBERG_LIB" ]; then
-        PHP_EXT_ARGS="-d extension=$KREUZBERG_LIB"
-    fi
+  KREUZBERG_LIB="$REPO_ROOT/target/release/deps/libkreuzberg_php.dylib"
+  if [ ! -f "$KREUZBERG_LIB" ]; then
+    KREUZBERG_LIB="$REPO_ROOT/target/release/libkreuzberg_php.so"
+  fi
+  if [ -f "$KREUZBERG_LIB" ]; then
+    PHP_EXT_ARGS="-d extension=$KREUZBERG_LIB"
+  fi
 fi
 
 echo "Running Kreuzberg PHP test suite..."
 echo ""
 
-php $PHP_EXT_ARGS "$SCRIPT_DIR/main.php"
+php "$PHP_EXT_ARGS" "$SCRIPT_DIR/main.php"

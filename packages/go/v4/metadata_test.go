@@ -1299,7 +1299,7 @@ func BenchmarkHTMLExtractionLargeDocument(b *testing.B) {
 `)
 
 	for i := 0; i < 50; i++ {
-		sb.WriteString(fmt.Sprintf(`
+		fmt.Fprintf(&sb, `
 	<section id="section-%d">
 		<h2>Section %d</h2>
 		<p>Content for section %d with some text and information.</p>
@@ -1310,7 +1310,7 @@ func BenchmarkHTMLExtractionLargeDocument(b *testing.B) {
 			<li><a href="link-%d-3">Link 3</a></li>
 		</ul>
 	</section>
-`, i, i, i, i, i, i, i, i))
+`, i, i, i, i, i, i, i, i)
 	}
 
 	sb.WriteString(`
