@@ -39,35 +39,43 @@ name = "kreuzberg_r"
 crate-type = ["staticlib", "lib"]
 
 [features]
-default = ["embeddings"]
-embeddings = ["kreuzberg/embeddings"]
+default = []
 
 [dependencies]
 kreuzberg = { path = "../../vendor/kreuzberg", default-features = false, features = [
     "pdf",
-    "excel",
     "office",
     "mdx",
     "email",
     "html",
     "xml",
     "archives",
-    "ocr",
-    "paddle-ocr",
     "language-detection",
     "chunking",
-    "embeddings",
     "quality",
     "keywords",
+] }
+extendr-api = { version = "0.8", features = ["result_condition"] }
+serde_json = { workspace = true }
+
+# Non-wasm: full features including tokio runtime, OCR, embeddings, API server
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+kreuzberg = { path = "../../vendor/kreuzberg", features = [
+    "excel",
+    "ocr",
+    "paddle-ocr",
+    "embeddings",
     "api",
     "mcp",
     "otel",
     "bundled-pdfium",
     "tokio-runtime",
 ] }
-extendr-api = { version = "0.8", features = ["result_condition"] }
-serde_json = { workspace = true }
 tokio = { workspace = true }
+
+# Wasm: lightweight excel without tokio dependency
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+kreuzberg = { path = "../../vendor/kreuzberg", features = ["excel-wasm"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4"
