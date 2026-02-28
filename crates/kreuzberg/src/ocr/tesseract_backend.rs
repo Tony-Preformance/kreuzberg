@@ -206,6 +206,13 @@ impl OcrBackend for TesseractBackend {
             .unwrap_or(&tess_config.language)
             .to_string();
 
+        // Check if OCR pre-formatted the content (e.g., tables inlined into markdown)
+        let pre_formatted = ocr_result
+            .metadata
+            .get("pre_formatted")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+
         // Convert HashMap<String, Value> to AHashMap<Cow<'static, str>, Value>
         let mut additional = AHashMap::new();
         for (key, value) in ocr_result.metadata {
@@ -224,6 +231,8 @@ impl OcrBackend for TesseractBackend {
                     .first()
                     .and_then(|t| t.cells.first().map(|row| row.len())),
             })),
+            // Signal pre-formatted content so apply_output_format() skips re-conversion
+            output_format: pre_formatted,
             additional,
             ..Default::default()
         };
@@ -236,11 +245,19 @@ impl OcrBackend for TesseractBackend {
             tables: ocr_result
                 .tables
                 .into_iter()
-                .map(|t| crate::types::Table {
-                    cells: t.cells,
-                    markdown: t.markdown,
-                    page_number: t.page_number,
-                    bounding_box: None,
+                .map(|t| {
+                    let bounding_box = t.bounding_box.map(|bbox| crate::types::BoundingBox {
+                        x0: bbox.left as f64,
+                        y0: bbox.top as f64,
+                        x1: bbox.right as f64,
+                        y1: bbox.bottom as f64,
+                    });
+                    crate::types::Table {
+                        cells: t.cells,
+                        markdown: t.markdown,
+                        page_number: t.page_number,
+                        bounding_box,
+                    }
                 })
                 .collect(),
             detected_languages: None,
@@ -288,6 +305,13 @@ impl OcrBackend for TesseractBackend {
             .unwrap_or(&tess_config.language)
             .to_string();
 
+        // Check if OCR pre-formatted the content (e.g., tables inlined into markdown)
+        let pre_formatted = ocr_result
+            .metadata
+            .get("pre_formatted")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+
         // Convert HashMap<String, Value> to AHashMap<Cow<'static, str>, Value>
         let mut additional = AHashMap::new();
         for (key, value) in ocr_result.metadata {
@@ -306,6 +330,8 @@ impl OcrBackend for TesseractBackend {
                     .first()
                     .and_then(|t| t.cells.first().map(|row| row.len())),
             })),
+            // Signal pre-formatted content so apply_output_format() skips re-conversion
+            output_format: pre_formatted,
             additional,
             ..Default::default()
         };
@@ -318,11 +344,19 @@ impl OcrBackend for TesseractBackend {
             tables: ocr_result
                 .tables
                 .into_iter()
-                .map(|t| crate::types::Table {
-                    cells: t.cells,
-                    markdown: t.markdown,
-                    page_number: t.page_number,
-                    bounding_box: None,
+                .map(|t| {
+                    let bounding_box = t.bounding_box.map(|bbox| crate::types::BoundingBox {
+                        x0: bbox.left as f64,
+                        y0: bbox.top as f64,
+                        x1: bbox.right as f64,
+                        y1: bbox.bottom as f64,
+                    });
+                    crate::types::Table {
+                        cells: t.cells,
+                        markdown: t.markdown,
+                        page_number: t.page_number,
+                        bounding_box,
+                    }
                 })
                 .collect(),
             detected_languages: None,

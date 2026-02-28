@@ -14,7 +14,7 @@ use crate::ocr::error::OcrError;
 use crate::ocr::hocr::convert_hocr_to_markdown;
 use crate::ocr::table::{extract_words_from_tsv, post_process_table, reconstruct_table, table_to_markdown};
 use crate::ocr::types::{BatchItemResult, TesseractConfig};
-use crate::types::{OcrExtractionResult, OcrTable};
+use crate::types::{OcrExtractionResult, OcrTable, OcrTableBoundingBox};
 use kreuzberg_tesseract::{TessPageSegMode, TesseractAPI};
 use std::collections::HashMap;
 use std::env;
@@ -108,6 +108,174 @@ where
         .unwrap_or(0.0);
 
     tracing::debug!("[ci-debug][ocr::processor::{stage}] {timestamp:.3}s {}", details());
+}
+
+/// Build content with OCR tables inlined at their correct vertical positions.
+///
+/// Parses TSV word positions to separate table words from non-table words,
+/// groups non-table words into lines and paragraphs, then interleaves
+/// paragraphs and table markdown sorted by Y-position.
+fn build_content_with_inline_tables(tsv_data: &str, tables: &[OcrTable], min_confidence: f64) -> String {
+    let words = match extract_words_from_tsv(tsv_data, min_confidence) {
+        Ok(w) => w,
+        Err(_) => return String::new(),
+    };
+
+    if words.is_empty() {
+        return String::new();
+    }
+
+    // Collect table bounding boxes
+    let table_bboxes: Vec<_> = tables.iter().filter_map(|t| t.bounding_box.as_ref()).collect();
+
+    // Classify words as inside a table bbox or not
+    let mut non_table_words = Vec::new();
+    for word in &words {
+        let in_table = table_bboxes.iter().any(|bbox| {
+            let word_cx = word.left + word.width / 2;
+            let word_cy = word.top + word.height / 2;
+            word_cx >= bbox.left && word_cx <= bbox.right && word_cy >= bbox.top && word_cy <= bbox.bottom
+        });
+        if !in_table {
+            non_table_words.push(word);
+        }
+    }
+
+    // Group non-table words into lines by Y-proximity.
+    // Words on the same line have similar top values (within half the average word height).
+    if non_table_words.is_empty() && tables.is_empty() {
+        return String::new();
+    }
+
+    // Sort non-table words by (top, left)
+    let mut sorted_words = non_table_words;
+    sorted_words.sort_by(|a, b| a.top.cmp(&b.top).then(a.left.cmp(&b.left)));
+
+    // Group into lines: words within line_threshold pixels vertically are on the same line
+    let avg_height = if sorted_words.is_empty() {
+        20
+    } else {
+        let total_h: u32 = sorted_words.iter().map(|w| w.height).sum();
+        (total_h / sorted_words.len() as u32).max(1)
+    };
+    let line_threshold = avg_height / 2;
+
+    struct TextLine {
+        y_center: u32,
+        text: String,
+    }
+
+    let mut lines: Vec<TextLine> = Vec::new();
+    for word in &sorted_words {
+        let word_y = word.top + word.height / 2;
+        if let Some(last_line) = lines.last_mut()
+            && word_y.abs_diff(last_line.y_center) <= line_threshold
+        {
+            last_line.text.push(' ');
+            last_line.text.push_str(&word.text);
+            continue;
+        }
+        lines.push(TextLine {
+            y_center: word_y,
+            text: word.text.clone(),
+        });
+    }
+
+    // Group lines into paragraphs: large Y-gap between consecutive lines = paragraph break
+    let paragraph_gap = avg_height * 2;
+
+    struct Paragraph {
+        y_start: u32,
+        text: String,
+    }
+
+    let mut paragraphs: Vec<Paragraph> = Vec::new();
+    for line in &lines {
+        if let Some(last_para) = paragraphs.last_mut() {
+            let last_y = last_para.y_start;
+            // Check gap - we use the line's y_center vs the last line added
+            if line.y_center.saturating_sub(last_y) <= paragraph_gap {
+                last_para.text.push('\n');
+                last_para.text.push_str(&line.text);
+                last_para.y_start = line.y_center; // track last line position
+                continue;
+            }
+        }
+        paragraphs.push(Paragraph {
+            y_start: line.y_center,
+            text: line.text.clone(),
+        });
+    }
+
+    // Build sorted elements: paragraphs + tables, ordered by Y-position
+    enum ContentElement<'a> {
+        Paragraph { y: u32, text: String },
+        Table { y: u32, markdown: &'a str },
+    }
+
+    let mut elements: Vec<ContentElement> = Vec::new();
+
+    // Re-derive paragraph y_start from the first line in each paragraph
+    // We need the first y_center of the paragraph, which we track by rebuilding
+    {
+        let mut para_idx = 0;
+        let mut line_idx = 0;
+        for para in &paragraphs {
+            let line_count = para.text.matches('\n').count() + 1;
+            let first_y = if line_idx < lines.len() {
+                lines[line_idx].y_center
+            } else {
+                para.y_start
+            };
+            elements.push(ContentElement::Paragraph {
+                y: first_y,
+                text: para.text.clone(),
+            });
+            line_idx += line_count;
+            para_idx += 1;
+        }
+        let _ = para_idx; // suppress unused warning
+    }
+
+    for table in tables {
+        if let Some(ref bbox) = table.bounding_box {
+            elements.push(ContentElement::Table {
+                y: bbox.top,
+                markdown: &table.markdown,
+            });
+        } else {
+            // Tables without bbox go at the end
+            elements.push(ContentElement::Table {
+                y: u32::MAX,
+                markdown: &table.markdown,
+            });
+        }
+    }
+
+    // Sort by Y-position (ascending = top of image first)
+    elements.sort_by_key(|e| match e {
+        ContentElement::Paragraph { y, .. } => *y,
+        ContentElement::Table { y, .. } => *y,
+    });
+
+    // Join with double newlines
+    let mut output = String::new();
+    for elem in &elements {
+        let text = match elem {
+            ContentElement::Paragraph { text, .. } => text.as_str(),
+            ContentElement::Table { markdown, .. } => markdown,
+        };
+        let trimmed = text.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        if !output.is_empty() {
+            output.push_str("\n\n");
+        }
+        output.push_str(trimmed);
+    }
+
+    output
 }
 
 /// Perform OCR on an image using Tesseract.
@@ -371,10 +539,28 @@ pub(super) fn perform_ocr(
                     );
 
                     let markdown_table = table_to_markdown(&cleaned);
+
+                    // Compute bounding box from the TSV words used for table reconstruction
+                    let bbox = if !words.is_empty() {
+                        let left = words.iter().map(|w| w.left).min().unwrap_or(0);
+                        let top = words.iter().map(|w| w.top).min().unwrap_or(0);
+                        let right = words.iter().map(|w| w.left + w.width).max().unwrap_or(0);
+                        let bottom = words.iter().map(|w| w.top + w.height).max().unwrap_or(0);
+                        Some(OcrTableBoundingBox {
+                            left,
+                            top,
+                            right,
+                            bottom,
+                        })
+                    } else {
+                        None
+                    };
+
                     tables.push(OcrTable {
                         cells: cleaned,
                         markdown: markdown_table,
                         page_number: 0,
+                        bounding_box: bbox,
                     });
                 }
             }
@@ -389,7 +575,29 @@ pub(super) fn perform_ocr(
         }
     }
 
-    let content = strip_control_characters(&raw_content).into_owned();
+    let mut content = strip_control_characters(&raw_content).into_owned();
+
+    // When tables were detected and output is markdown, rebuild content with tables inlined
+    // at their correct vertical positions. This mirrors the PDF path's assemble_markdown_with_tables.
+    let is_markdown_output = extraction_config
+        .map(|c| c.output_format == crate::core::config::OutputFormat::Markdown)
+        .unwrap_or(config.output_format == "markdown");
+
+    if !tables.is_empty()
+        && is_markdown_output
+        && let Some(ref tsv_data) = tsv_data_for_tables
+    {
+        let rebuilt = build_content_with_inline_tables(tsv_data, &tables, config.table_min_confidence);
+        if !rebuilt.is_empty() {
+            content = rebuilt;
+            // Signal that content is already formatted as markdown so
+            // apply_output_format() in the pipeline skips re-conversion.
+            metadata.insert(
+                "pre_formatted".to_string(),
+                serde_json::Value::String("markdown".to_string()),
+            );
+        }
+    }
 
     Ok(OcrExtractionResult {
         content,

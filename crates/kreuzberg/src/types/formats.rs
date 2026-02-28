@@ -190,6 +190,23 @@ pub struct OcrTable {
     pub markdown: String,
     /// Page number where the table was found (1-indexed)
     pub page_number: usize,
+    /// Bounding box of the table in pixel coordinates (from OCR word positions).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub bounding_box: Option<OcrTableBoundingBox>,
+}
+
+/// Bounding box for an OCR-detected table in pixel coordinates.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct OcrTableBoundingBox {
+    /// Left x-coordinate (pixels)
+    pub left: u32,
+    /// Top y-coordinate (pixels)
+    pub top: u32,
+    /// Right x-coordinate (pixels)
+    pub right: u32,
+    /// Bottom y-coordinate (pixels)
+    pub bottom: u32,
 }
 
 /// Image preprocessing configuration for OCR.

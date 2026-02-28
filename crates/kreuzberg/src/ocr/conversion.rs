@@ -245,7 +245,7 @@ mod tests {
     #[test]
     fn test_tsv_row_to_element() {
         let row = TsvRow {
-            level: 4, // word level
+            level: 5, // word level (Tesseract: 1=Page, 2=Block, 3=Paragraph, 4=Line, 5=Word)
             page_num: 1,
             block_num: 1,
             par_num: 1,

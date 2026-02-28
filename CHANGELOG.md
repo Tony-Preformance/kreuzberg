@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **OCR table inlining into markdown content** (#421): When `output_format = Markdown` and OCR detects tables, the markdown pipe tables are now inlined into `result.content` at their correct vertical positions instead of only appearing in `result.tables`. Adds `OcrTableBoundingBox` to `OcrTable` for spatial positioning. Sets `metadata.output_format = "markdown"` to signal pre-formatted content and skip re-conversion.
+- **OCR table bounding boxes**: OCR-detected tables now include bounding box coordinates (pixel-level) computed from TSV word positions, propagated through all bindings as `Table.bounding_box`.
+- **OCR table test images**: Added balance sheet and financial table test images from issue #421 for integration testing.
+
+### Fixed
+
+- **OCR test_tsv_row_to_element used wrong Tesseract level**: Test specified `level: 4` (Line) but asserted `Word`. Fixed to `level: 5` (correct Tesseract word level).
+
+- **MSG recipients missing email addresses**: The MSG extractor read `PR_DISPLAY_TO` which contains only display names (e.g. "John Jennings"), losing email addresses entirely. Now reads recipient substorages (`__recip_version1.0_#XXXXXXXX`) with `PR_EMAIL_ADDRESS` and `PR_RECIPIENT_TYPE` to produce full `"Name" <email>` output with correct To/CC/BCC separation.
+- **MSG date missing or incorrect**: Date was parsed from `PR_TRANSPORT_MESSAGE_HEADERS` which is absent in many MSG files. Now reads `PR_CLIENT_SUBMIT_TIME` FILETIME directly from the MAPI properties stream, with fallback to transport headers.
+- **EML date mangled for non-standard formats**: `mail_parser` parsed ISO 8601 dates (e.g. `2025-07-29T12:42:06.000Z`) into garbled output (`2000-00-20T00:00:00Z`) and replaced invalid dates with `2000-00-00T00:00:00Z`. Now extracts the raw `Date:` header text from the email bytes, preserving the original value.
+- **EML/MSG attachments line pollutes text output**: `build_email_text_output()` appended an `Attachments: ...` line that doesn't represent message content. Removed from text output; attachment names remain in metadata.
+- **HTML script/style tags leak in email fallback**: The regex-based HTML cleaner for email bodies used `.*?` which doesn't match across newlines, allowing multiline `<script>`/`<style>` content to leak into extracted text. Added `(?s)` flag for dotall matching.
+- **SVG CData content leaks JavaScript/CSS**: `Event::CData` handler in the XML extractor didn't check SVG mode, causing `<script>` and `<style>` CDATA blocks to appear in SVG text output.
+
+---
+
 ## [4.4.0]
 
 ### Added
