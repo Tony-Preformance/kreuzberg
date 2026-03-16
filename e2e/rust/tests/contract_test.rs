@@ -24,10 +24,11 @@ async fn test_api_batch_bytes_async() {
     let file_bytes = std::fs::read(&document_path).expect("Failed to read document file");
     let mime_type = kreuzberg::detect_mime_type(&document_path, true).expect("Failed to detect MIME type");
 
-    let result = match kreuzberg::batch_extract_bytes(vec![(file_bytes.clone(), mime_type.clone())], &config).await {
-        Err(err) => panic!("Extraction failed for api_batch_bytes_async: {err:?}"),
-        Ok(results) => results.into_iter().next().expect("Expected at least one result"),
-    };
+    let result =
+        match kreuzberg::batch_extract_bytes(vec![(file_bytes.clone(), mime_type.clone(), None)], &config).await {
+            Err(err) => panic!("Extraction failed for api_batch_bytes_async: {err:?}"),
+            Ok(results) => results.into_iter().next().expect("Expected at least one result"),
+        };
 
     assertions::assert_expected_mime(&result, &["application/pdf"]);
     assertions::assert_min_content_length(&result, 10);
@@ -51,7 +52,8 @@ fn test_api_batch_bytes_sync() {
     let file_bytes = std::fs::read(&document_path).expect("Failed to read document file");
     let mime_type = kreuzberg::detect_mime_type(&document_path, true).expect("Failed to detect MIME type");
 
-    let result = match kreuzberg::batch_extract_bytes_sync(vec![(file_bytes.clone(), mime_type.clone())], &config) {
+    let result = match kreuzberg::batch_extract_bytes_sync(vec![(file_bytes.clone(), mime_type.clone(), None)], &config)
+    {
         Err(err) => panic!("Extraction failed for api_batch_bytes_sync: {err:?}"),
         Ok(results) => results.into_iter().next().expect("Expected at least one result"),
     };
@@ -75,7 +77,7 @@ async fn test_api_batch_file_async() {
     }
     let config = ExtractionConfig::default();
 
-    let result = match kreuzberg::batch_extract_file(vec![document_path.clone()], &config).await {
+    let result = match kreuzberg::batch_extract_file(vec![(document_path.clone(), None)], &config).await {
         Err(err) => panic!("Extraction failed for api_batch_file_async: {err:?}"),
         Ok(results) => results.into_iter().next().expect("Expected at least one result"),
     };
@@ -99,7 +101,7 @@ fn test_api_batch_file_sync() {
     }
     let config = ExtractionConfig::default();
 
-    let result = match kreuzberg::batch_extract_file_sync(vec![document_path.clone()], &config) {
+    let result = match kreuzberg::batch_extract_file_sync(vec![(document_path.clone(), None)], &config) {
         Err(err) => panic!("Extraction failed for api_batch_file_sync: {err:?}"),
         Ok(results) => results.into_iter().next().expect("Expected at least one result"),
     };

@@ -9,19 +9,21 @@ use pyo3::prelude::*;
 use pyo3::types::PyList;
 use std::path::PathBuf;
 
+type BatchBytesItem = (Vec<u8>, String, Option<kreuzberg::FileExtractionConfig>);
+
 /// Build file items from separate paths and optional per-file configs.
 fn build_file_items(
     path_strings: Vec<String>,
     file_configs: Option<Vec<Option<FileExtractionConfig>>>,
 ) -> PyResult<Vec<(PathBuf, Option<kreuzberg::FileExtractionConfig>)>> {
-    if let Some(ref configs) = file_configs {
-        if configs.len() != path_strings.len() {
-            return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "file_configs length ({}) must match paths length ({})",
-                configs.len(),
-                path_strings.len()
-            )));
-        }
+    if let Some(ref configs) = file_configs
+        && configs.len() != path_strings.len()
+    {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "file_configs length ({}) must match paths length ({})",
+            configs.len(),
+            path_strings.len()
+        )));
     }
 
     let items = match file_configs {
@@ -40,15 +42,15 @@ fn build_bytes_items(
     data_list: Vec<Vec<u8>>,
     mime_types: Vec<String>,
     file_configs: Option<Vec<Option<FileExtractionConfig>>>,
-) -> PyResult<Vec<(Vec<u8>, String, Option<kreuzberg::FileExtractionConfig>)>> {
-    if let Some(ref configs) = file_configs {
-        if configs.len() != data_list.len() {
-            return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "file_configs length ({}) must match data_list length ({})",
-                configs.len(),
-                data_list.len()
-            )));
-        }
+) -> PyResult<Vec<BatchBytesItem>> {
+    if let Some(ref configs) = file_configs
+        && configs.len() != data_list.len()
+    {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "file_configs length ({}) must match data_list length ({})",
+            configs.len(),
+            data_list.len()
+        )));
     }
 
     let items = match file_configs {

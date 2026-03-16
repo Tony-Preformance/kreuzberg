@@ -42,11 +42,14 @@ async fn test_batch_extract_file_multiple_formats() {
 
     let config = ExtractionConfig::default();
 
-    let paths = vec![
+    let paths: Vec<(std::path::PathBuf, Option<kreuzberg::FileExtractionConfig>)> = vec![
         get_test_file_path("pdfs/fake_memo.pdf"),
         get_test_file_path("documents/fake.docx"),
         get_test_file_path("text/fake_text.txt"),
-    ];
+    ]
+    .into_iter()
+    .map(|p| (p, None))
+    .collect();
 
     let results = batch_extract_file(paths, &config).await;
 
@@ -87,10 +90,13 @@ fn test_batch_extract_file_sync_variant() {
 
     let config = ExtractionConfig::default();
 
-    let paths = vec![
+    let paths: Vec<(std::path::PathBuf, Option<kreuzberg::FileExtractionConfig>)> = vec![
         get_test_file_path("pdfs/fake_memo.pdf"),
         get_test_file_path("text/fake_text.txt"),
-    ];
+    ]
+    .into_iter()
+    .map(|p| (p, None))
+    .collect();
 
     let results = batch_extract_file_sync(paths, &config);
 
@@ -129,9 +135,9 @@ async fn test_batch_extract_bytes_multiple() {
         (json_bytes.as_slice(), "application/json"),
     ];
 
-    let owned_contents: Vec<(Vec<u8>, String)> = contents
+    let owned_contents: Vec<(Vec<u8>, String, Option<kreuzberg::FileExtractionConfig>)> = contents
         .into_iter()
-        .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string()))
+        .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string(), None))
         .collect();
 
     let results = batch_extract_bytes(owned_contents, &config).await;
@@ -157,7 +163,7 @@ async fn test_batch_extract_bytes_multiple() {
 async fn test_batch_extract_empty_list() {
     let config = ExtractionConfig::default();
 
-    let paths: Vec<PathBuf> = vec![];
+    let paths: Vec<(PathBuf, Option<kreuzberg::FileExtractionConfig>)> = vec![];
     let results = batch_extract_file(paths, &config).await;
 
     assert!(results.is_ok(), "Empty batch should succeed");
@@ -182,11 +188,14 @@ async fn test_batch_extract_one_file_fails() {
 
     let config = ExtractionConfig::default();
 
-    let paths = vec![
+    let paths: Vec<(PathBuf, Option<kreuzberg::FileExtractionConfig>)> = vec![
         get_test_file_path("text/fake_text.txt"),
         get_test_documents_dir().join("nonexistent_file.txt"),
         get_test_file_path("text/contract.txt"),
-    ];
+    ]
+    .into_iter()
+    .map(|p| (p, None))
+    .collect();
 
     let results = batch_extract_file(paths, &config).await;
 
@@ -211,11 +220,14 @@ async fn test_batch_extract_all_fail() {
     let config = ExtractionConfig::default();
 
     let test_dir = get_test_documents_dir();
-    let paths = vec![
+    let paths: Vec<(PathBuf, Option<kreuzberg::FileExtractionConfig>)> = vec![
         test_dir.join("nonexistent1.txt"),
         test_dir.join("nonexistent2.pdf"),
         test_dir.join("nonexistent3.docx"),
-    ];
+    ]
+    .into_iter()
+    .map(|p| (p, None))
+    .collect();
 
     let results = batch_extract_file(paths, &config).await;
 
@@ -248,7 +260,8 @@ async fn test_batch_extract_concurrent() {
     let config = ExtractionConfig::default();
 
     let base_path = get_test_file_path("text/fake_text.txt");
-    let paths: Vec<PathBuf> = (0..20).map(|_| base_path.clone()).collect();
+    let paths: Vec<(PathBuf, Option<kreuzberg::FileExtractionConfig>)> =
+        (0..20).map(|_| (base_path.clone(), None)).collect();
 
     let start = std::time::Instant::now();
     let results = batch_extract_file(paths, &config).await;
@@ -288,7 +301,8 @@ async fn test_batch_extract_large_batch() {
     let config = ExtractionConfig::default();
 
     let base_path = get_test_file_path("text/fake_text.txt");
-    let paths: Vec<PathBuf> = (0..50).map(|_| base_path.clone()).collect();
+    let paths: Vec<(PathBuf, Option<kreuzberg::FileExtractionConfig>)> =
+        (0..50).map(|_| (base_path.clone(), None)).collect();
 
     let results = batch_extract_file(paths, &config).await;
 
@@ -315,9 +329,9 @@ fn test_batch_extract_bytes_sync_variant() {
         (b"# content 3".as_slice(), "text/markdown"),
     ];
 
-    let owned_contents: Vec<(Vec<u8>, String)> = contents
+    let owned_contents: Vec<(Vec<u8>, String, Option<kreuzberg::FileExtractionConfig>)> = contents
         .into_iter()
-        .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string()))
+        .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string(), None))
         .collect();
 
     let results = batch_extract_bytes_sync(owned_contents, &config);

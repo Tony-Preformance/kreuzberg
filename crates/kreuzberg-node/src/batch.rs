@@ -257,13 +257,13 @@ pub async fn batch_extract_bytes(
     let items: Vec<(Vec<u8>, String, Option<kreuzberg::FileExtractionConfig>)> = match file_configs {
         Some(fcs) => data_list
             .iter()
-            .zip(mime_types.into_iter())
+            .zip(mime_types)
             .zip(fcs)
             .map(|((data, mime), fc)| Ok((data.to_vec(), mime, resolve_file_config(fc)?)))
             .collect::<Result<Vec<_>>>()?,
         None => data_list
             .iter()
-            .zip(mime_types.into_iter())
+            .zip(mime_types)
             .map(|(data, mime)| (data.to_vec(), mime, None))
             .collect(),
     };

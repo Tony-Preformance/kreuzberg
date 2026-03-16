@@ -145,7 +145,11 @@ async fn test_batch_extract_file_concurrency() {
         paths.push(file_path);
     }
 
-    let results = batch_extract_file(paths.clone(), &config).await;
+    let results = batch_extract_file(
+        paths.clone().into_iter().map(|p| (p, None)).collect::<Vec<_>>(),
+        &config,
+    )
+    .await;
     assert!(results.is_ok());
 
     let results = results.expect("Operation failed");
@@ -167,7 +171,7 @@ async fn test_batch_extract_file_concurrency() {
 #[tokio::test]
 async fn test_batch_extract_empty() {
     let config = ExtractionConfig::default();
-    let paths: Vec<std::path::PathBuf> = vec![];
+    let paths: Vec<(std::path::PathBuf, Option<kreuzberg::FileExtractionConfig>)> = vec![];
 
     let results = batch_extract_file(paths, &config).await;
     assert!(results.is_ok());
@@ -187,9 +191,9 @@ async fn test_batch_extract_bytes_concurrency() {
         (b"content 5".as_slice(), "text/plain"),
     ];
 
-    let owned_contents: Vec<(Vec<u8>, String)> = contents
+    let owned_contents: Vec<(Vec<u8>, String, Option<kreuzberg::FileExtractionConfig>)> = contents
         .into_iter()
-        .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string()))
+        .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string(), None))
         .collect();
 
     let results = batch_extract_bytes(owned_contents, &config).await;
@@ -234,7 +238,7 @@ fn test_sync_wrappers() {
     assert_text_content(&extraction.content, "test bytes");
     assert!(extraction.chunks.is_none(), "Chunks should be None");
 
-    let paths = vec![file_path];
+    let paths = vec![(file_path, None::<kreuzberg::FileExtractionConfig>)];
     let results = batch_extract_file_sync(paths, &config);
     assert!(results.is_ok(), "Batch sync file should succeed");
     let results = results.expect("Operation failed");
@@ -243,9 +247,9 @@ fn test_sync_wrappers() {
     assert!(results[0].chunks.is_none(), "Chunks should be None");
 
     let contents = vec![(b"test".as_slice(), "text/plain")];
-    let owned_contents: Vec<(Vec<u8>, String)> = contents
+    let owned_contents: Vec<(Vec<u8>, String, Option<kreuzberg::FileExtractionConfig>)> = contents
         .into_iter()
-        .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string()))
+        .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string(), None))
         .collect();
     let results = batch_extract_bytes_sync(owned_contents, &config);
     assert!(results.is_ok(), "Batch bytes sync should succeed");

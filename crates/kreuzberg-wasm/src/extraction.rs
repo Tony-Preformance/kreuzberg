@@ -12,6 +12,8 @@ use kreuzberg::{
 };
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
+
+type BatchItem = (Vec<u8>, String, Option<FileExtractionConfig>);
 use web_sys::{File, FileReader};
 
 /// Extract content from a byte array (synchronous).
@@ -365,7 +367,7 @@ fn build_batch_items(
     data_list: Vec<Uint8Array>,
     mime_types: Vec<String>,
     file_configs: Option<Vec<JsValue>>,
-) -> Result<Vec<(Vec<u8>, String, Option<FileExtractionConfig>)>, JsValue> {
+) -> Result<Vec<BatchItem>, JsValue> {
     match file_configs {
         Some(configs) => {
             if configs.len() != data_list.len() {

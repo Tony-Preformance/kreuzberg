@@ -109,10 +109,9 @@ async fn test_concurrent_batch_extractions() {
         let contents_clone = contents.clone();
 
         handles.push(tokio::spawn(async move {
-            let data: Vec<(&[u8], &str)> = contents_clone.iter().map(|c| (c.as_slice(), "text/plain")).collect();
-            let owned_data: Vec<(Vec<u8>, String)> = data
-                .into_iter()
-                .map(|(bytes, mime)| (bytes.to_vec(), mime.to_string()))
+            let owned_data: Vec<(Vec<u8>, String, Option<kreuzberg::FileExtractionConfig>)> = contents_clone
+                .iter()
+                .map(|c| (c.to_vec(), "text/plain".to_string(), None))
                 .collect();
             batch_extract_bytes(owned_data, &config).await
         }));

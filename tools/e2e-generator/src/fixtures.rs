@@ -138,9 +138,10 @@ pub struct ExtractionSpec {
     pub file_configs: Option<Vec<Option<Map<String, Value>>>>,
 }
 
+#[allow(dead_code)]
 impl ExtractionSpec {
     pub fn has_file_configs(&self) -> bool {
-        self.file_configs.as_ref().map_or(false, |fc| !fc.is_empty())
+        self.file_configs.as_ref().is_some_and(|fc| !fc.is_empty())
     }
 }
 

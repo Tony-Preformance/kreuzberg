@@ -213,7 +213,6 @@ pub(in crate::pdf::markdown) fn recognize_tables_for_native_page(
 /// Cell bboxes are in crop-pixel space. Words are in PDF image-coord space
 /// (HocrWord: left in PDF x-units, top = page_height - pdf_top).
 /// Converts cell coords to word space via crop offset + scale factors.
-#[cfg(feature = "layout-detection")]
 fn build_tatr_grid_table(
     cell_grid: &[Vec<crate::layout::models::tatr::CellBBox>],
     words: &[&crate::pdf::table_reconstruct::HocrWord],

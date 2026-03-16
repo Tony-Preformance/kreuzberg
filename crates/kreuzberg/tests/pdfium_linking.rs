@@ -288,7 +288,10 @@ fn test_pdf_batch_extraction() {
         return;
     }
 
-    let paths = vec![get_test_file_path("pdf/tiny.pdf"), get_test_file_path("pdf/medium.pdf")];
+    let paths: Vec<(std::path::PathBuf, Option<kreuzberg::FileExtractionConfig>)> = vec![
+        (get_test_file_path("pdf/tiny.pdf"), None),
+        (get_test_file_path("pdf/medium.pdf"), None),
+    ];
 
     let config = ExtractionConfig::default();
 
