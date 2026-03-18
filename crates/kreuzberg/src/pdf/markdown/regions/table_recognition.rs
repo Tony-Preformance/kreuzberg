@@ -95,8 +95,11 @@ pub(in crate::pdf::markdown) fn recognize_tables_for_native_page(
             continue;
         }
 
-        // Guard: skip TATR on extremely large crops that would slow inference
-        if (crop_w as u64) * (crop_h as u64) > 1_000_000 {
+        // Guard: skip TATR on extremely large crops that would slow inference.
+        // DETR preprocessing resizes the crop (shortest edge → 800, cap 1333),
+        // so even large crops are feasible; 4M pixels (~2000x2000) is generous
+        // enough for tables rendered from the ~640px layout image.
+        if (crop_w as u64) * (crop_h as u64) > 4_000_000 {
             tracing::debug!(
                 page = page_index,
                 crop_w,
@@ -213,16 +216,15 @@ pub(in crate::pdf::markdown) fn recognize_tables_for_native_page(
     tables
 }
 
-/// Build markdown table from TATR structure + native PDF words.
-///
-/// TATR cell bboxes are in crop-pixel space. Words are in PDF image-coord space
-/// (HocrWord: left in PDF x-units, top = page_height - pdf_top).
-#[cfg(feature = "layout-detection")]
 /// Build markdown table from TATR cell grid + PDF words.
 ///
 /// Cell bboxes are in crop-pixel space. Words are in PDF image-coord space
 /// (HocrWord: left in PDF x-units, top = page_height - pdf_top).
 /// Converts cell coords to word space via crop offset + scale factors.
+///
+/// Uses best-match assignment: each word is assigned to the single cell with
+/// the highest IoW overlap, preventing duplication across cells.
+#[cfg(feature = "layout-detection")]
 fn build_tatr_grid_table(
     cell_grid: &[Vec<crate::layout::models::tatr::CellBBox>],
     words: &[&crate::pdf::table_reconstruct::HocrWord],
@@ -235,74 +237,84 @@ fn build_tatr_grid_table(
         return String::new();
     }
 
+    let num_rows = cell_grid.len();
     let num_cols = cell_grid[0].len();
     if num_cols == 0 {
         return String::new();
     }
 
-    let mut grid: Vec<Vec<String>> = Vec::with_capacity(cell_grid.len());
-
+    // Convert all cell bboxes from crop-pixel space to HocrWord coordinate
+    // space (PDF point units, image-oriented y).
+    let mut converted_cells: Vec<Vec<(f32, f32, f32, f32)>> = Vec::with_capacity(num_rows);
     for row in cell_grid {
-        let mut grid_row = vec![String::new(); num_cols];
-
-        for (col_idx, cell) in row.iter().enumerate() {
-            // Convert TATR crop-pixel bbox to HocrWord coordinate space:
-            // 1. Add crop offset to get page-image-pixel coords
-            // 2. Divide by scale factors to get PDF point coords
+        let mut conv_row = Vec::with_capacity(num_cols);
+        for cell in row {
             let cell_left = (cell.x1 + crop_offset_px_x) / sx;
             let cell_right = (cell.x2 + crop_offset_px_x) / sx;
             let cell_top = (cell.y1 + crop_offset_px_y) / sy;
             let cell_bottom = (cell.y2 + crop_offset_px_y) / sy;
+            conv_row.push((cell_left, cell_top, cell_right, cell_bottom));
+        }
+        converted_cells.push(conv_row);
+    }
 
-            let cell_text = match_words_to_cell(words, cell_left, cell_top, cell_right, cell_bottom);
-            grid_row[col_idx] = cell_text;
+    // Best-match assignment: assign each word to the single cell with the
+    // highest IoW, preventing the same word from appearing in multiple cells.
+    // Store (word_index, cx, cy) per cell for reading-order sorting.
+    let mut cell_words: Vec<Vec<Vec<(usize, f32, f32)>>> = (0..num_rows)
+        .map(|_| (0..num_cols).map(|_| Vec::new()).collect())
+        .collect();
+
+    for (wi, &word) in words.iter().enumerate() {
+        let mut best_iow: f32 = 0.0;
+        let mut best_row: usize = 0;
+        let mut best_col: usize = 0;
+
+        for (ri, conv_row) in converted_cells.iter().enumerate() {
+            for (ci, &(cl, ct, cr, cb)) in conv_row.iter().enumerate() {
+                let iow = word_hint_iow(word, cl, ct, cr, cb);
+                if iow > best_iow {
+                    best_iow = iow;
+                    best_row = ri;
+                    best_col = ci;
+                }
+            }
         }
 
+        if best_iow >= 0.2 {
+            let cx = word.left as f32 + word.width as f32 / 2.0;
+            let cy = word.top as f32 + word.height as f32 / 2.0;
+            cell_words[best_row][best_col].push((wi, cx, cy));
+        }
+    }
+
+    // Build the text grid from the assigned words.
+    let mut grid: Vec<Vec<String>> = Vec::with_capacity(num_rows);
+    for row_cells in &cell_words {
+        let mut grid_row = vec![String::new(); num_cols];
+        for (ci, cell_word_indices) in row_cells.iter().enumerate() {
+            if cell_word_indices.is_empty() {
+                continue;
+            }
+            // Sort words within the cell by reading order (y then x).
+            let mut sorted = cell_word_indices.clone();
+            sorted.sort_by(|a, b| a.2.total_cmp(&b.2).then_with(|| a.1.total_cmp(&b.1)));
+            let text: String = sorted
+                .iter()
+                .map(|(wi, _, _)| words[*wi].text.trim())
+                .filter(|t| !t.is_empty())
+                .collect::<Vec<_>>()
+                .join(" ");
+            grid_row[ci] = text;
+        }
         grid.push(grid_row);
     }
 
     render_grid_as_markdown(&grid)
 }
 
-/// Match HocrWords to a cell using intersection-over-word-area (IoW).
-///
-/// Assigns a word to this cell if the overlap between the word bbox and cell bbox
-/// covers at least 20% of the word's area (matching docling's cell assignment
-/// threshold). This is more robust than center-point containment for words that
-/// straddle cell boundaries.
-#[cfg(feature = "layout-detection")]
-fn match_words_to_cell(
-    words: &[&crate::pdf::table_reconstruct::HocrWord],
-    cell_left: f32,
-    cell_top: f32,
-    cell_right: f32,
-    cell_bottom: f32,
-) -> String {
-    let mut matched: Vec<(&crate::pdf::table_reconstruct::HocrWord, f32, f32)> = Vec::new();
-
-    for &word in words {
-        let iow = word_hint_iow(word, cell_left, cell_top, cell_right, cell_bottom);
-        if iow >= 0.2 {
-            let cx = word.left as f32 + word.width as f32 / 2.0;
-            let cy = word.top as f32 + word.height as f32 / 2.0;
-            matched.push((word, cx, cy));
-        }
-    }
-
-    if matched.is_empty() {
-        return String::new();
-    }
-
-    // Sort by y then x for reading order
-    matched.sort_by(|a, b| a.2.total_cmp(&b.2).then_with(|| a.1.total_cmp(&b.1)));
-
-    matched
-        .iter()
-        .map(|(w, _, _)| w.text.trim())
-        .filter(|t| !t.is_empty())
-        .collect::<Vec<_>>()
-        .join(" ")
-}
+// Word-to-cell matching is now handled inline in build_tatr_grid_table
+// using best-match assignment (each word assigned to exactly one cell).
 
 /// Render a grid of cell text strings as a markdown table.
 #[cfg(feature = "layout-detection")]

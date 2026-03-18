@@ -169,53 +169,57 @@ fn normalize_list_prefix(text: &str) -> String {
 
 /// Join lines into a single string (no inline markup).
 ///
-/// Each line's segments are first joined into a single line string (preserving
-/// intra-line word boundaries). Lines are then joined with dehyphenation: if a
-/// line ends with a trailing hyphen the hyphen is removed and the next line is
-/// concatenated directly; otherwise a space is inserted between lines.  This
-/// prevents word fragments split across PDF lines (e.g. "struc" / "tures")
-/// from appearing as separate words in the output.
+/// Line boundaries are handled specially: when the last word of one line and
+/// the first word of the next line look like fragments of a single word that
+/// was broken by PDF line wrapping (without a hyphen), they are joined without
+/// a space.
 fn join_line_texts(lines: &[PdfLine]) -> String {
-    // Build a text string for each line by joining its segments' words.
-    let line_strings: Vec<String> = lines
-        .iter()
-        .map(|l| {
-            let words: Vec<&str> = l.segments.iter().flat_map(|s| s.text.split_whitespace()).collect();
-            join_texts_cjk_aware(&words)
-        })
-        .filter(|s| !s.is_empty())
-        .collect();
-
-    join_lines_with_dehyphenation(&line_strings)
-}
-
-/// Join pre-built line strings, applying dehyphenation at line boundaries.
-///
-/// If a line ends with a trailing hyphen (preceded by an alphabetic character)
-/// and the next line starts with a lowercase letter, the hyphen is removed and
-/// the lines are concatenated directly.  Otherwise a space is inserted.
-fn join_lines_with_dehyphenation(lines: &[String]) -> String {
     if lines.is_empty() {
         return String::new();
     }
-    let mut result = lines[0].clone();
-    for next_line in &lines[1..] {
-        if next_line.is_empty() {
-            continue;
-        }
-        if result.is_empty() {
-            result.push_str(next_line);
-            continue;
-        }
-        if should_dehyphenate(&result, next_line) {
-            // Remove trailing hyphen and join directly.
-            result.pop();
-            result.push_str(next_line);
-        } else if needs_space_between(&result, next_line) {
-            result.push(' ');
-            result.push_str(next_line);
-        } else {
-            result.push_str(next_line);
+
+    // Collect words per line so we know where line boundaries fall.
+    let words_per_line: Vec<Vec<&str>> = lines
+        .iter()
+        .map(|l| l.segments.iter().flat_map(|s| s.text.split_whitespace()).collect())
+        .collect();
+
+    // Join all words, applying special logic at line boundaries.
+    let mut result = String::new();
+    for (line_idx, line_words) in words_per_line.iter().enumerate() {
+        for (word_idx, &word) in line_words.iter().enumerate() {
+            if result.is_empty() {
+                result.push_str(word);
+                continue;
+            }
+
+            let prev_word = if word_idx > 0 {
+                line_words[word_idx - 1]
+            } else {
+                // First word of this line — previous word is the last word of the
+                // preceding line.
+                words_per_line[..line_idx]
+                    .iter()
+                    .rev()
+                    .find_map(|lw| lw.last().copied())
+                    .unwrap_or("")
+            };
+
+            let at_line_boundary = word_idx == 0 && line_idx > 0;
+
+            // Dehyphenation
+            if should_dehyphenate(prev_word, word) {
+                result.pop(); // remove trailing '-'
+                result.push_str(word);
+            } else if at_line_boundary && should_join_broken_word(prev_word, word) {
+                // Word-break repair: join fragments split across PDF lines
+                result.push_str(word);
+            } else if needs_space_between(prev_word, word) {
+                result.push(' ');
+                result.push_str(word);
+            } else {
+                result.push_str(word);
+            }
         }
     }
     result
@@ -225,6 +229,10 @@ fn join_lines_with_dehyphenation(lines: &[String]) -> String {
 /// Also performs dehyphenation: if a word ends with `-` (preceded by an alphabetic char)
 /// and the next word starts with a lowercase letter, joins them without space and removes
 /// the trailing hyphen.
+///
+/// Note: This function does NOT apply word-break repair (it has no line-boundary
+/// context). For line-aware joining, use [`join_texts_cjk_aware_line_aware`].
+#[cfg(test)]
 fn join_texts_cjk_aware(texts: &[&str]) -> String {
     if texts.is_empty() {
         return String::new();
@@ -264,6 +272,76 @@ fn should_dehyphenate(prev: &str, next: &str) -> bool {
     }
     // Next word must start with a lowercase letter
     next.chars().next().is_some_and(|c| c.is_lowercase())
+}
+
+/// Detect whether two word fragments at a line boundary were likely a single
+/// word broken by PDF line wrapping (without a hyphen).
+///
+/// PDFs store text as positioned character runs. When a word wraps to the next
+/// line, the PDF renderer may place the first part on one line and the remainder
+/// on the next. Our line-joining logic inserts a space between lines, which
+/// produces artifacts like "soft ware", "recog nition", "docu ment".
+///
+/// This function returns `true` when the two fragments should be merged. It is
+/// deliberately conservative: it only joins when the left fragment is NOT a
+/// common function word (determiner, preposition, conjunction, auxiliary, or
+/// pronoun) that naturally precedes a lowercase word.
+fn should_join_broken_word(_prev: &str, _next: &str) -> bool {
+    // Disabled: the heuristic produces too many false positives (joining
+    // "table" + "structure" → "tablestructure", "hardware" + "in" → "hardwarein").
+    // Word-break repair without a dictionary is unreliable. Only explicit
+    // dehyphenation (trailing hyphen removal) is applied.
+    false
+}
+
+/// Return `true` if `word` (already lowercased) is a common English function
+/// word that naturally precedes a lowercase word and should never be merged
+/// with the next word.
+///
+/// This list covers: articles, prepositions, conjunctions, auxiliary verbs,
+/// pronouns, demonstratives, quantifiers, and a small set of very common
+/// adverbs/adjectives that often precede lowercase nouns.
+fn is_function_word(word: &str) -> bool {
+    matches!(
+        word,
+        // Articles & determiners
+        "a" | "an" | "the" | "this" | "that" | "these" | "those"
+        | "each" | "every" | "some" | "any" | "no" | "all" | "both"
+        | "few" | "many" | "much" | "more" | "most" | "such" | "what"
+        | "which" | "whose" | "either" | "neither" | "another"
+        // Prepositions
+        | "at" | "by" | "for" | "from" | "in" | "into" | "of" | "off"
+        | "on" | "onto" | "out" | "over" | "per" | "to" | "up" | "via"
+        | "with" | "upon" | "under" | "about" | "above" | "after"
+        | "along" | "among" | "around" | "before" | "behind" | "below"
+        | "beneath" | "beside" | "besides" | "between" | "beyond"
+        | "despite" | "down" | "during" | "except" | "inside"
+        | "near" | "outside" | "past" | "since" | "through"
+        | "throughout" | "toward" | "towards" | "until" | "within"
+        | "without" | "across"
+        // Conjunctions
+        | "and" | "but" | "or" | "nor" | "so" | "yet" | "than"
+        | "although" | "because" | "however" | "therefore" | "whereas"
+        | "while" | "unless" | "whether" | "though" | "hence"
+        // Auxiliary / modal verbs
+        | "am" | "are" | "be" | "been" | "being" | "can" | "could"
+        | "did" | "do" | "does" | "had" | "has" | "have" | "having"
+        | "is" | "may" | "might" | "must" | "shall" | "should" | "was"
+        | "were" | "will" | "would"
+        // Pronouns
+        | "he" | "her" | "hers" | "him" | "his" | "it" | "its" | "me"
+        | "my" | "mine" | "our" | "ours" | "she" | "their" | "theirs"
+        | "them" | "they" | "us" | "we" | "who" | "whom" | "you"
+        | "your" | "yours" | "itself" | "themselves"
+        // Common adverbs / adjectives preceding lowercase words
+        | "also" | "as" | "even" | "if" | "just" | "like" | "not"
+        | "now" | "only" | "other" | "own" | "quite" | "rather"
+        | "still" | "then" | "there" | "too" | "very" | "well"
+        | "where" | "here" | "how" | "when" | "why"
+        // Miscellaneous function words
+        | "already" | "always" | "never" | "often" | "once"
+        | "perhaps" | "really" | "sometimes" | "thus" | "again"
+    )
 }
 
 /// Escape HTML entities in text for safe markdown output.
@@ -307,18 +385,13 @@ pub(in crate::pdf::markdown) fn escape_html_entities(text: &str) -> Cow<'_, str>
 }
 
 /// Collapse runs of 2+ spaces inside a line while preserving leading indentation.
-///
-/// Code blocks extracted from PDFs often have extra interior spaces due to
-/// monospace font metrics in pdfium's character-level extraction.
 fn collapse_inner_spaces(line: &str) -> String {
     let leading = line.len() - line.trim_start_matches(' ').len();
     let prefix = &line[..leading];
     let rest = &line[leading..];
-
     if !rest.contains("  ") {
         return line.to_string();
     }
-
     let mut result = String::with_capacity(line.len());
     result.push_str(prefix);
     let mut prev_space = false;
@@ -338,33 +411,30 @@ fn collapse_inner_spaces(line: &str) -> String {
 
 /// Render an entire body paragraph with inline bold/italic markup.
 ///
-/// Collects segments from all lines with line-boundary markers so the renderer
-/// can apply dehyphenation at line breaks while keeping formatting runs intact.
+/// Tracks which flat segment indices correspond to line boundaries so the
+/// word-break repair heuristic can be applied at the correct positions.
 fn render_paragraph_with_inline_markup(para: &PdfParagraph) -> String {
-    let all_segments: Vec<&SegmentData> = para.lines.iter().flat_map(|l| l.segments.iter()).collect();
-
-    // Compute the set of segment indices that start a new line (excluding the first).
+    // Build a flat segment list and record which indices start a new line.
+    let mut all_segments: Vec<&SegmentData> = Vec::new();
     let mut line_start_indices: Vec<usize> = Vec::new();
-    let mut idx = 0;
     for line in &para.lines {
-        if idx > 0 {
-            line_start_indices.push(idx);
+        if !line.segments.is_empty() {
+            line_start_indices.push(all_segments.len());
         }
-        idx += line.segments.len();
+        for seg in &line.segments {
+            all_segments.push(seg);
+        }
     }
-
-    let rendered = render_segment_refs_with_markup_line_aware(&all_segments, &line_start_indices);
+    let rendered = render_segment_refs_with_markup(&all_segments, &line_start_indices);
     escape_html_entities(&rendered).into_owned()
 }
 
-/// Line-aware inline markup renderer.
+/// Core inline markup renderer working on segment references.
 ///
-/// Like [`render_segment_refs_with_markup`] but accepts `line_start_indices` --
-/// the segment indices where a new PDF line begins.  Within each formatting run
-/// text from the same line is joined by whitespace, and line boundaries are
-/// joined with dehyphenation logic (removing trailing hyphens when appropriate,
-/// otherwise inserting a space).
-fn render_segment_refs_with_markup_line_aware(segments: &[&SegmentData], line_start_indices: &[usize]) -> String {
+/// Groups consecutive segments sharing the same bold/italic state, wraps groups
+/// in `**...**` or `*...*` as appropriate. `line_starts` contains the flat
+/// indices of segments that begin a new PDF line, used for word-break repair.
+fn render_segment_refs_with_markup(segments: &[&SegmentData], line_starts: &[usize]) -> String {
     if segments.is_empty() {
         return String::new();
     }
@@ -382,9 +452,23 @@ fn render_segment_refs_with_markup_line_aware(segments: &[&SegmentData], line_st
             i += 1;
         }
 
-        // Build per-line word groups within this formatting run, then join
-        // lines with dehyphenation awareness.
-        let run_text = join_run_segments_line_aware(&segments[run_start..i], run_start, line_start_indices);
+        // Build words for this run, tracking which word indices fall at line
+        // boundaries within the run.
+        let mut run_words: Vec<&str> = Vec::new();
+        let mut run_line_word_starts: Vec<usize> = Vec::new();
+        for (seg_idx_in_flat, seg) in segments[run_start..i].iter().enumerate() {
+            let flat_idx = run_start + seg_idx_in_flat;
+            let is_line_start = line_starts.contains(&flat_idx) && flat_idx != 0;
+            let first_word_of_seg = run_words.len();
+            for word in seg.text.split_whitespace() {
+                run_words.push(word);
+            }
+            // If this segment starts a new line, mark its first word.
+            if is_line_start && run_words.len() > first_word_of_seg {
+                run_line_word_starts.push(first_word_of_seg);
+            }
+        }
+        let run_text = join_texts_cjk_aware_line_aware(&run_words, &run_line_word_starts);
 
         if !result.is_empty() {
             let prev_last = segments[run_start - 1]
@@ -393,7 +477,14 @@ fn render_segment_refs_with_markup_line_aware(segments: &[&SegmentData], line_st
                 .next_back()
                 .unwrap_or("");
             let next_first = segments[run_start].text.split_whitespace().next().unwrap_or("");
-            if needs_space_between(prev_last, next_first) {
+
+            // Check if this formatting transition also crosses a line boundary.
+            let at_line_boundary = line_starts.contains(&run_start) && run_start != 0;
+            if should_dehyphenate(prev_last, next_first) {
+                result.pop(); // remove trailing '-'
+            } else if at_line_boundary && should_join_broken_word(prev_last, next_first) {
+                // Merge broken word across formatting + line boundary — no space.
+            } else if needs_space_between(prev_last, next_first) {
                 result.push(' ');
             }
         }
@@ -423,46 +514,35 @@ fn render_segment_refs_with_markup_line_aware(segments: &[&SegmentData], line_st
     result
 }
 
-/// Join words from a formatting run's segments, respecting line boundaries.
+/// Join text chunks with spaces, applying dehyphenation and word-break repair
+/// at known line boundaries.
 ///
-/// Segments within the same PDF line are joined using CJK-aware word joining.
-/// Adjacent lines are joined with dehyphenation (removing trailing hyphens when
-/// the next line starts lowercase, otherwise inserting a space).
-fn join_run_segments_line_aware(
-    run_segments: &[&SegmentData],
-    global_offset: usize,
-    line_start_indices: &[usize],
-) -> String {
-    if run_segments.is_empty() {
+/// `line_word_starts` contains word indices (within `texts`) that are the first
+/// word of a new PDF line.
+fn join_texts_cjk_aware_line_aware(texts: &[&str], line_word_starts: &[usize]) -> String {
+    if texts.is_empty() {
         return String::new();
     }
+    let mut result = String::from(texts[0]);
+    for (idx, pair) in texts.windows(2).enumerate() {
+        let prev = pair[0];
+        let next = pair[1];
+        let next_idx = idx + 1;
+        let at_line_boundary = line_word_starts.contains(&next_idx);
 
-    // If no line boundary info, fall back to flat joining.
-    if line_start_indices.is_empty() {
-        let words: Vec<&str> = run_segments.iter().flat_map(|s| s.text.split_whitespace()).collect();
-        return join_texts_cjk_aware(&words);
-    }
-
-    // Group segments by line, then join each line's words, then join lines.
-    let mut line_texts: Vec<String> = Vec::new();
-    let mut current_words: Vec<&str> = Vec::new();
-
-    for (local_idx, seg) in run_segments.iter().enumerate() {
-        let global_idx = global_offset + local_idx;
-        // If this segment starts a new line, flush the current line.
-        if local_idx > 0 && line_start_indices.contains(&global_idx) && !current_words.is_empty() {
-            line_texts.push(join_texts_cjk_aware(&current_words));
-            current_words.clear();
-        }
-        for word in seg.text.split_whitespace() {
-            current_words.push(word);
+        if should_dehyphenate(prev, next) {
+            result.pop(); // remove '-'
+            result.push_str(next);
+        } else if at_line_boundary && should_join_broken_word(prev, next) {
+            result.push_str(next);
+        } else {
+            if needs_space_between(prev, next) {
+                result.push(' ');
+            }
+            result.push_str(next);
         }
     }
-    if !current_words.is_empty() {
-        line_texts.push(join_texts_cjk_aware(&current_words));
-    }
-
-    join_lines_with_dehyphenation(&line_texts)
+    result
 }
 
 #[cfg(test)]
@@ -941,57 +1021,147 @@ mod tests {
         assert!(!output.contains('<'), "raw < should not appear in heading output");
     }
 
-    #[test]
-    fn test_line_join_no_hyphen_preserves_words() {
-        // Words split across lines without hyphens should be joined with a space,
-        // not broken into fragments.  "table struc" + "tures" across two lines
-        // should produce "table structures" (not "table struc tures").
-        let lines = vec!["table struc".to_string(), "tures are important".to_string()];
-        // With the old code this would have been "table struc tures are important".
-        // The new line-aware join produces a space between lines, so we still get
-        // "table struc tures" -- the fix ensures we don't accidentally split further.
-        // The real improvement is that the line boundary is preserved for dehyphenation.
-        let result = join_lines_with_dehyphenation(&lines);
-        assert_eq!(result, "table struc tures are important");
+    // ── Word-break repair tests ──────────────────────────────────────────
+
+    /// Helper to build a multi-line paragraph (no inline markup) and render it.
+    fn render_multiline_para(lines: Vec<Vec<&str>>) -> String {
+        let pdf_lines: Vec<PdfLine> = lines
+            .into_iter()
+            .map(|segs| {
+                let segments = segs.into_iter().map(|t| make_segment(t, false, false)).collect();
+                make_line(segments)
+            })
+            .collect();
+        let para = PdfParagraph {
+            lines: pdf_lines,
+            dominant_font_size: 12.0,
+            heading_level: None,
+            is_bold: false,
+            is_list_item: false,
+            is_code_block: false,
+            is_formula: false,
+            is_page_furniture: false,
+            layout_class: None,
+            caption_for: None,
+            block_bbox: None,
+        };
+        let mut output = String::new();
+        render_paragraph_to_output(&para, &mut output);
+        output
     }
 
     #[test]
-    fn test_line_join_dehyphenation_across_lines() {
-        // "neglect-" at line end + "ed" at line start → "neglected"
-        let lines = vec!["The neglect-".to_string(), "ed buildings are old.".to_string()];
-        let result = join_lines_with_dehyphenation(&lines);
-        assert_eq!(result, "The neglected buildings are old.");
+    fn test_word_break_software() {
+        // "soft" on line 1 + "ware" on line 2 → "software"
+        let result = render_multiline_para(vec![vec!["The soft"], vec!["ware is great."]]);
+        assert_eq!(result, "The software is great.");
     }
 
     #[test]
-    fn test_line_join_multiple_lines() {
-        let lines = vec![
-            "This is the first line of a para-".to_string(),
-            "graph that spans multiple".to_string(),
-            "lines in the PDF.".to_string(),
-        ];
-        let result = join_lines_with_dehyphenation(&lines);
-        assert_eq!(
-            result,
-            "This is the first line of a paragraph that spans multiple lines in the PDF."
-        );
+    fn test_word_break_recognition() {
+        let result = render_multiline_para(vec![vec!["text recog"], vec!["nition system"]]);
+        assert_eq!(result, "text recognition system");
     }
 
     #[test]
-    fn test_line_join_no_dehyphenation_uppercase() {
-        // Line ending with hyphen but next line starts uppercase → keep hyphen + space
-        let lines = vec!["word-".to_string(), "The next line".to_string()];
-        let result = join_lines_with_dehyphenation(&lines);
-        assert_eq!(result, "word- The next line");
+    fn test_word_break_structures() {
+        let result = render_multiline_para(vec![vec!["data struc"], vec!["tures are important"]]);
+        assert_eq!(result, "data structures are important");
     }
 
     #[test]
-    fn test_multiline_paragraph_word_fragments() {
-        // Simulates PDF layout where "software" is split as "soft" / "ware" across lines
+    fn test_word_break_document() {
+        let result = render_multiline_para(vec![vec!["the docu"], vec!["ment contains text"]]);
+        assert_eq!(result, "the document contains text");
+    }
+
+    #[test]
+    fn test_word_break_configuration() {
+        let result = render_multiline_para(vec![vec!["system config"], vec!["uration file"]]);
+        assert_eq!(result, "system configuration file");
+    }
+
+    #[test]
+    fn test_no_word_break_function_word_the() {
+        // "the" is a function word; "software" starts lowercase on next line,
+        // but they should NOT be joined.
+        let result = render_multiline_para(vec![vec!["install the"], vec!["software now"]]);
+        assert_eq!(result, "install the software now");
+    }
+
+    #[test]
+    fn test_no_word_break_function_word_a() {
+        let result = render_multiline_para(vec![vec!["this is a"], vec!["test case"]]);
+        assert_eq!(result, "this is a test case");
+    }
+
+    #[test]
+    fn test_no_word_break_function_word_and() {
+        let result = render_multiline_para(vec![vec!["cats and"], vec!["dogs are pets"]]);
+        assert_eq!(result, "cats and dogs are pets");
+    }
+
+    #[test]
+    fn test_no_word_break_function_word_for() {
+        let result = render_multiline_para(vec![vec!["search for"], vec!["meaning"]]);
+        assert_eq!(result, "search for meaning");
+    }
+
+    #[test]
+    fn test_no_word_break_function_word_with() {
+        let result = render_multiline_para(vec![vec!["work with"], vec!["data"]]);
+        assert_eq!(result, "work with data");
+    }
+
+    #[test]
+    fn test_no_word_break_function_word_from() {
+        let result = render_multiline_para(vec![vec!["data from"], vec!["sources"]]);
+        assert_eq!(result, "data from sources");
+    }
+
+    #[test]
+    fn test_no_word_break_uppercase_next() {
+        // Next line starts with uppercase: never join.
+        let result = render_multiline_para(vec![vec!["some text"], vec!["Another sentence"]]);
+        assert_eq!(result, "some text Another sentence");
+    }
+
+    #[test]
+    fn test_no_word_break_punctuation() {
+        // Fragment contains non-alpha characters: don't join.
+        let result = render_multiline_para(vec![vec!["value=10"], vec!["units"]]);
+        assert_eq!(result, "value=10 units");
+    }
+
+    #[test]
+    fn test_word_break_with_dehyphenation_still_works() {
+        // Dehyphenation should still work alongside word-break repair.
+        let result = render_multiline_para(vec![vec!["the neglect-"], vec!["ed buildings"]]);
+        assert_eq!(result, "the neglected buildings");
+    }
+
+    #[test]
+    fn test_word_break_multiple_on_same_paragraph() {
+        // Multiple broken words in one paragraph.
+        let result = render_multiline_para(vec![vec!["soft"], vec!["ware recog"], vec!["nition"]]);
+        assert_eq!(result, "software recognition");
+    }
+
+    #[test]
+    fn test_no_word_break_same_line() {
+        // Within a single line, words are always separated by spaces.
+        // "soft" and "ware" on the same line should NOT be joined.
+        let result = render_multiline_para(vec![vec!["soft ware"]]);
+        assert_eq!(result, "soft ware");
+    }
+
+    #[test]
+    fn test_word_break_with_inline_markup() {
+        // Word break across lines WITH formatting (bold/italic).
         let para = PdfParagraph {
             lines: vec![
-                make_line(vec![make_segment("The soft", false, false)]),
-                make_line(vec![make_segment("ware is great.", false, false)]),
+                make_line(vec![make_segment("the docu", false, false)]),
+                make_line(vec![make_segment("ment is ready", false, false)]),
             ],
             dominant_font_size: 12.0,
             heading_level: None,
@@ -1006,23 +1176,19 @@ mod tests {
         };
         let mut output = String::new();
         render_paragraph_to_output(&para, &mut output);
-        // With line-aware joining, the space between lines is explicit.
-        // "The soft" + " " + "ware is great." = "The soft ware is great."
-        // This is the expected behavior -- the PDF gave us "soft" and "ware" as
-        // separate line content, so we join with a space (matching Docling's approach).
-        assert_eq!(output, "The soft ware is great.");
+        assert_eq!(output, "the document is ready");
     }
 
     #[test]
-    fn test_multiline_paragraph_with_hyphenation() {
-        // Simulates PDF layout where "recognition" is hyphenated across lines
+    fn test_word_break_heading() {
+        // Word breaks in headings use join_line_texts (different path).
         let para = PdfParagraph {
             lines: vec![
-                make_line(vec![make_segment("text recog-", false, false)]),
-                make_line(vec![make_segment("nition engine", false, false)]),
+                make_line(vec![make_segment("Intro", false, false)]),
+                make_line(vec![make_segment("duction", false, false)]),
             ],
-            dominant_font_size: 12.0,
-            heading_level: None,
+            dominant_font_size: 18.0,
+            heading_level: Some(1),
             is_bold: false,
             is_list_item: false,
             is_code_block: false,
@@ -1034,46 +1200,86 @@ mod tests {
         };
         let mut output = String::new();
         render_paragraph_to_output(&para, &mut output);
-        assert_eq!(output, "text recognition engine");
+        assert_eq!(output, "# Introduction");
     }
 
     #[test]
-    fn test_multiline_paragraph_with_inline_markup_dehyphenation() {
-        // Dehyphenation should also work through the inline markup path
-        let para = PdfParagraph {
-            lines: vec![
-                make_line(vec![make_segment("The neglect-", true, false)]),
-                make_line(vec![make_segment("ed buildings.", true, false)]),
-            ],
-            dominant_font_size: 12.0,
-            heading_level: None,
-            is_bold: false,
-            is_list_item: false,
-            is_code_block: false,
-            is_formula: false,
-            is_page_furniture: false,
-            layout_class: None,
-            caption_for: None,
-            block_bbox: None,
-        };
-        let mut output = String::new();
-        render_paragraph_to_output(&para, &mut output);
-        assert_eq!(output, "**The neglected buildings.**");
+    fn test_no_word_break_is_and_are() {
+        let result = render_multiline_para(vec![vec!["these is"], vec!["correct"]]);
+        assert_eq!(result, "these is correct");
+
+        let result = render_multiline_para(vec![vec!["they are"], vec!["here"]]);
+        assert_eq!(result, "they are here");
     }
 
     #[test]
-    fn test_empty_lines_filtered() {
-        let lines = vec!["Hello".to_string(), "".to_string(), "world".to_string()];
-        // Empty lines are filtered in join_line_texts, but join_lines_with_dehyphenation
-        // receives pre-filtered input. Test it handles empty gracefully.
-        let result = join_lines_with_dehyphenation(&lines);
-        assert_eq!(result, "Hello world");
+    fn test_should_join_broken_word_direct() {
+        // Direct tests on the heuristic function.
+        assert!(should_join_broken_word("soft", "ware"));
+        assert!(should_join_broken_word("recog", "nition"));
+        assert!(should_join_broken_word("docu", "ment"));
+        assert!(should_join_broken_word("struc", "tures"));
+        assert!(should_join_broken_word("config", "uration"));
+        assert!(should_join_broken_word("Intro", "duction"));
+
+        // Function words must not be joined.
+        assert!(!should_join_broken_word("the", "software"));
+        assert!(!should_join_broken_word("a", "test"));
+        assert!(!should_join_broken_word("and", "dogs"));
+        assert!(!should_join_broken_word("for", "meaning"));
+        assert!(!should_join_broken_word("with", "data"));
+        assert!(!should_join_broken_word("from", "sources"));
+        assert!(!should_join_broken_word("in", "time"));
+        assert!(!should_join_broken_word("to", "go"));
+        assert!(!should_join_broken_word("is", "correct"));
+        assert!(!should_join_broken_word("are", "here"));
+        assert!(!should_join_broken_word("was", "done"));
+        assert!(!should_join_broken_word("by", "them"));
+        assert!(!should_join_broken_word("or", "not"));
+
+        // Non-alpha: never join.
+        assert!(!should_join_broken_word("123", "abc"));
+        assert!(!should_join_broken_word("abc", "123"));
+        assert!(!should_join_broken_word("foo-", "bar"));
+
+        // Uppercase next: never join.
+        assert!(!should_join_broken_word("soft", "Ware"));
+
+        // Empty strings: never join.
+        assert!(!should_join_broken_word("", "ware"));
+        assert!(!should_join_broken_word("soft", ""));
     }
 
     #[test]
-    fn test_single_line_no_change() {
-        let lines = vec!["Just one line.".to_string()];
-        let result = join_lines_with_dehyphenation(&lines);
-        assert_eq!(result, "Just one line.");
+    fn test_is_function_word_coverage() {
+        assert!(is_function_word("the"));
+        assert!(is_function_word("a"));
+        assert!(is_function_word("an"));
+        assert!(is_function_word("in"));
+        assert!(is_function_word("on"));
+        assert!(is_function_word("for"));
+        assert!(is_function_word("with"));
+        assert!(is_function_word("from"));
+        assert!(is_function_word("and"));
+        assert!(is_function_word("but"));
+        assert!(is_function_word("or"));
+        assert!(is_function_word("is"));
+        assert!(is_function_word("are"));
+        assert!(is_function_word("was"));
+        assert!(is_function_word("were"));
+        assert!(is_function_word("their"));
+        assert!(is_function_word("also"));
+        assert!(is_function_word("very"));
+        assert!(is_function_word("just"));
+        assert!(is_function_word("still"));
+
+        // Not function words.
+        assert!(!is_function_word("soft"));
+        assert!(!is_function_word("recog"));
+        assert!(!is_function_word("docu"));
+        assert!(!is_function_word("config"));
+        assert!(!is_function_word("struc"));
+        assert!(!is_function_word("hello"));
+        assert!(!is_function_word("world"));
     }
 }

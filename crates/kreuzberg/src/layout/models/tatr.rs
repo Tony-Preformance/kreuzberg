@@ -47,7 +47,15 @@ const CONF_THRESHOLD_ROW_COL: f32 = 0.3;
 const CONF_THRESHOLD_SPANNING: f32 = 0.5;
 
 /// IoB threshold for NMS during cell grid construction.
-const NMS_IOB_THRESHOLD: f32 = 0.1;
+///
+/// A candidate detection is suppressed if more than this fraction of its area
+/// overlaps with any already-kept detection.  The previous value of 0.1 was
+/// too aggressive: TATR row/column predictions frequently overlap by a few
+/// pixels, causing valid rows to be suppressed and merging their content.
+/// 0.5 means "suppress only when the majority of the candidate is already
+/// covered" — enough to remove true duplicates while preserving close but
+/// distinct rows.
+const NMS_IOB_THRESHOLD: f32 = 0.5;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -497,12 +505,16 @@ pub fn build_cell_grid(result: &TatrResult, table_bbox: Option<[f32; 4]>) -> Vec
         .map(|r| [table_x1, r.bbox[1], table_x2, r.bbox[3]])
         .collect();
 
-    // NMS on rows (by confidence, IoB threshold)
-    let nms_rows = nms_by_iob(&result.rows, &widened_rows);
+    // NMS on rows (by confidence, IoB threshold), then sort top-to-bottom.
+    // nms_by_iob returns rows in confidence order; we must restore spatial
+    // order so the cell grid rows correspond to top-to-bottom reading order.
+    let mut nms_rows = nms_by_iob(&result.rows, &widened_rows);
+    nms_rows.sort_by(|a, b| a[1].total_cmp(&b[1]));
 
-    // NMS on columns (using original bboxes)
+    // NMS on columns (using original bboxes), then sort left-to-right.
     let col_bboxes: Vec<[f32; 4]> = result.columns.iter().map(|c| c.bbox).collect();
-    let nms_cols = nms_by_iob(&result.columns, &col_bboxes);
+    let mut nms_cols = nms_by_iob(&result.columns, &col_bboxes);
+    nms_cols.sort_by(|a, b| a[0].total_cmp(&b[0]));
 
     // Build grid: intersection of each (row, col) pair
     let mut grid = Vec::with_capacity(nms_rows.len());
@@ -750,6 +762,28 @@ mod tests {
         assert_eq!(kept.len(), 2, "non-overlapping detections should both be kept");
     }
 
+    #[test]
+    fn test_nms_keeps_adjacent_rows_with_minor_overlap() {
+        // Two rows that overlap by 2px (10% of height) should be kept.
+        // This tests the fix: IoB threshold 0.5 preserves close but distinct rows.
+        let detections = vec![
+            TatrDetection {
+                bbox: [0.0, 0.0, 100.0, 20.0],
+                confidence: 0.9,
+                class: TatrClass::Row,
+            },
+            TatrDetection {
+                bbox: [0.0, 18.0, 100.0, 38.0],
+                confidence: 0.8,
+                class: TatrClass::Row,
+            },
+        ];
+        let bboxes: Vec<[f32; 4]> = detections.iter().map(|d| d.bbox).collect();
+        let kept = nms_by_iob(&detections, &bboxes);
+        // IoB = intersection(100*2) / area(100*20) = 0.1 < 0.5 → both kept
+        assert_eq!(kept.len(), 2, "adjacent rows with minor overlap should both be kept");
+    }
+
     // -- Cell grid --
 
     #[test]
@@ -853,6 +887,80 @@ mod tests {
         assert_eq!(TatrClass::from_index(5), Some(TatrClass::SpanningCell));
         assert_eq!(TatrClass::from_index(6), None); // NoObject
         assert_eq!(TatrClass::from_index(7), None); // out of range
+    }
+
+    #[test]
+    fn test_build_cell_grid_rows_sorted_spatially() {
+        // Rows provided in reverse confidence order (bottom row has higher
+        // confidence). After NMS + spatial sorting, the grid should still
+        // have the top row first.
+        let result = TatrResult {
+            rows: vec![
+                TatrDetection {
+                    bbox: [0.0, 30.0, 100.0, 50.0], // bottom row
+                    confidence: 0.95,
+                    class: TatrClass::Row,
+                },
+                TatrDetection {
+                    bbox: [0.0, 0.0, 100.0, 20.0], // top row
+                    confidence: 0.80,
+                    class: TatrClass::Row,
+                },
+            ],
+            columns: vec![TatrDetection {
+                bbox: [0.0, 0.0, 100.0, 50.0],
+                confidence: 0.9,
+                class: TatrClass::Column,
+            }],
+            headers: Vec::new(),
+            spanning: Vec::new(),
+        };
+
+        let grid = build_cell_grid(&result, None);
+        assert_eq!(grid.len(), 2, "should have 2 rows");
+        // First grid row should be the spatially top row (y1 = 0)
+        assert!(
+            grid[0][0].y1 < grid[1][0].y1,
+            "grid rows should be sorted top-to-bottom: row0.y1={} row1.y1={}",
+            grid[0][0].y1,
+            grid[1][0].y1,
+        );
+    }
+
+    #[test]
+    fn test_build_cell_grid_columns_sorted_spatially() {
+        // Columns with right column having higher confidence.
+        let result = TatrResult {
+            rows: vec![TatrDetection {
+                bbox: [0.0, 0.0, 100.0, 20.0],
+                confidence: 0.9,
+                class: TatrClass::Row,
+            }],
+            columns: vec![
+                TatrDetection {
+                    bbox: [60.0, 0.0, 100.0, 20.0], // right column
+                    confidence: 0.95,
+                    class: TatrClass::Column,
+                },
+                TatrDetection {
+                    bbox: [0.0, 0.0, 50.0, 20.0], // left column
+                    confidence: 0.80,
+                    class: TatrClass::Column,
+                },
+            ],
+            headers: Vec::new(),
+            spanning: Vec::new(),
+        };
+
+        let grid = build_cell_grid(&result, None);
+        assert_eq!(grid[0].len(), 2, "should have 2 columns");
+        // First column should be the left column (x1 = 0)
+        assert!(
+            grid[0][0].x1 < grid[0][1].x1,
+            "grid columns should be sorted left-to-right: col0.x1={} col1.x1={}",
+            grid[0][0].x1,
+            grid[0][1].x1,
+        );
     }
 
     // -- Preprocessing dimensions --
