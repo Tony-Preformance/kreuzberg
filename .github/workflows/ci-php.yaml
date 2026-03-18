@@ -69,7 +69,7 @@ jobs:
   build-php-extension:
     name: PHP Build (${{ matrix.os }}, PHP ${{ matrix.php-version }})
     if: github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]'
-    timeout-minutes: 180
+    timeout-minutes: 240
     strategy:
       fail-fast: true
       matrix:
@@ -213,7 +213,7 @@ jobs:
     name: PHP Tests (${{ matrix.os }}, PHP ${{ matrix.php-version }})
     if: github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]'
     needs: build-php-extension
-    timeout-minutes: 180
+    timeout-minutes: 240
     strategy:
       fail-fast: true
       matrix:
