@@ -50,8 +50,7 @@ pub(in crate::pdf::markdown) fn apply_region_class(
                 // since typical page aspect ratio is ~0.77 (612/792).
                 let lateral_margin = page_height * 0.06; // ~48pt on letter, covers left/right 8%
                 let is_sidebar = region_height > region_width * 3.0
-                    && (hint.right < lateral_margin
-                        || hint.left > page_height - lateral_margin);
+                    && (hint.right < lateral_margin || hint.left > page_height - lateral_margin);
 
                 near_top || near_bottom || is_sidebar
             } else {
@@ -414,10 +413,10 @@ mod tests {
         let hint = LayoutHint {
             class: LayoutHintClass::PageHeader,
             confidence: 0.9,
-            left: 5.0,     // left margin
-            bottom: 50.0,  // near bottom of page
-            right: 25.0,   // narrow (20pt wide)
-            top: 742.0,    // near top of page (792 - 50)
+            left: 5.0,    // left margin
+            bottom: 50.0, // near bottom of page
+            right: 25.0,  // narrow (20pt wide)
+            top: 742.0,   // near top of page (792 - 50)
         };
         let page_height = 792.0; // letter size
 

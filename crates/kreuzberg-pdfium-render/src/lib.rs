@@ -1,5 +1,10 @@
 #![doc = include_str!("../README.md")]
 #![allow(clippy::doc_nested_refdefs)]
+// Vendored fork: suppress warnings from entangled internal modules
+// (form fields, annotation variable_text, appearance mode) that are
+// not exposed in the prelude but cannot be cleanly removed.
+#![allow(dead_code)]
+#![allow(deprecated)]
 
 mod bindgen {
     #![allow(non_upper_case_globals)]
@@ -41,21 +46,6 @@ pub mod prelude {
         // Document
         pdf::document::fonts::*,
         pdf::document::metadata::*,
-        pdf::document::pages::*,
-        pdf::document::permissions::*,
-        pdf::document::{PdfDocument, PdfDocumentVersion},
-        // Page core
-        pdf::document::page::boundaries::*,
-        pdf::document::page::extraction::*,
-        pdf::document::page::links::*,
-        pdf::document::page::paragraph::*,
-        pdf::document::page::render_config::*,
-        pdf::document::page::size::*,
-        pdf::document::page::struct_element::*,
-        pdf::document::page::struct_tree::*,
-        pdf::document::page::{
-            PdfBitmapRotation, PdfPage, PdfPageContentRegenerationStrategy, PdfPageOrientation, PdfPageRenderRotation,
-        },
         // Annotations (read-only, used by kreuzberg annotations.rs)
         pdf::document::page::annotation::attachment_points::*,
         pdf::document::page::annotation::circle::*,
@@ -73,6 +63,10 @@ pub mod prelude {
         pdf::document::page::annotation::unsupported::*,
         pdf::document::page::annotation::{PdfPageAnnotation, PdfPageAnnotationCommon, PdfPageAnnotationType},
         pdf::document::page::annotations::*,
+        // Page core
+        pdf::document::page::boundaries::*,
+        pdf::document::page::extraction::*,
+        pdf::document::page::links::*,
         // Page objects
         pdf::document::page::object::content_mark::*,
         pdf::document::page::object::content_marks::*,
@@ -89,6 +83,11 @@ pub mod prelude {
         },
         pdf::document::page::objects::common::*,
         pdf::document::page::objects::*,
+        pdf::document::page::paragraph::*,
+        pdf::document::page::render_config::*,
+        pdf::document::page::size::*,
+        pdf::document::page::struct_element::*,
+        pdf::document::page::struct_tree::*,
         // Text extraction
         pdf::document::page::text::char::*,
         pdf::document::page::text::chars::*,
@@ -96,6 +95,10 @@ pub mod prelude {
         pdf::document::page::text::segment::*,
         pdf::document::page::text::segments::*,
         pdf::document::page::text::*,
+        pdf::document::page::{PdfPage, PdfPageContentRegenerationStrategy, PdfPageOrientation, PdfPageRenderRotation},
+        pdf::document::pages::*,
+        pdf::document::permissions::*,
+        pdf::document::{PdfDocument, PdfDocumentVersion},
         // Fonts & geometry
         pdf::font::glyph::*,
         pdf::font::glyphs::*,

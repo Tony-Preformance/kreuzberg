@@ -109,10 +109,7 @@ fn filter_blocks_recursive(blocks: &[ExtractedBlock], left_cutoff: f32, right_cu
 /// `ExtractedBlock` → `PageContent` (via `adapters::from_structure_tree`) →
 /// `Vec<PdfParagraph>` (via `content_convert::content_to_paragraphs`).
 pub(super) fn extracted_blocks_to_paragraphs(blocks: &[ExtractedBlock]) -> Vec<PdfParagraph> {
-    // page_width/page_height are unused by content_to_paragraphs for structure-tree content
-    // (no spatial grouping is performed; elements carry their own bboxes). page_number is
-    // set to 1 (1-indexed sentinel) because we don't have the caller's page number here.
-    let page_content = super::adapters::from_structure_tree(blocks, 0.0, 0.0, 1);
+    let page_content = super::adapters::from_structure_tree(blocks);
     super::content_convert::content_to_paragraphs(&page_content)
 }
 
@@ -656,8 +653,7 @@ fn assemble_segments_from_chars(char_infos: &[CharInfo], repair_map: Option<&[(c
         // removed to rejoin a word split across lines.  The `is_hyphen` flag
         // from pdfium's `FPDFText_IsHyphen` fires for soft hyphens (U+00AD),
         // discretionary hyphens, and regular hyphens at line-break positions.
-        let merge_with_next = range_idx + 1 < line_ranges.len()
-            && line_ends_with_break_hyphen(&char_infos[start..end]);
+        let merge_with_next = range_idx + 1 < line_ranges.len() && line_ends_with_break_hyphen(&char_infos[start..end]);
 
         if merge_with_next {
             // Strip the trailing hyphen character from the accumulated text so
@@ -785,10 +781,10 @@ fn line_ends_with_break_hyphen(line_chars: &[CharInfo]) -> bool {
 /// U+2011). If the text ends with trailing spaces after the hyphen, only the
 /// hyphen itself is removed (spaces were already trimmed by the caller).
 fn strip_trailing_hyphen(text: &mut String) {
-    if let Some(ch) = text.chars().next_back() {
-        if matches!(ch, '-' | '\u{2010}' | '\u{00AD}' | '\u{2011}') {
-            text.pop();
-        }
+    if let Some(ch) = text.chars().next_back()
+        && matches!(ch, '-' | '\u{2010}' | '\u{00AD}' | '\u{2011}')
+    {
+        text.pop();
     }
 }
 
@@ -1464,7 +1460,13 @@ mod tests {
         let mut chars = Vec::new();
         // Line 1: "this is soft-" — hyphen at end has is_hyphen = true
         chars.extend(make_word_chars("this", 10.0, 100.0, fs));
-        chars.push(make_char_exact(' ', 10.0 + 4.0 * cw + 1.0, 100.0, fs, 10.0 + 4.0 * cw + 1.0 + cw));
+        chars.push(make_char_exact(
+            ' ',
+            10.0 + 4.0 * cw + 1.0,
+            100.0,
+            fs,
+            10.0 + 4.0 * cw + 1.0 + cw,
+        ));
         chars.extend(make_word_chars("is", 10.0 + 5.0 * cw + 2.0, 100.0, fs));
         chars.push(make_char_exact(
             ' ',
@@ -1476,11 +1478,23 @@ mod tests {
         let soft_start = right_margin_x - 5.0 * cw; // 4 chars + hyphen
         chars.extend(make_word_chars("soft", soft_start, 100.0, fs));
         // Trailing hyphen with is_hyphen = true (pdfium flag)
-        chars.push(make_hyphen_char('-', soft_start + 4.0 * cw, 100.0, fs, soft_start + 5.0 * cw));
+        chars.push(make_hyphen_char(
+            '-',
+            soft_start + 4.0 * cw,
+            100.0,
+            fs,
+            soft_start + 5.0 * cw,
+        ));
 
         // Line 2: "ware is great" — starts with lowercase continuation
         chars.extend(make_word_chars("ware", 10.0, 80.0, fs));
-        chars.push(make_char_exact(' ', 10.0 + 4.0 * cw + 1.0, 80.0, fs, 10.0 + 4.0 * cw + 1.0 + cw));
+        chars.push(make_char_exact(
+            ' ',
+            10.0 + 4.0 * cw + 1.0,
+            80.0,
+            fs,
+            10.0 + 4.0 * cw + 1.0 + cw,
+        ));
         chars.extend(make_word_chars("is", 10.0 + 5.0 * cw + 2.0, 80.0, fs));
         chars.push(make_char_exact(
             ' ',
@@ -1493,11 +1507,7 @@ mod tests {
         chars.extend(make_word_chars("great", great_start, 80.0, fs));
 
         let segments = assemble_segments_from_chars(&chars, None);
-        let all_text: String = segments
-            .iter()
-            .map(|s| s.text.as_str())
-            .collect::<Vec<_>>()
-            .join(" ");
+        let all_text: String = segments.iter().map(|s| s.text.as_str()).collect::<Vec<_>>().join(" ");
         assert!(
             all_text.contains("software"),
             "Expected 'software' in merged text, got: {all_text}",
@@ -1584,7 +1594,13 @@ mod tests {
 
         // Line 2: "next line" — starts with lowercase
         chars.extend(make_word_chars("next", 10.0, 80.0, fs));
-        chars.push(make_char_exact(' ', 10.0 + 4.0 * cw + 1.0, 80.0, fs, 10.0 + 5.0 * cw + 1.0));
+        chars.push(make_char_exact(
+            ' ',
+            10.0 + 4.0 * cw + 1.0,
+            80.0,
+            fs,
+            10.0 + 5.0 * cw + 1.0,
+        ));
         let line2_start = right_margin_x - 4.0 * cw;
         chars.extend(make_word_chars("line", line2_start, 80.0, fs));
 
@@ -1607,15 +1623,33 @@ mod tests {
         let mut chars = Vec::new();
         // Line 1: "the recog-" — ends with pdfium hyphen
         chars.extend(make_word_chars("the", 10.0, 100.0, fs));
-        chars.push(make_char_exact(' ', 10.0 + 3.0 * cw + 1.0, 100.0, fs, 10.0 + 4.0 * cw + 1.0));
+        chars.push(make_char_exact(
+            ' ',
+            10.0 + 3.0 * cw + 1.0,
+            100.0,
+            fs,
+            10.0 + 4.0 * cw + 1.0,
+        ));
         let recog_start = right_margin_x - 6.0 * cw; // 5 chars + hyphen
         chars.extend(make_word_chars("recog", recog_start, 100.0, fs));
-        chars.push(make_hyphen_char('-', recog_start + 5.0 * cw, 100.0, fs, recog_start + 6.0 * cw));
+        chars.push(make_hyphen_char(
+            '-',
+            recog_start + 5.0 * cw,
+            100.0,
+            fs,
+            recog_start + 6.0 * cw,
+        ));
 
         // Line 2: "nition is" — starts with lowercase continuation
         let ni_start = 10.0;
         chars.extend(make_word_chars("nition", ni_start, 80.0, fs));
-        chars.push(make_char_exact(' ', ni_start + 6.0 * cw + 1.0, 80.0, fs, ni_start + 7.0 * cw + 1.0));
+        chars.push(make_char_exact(
+            ' ',
+            ni_start + 6.0 * cw + 1.0,
+            80.0,
+            fs,
+            ni_start + 7.0 * cw + 1.0,
+        ));
         let is_start = right_margin_x - 2.0 * cw;
         chars.extend(make_word_chars("is", is_start, 80.0, fs));
 
@@ -1683,7 +1717,13 @@ mod tests {
         let cw = fs * 0.6;
         // "word—" with em dash that has is_hyphen = true — should NOT be treated as break
         let mut chars = make_word_chars("word", 10.0, 100.0, fs);
-        chars.push(make_hyphen_char('\u{2014}', 10.0 + 4.0 * cw, 100.0, fs, 10.0 + 5.0 * cw));
+        chars.push(make_hyphen_char(
+            '\u{2014}',
+            10.0 + 4.0 * cw,
+            100.0,
+            fs,
+            10.0 + 5.0 * cw,
+        ));
         assert!(!line_ends_with_break_hyphen(&chars));
     }
 
@@ -1722,7 +1762,13 @@ mod tests {
         chars.push(make_hyphen_char('-', 10.0 + 4.0 * cw, 100.0, fs, 10.0 + 5.0 * cw));
         // Line 2 at y=80: "ware is great"
         chars.extend(make_word_chars("ware", 10.0, 80.0, fs));
-        chars.push(make_char_exact(' ', 10.0 + 4.0 * cw + 1.0, 80.0, fs, 10.0 + 5.0 * cw + 1.0));
+        chars.push(make_char_exact(
+            ' ',
+            10.0 + 4.0 * cw + 1.0,
+            80.0,
+            fs,
+            10.0 + 5.0 * cw + 1.0,
+        ));
         chars.extend(make_word_chars("is", 10.0 + 5.0 * cw + 2.0, 80.0, fs));
         chars.push(make_char_exact(
             ' ',
@@ -1734,11 +1780,7 @@ mod tests {
         chars.extend(make_word_chars("great", 10.0 + 8.0 * cw + 4.0, 80.0, fs));
 
         let segments = assemble_segments_from_chars(&chars, None);
-        let all_text: String = segments
-            .iter()
-            .map(|s| s.text.as_str())
-            .collect::<Vec<_>>()
-            .join(" ");
+        let all_text: String = segments.iter().map(|s| s.text.as_str()).collect::<Vec<_>>().join(" ");
         assert!(
             all_text.contains("software"),
             "Expected 'software' (dehyphenated), got: {all_text}",
@@ -1765,11 +1807,7 @@ mod tests {
         chars.extend(make_word_chars("known", 10.0, 80.0, fs));
 
         let segments = assemble_segments_from_chars(&chars, None);
-        let all_text: String = segments
-            .iter()
-            .map(|s| s.text.as_str())
-            .collect::<Vec<_>>()
-            .join(" ");
+        let all_text: String = segments.iter().map(|s| s.text.as_str()).collect::<Vec<_>>().join(" ");
         assert!(
             all_text.contains("well-"),
             "Non-break hyphen should be preserved, got: {all_text}",
@@ -1798,11 +1836,7 @@ mod tests {
         chars.extend(make_word_chars("tion", 10.0, 80.0, fs));
 
         let segments = assemble_segments_from_chars(&chars, None);
-        let all_text: String = segments
-            .iter()
-            .map(|s| s.text.as_str())
-            .collect::<Vec<_>>()
-            .join(" ");
+        let all_text: String = segments.iter().map(|s| s.text.as_str()).collect::<Vec<_>>().join(" ");
         assert!(
             all_text.contains("configuration"),
             "Expected 'configuration' from multi-line dehyphenation, got: {all_text}",

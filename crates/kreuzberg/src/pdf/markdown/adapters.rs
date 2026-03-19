@@ -3,34 +3,21 @@
 
 use pdfium_render::prelude::{ContentRole, ExtractedBlock};
 
-use super::content::{ContentElement, ElementLevel, ExtractionSource, PageContent, SemanticRole};
+use super::content::{ContentElement, ElementLevel, PageContent, SemanticRole};
 use super::geometry::Rect;
 #[cfg(feature = "layout-detection")]
 use super::types::LayoutHintClass;
-use crate::pdf::hierarchy::SegmentData;
-
 // ── Structure tree adapter ──────────────────────────────────────────────
 
 /// Convert structure-tree `ExtractedBlock`s into a [`PageContent`].
 ///
 /// Flattens the block hierarchy into a flat list of `ContentElement`s,
 /// mapping `ContentRole` to `SemanticRole` and extracting bounding boxes.
-pub(super) fn from_structure_tree(
-    blocks: &[ExtractedBlock],
-    page_width: f32,
-    page_height: f32,
-    page_number: usize,
-) -> PageContent {
+pub(super) fn from_structure_tree(blocks: &[ExtractedBlock]) -> PageContent {
     let mut elements = Vec::new();
     flatten_blocks(blocks, &mut elements);
 
-    PageContent {
-        page_number,
-        page_width,
-        page_height,
-        elements,
-        source: ExtractionSource::StructureTree,
-    }
+    PageContent { elements }
 }
 
 /// Recursively flatten `ExtractedBlock` hierarchy into `ContentElement`s.
@@ -59,7 +46,6 @@ fn flatten_blocks(blocks: &[ExtractedBlock], elements: &mut Vec<ContentElement>)
             is_bold: block.is_bold,
             is_italic: block.is_italic,
             is_monospace: block.is_monospace,
-            confidence: None,
             semantic_role: Some(semantic_role),
             level: ElementLevel::Block,
             list_label,
@@ -85,53 +71,6 @@ fn map_content_role(role: &ContentRole) -> (SemanticRole, Option<String>) {
     }
 }
 
-// ── Heuristic segments adapter ──────────────────────────────────────────
-
-/// Convert pdfium heuristic `SegmentData`s into a [`PageContent`].
-///
-/// Each segment becomes a line-level `ContentElement` with its spatial data
-/// mapped directly (already in PDF coordinate space).
-pub(super) fn from_segments(
-    segments: Vec<SegmentData>,
-    page_width: f32,
-    page_height: f32,
-    page_number: usize,
-) -> PageContent {
-    let elements = segments
-        .into_iter()
-        .filter(|s| !s.text.trim().is_empty())
-        .map(|s| {
-            let bbox = if s.width > 0.0 || s.height > 0.0 || s.x != 0.0 || s.y != 0.0 {
-                Some(Rect::from_lbrt(s.x, s.y, s.x + s.width, s.y + s.height))
-            } else {
-                None
-            };
-
-            ContentElement {
-                text: s.text,
-                bbox,
-                font_size: Some(s.font_size),
-                is_bold: s.is_bold,
-                is_italic: s.is_italic,
-                is_monospace: s.is_monospace,
-                confidence: None,
-                semantic_role: None,
-                level: ElementLevel::Line,
-                list_label: None,
-                layout_class: None,
-            }
-        })
-        .collect();
-
-    PageContent {
-        page_number,
-        page_width,
-        page_height,
-        elements,
-        source: ExtractionSource::PdfiumHeuristic,
-    }
-}
-
 // ── OCR adapter ─────────────────────────────────────────────────────────
 
 /// Convert `OcrElement`s into a [`PageContent`].
@@ -139,12 +78,7 @@ pub(super) fn from_segments(
 /// Coordinates are flipped from image space (y=0 at top) to PDF space
 /// (y=0 at bottom) using `page_height`.
 #[cfg(feature = "layout-detection")]
-pub(crate) fn from_ocr_elements(
-    elements: &[crate::types::OcrElement],
-    page_width: f32,
-    page_height: f32,
-    page_number: usize,
-) -> PageContent {
+pub(crate) fn from_ocr_elements(elements: &[crate::types::OcrElement], page_height: f32) -> PageContent {
     let content_elements = elements
         .iter()
         .filter(|e| !e.text.trim().is_empty())
@@ -216,7 +150,6 @@ pub(crate) fn from_ocr_elements(
                 is_bold,
                 is_italic,
                 is_monospace,
-                confidence: Some(e.confidence.recognition as f32),
                 semantic_role,
                 level,
                 list_label: None,
@@ -226,11 +159,7 @@ pub(crate) fn from_ocr_elements(
         .collect();
 
     PageContent {
-        page_number,
-        page_width,
-        page_height,
         elements: content_elements,
-        source: ExtractionSource::Ocr,
     }
 }
 
@@ -277,9 +206,8 @@ mod tests {
             make_block(ContentRole::Heading { level: 1 }, "Title"),
             make_block(ContentRole::Paragraph, "Body text"),
         ];
-        let page = from_structure_tree(&blocks, 612.0, 792.0, 1);
+        let page = from_structure_tree(&blocks);
         assert_eq!(page.elements.len(), 2);
-        assert_eq!(page.source, ExtractionSource::StructureTree);
         assert_eq!(page.elements[0].semantic_role, Some(SemanticRole::Heading { level: 1 }));
         assert_eq!(page.elements[1].semantic_role, Some(SemanticRole::Paragraph));
     }
@@ -291,7 +219,7 @@ mod tests {
             make_block(ContentRole::Paragraph, "   "),
             make_block(ContentRole::Paragraph, "Real text"),
         ];
-        let page = from_structure_tree(&blocks, 612.0, 792.0, 1);
+        let page = from_structure_tree(&blocks);
         assert_eq!(page.elements.len(), 1);
         assert_eq!(page.elements[0].text, "Real text");
     }
@@ -311,14 +239,14 @@ mod tests {
                 make_block(ContentRole::Paragraph, "Cell 2"),
             ],
         }];
-        let page = from_structure_tree(&blocks, 612.0, 792.0, 1);
+        let page = from_structure_tree(&blocks);
         assert_eq!(page.elements.len(), 2);
     }
 
     #[test]
     fn test_from_structure_tree_maps_bounds() {
         let blocks = vec![make_block_with_bounds(ContentRole::Paragraph, "With bounds")];
-        let page = from_structure_tree(&blocks, 612.0, 792.0, 1);
+        let page = from_structure_tree(&blocks);
         let elem = &page.elements[0];
         assert!(elem.bbox.is_some());
         assert!(elem.is_bold);
@@ -338,63 +266,9 @@ mod tests {
             is_monospace: false,
             children: Vec::new(),
         }];
-        let page = from_structure_tree(&blocks, 612.0, 792.0, 1);
+        let page = from_structure_tree(&blocks);
         assert_eq!(page.elements[0].semantic_role, Some(SemanticRole::ListItem));
         assert_eq!(page.elements[0].list_label, Some("1.".to_string()));
-    }
-
-    #[test]
-    fn test_from_segments_basic() {
-        let segments = vec![
-            SegmentData {
-                text: "Hello world".to_string(),
-                x: 50.0,
-                y: 700.0,
-                width: 200.0,
-                height: 12.0,
-                font_size: 12.0,
-                is_bold: false,
-                is_italic: false,
-                is_monospace: false,
-                baseline_y: 700.0,
-            },
-            SegmentData {
-                text: "Second line".to_string(),
-                x: 50.0,
-                y: 680.0,
-                width: 180.0,
-                height: 12.0,
-                font_size: 12.0,
-                is_bold: true,
-                is_italic: false,
-                is_monospace: false,
-                baseline_y: 680.0,
-            },
-        ];
-        let page = from_segments(segments, 612.0, 792.0, 1);
-        assert_eq!(page.elements.len(), 2);
-        assert_eq!(page.source, ExtractionSource::PdfiumHeuristic);
-        assert!(page.elements[0].bbox.is_some());
-        assert_eq!(page.elements[0].font_size, Some(12.0));
-        assert!(page.elements[1].is_bold);
-    }
-
-    #[test]
-    fn test_from_segments_skips_empty() {
-        let segments = vec![SegmentData {
-            text: "   ".to_string(),
-            x: 0.0,
-            y: 0.0,
-            width: 0.0,
-            height: 0.0,
-            font_size: 12.0,
-            is_bold: false,
-            is_italic: false,
-            is_monospace: false,
-            baseline_y: 0.0,
-        }];
-        let page = from_segments(segments, 612.0, 792.0, 1);
-        assert_eq!(page.elements.len(), 0);
     }
 
     #[test]
@@ -446,78 +320,8 @@ mod tests {
     }
 
     #[test]
-    fn test_from_segments_no_bbox_when_all_zero() {
-        let segments = vec![SegmentData {
-            text: "No position".to_string(),
-            x: 0.0,
-            y: 0.0,
-            width: 0.0,
-            height: 0.0,
-            font_size: 12.0,
-            is_bold: false,
-            is_italic: false,
-            is_monospace: false,
-            baseline_y: 0.0,
-        }];
-        let page = from_segments(segments, 612.0, 792.0, 1);
-        assert_eq!(page.elements.len(), 1);
-        assert!(page.elements[0].bbox.is_none());
-    }
-
-    #[test]
-    fn test_from_segments_preserves_style_flags() {
-        let segments = vec![SegmentData {
-            text: "Styled".to_string(),
-            x: 10.0,
-            y: 20.0,
-            width: 50.0,
-            height: 12.0,
-            font_size: 14.0,
-            is_bold: true,
-            is_italic: true,
-            is_monospace: true,
-            baseline_y: 20.0,
-        }];
-        let page = from_segments(segments, 612.0, 792.0, 1);
-        let elem = &page.elements[0];
-        assert!(elem.is_bold);
-        assert!(elem.is_italic);
-        assert!(elem.is_monospace);
-        assert_eq!(elem.font_size, Some(14.0));
-    }
-
-    #[test]
-    fn test_from_segments_page_metadata() {
-        let page = from_segments(Vec::new(), 400.0, 600.0, 5);
-        assert_eq!(page.page_number, 5);
-        assert!((page.page_width - 400.0).abs() < f32::EPSILON);
-        assert!((page.page_height - 600.0).abs() < f32::EPSILON);
-    }
-
-    #[test]
     fn test_from_structure_tree_page_metadata() {
-        let page = from_structure_tree(&[], 500.0, 700.0, 3);
-        assert_eq!(page.page_number, 3);
-        assert_eq!(page.source, ExtractionSource::StructureTree);
+        let page = from_structure_tree(&[]);
         assert!(page.elements.is_empty());
-    }
-
-    #[test]
-    fn test_from_segments_element_level_is_line() {
-        let segments = vec![SegmentData {
-            text: "A line".to_string(),
-            x: 10.0,
-            y: 100.0,
-            width: 80.0,
-            height: 12.0,
-            font_size: 12.0,
-            is_bold: false,
-            is_italic: false,
-            is_monospace: false,
-            baseline_y: 100.0,
-        }];
-        let page = from_segments(segments, 612.0, 792.0, 1);
-        assert_eq!(page.elements[0].level, ElementLevel::Line);
-        assert!(page.elements[0].semantic_role.is_none());
     }
 }

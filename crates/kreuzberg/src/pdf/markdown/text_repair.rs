@@ -959,10 +959,7 @@ mod tests {
 
     #[test]
     fn test_clean_duplicate_punctuation_multiple() {
-        assert_eq!(
-            clean_duplicate_punctuation("a, , b, , c"),
-            "a, b, c"
-        );
+        assert_eq!(clean_duplicate_punctuation("a, , b, , c"), "a, b, c");
     }
 
     #[test]

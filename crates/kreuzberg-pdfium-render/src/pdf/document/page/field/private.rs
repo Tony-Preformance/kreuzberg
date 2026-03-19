@@ -475,6 +475,7 @@ pub(crate) mod internal {
 
 #[cfg(test)]
 mod tests {
+    use crate::pdf::document::page::field::PdfFormFieldCommon;
     use crate::pdf::document::page::field::private::internal::{PdfFormFieldFlags, PdfFormFieldPrivate};
     use crate::prelude::*;
     use crate::utils::test::{test_bind_to_pdfium, test_fixture_path};

@@ -34,8 +34,6 @@
 //! ```
 
 mod converter;
-mod image_handling;
-mod processor;
 mod stack_management;
 mod types;
 

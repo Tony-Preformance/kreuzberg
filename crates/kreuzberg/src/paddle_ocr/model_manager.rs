@@ -1106,7 +1106,6 @@ mod tests {
                 "Paths should be prefixed with paddle-ocr/"
             );
         }
-
     }
 
     #[test]

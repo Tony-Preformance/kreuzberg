@@ -409,8 +409,6 @@ pub(crate) async fn extract_with_ocr(
         let ocr_result = ocr_result.expect("OCR result missing for page");
         let (_page_idx_enc, _image_data, _width, _height) = &encoded_pages[page_idx];
         #[cfg(feature = "layout-detection")]
-        let width = *_width;
-        #[cfg(feature = "layout-detection")]
         let height = *_height;
 
         // Accumulate mean_text_conf from per-page OCR results.
@@ -443,8 +441,7 @@ pub(crate) async fn extract_with_ocr(
             };
 
             // Convert OcrElements to PageContent via unified adapter.
-            let mut page_content =
-                crate::pdf::markdown::adapters::from_ocr_elements(elements, width as f32, height as f32, page_idx + 1);
+            let mut page_content = crate::pdf::markdown::adapters::from_ocr_elements(elements, height as f32);
 
             // Reorder for multi-column reading order.
             crate::pdf::markdown::reorder_elements_reading_order(&mut page_content.elements);

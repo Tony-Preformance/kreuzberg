@@ -10,8 +10,8 @@ use crate::pdf::rect::PdfRect;
 
 #[cfg(doc)]
 use {
-    crate::pdf::action::PdfActionType,
-    crate::pdf::document::page::PdfPage, crate::pdf::document::page::annotation::PdfPageAnnotation,
+    crate::pdf::action::PdfActionType, crate::pdf::document::page::PdfPage,
+    crate::pdf::document::page::annotation::PdfPageAnnotation,
 };
 
 /// A single link contained within a [PdfPage] or a [PdfPageAnnotation].

@@ -392,10 +392,7 @@ fn build_paragraph_from_lines(line_groups: &[&Vec<usize>], elements: &[ContentEl
             let is_code = matches!(elem.semantic_role, Some(SemanticRole::Code));
             let is_formula = matches!(elem.semantic_role, Some(SemanticRole::Formula))
                 || matches!(elem.layout_class, Some(LayoutHintClass::Formula));
-            let is_page_furniture = matches!(
-                elem.semantic_role,
-                Some(SemanticRole::PageHeader) | Some(SemanticRole::PageFooter)
-            );
+            let is_page_furniture = false;
             let mut is_list = matches!(elem.semantic_role, Some(SemanticRole::ListItem));
 
             // Detect list items from text content when not tagged.
@@ -488,10 +485,7 @@ fn element_to_paragraph(elem: &ContentElement) -> Option<PdfParagraph> {
     let is_formula = matches!(elem.semantic_role, Some(SemanticRole::Formula))
         || matches!(elem.layout_class, Some(LayoutHintClass::Formula));
     let is_monospace = elem.is_monospace || is_code_block;
-    let is_page_furniture = matches!(
-        elem.semantic_role,
-        Some(SemanticRole::PageHeader) | Some(SemanticRole::PageFooter)
-    );
+    let is_page_furniture = false;
 
     // Detect list items from text content when not tagged.
     if !is_list_item {
@@ -572,7 +566,7 @@ fn element_to_paragraph(elem: &ContentElement) -> Option<PdfParagraph> {
 /// then right column top-to-bottom.
 ///
 /// The detection algorithm:
-/// 1. Filter out `PageHeader`/`PageFooter` elements from analysis (but keep them in output).
+/// 1. Filter out furniture elements from analysis (but keep them in output).
 /// 2. Collect X-center positions of content elements that have bounding boxes.
 /// 3. Sort X-centers, find the largest gap between adjacent values.
 /// 4. Gap must be ≥ 10% of estimated page width (max right edge of any element).
@@ -586,16 +580,11 @@ pub(crate) fn reorder_elements_reading_order(elements: &mut Vec<ContentElement>)
         return;
     }
 
-    // Collect content elements (non-header/footer) that have bounding boxes.
+    // Collect content elements that have bounding boxes.
     let content_indices: Vec<usize> = elements
         .iter()
         .enumerate()
-        .filter(|(_, e)| {
-            !matches!(
-                e.semantic_role,
-                Some(SemanticRole::PageHeader) | Some(SemanticRole::PageFooter)
-            ) && e.bbox.is_some()
-        })
+        .filter(|(_, e)| e.bbox.is_some())
         .map(|(i, _)| i)
         .collect();
 
@@ -748,7 +737,6 @@ pub(crate) fn reorder_elements_reading_order(elements: &mut Vec<ContentElement>)
 
 #[cfg(test)]
 mod tests {
-    use super::super::content::ExtractionSource;
     use super::super::geometry::Rect;
     use super::*;
 
@@ -760,7 +748,6 @@ mod tests {
             is_bold: false,
             is_italic: false,
             is_monospace: false,
-            confidence: None,
             semantic_role: role,
             level: ElementLevel::Block,
             list_label: None,
@@ -776,7 +763,6 @@ mod tests {
             is_bold: false,
             is_italic: false,
             is_monospace: false,
-            confidence: None,
             semantic_role: Some(SemanticRole::Paragraph),
             level: ElementLevel::Word,
             list_label: None,
@@ -785,13 +771,7 @@ mod tests {
     }
 
     fn make_page(elements: Vec<ContentElement>) -> PageContent {
-        PageContent {
-            page_number: 1,
-            page_width: 612.0,
-            page_height: 792.0,
-            elements,
-            source: ExtractionSource::StructureTree,
-        }
+        PageContent { elements }
     }
 
     #[test]
@@ -878,13 +858,7 @@ mod tests {
             make_word("baz", 85.0, 684.0, 696.0),
             make_word("qux", 120.0, 684.0, 696.0),
         ];
-        let page = PageContent {
-            page_number: 1,
-            page_width: 612.0,
-            page_height: 792.0,
-            elements,
-            source: ExtractionSource::Ocr,
-        };
+        let page = PageContent { elements };
         let paras = content_to_paragraphs(&page);
         assert_eq!(paras.len(), 1, "expected 1 paragraph, got {}", paras.len());
         assert_eq!(
@@ -910,13 +884,7 @@ mod tests {
             make_word("Second", 50.0, 600.0, 612.0),
             make_word("para", 85.0, 600.0, 612.0),
         ];
-        let page = PageContent {
-            page_number: 1,
-            page_width: 612.0,
-            page_height: 792.0,
-            elements,
-            source: ExtractionSource::Ocr,
-        };
+        let page = PageContent { elements };
         let paras = content_to_paragraphs(&page);
         assert_eq!(paras.len(), 2, "expected 2 paragraphs, got {}", paras.len());
         assert_eq!(paras[0].lines[0].segments[0].text, "First");
@@ -926,13 +894,7 @@ mod tests {
     #[test]
     fn test_single_word_produces_one_paragraph() {
         let elements = vec![make_word("Solo", 50.0, 400.0, 412.0)];
-        let page = PageContent {
-            page_number: 1,
-            page_width: 612.0,
-            page_height: 792.0,
-            elements,
-            source: ExtractionSource::Ocr,
-        };
+        let page = PageContent { elements };
         let paras = content_to_paragraphs(&page);
         assert_eq!(paras.len(), 1);
         assert_eq!(paras[0].lines[0].segments[0].text, "Solo");
@@ -943,11 +905,7 @@ mod tests {
         let mut empty = make_word("", 50.0, 400.0, 412.0);
         empty.text = "   ".to_string();
         let page = PageContent {
-            page_number: 1,
-            page_width: 612.0,
-            page_height: 792.0,
             elements: vec![empty, make_word("Real", 85.0, 400.0, 412.0)],
-            source: ExtractionSource::Ocr,
         };
         let paras = content_to_paragraphs(&page);
         assert_eq!(paras.len(), 1);
@@ -964,13 +922,7 @@ mod tests {
             make_word("B", 200.0, 700.0, 712.0),
             make_word("C", 100.0, 685.0, 697.0),
         ];
-        let page = PageContent {
-            page_number: 1,
-            page_width: 612.0,
-            page_height: 792.0,
-            elements,
-            source: ExtractionSource::Ocr,
-        };
+        let page = PageContent { elements };
         let paras = content_to_paragraphs(&page);
         assert_eq!(paras.len(), 1);
         let bbox = paras[0].block_bbox.unwrap();
@@ -991,7 +943,6 @@ mod tests {
             is_bold: false,
             is_italic: false,
             is_monospace: false,
-            confidence: None,
             semantic_role: Some(role),
             level: ElementLevel::Block,
             list_label: None,
@@ -1047,7 +998,7 @@ mod tests {
         let mut elements = vec![
             make_block("L1", 0.0, 650.0, 662.0, SemanticRole::Paragraph),
             make_block("R1", 400.0, 650.0, 662.0, SemanticRole::Paragraph),
-            make_block("Header", 0.0, 750.0, 762.0, SemanticRole::PageHeader),
+            make_block("Header", 0.0, 750.0, 762.0, SemanticRole::Other),
             make_block("L2", 0.0, 600.0, 612.0, SemanticRole::Paragraph),
             make_block("R2", 400.0, 600.0, 612.0, SemanticRole::Paragraph),
         ];
