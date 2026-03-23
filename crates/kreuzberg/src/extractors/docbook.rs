@@ -133,9 +133,9 @@ fn build_docbook_document_structure(content: &str) -> Result<crate::types::docum
                         }
                     }
                     "para" => {
-                        let text = extract_element_text(&mut reader)?;
+                        let (text, annotations) = extract_para_with_annotations(&mut reader)?;
                         if !text.is_empty() {
-                            builder.push_paragraph(&text, vec![], None, None);
+                            builder.push_paragraph(&text, annotations, None, None);
                         }
                     }
                     "programlisting" | "screen" => {
@@ -708,6 +708,135 @@ fn extract_figure_with_caption(reader: &mut Reader<&[u8]>) -> Result<String> {
     }
 
     Ok(caption)
+}
+
+/// Extract text and inline annotations from a DocBook `<para>` element.
+///
+/// Recognizes:
+/// - `<emphasis>` → italic (or bold if `role="bold"` / `role="strong"`)
+/// - `<literal>` / `<command>` → code
+/// - `<link>` / `<ulink>` with href → link
+/// - `<subscript>` → subscript
+/// - `<superscript>` → superscript
+fn extract_para_with_annotations(
+    reader: &mut Reader<&[u8]>,
+) -> Result<(String, Vec<crate::types::document_structure::TextAnnotation>)> {
+    use crate::types::builder;
+
+    let mut text = String::new();
+    let mut annotations = Vec::new();
+    let mut depth: u32 = 0;
+
+    // Stack of (kind, depth_at_open, start_byte_offset, optional_href).
+    let mut inline_stack: Vec<(&'static str, u32, u32, Option<String>)> = Vec::new();
+
+    loop {
+        match reader.read_event() {
+            Ok(Event::Start(e)) => {
+                depth += 1;
+
+                let name = e.name();
+                let tag_cow = crate::utils::xml_tag_name(name.as_ref());
+                let tag = strip_namespace(&tag_cow);
+
+                match tag {
+                    "emphasis" => {
+                        let mut role = String::new();
+                        for attr in e.attributes().flatten() {
+                            if String::from_utf8_lossy(attr.key.as_ref()) == "role" {
+                                role = String::from_utf8_lossy(attr.value.as_ref()).to_string();
+                            }
+                        }
+                        let kind = if role == "bold" || role == "strong" {
+                            "bold"
+                        } else {
+                            "italic"
+                        };
+                        inline_stack.push((kind, depth, text.len() as u32, None));
+                    }
+                    "literal" | "command" => {
+                        inline_stack.push(("code", depth, text.len() as u32, None));
+                    }
+                    "link" | "ulink" => {
+                        let mut href = None;
+                        for attr in e.attributes().flatten() {
+                            let key = String::from_utf8_lossy(attr.key.as_ref());
+                            if key == "url" || key == "href" || key.ends_with(":href") || key == "linkend" {
+                                href = Some(String::from_utf8_lossy(attr.value.as_ref()).to_string());
+                            }
+                        }
+                        inline_stack.push(("link", depth, text.len() as u32, href));
+                    }
+                    "subscript" => {
+                        inline_stack.push(("subscript", depth, text.len() as u32, None));
+                    }
+                    "superscript" => {
+                        inline_stack.push(("superscript", depth, text.len() as u32, None));
+                    }
+                    _ => {}
+                }
+            }
+            Ok(Event::End(_)) => {
+                if depth == 0 {
+                    break;
+                }
+
+                // Check if this closes an inline element on our stack
+                if let Some(&(kind, open_depth, start, ref href)) = inline_stack.last() {
+                    if open_depth == depth {
+                        let end = text.len() as u32;
+                        if end > start {
+                            let href_clone = href.clone();
+                            let annotation = match kind {
+                                "bold" => builder::bold(start, end),
+                                "italic" => builder::italic(start, end),
+                                "code" => builder::code(start, end),
+                                "subscript" => builder::subscript(start, end),
+                                "superscript" => builder::superscript(start, end),
+                                "link" => {
+                                    let url = href_clone.as_deref().unwrap_or("");
+                                    builder::link(start, end, url, None)
+                                }
+                                _ => unreachable!(),
+                            };
+                            annotations.push(annotation);
+                        }
+                        inline_stack.pop();
+                    }
+                }
+
+                depth -= 1;
+            }
+            Ok(Event::Text(t)) => {
+                let decoded = String::from_utf8_lossy(t.as_ref()).to_string();
+                if !decoded.trim().is_empty() {
+                    if !text.is_empty() && !text.ends_with(' ') && !text.ends_with('\n') {
+                        text.push(' ');
+                    }
+                    text.push_str(decoded.trim());
+                }
+            }
+            Ok(Event::CData(t)) => {
+                let decoded = std::str::from_utf8(t.as_ref()).unwrap_or("").to_string();
+                if !decoded.trim().is_empty() {
+                    if !text.is_empty() {
+                        text.push(' ');
+                    }
+                    text.push_str(decoded.trim());
+                }
+            }
+            Ok(Event::Eof) => break,
+            Err(e) => {
+                return Err(crate::error::KreuzbergError::parsing(format!(
+                    "XML parsing error: {}",
+                    e
+                )));
+            }
+            _ => {}
+        }
+    }
+
+    Ok((text.trim().to_string(), annotations))
 }
 
 /// Extract text content from a DocBook element and its children.

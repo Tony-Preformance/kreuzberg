@@ -85,21 +85,21 @@ impl DocumentExtractor for CsvExtractor {
             .collect::<Vec<_>>()
             .join("\n");
 
-        // Build markdown table
-        let markdown = build_markdown_table(&rows);
-
-        let table = Table {
-            cells: rows.clone(),
-            markdown,
-            page_number: 1,
-            bounding_box: None,
-        };
-
         let row_count = rows.len();
         let col_count = rows.iter().map(|r| r.len()).max().unwrap_or(0);
 
         let has_header = detect_header(&rows);
         let column_types = infer_column_types(&rows, has_header);
+
+        // Build markdown table before moving rows into Table::cells
+        let markdown = build_markdown_table(&rows);
+
+        let table = Table {
+            cells: rows,
+            markdown,
+            page_number: 1,
+            bounding_box: None,
+        };
 
         let mut additional = ahash::AHashMap::new();
         additional.insert(
@@ -125,10 +125,10 @@ impl DocumentExtractor for CsvExtractor {
             );
         }
 
-        let document = if config.include_document_structure && !rows.is_empty() {
+        let document = if config.include_document_structure && !table.cells.is_empty() {
             use crate::types::builder::DocumentStructureBuilder;
             let mut builder = DocumentStructureBuilder::new().source_format("csv");
-            builder.push_table_simple(&rows, None);
+            builder.push_table_simple(&table.cells, None);
             Some(builder.build())
         } else {
             None

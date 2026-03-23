@@ -592,12 +592,12 @@ impl RstExtractor {
 
             // Code block directive
             if trimmed.starts_with(".. code-block::") || trimmed.starts_with(".. code::") {
-                let language = if let Some(rest) = trimmed.strip_prefix(".. code-block::") {
+                let language: Option<&str> = if let Some(rest) = trimmed.strip_prefix(".. code-block::") {
                     let lang = rest.trim();
-                    if lang.is_empty() { None } else { Some(lang.to_string()) }
+                    if lang.is_empty() { None } else { Some(lang) }
                 } else if let Some(rest) = trimmed.strip_prefix(".. code::") {
                     let lang = rest.trim();
-                    if lang.is_empty() { None } else { Some(lang.to_string()) }
+                    if lang.is_empty() { None } else { Some(lang) }
                 } else {
                     None
                 };
@@ -618,7 +618,7 @@ impl RstExtractor {
                     }
                     i += 1;
                 }
-                builder.push_code(code_content.trim_end(), language.as_deref(), None);
+                builder.push_code(code_content.trim_end(), language, None);
                 continue;
             }
 

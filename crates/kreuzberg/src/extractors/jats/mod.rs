@@ -30,6 +30,127 @@ use std::path::Path;
 use elements::extract_jats_all_in_one;
 use parser::extract_text_content as jats_extract_text;
 
+/// Extract text and inline annotations from a JATS `<p>` element.
+///
+/// Recognizes:
+/// - `<italic>` → italic
+/// - `<bold>` → bold
+/// - `<underline>` → underline
+/// - `<sub>` → subscript
+/// - `<sup>` → superscript
+/// - `<ext-link>` → link (with xlink:href)
+fn extract_para_with_annotations_jats(
+    reader: &mut Reader<&[u8]>,
+) -> crate::Result<(String, Vec<crate::types::document_structure::TextAnnotation>)> {
+    use crate::types::builder;
+
+    let mut text = String::new();
+    let mut annotations = Vec::new();
+    let mut depth: u32 = 0;
+
+    // Stack of (kind, depth_at_open, start_byte_offset, optional_href).
+    let mut inline_stack: Vec<(&'static str, u32, u32, Option<String>)> = Vec::new();
+
+    loop {
+        match reader.read_event() {
+            Ok(Event::Start(e)) => {
+                depth += 1;
+
+                let name = e.name();
+                let tag = crate::utils::xml_tag_name(name.as_ref());
+
+                match tag.as_ref() {
+                    "italic" => {
+                        inline_stack.push(("italic", depth, text.len() as u32, None));
+                    }
+                    "bold" => {
+                        inline_stack.push(("bold", depth, text.len() as u32, None));
+                    }
+                    "underline" => {
+                        inline_stack.push(("underline", depth, text.len() as u32, None));
+                    }
+                    "sub" => {
+                        inline_stack.push(("subscript", depth, text.len() as u32, None));
+                    }
+                    "sup" => {
+                        inline_stack.push(("superscript", depth, text.len() as u32, None));
+                    }
+                    "ext-link" => {
+                        let mut href = None;
+                        for attr in e.attributes().flatten() {
+                            let key = String::from_utf8_lossy(attr.key.as_ref());
+                            if key == "xlink:href" || key.ends_with(":href") || key == "href" {
+                                href = Some(String::from_utf8_lossy(attr.value.as_ref()).to_string());
+                            }
+                        }
+                        inline_stack.push(("link", depth, text.len() as u32, href));
+                    }
+                    _ => {}
+                }
+            }
+            Ok(Event::End(_)) => {
+                if depth == 0 {
+                    break;
+                }
+
+                // Check if this closes an inline element on our stack
+                if let Some(&(kind, open_depth, start, ref href)) = inline_stack.last() {
+                    if open_depth == depth {
+                        let end = text.len() as u32;
+                        if end > start {
+                            let href_clone = href.clone();
+                            let annotation = match kind {
+                                "bold" => builder::bold(start, end),
+                                "italic" => builder::italic(start, end),
+                                "underline" => builder::underline(start, end),
+                                "subscript" => builder::subscript(start, end),
+                                "superscript" => builder::superscript(start, end),
+                                "link" => {
+                                    let url = href_clone.as_deref().unwrap_or("");
+                                    builder::link(start, end, url, None)
+                                }
+                                _ => unreachable!(),
+                            };
+                            annotations.push(annotation);
+                        }
+                        inline_stack.pop();
+                    }
+                }
+
+                depth -= 1;
+            }
+            Ok(Event::Text(t)) => {
+                let decoded = String::from_utf8_lossy(t.as_ref()).to_string();
+                if !decoded.trim().is_empty() {
+                    if !text.is_empty() && !text.ends_with(' ') && !text.ends_with('\n') {
+                        text.push(' ');
+                    }
+                    text.push_str(decoded.trim());
+                }
+            }
+            Ok(Event::CData(t)) => {
+                let decoded = std::str::from_utf8(t.as_ref()).unwrap_or("").to_string();
+                if !decoded.trim().is_empty() {
+                    if !text.is_empty() {
+                        text.push(' ');
+                    }
+                    text.push_str(decoded.trim());
+                }
+            }
+            Ok(Event::Eof) => break,
+            Err(e) => {
+                return Err(crate::error::KreuzbergError::parsing(format!(
+                    "XML parsing error: {}",
+                    e
+                )));
+            }
+            _ => {}
+        }
+    }
+
+    Ok((text.trim().to_string(), annotations))
+}
+
 /// Build a `DocumentStructure` from JATS XML content.
 fn build_jats_document_structure(content: &str) -> crate::Result<crate::types::document_structure::DocumentStructure> {
     use crate::types::builder::DocumentStructureBuilder;
@@ -78,9 +199,9 @@ fn build_jats_document_structure(content: &str) -> crate::Result<crate::types::d
                         continue;
                     }
                     "p" if in_body => {
-                        let text = jats_extract_text(&mut reader)?;
+                        let (text, annotations) = extract_para_with_annotations_jats(&mut reader)?;
                         if !text.is_empty() {
-                            builder.push_paragraph(&text, vec![], None, None);
+                            builder.push_paragraph(&text, annotations, None, None);
                         }
                         continue;
                     }

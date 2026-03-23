@@ -110,11 +110,58 @@ impl SyncExtractor for EmailExtractor {
                 builder.push_metadata_block(header_entries, None);
             }
 
-            // Push body paragraphs
-            for paragraph in email_result.cleaned_text.split("\n\n") {
-                let trimmed = paragraph.trim();
-                if !trimmed.is_empty() {
-                    builder.push_paragraph(trimmed, vec![], None, None);
+            // Push body content: if HTML body is available, use the HTML
+            // structure walker for rich annotations (bold, italic, links, etc.);
+            // otherwise fall back to plain text paragraph splitting.
+            if let Some(ref html) = email_result.html_content {
+                let html_doc = crate::extraction::html::structure::build_document_structure(html);
+                // Merge HTML structure nodes into the email builder.
+                for node in &html_doc.nodes {
+                    // Only merge root-level body nodes (skip the HTML wrapper structure).
+                    if node.parent.is_none() {
+                        match &node.content {
+                            crate::types::NodeContent::Paragraph { text } => {
+                                let trimmed = text.trim();
+                                if !trimmed.is_empty() {
+                                    builder.push_paragraph(trimmed, node.annotations.clone(), None, None);
+                                }
+                            }
+                            crate::types::NodeContent::Heading { level, text } => {
+                                builder.push_heading(*level, text, None, None);
+                            }
+                            crate::types::NodeContent::List { ordered } => {
+                                let list_idx = builder.push_list(*ordered, None);
+                                // Collect list item children from the HTML doc
+                                for &child_idx in &node.children {
+                                    if let Some(child) = html_doc.nodes.get(child_idx.0 as usize) {
+                                        if let crate::types::NodeContent::ListItem { text } = &child.content {
+                                            builder.push_list_item(list_idx, text, None);
+                                        }
+                                    }
+                                }
+                            }
+                            crate::types::NodeContent::Code { text, language } => {
+                                builder.push_code(text, language.as_deref(), None);
+                            }
+                            _ => {
+                                // For other node types, extract text if available
+                                // and push as paragraph
+                                if let Some(text) = node.content.text() {
+                                    let trimmed = text.trim();
+                                    if !trimmed.is_empty() {
+                                        builder.push_paragraph(trimmed, node.annotations.clone(), None, None);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                for paragraph in email_result.cleaned_text.split("\n\n") {
+                    let trimmed = paragraph.trim();
+                    if !trimmed.is_empty() {
+                        builder.push_paragraph(trimmed, vec![], None, None);
+                    }
                 }
             }
             Some(builder.build())

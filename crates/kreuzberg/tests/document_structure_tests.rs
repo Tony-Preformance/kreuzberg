@@ -3091,3 +3091,798 @@ async fn test_docx_drawing_bounding_box() {
         }
     }
 }
+
+// ============================================================================
+// Data Format Enrichment Tests
+// ============================================================================
+
+#[cfg(feature = "email")]
+#[test]
+fn test_email_threading_headers() {
+    use kreuzberg::extractors::EmailExtractor;
+    use kreuzberg::extractors::SyncExtractor;
+
+    let eml = b"From: alice@example.com\r\n\
+                 To: bob@example.com\r\n\
+                 Subject: Re: Hello\r\n\
+                 Reply-To: alice-reply@example.com\r\n\
+                 In-Reply-To: <original-msg-id@example.com>\r\n\
+                 Message-ID: <reply-msg-id@example.com>\r\n\
+                 Date: Mon, 01 Jan 2024 12:00:00 +0000\r\n\
+                 \r\n\
+                 This is a reply.";
+
+    let config = config_with_structure();
+    let result = EmailExtractor::new()
+        .extract_sync(eml, "message/rfc822", &config)
+        .expect("email extraction should succeed");
+
+    // Threading headers should appear in additional metadata
+    let reply_to = result.metadata.additional.get("reply_to");
+    assert!(reply_to.is_some(), "metadata should contain reply_to header");
+    assert!(
+        reply_to
+            .unwrap()
+            .as_str()
+            .unwrap_or("")
+            .contains("alice-reply@example.com"),
+        "reply_to should contain the Reply-To address"
+    );
+
+    let in_reply_to = result.metadata.additional.get("in_reply_to");
+    assert!(in_reply_to.is_some(), "metadata should contain in_reply_to header");
+    assert!(
+        in_reply_to
+            .unwrap()
+            .as_str()
+            .unwrap_or("")
+            .contains("original-msg-id@example.com"),
+        "in_reply_to should contain the In-Reply-To message ID"
+    );
+}
+
+#[cfg(feature = "office")]
+#[test]
+fn test_jupyter_cells_metadata() {
+    use kreuzberg::extractors::JupyterExtractor;
+    use kreuzberg::plugins::DocumentExtractor;
+
+    let notebook = serde_json::json!({
+        "cells": [
+            {
+                "cell_type": "code",
+                "source": ["print('hello')"],
+                "execution_count": 7,
+                "outputs": [],
+                "metadata": {}
+            }
+        ],
+        "metadata": {
+            "kernelspec": {"name": "python3", "language": "python"},
+            "language_info": {"name": "python"}
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5
+    });
+    let content = serde_json::to_vec(&notebook).unwrap();
+
+    let config = config_with_structure();
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let result = rt
+        .block_on(JupyterExtractor::new().extract_bytes(&content, "application/x-ipynb+json", &config))
+        .expect("jupyter extraction should succeed");
+
+    // Verify cells array in metadata
+    let cells = result.metadata.additional.get("cells");
+    assert!(cells.is_some(), "metadata should have cells array");
+    let cells_arr = cells.unwrap().as_array().expect("cells should be an array");
+    assert_eq!(cells_arr.len(), 1);
+    let cell0 = &cells_arr[0];
+    assert_eq!(cell0["execution_count"], serde_json::json!(7));
+}
+
+#[cfg(feature = "office")]
+#[test]
+fn test_bibtex_entry_fields() {
+    use kreuzberg::extractors::BibtexExtractor;
+    use kreuzberg::plugins::DocumentExtractor;
+
+    let bibtex = br#"@article{smith2024,
+  author    = {John Smith},
+  title     = {A Great Paper},
+  journal   = {Journal of Testing},
+  volume    = {42},
+  doi       = {10.1234/test.2024},
+  year      = {2024}
+}"#;
+
+    let config = config_with_structure();
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let result = rt
+        .block_on(BibtexExtractor::new().extract_bytes(bibtex, "application/x-bibtex", &config))
+        .expect("bibtex extraction should succeed");
+
+    let doc = result.document.as_ref().expect("document should be present");
+    assert!(doc.validate().is_ok());
+
+    // Find the citation node
+    let citation = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::Citation { key, .. } if key == "smith2024"))
+        .expect("should have citation node for smith2024");
+
+    let attrs = citation.attributes.as_ref().expect("citation should have attributes");
+    assert_eq!(
+        attrs.get("journal").map(|s| s.as_str()),
+        Some("Journal of Testing"),
+        "should have journal attribute"
+    );
+    assert_eq!(
+        attrs.get("volume").map(|s| s.as_str()),
+        Some("42"),
+        "should have volume attribute"
+    );
+    assert_eq!(
+        attrs.get("doi").map(|s| s.as_str()),
+        Some("10.1234/test.2024"),
+        "should have doi attribute"
+    );
+}
+
+#[test]
+fn test_csv_header_detection() {
+    use kreuzberg::extractors::CsvExtractor;
+    use kreuzberg::plugins::DocumentExtractor;
+
+    let csv_data = b"Name,Age,City\nAlice,30,NYC\nBob,25,LA\n";
+
+    let config = config_with_structure();
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let result = rt
+        .block_on(CsvExtractor::new().extract_bytes(csv_data, "text/csv", &config))
+        .expect("csv extraction should succeed");
+
+    let has_header = result.metadata.additional.get("has_header");
+    assert!(has_header.is_some(), "metadata should have has_header field");
+    assert_eq!(
+        has_header.unwrap(),
+        &serde_json::Value::Bool(true),
+        "has_header should be true for data with header row"
+    );
+
+    // Document structure should contain a table
+    let doc = result.document.as_ref().expect("document should be present");
+    assert!(
+        has_node_type(doc, |c| matches!(c, NodeContent::Table { .. })),
+        "CSV should contain Table nodes"
+    );
+}
+
+#[cfg(feature = "office")]
+#[test]
+fn test_opml_feed_urls() {
+    use kreuzberg::extractors::OpmlExtractor;
+    use kreuzberg::plugins::DocumentExtractor;
+
+    let opml = br#"<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head><title>Subscriptions</title></head>
+  <body>
+    <outline text="Tech News" type="rss" xmlUrl="https://example.com/feed.xml" />
+  </body>
+</opml>"#;
+
+    let config = config_with_structure();
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let result = rt
+        .block_on(OpmlExtractor::new().extract_bytes(opml, "text/x-opml", &config))
+        .expect("opml extraction should succeed");
+
+    let doc = result.document.as_ref().expect("document should be present");
+    assert!(doc.validate().is_ok());
+
+    // Find the node with xmlUrl attribute
+    let node_with_url = doc
+        .nodes
+        .iter()
+        .find(|n| n.attributes.as_ref().is_some_and(|a| a.contains_key("xmlUrl")));
+    assert!(node_with_url.is_some(), "should have a node with xmlUrl attribute");
+    let attrs = node_with_url.unwrap().attributes.as_ref().unwrap();
+    assert_eq!(
+        attrs.get("xmlUrl").map(|s| s.as_str()),
+        Some("https://example.com/feed.xml"),
+        "xmlUrl attribute should contain the feed URL"
+    );
+}
+
+#[test]
+fn test_dbf_field_types() {
+    let path = helpers::get_test_file_path("dbf/stations.dbf");
+    if !path.exists() {
+        return;
+    }
+
+    let config = config_with_structure();
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let result = rt
+        .block_on(kreuzberg::core::extractor::extract_file(&path, None, &config))
+        .expect("DBF extraction should succeed");
+
+    // Verify fields metadata with type info
+    let fields = result.metadata.additional.get("fields");
+    assert!(fields.is_some(), "metadata should have fields");
+    let fields_arr = fields.unwrap().as_array().expect("fields should be an array");
+    assert!(!fields_arr.is_empty(), "fields array should not be empty");
+
+    // Each field entry should have name and type
+    let first_field = &fields_arr[0];
+    assert!(first_field.get("name").is_some(), "field entry should have a name");
+    assert!(first_field.get("type").is_some(), "field entry should have a type");
+}
+
+// ============================================================================
+// Email HTML Body Annotations
+// ============================================================================
+
+#[cfg(feature = "email")]
+#[test]
+fn test_email_html_body_annotations() {
+    use kreuzberg::extractors::EmailExtractor;
+    use kreuzberg::extractors::SyncExtractor;
+
+    let eml = b"From: alice@example.com\r\n\
+                 To: bob@example.com\r\n\
+                 Subject: Test\r\n\
+                 MIME-Version: 1.0\r\n\
+                 Content-Type: text/html; charset=utf-8\r\n\
+                 \r\n\
+                 <html><body><p>This is <b>bold</b> text.</p></body></html>";
+
+    let config = config_with_structure();
+    let result = EmailExtractor::new()
+        .extract_sync(eml, "message/rfc822", &config)
+        .expect("email extraction should succeed");
+
+    let doc = result.document.as_ref().expect("document should be present");
+    assert!(doc.validate().is_ok());
+
+    // Find a paragraph containing "bold"
+    let para = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::Paragraph { text } if text.contains("bold")));
+    assert!(para.is_some(), "should have paragraph with bold text");
+    let para = para.unwrap();
+
+    // Verify Bold annotation exists
+    let has_bold = para.annotations.iter().any(|a| matches!(a.kind, AnnotationKind::Bold));
+    assert!(has_bold, "email HTML body paragraph should have Bold annotation");
+}
+
+// ============================================================================
+// Jupyter Markdown Cell Formatting Annotations
+// ============================================================================
+
+#[cfg(feature = "office")]
+#[test]
+fn test_jupyter_markdown_cell_formatting() {
+    use kreuzberg::extractors::JupyterExtractor;
+    use kreuzberg::plugins::DocumentExtractor;
+
+    let notebook = serde_json::json!({
+        "cells": [
+            {
+                "cell_type": "markdown",
+                "source": ["This has **bold** and *italic* and `code` text."],
+                "metadata": {}
+            }
+        ],
+        "metadata": {
+            "kernelspec": {"name": "python3", "language": "python"},
+            "language_info": {"name": "python"}
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5
+    });
+    let content = serde_json::to_vec(&notebook).unwrap();
+
+    let config = config_with_structure();
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let result = rt
+        .block_on(JupyterExtractor::new().extract_bytes(&content, "application/x-ipynb+json", &config))
+        .expect("jupyter extraction should succeed");
+
+    let doc = result.document.as_ref().expect("document should be present");
+    assert!(doc.validate().is_ok());
+
+    // Find the paragraph
+    let para = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::Paragraph { text } if text.contains("bold")))
+        .expect("should have paragraph with formatted text");
+
+    let text = match &para.content {
+        NodeContent::Paragraph { text } => text.as_str(),
+        _ => unreachable!(),
+    };
+
+    // Verify the markdown markers are stripped
+    assert!(!text.contains("**"), "bold markers should be stripped");
+    assert!(text.contains("bold"), "bold text should remain");
+    assert!(text.contains("italic"), "italic text should remain");
+    assert!(text.contains("code"), "code text should remain");
+
+    // Verify annotations
+    let has_bold = para.annotations.iter().any(|a| matches!(a.kind, AnnotationKind::Bold));
+    let has_italic = para
+        .annotations
+        .iter()
+        .any(|a| matches!(a.kind, AnnotationKind::Italic));
+    let has_code = para.annotations.iter().any(|a| matches!(a.kind, AnnotationKind::Code));
+
+    assert!(has_bold, "should have Bold annotation");
+    assert!(has_italic, "should have Italic annotation");
+    assert!(has_code, "should have Code annotation");
+
+    // Verify annotation byte ranges are correct
+    let bold_ann = para
+        .annotations
+        .iter()
+        .find(|a| matches!(a.kind, AnnotationKind::Bold))
+        .unwrap();
+    let annotated = &text[bold_ann.start as usize..bold_ann.end as usize];
+    assert_eq!(annotated, "bold", "Bold annotation should span 'bold'");
+}
+
+// ============================================================================
+// Enrichment Tests: HTML
+// ============================================================================
+
+#[cfg(feature = "html")]
+#[test]
+fn test_html_definition_list() {
+    let html = "<html><body><dl><dt>Term</dt><dd>Definition</dd></dl></body></html>";
+    let config = config_with_structure();
+    let result =
+        kreuzberg::extract_bytes_sync(html.as_bytes(), "text/html", &config).expect("HTML extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+    assert!(
+        has_node_type(&doc, |c| matches!(c, NodeContent::DefinitionList)),
+        "HTML with <dl> should contain DefinitionList node"
+    );
+    assert!(
+        has_node_type(&doc, |c| matches!(c, NodeContent::DefinitionItem { .. })),
+        "HTML with <dt>/<dd> should contain DefinitionItem node"
+    );
+    let item = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::DefinitionItem { .. }))
+        .expect("should find DefinitionItem");
+    if let NodeContent::DefinitionItem { term, definition } = &item.content {
+        assert_eq!(term, "Term");
+        assert_eq!(definition, "Definition");
+    }
+}
+
+#[cfg(feature = "html")]
+#[test]
+fn test_html_table_spans() {
+    let html = r#"<html><body><table><tr><td colspan="2">merged</td></tr></table></body></html>"#;
+    let config = config_with_structure();
+    let result =
+        kreuzberg::extract_bytes_sync(html.as_bytes(), "text/html", &config).expect("HTML extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+    let table = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::Table { .. }))
+        .expect("should find Table node");
+    if let NodeContent::Table { grid } = &table.content {
+        let cell = grid.cells.iter().find(|c| c.content == "merged");
+        assert!(cell.is_some(), "should find cell with 'merged' content");
+        assert_eq!(cell.unwrap().col_span, 2, "col_span should be 2");
+    }
+}
+
+#[cfg(feature = "html")]
+#[test]
+fn test_html_meta_tags() {
+    let html = r#"<html><head><meta name="author" content="John"></head><body><p>text</p></body></html>"#;
+    let config = config_with_structure();
+    let result =
+        kreuzberg::extract_bytes_sync(html.as_bytes(), "text/html", &config).expect("HTML extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+    assert!(
+        has_node_type(&doc, |c| matches!(c, NodeContent::MetadataBlock { .. })),
+        "HTML with <meta> tags should contain MetadataBlock node"
+    );
+    let meta = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::MetadataBlock { .. }))
+        .expect("should find MetadataBlock");
+    if let NodeContent::MetadataBlock { entries } = &meta.content {
+        let author_entry = entries.iter().find(|(k, _)| k == "author");
+        assert!(author_entry.is_some(), "should have author entry");
+        assert_eq!(author_entry.unwrap().1, "John");
+    }
+}
+
+#[cfg(feature = "html")]
+#[test]
+fn test_html_figure_caption() {
+    let html = r#"<html><body><figure><img alt="photo"><figcaption>Caption text</figcaption></figure></body></html>"#;
+    let config = config_with_structure();
+    let result =
+        kreuzberg::extract_bytes_sync(html.as_bytes(), "text/html", &config).expect("HTML extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+    let image = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::Image { .. }))
+        .expect("should find Image node");
+    if let NodeContent::Image { description, .. } = &image.content {
+        let desc = description.as_deref().unwrap_or("");
+        assert!(
+            desc.contains("Caption"),
+            "Image description should contain 'Caption', got: '{desc}'"
+        );
+    }
+}
+
+// ============================================================================
+// Enrichment Tests: FictionBook
+// ============================================================================
+
+#[cfg(feature = "office")]
+#[tokio::test]
+async fn test_fictionbook_author_details() {
+    let path = helpers::get_test_file_path("fictionbook/writer.fb2");
+    if !path.exists() {
+        return;
+    }
+
+    let config = ExtractionConfig {
+        include_document_structure: false,
+        ..Default::default()
+    };
+    let result = extract_file(&path, None, &config)
+        .await
+        .expect("FictionBook extraction should succeed");
+
+    let additional = &result.metadata.additional;
+    assert!(
+        additional.contains_key("author_details"),
+        "FictionBook metadata should have author_details, got keys: {:?}",
+        additional.keys().collect::<Vec<_>>()
+    );
+}
+
+#[cfg(feature = "office")]
+#[tokio::test]
+async fn test_fictionbook_genre_metadata() {
+    let path = helpers::get_test_file_path("fictionbook/basic.fb2");
+    if !path.exists() {
+        return;
+    }
+
+    let config = ExtractionConfig::default();
+    let result = extract_file(&path, None, &config)
+        .await
+        .expect("FictionBook extraction should succeed");
+
+    let additional = &result.metadata.additional;
+    assert!(
+        additional.contains_key("genres"),
+        "FictionBook metadata should have genres, got keys: {:?}",
+        additional.keys().collect::<Vec<_>>()
+    );
+    let genres = additional.get("genres").unwrap();
+    assert!(genres.is_array(), "genres should be an array");
+    assert!(
+        !genres.as_array().unwrap().is_empty(),
+        "genres array should not be empty"
+    );
+}
+
+// ============================================================================
+// Enrichment Tests: DocBook
+// ============================================================================
+
+#[cfg(feature = "xml")]
+#[test]
+fn test_docbook_admonitions() {
+    let docbook = r#"<?xml version="1.0" encoding="UTF-8"?>
+<article xmlns="http://docbook.org/ns/docbook" version="5.0">
+  <title>Test</title>
+  <note><para>This is a note.</para></note>
+</article>"#;
+    let config = config_with_structure();
+    let result = kreuzberg::extract_bytes_sync(docbook.as_bytes(), "application/docbook+xml", &config)
+        .expect("DocBook extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+    assert!(
+        has_node_type(&doc, |c| matches!(c, NodeContent::Admonition { .. })),
+        "DocBook with <note> should contain Admonition node"
+    );
+    let admonition = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::Admonition { .. }))
+        .expect("should find Admonition");
+    if let NodeContent::Admonition { kind, .. } = &admonition.content {
+        assert_eq!(kind, "note");
+    }
+}
+
+#[cfg(feature = "xml")]
+#[test]
+fn test_docbook_inline_annotations() {
+    let docbook = r#"<?xml version="1.0" encoding="UTF-8"?>
+<article xmlns="http://docbook.org/ns/docbook" version="5.0">
+  <title>Test</title>
+  <para>This is <emphasis>italic</emphasis> and <emphasis role="bold">bold</emphasis> text.</para>
+</article>"#;
+    let config = config_with_structure();
+    let result = kreuzberg::extract_bytes_sync(docbook.as_bytes(), "application/docbook+xml", &config)
+        .expect("DocBook extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+
+    let para = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::Paragraph { text } if text.contains("italic")))
+        .expect("should find paragraph with inline text");
+
+    let has_italic = para
+        .annotations
+        .iter()
+        .any(|a| matches!(a.kind, AnnotationKind::Italic));
+    let has_bold = para.annotations.iter().any(|a| matches!(a.kind, AnnotationKind::Bold));
+
+    assert!(has_italic, "should have Italic annotation from <emphasis>");
+    assert!(has_bold, "should have Bold annotation from <emphasis role=\"bold\">");
+
+    // Verify byte ranges
+    let text = match &para.content {
+        NodeContent::Paragraph { text } => text.as_str(),
+        _ => unreachable!(),
+    };
+    let italic_ann = para
+        .annotations
+        .iter()
+        .find(|a| matches!(a.kind, AnnotationKind::Italic))
+        .unwrap();
+    let annotated = &text[italic_ann.start as usize..italic_ann.end as usize];
+    assert_eq!(annotated, "italic", "Italic annotation should span 'italic'");
+
+    let bold_ann = para
+        .annotations
+        .iter()
+        .find(|a| matches!(a.kind, AnnotationKind::Bold))
+        .unwrap();
+    let annotated = &text[bold_ann.start as usize..bold_ann.end as usize];
+    assert_eq!(annotated, "bold", "Bold annotation should span 'bold'");
+}
+
+// ============================================================================
+// Enrichment Tests: JATS
+// ============================================================================
+
+#[cfg(feature = "xml")]
+#[tokio::test]
+async fn test_jats_history_dates() {
+    let path = helpers::get_test_file_path("jats/sample_article.jats");
+    if !path.exists() {
+        return;
+    }
+
+    let config = ExtractionConfig::default();
+    let result = extract_file(&path, None, &config)
+        .await
+        .expect("JATS extraction should succeed");
+
+    let additional = &result.metadata.additional;
+    // Check for date_received or date_accepted in metadata
+    let has_date_key = additional.keys().any(|k| k.starts_with("date_"));
+    assert!(
+        has_date_key,
+        "JATS metadata should have history date keys (date_received, date_accepted, etc.), got keys: {:?}",
+        additional.keys().collect::<Vec<_>>()
+    );
+}
+
+#[cfg(feature = "xml")]
+#[test]
+fn test_jats_inline_formula() {
+    let jats = r#"<?xml version="1.0" encoding="UTF-8"?>
+<article>
+  <front>
+    <article-meta>
+      <article-title>Formula Test</article-title>
+    </article-meta>
+  </front>
+  <body>
+    <p>The equation is important.</p>
+    <inline-formula>E = mc^2</inline-formula>
+  </body>
+</article>"#;
+    let config = config_with_structure();
+    let result = kreuzberg::extract_bytes_sync(jats.as_bytes(), "application/x-jats+xml", &config)
+        .expect("JATS extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+    assert!(
+        has_node_type(&doc, |c| matches!(c, NodeContent::Formula { .. })),
+        "JATS with <inline-formula> should contain Formula node"
+    );
+}
+
+#[cfg(feature = "xml")]
+#[test]
+fn test_jats_inline_annotations() {
+    let jats = r#"<?xml version="1.0" encoding="UTF-8"?>
+<article>
+  <front>
+    <article-meta>
+      <article-title>Annotation Test</article-title>
+    </article-meta>
+  </front>
+  <body>
+    <p>This is <bold>important</bold> and <italic>noted</italic> text.</p>
+  </body>
+</article>"#;
+    let config = config_with_structure();
+    let result = kreuzberg::extract_bytes_sync(jats.as_bytes(), "application/x-jats+xml", &config)
+        .expect("JATS extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+
+    let para = doc
+        .nodes
+        .iter()
+        .find(|n| matches!(&n.content, NodeContent::Paragraph { text } if text.contains("important")))
+        .expect("should find paragraph with inline text");
+
+    let has_bold = para.annotations.iter().any(|a| matches!(a.kind, AnnotationKind::Bold));
+    let has_italic = para
+        .annotations
+        .iter()
+        .any(|a| matches!(a.kind, AnnotationKind::Italic));
+
+    assert!(has_bold, "should have Bold annotation from <bold>");
+    assert!(has_italic, "should have Italic annotation from <italic>");
+
+    // Verify byte ranges
+    let text = match &para.content {
+        NodeContent::Paragraph { text } => text.as_str(),
+        _ => unreachable!(),
+    };
+    let bold_ann = para
+        .annotations
+        .iter()
+        .find(|a| matches!(a.kind, AnnotationKind::Bold))
+        .unwrap();
+    let annotated = &text[bold_ann.start as usize..bold_ann.end as usize];
+    assert_eq!(annotated, "important", "Bold annotation should span 'important'");
+
+    let italic_ann = para
+        .annotations
+        .iter()
+        .find(|a| matches!(a.kind, AnnotationKind::Italic))
+        .unwrap();
+    let annotated = &text[italic_ann.start as usize..italic_ann.end as usize];
+    assert_eq!(annotated, "noted", "Italic annotation should span 'noted'");
+}
+
+// ============================================================================
+// Enrichment Tests: ODT
+// ============================================================================
+
+#[cfg(feature = "office")]
+#[tokio::test]
+async fn test_odt_footnote() {
+    let path = helpers::get_test_file_path("odt/footnote.odt");
+    if !path.exists() {
+        return;
+    }
+
+    let config = config_with_structure();
+    let result = extract_file(&path, None, &config)
+        .await
+        .expect("ODT extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+    assert!(
+        has_node_type(&doc, |c| matches!(c, NodeContent::Footnote { .. })),
+        "ODT with footnotes should contain Footnote node"
+    );
+}
+
+#[cfg(feature = "office")]
+#[tokio::test]
+async fn test_odt_bold_annotations() {
+    let path = helpers::get_test_file_path("odt/bold.odt");
+    if !path.exists() {
+        return;
+    }
+
+    let config = config_with_structure();
+    let result = extract_file(&path, None, &config)
+        .await
+        .expect("ODT extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+
+    let has_bold_annotation = doc
+        .nodes
+        .iter()
+        .any(|n| n.annotations.iter().any(|a| matches!(a.kind, AnnotationKind::Bold)));
+    assert!(has_bold_annotation, "ODT with bold text should have Bold annotations");
+}
+
+// ============================================================================
+// Enrichment Tests: RTF
+// ============================================================================
+
+#[cfg(feature = "office")]
+#[tokio::test]
+async fn test_rtf_bold_annotations() {
+    let path = helpers::get_test_file_path("rtf/formatting.rtf");
+    if !path.exists() {
+        return;
+    }
+
+    let config = config_with_structure();
+    let result = extract_file(&path, None, &config)
+        .await
+        .expect("RTF extraction should succeed");
+    let doc = result.document.expect("document should be populated");
+    assert!(doc.validate().is_ok());
+
+    let has_bold_annotation = doc
+        .nodes
+        .iter()
+        .any(|n| n.annotations.iter().any(|a| matches!(a.kind, AnnotationKind::Bold)));
+    assert!(
+        has_bold_annotation,
+        "RTF with bold formatting should have Bold annotations"
+    );
+}
+
+// ============================================================================
+// Enrichment Tests: EPUB
+// ============================================================================
+
+#[cfg(feature = "office")]
+#[tokio::test]
+async fn test_epub_dublin_core() {
+    let path = helpers::get_test_file_path("epub/features.epub");
+    if !path.exists() {
+        return;
+    }
+
+    let config = ExtractionConfig::default();
+    let result = extract_file(&path, None, &config)
+        .await
+        .expect("EPUB extraction should succeed");
+
+    // EPUB typically provides Dublin Core metadata via the OPF package.
+    // Check that some metadata was extracted.
+    let meta = &result.metadata;
+    let has_some_metadata = meta.subject.is_some() || meta.created_at.is_some() || !meta.additional.is_empty();
+    assert!(
+        has_some_metadata,
+        "EPUB should have some metadata (subject, created_at, or additional), got: {:?}",
+        meta
+    );
+}

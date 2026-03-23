@@ -489,7 +489,7 @@ impl OrgModeExtractor {
 
             // Code blocks: #+BEGIN_SRC lang ... #+END_SRC
             if trimmed.starts_with("#+BEGIN_SRC") || trimmed.starts_with("#+begin_src") {
-                let language = trimmed.split_whitespace().nth(1).map(|s| s.to_string());
+                let language: Option<&str> = trimmed.split_whitespace().nth(1);
                 i += 1;
                 let mut code_content = String::new();
                 while i < lines.len() {
@@ -504,7 +504,7 @@ impl OrgModeExtractor {
                     code_content.push_str(lines[i]);
                     i += 1;
                 }
-                builder.push_code(code_content.trim_end(), language.as_deref(), None);
+                builder.push_code(code_content.trim_end(), language, None);
                 continue;
             }
 

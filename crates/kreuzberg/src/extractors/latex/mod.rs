@@ -23,7 +23,7 @@ use crate::Result;
 use crate::core::config::ExtractionConfig;
 use crate::plugins::{DocumentExtractor, Plugin};
 use crate::types::builder::DocumentStructureBuilder;
-use crate::types::document_structure::{AnnotationKind, DocumentStructure, TextAnnotation};
+use crate::types::document_structure::{AnnotationKind, DocumentStructure, NodeContent, TextAnnotation};
 use crate::types::{ExtractionResult, Metadata, Table};
 use async_trait::async_trait;
 
@@ -359,7 +359,7 @@ impl LatexExtractor {
                         } else {
                             None
                         };
-                        builder.push_code(env_content.trim(), language.as_deref(), None);
+                        builder.push_code(env_content.trim(), language, None);
                         i = new_i;
                         continue;
                     }
@@ -521,12 +521,12 @@ impl LatexExtractor {
     }
 
     /// Extract language from code environment options.
-    fn extract_code_language(begin_line: &str) -> Option<String> {
+    fn extract_code_language(begin_line: &str) -> Option<&str> {
         // \begin{lstlisting}[language=Python] or \begin{minted}{python}
         if let Some(lang_pos) = begin_line.find("language=") {
             let after = &begin_line[lang_pos + 9..];
             let end = after.find([',', ']', '}']).unwrap_or(after.len());
-            let lang = after[..end].trim().to_string();
+            let lang = after[..end].trim();
             if !lang.is_empty() {
                 return Some(lang);
             }
@@ -537,7 +537,7 @@ impl LatexExtractor {
         {
             let after = &begin_line[brace_start + 1..];
             if let Some(brace_end) = after.find('}') {
-                let lang = after[..brace_end].trim().to_string();
+                let lang = after[..brace_end].trim();
                 if !lang.is_empty() && lang != "minted" {
                     return Some(lang);
                 }

@@ -203,7 +203,7 @@ impl JupyterExtractor {
     fn extract_source(source: &Value) -> String {
         match source {
             Value::String(s) => s.clone(),
-            Value::Array(arr) => arr.iter().filter_map(|v| v.as_str()).collect::<Vec<_>>().join(""),
+            Value::Array(arr) => arr.iter().filter_map(|v| v.as_str()).collect::<String>(),
             _ => String::new(),
         }
     }
@@ -329,6 +329,110 @@ impl JupyterExtractor {
         Ok(())
     }
 
+    /// Scan markdown text for inline formatting patterns and produce
+    /// stripped text with annotations.
+    ///
+    /// Recognizes: `**bold**`, `*italic*`, `` `code` ``
+    fn scan_markdown_inline(text: &str) -> (String, Vec<crate::types::TextAnnotation>) {
+        use crate::types::TextAnnotation;
+        use crate::types::document_structure::AnnotationKind;
+
+        let mut out = String::with_capacity(text.len());
+        let mut annotations = Vec::new();
+        let bytes = text.as_bytes();
+        let len = bytes.len();
+        let mut i = 0;
+
+        while i < len {
+            if i + 1 < len && bytes[i] == b'*' && bytes[i + 1] == b'*' {
+                // Bold: **...**
+                if let Some(end) = Self::find_closing(bytes, i + 2, b"**") {
+                    let inner = &text[i + 2..end];
+                    let start = out.len() as u32;
+                    out.push_str(inner);
+                    let ann_end = out.len() as u32;
+                    annotations.push(TextAnnotation {
+                        start,
+                        end: ann_end,
+                        kind: AnnotationKind::Bold,
+                    });
+                    i = end + 2;
+                    continue;
+                }
+            }
+
+            if bytes[i] == b'*' && (i == 0 || bytes[i - 1] != b'*') {
+                // Italic: *...*  (but not **)
+                if i + 1 < len && bytes[i + 1] != b'*' {
+                    if let Some(end) = Self::find_closing_single_star(bytes, i + 1) {
+                        let inner = &text[i + 1..end];
+                        let start = out.len() as u32;
+                        out.push_str(inner);
+                        let ann_end = out.len() as u32;
+                        annotations.push(TextAnnotation {
+                            start,
+                            end: ann_end,
+                            kind: AnnotationKind::Italic,
+                        });
+                        i = end + 1;
+                        continue;
+                    }
+                }
+            }
+
+            if bytes[i] == b'`' && (i + 1 >= len || bytes[i + 1] != b'`') {
+                // Inline code: `...`
+                if let Some(end) = Self::find_closing_byte(bytes, i + 1, b'`') {
+                    let inner = &text[i + 1..end];
+                    let start = out.len() as u32;
+                    out.push_str(inner);
+                    let ann_end = out.len() as u32;
+                    annotations.push(TextAnnotation {
+                        start,
+                        end: ann_end,
+                        kind: AnnotationKind::Code,
+                    });
+                    i = end + 1;
+                    continue;
+                }
+            }
+
+            out.push(bytes[i] as char);
+            i += 1;
+        }
+
+        (out, annotations)
+    }
+
+    /// Find position of a two-byte closing delimiter (e.g. `**`).
+    fn find_closing(bytes: &[u8], start: usize, delim: &[u8; 2]) -> Option<usize> {
+        let mut i = start;
+        while i + 1 < bytes.len() {
+            if bytes[i] == delim[0] && bytes[i + 1] == delim[1] {
+                return Some(i);
+            }
+            i += 1;
+        }
+        None
+    }
+
+    /// Find position of a closing single `*` that is not followed by another `*`.
+    fn find_closing_single_star(bytes: &[u8], start: usize) -> Option<usize> {
+        let mut i = start;
+        while i < bytes.len() {
+            if bytes[i] == b'*' && (i + 1 >= bytes.len() || bytes[i + 1] != b'*') {
+                return Some(i);
+            }
+            i += 1;
+        }
+        None
+    }
+
+    /// Find position of a closing single byte delimiter.
+    fn find_closing_byte(bytes: &[u8], start: usize, delim: u8) -> Option<usize> {
+        bytes[start..].iter().position(|&b| b == delim).map(|p| start + p)
+    }
+
     /// Build a `DocumentStructure` from the already-parsed notebook JSON.
     ///
     /// Markdown cells become paragraphs, code cells become code blocks.
@@ -361,7 +465,8 @@ impl JupyterExtractor {
 
             match cell_type {
                 "markdown" => {
-                    builder.push_paragraph(trimmed, vec![], None, None);
+                    let (stripped, annotations) = Self::scan_markdown_inline(trimmed);
+                    builder.push_paragraph(&stripped, annotations, None, None);
                 }
                 "code" => {
                     let node_idx = builder.push_code(trimmed, kernel_lang, None);

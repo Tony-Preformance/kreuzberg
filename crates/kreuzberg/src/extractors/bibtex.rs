@@ -208,11 +208,11 @@ impl DocumentExtractor for BibtexExtractor {
         let document = if wants_structure && !citation_pairs.is_empty() {
             use crate::types::builder::DocumentStructureBuilder;
             let mut builder = DocumentStructureBuilder::new().source_format("bibtex");
-            for (key, citation_text, fields) in &citation_pairs {
-                let node_idx = builder.push_citation(key, citation_text, None);
+            for (key, citation_text, fields) in citation_pairs {
+                let node_idx = builder.push_citation(&key, &citation_text, None);
                 // Set all entry fields as node attributes
                 if !fields.is_empty() {
-                    builder.set_attributes(node_idx, fields.clone());
+                    builder.set_attributes(node_idx, fields);
                 }
             }
             Some(builder.build())

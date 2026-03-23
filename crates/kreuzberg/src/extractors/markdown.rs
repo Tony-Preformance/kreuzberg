@@ -206,9 +206,9 @@ impl MarkdownExtractor {
                 }
                 Event::End(TagEnd::Heading(_)) => {
                     in_heading = false;
-                    let text = heading_text.trim().to_string();
-                    if !text.is_empty() {
-                        builder.push_heading(heading_level, &text, None, None);
+                    let trimmed = heading_text.trim();
+                    if !trimmed.is_empty() {
+                        builder.push_heading(heading_level, trimmed, None, None);
                     }
                     heading_text.clear();
                 }
@@ -222,11 +222,11 @@ impl MarkdownExtractor {
                 Event::End(TagEnd::Paragraph) => {
                     if in_paragraph {
                         in_paragraph = false;
-                        let text = paragraph_text.trim().to_string();
-                        if !text.is_empty() {
+                        let trimmed = paragraph_text.trim();
+                        if !trimmed.is_empty() {
                             // Adjust annotations for leading whitespace trim
                             let trim_offset = paragraph_text.len() - paragraph_text.trim_start().len();
-                            let trimmed_len = text.len() as u32;
+                            let trimmed_len = trimmed.len() as u32;
                             let annotations = if trim_offset > 0 {
                                 paragraph_annotations
                                     .drain(..)
@@ -243,7 +243,7 @@ impl MarkdownExtractor {
                                     .filter(|a| a.start < a.end && a.end <= trimmed_len)
                                     .collect()
                             };
-                            builder.push_paragraph(&text, annotations, None, None);
+                            builder.push_paragraph(trimmed, annotations, None, None);
                         }
                         paragraph_text.clear();
                         paragraph_annotations.clear();
@@ -344,9 +344,9 @@ impl MarkdownExtractor {
                 }
                 Event::End(TagEnd::CodeBlock) => {
                     in_code_block = false;
-                    let text = code_text.trim_end().to_string();
-                    if !text.is_empty() {
-                        builder.push_code(&text, code_lang.as_deref(), None);
+                    let trimmed = code_text.trim_end();
+                    if !trimmed.is_empty() {
+                        builder.push_code(trimmed, code_lang.as_deref(), None);
                     }
                     code_text.clear();
                     code_lang = None;
@@ -375,11 +375,11 @@ impl MarkdownExtractor {
                 }
                 Event::End(TagEnd::Item) => {
                     in_list_item = false;
-                    let text = list_item_text.trim().to_string();
+                    let trimmed = list_item_text.trim();
                     if let Some((list_idx, _)) = list_stack.last()
-                        && !text.is_empty()
+                        && !trimmed.is_empty()
                     {
-                        builder.push_list_item(*list_idx, &text, None);
+                        builder.push_list_item(*list_idx, trimmed, None);
                     }
                     list_item_text.clear();
                 }
@@ -415,12 +415,9 @@ impl MarkdownExtractor {
                 }
                 Event::End(TagEnd::Image) => {
                     in_image = false;
-                    let desc = if image_alt.trim().is_empty() {
-                        None
-                    } else {
-                        Some(image_alt.trim().to_string())
-                    };
-                    builder.push_image(desc.as_deref(), None, None, None);
+                    let trimmed = image_alt.trim();
+                    let desc = if trimmed.is_empty() { None } else { Some(trimmed) };
+                    builder.push_image(desc, None, None, None);
                     image_alt.clear();
                 }
                 Event::Code(s) => {
