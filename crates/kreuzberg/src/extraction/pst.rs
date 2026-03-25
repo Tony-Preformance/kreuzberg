@@ -29,7 +29,6 @@ use crate::error::{KreuzbergError, Result};
 use crate::types::{EmailExtractionResult, ProcessingWarning};
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::string::String;
 
 #[cfg(feature = "email")]
 use outlook_pst::{
@@ -73,6 +72,16 @@ pub fn extract_pst_messages(pst_data: &[u8]) -> Result<(Vec<EmailExtractionResul
 
     let (messages, warnings) = extract_from_path(temp_file.path())?;
     Ok((messages, warnings))
+}
+
+/// Extract PST messages directly from a file path, bypassing the in-memory copy.
+///
+/// Used by `PstExtractor::extract_file` to avoid the double-allocation that
+/// occurs when the full PST is first read into a `Vec<u8>` and then written
+/// back out to a tempfile before parsing.
+#[cfg(feature = "email")]
+pub(crate) fn extract_pst_from_path(path: &std::path::Path) -> Result<(Vec<EmailExtractionResult>, Vec<ProcessingWarning>)> {
+    extract_from_path(path)
 }
 
 #[cfg(feature = "email")]
@@ -245,7 +254,9 @@ fn extract_message_content(message: &dyn PstMessage) -> EmailExtractionResult {
                 1 => to_emails.push(recipient),  // MAPI_TO
                 2 => cc_emails.push(recipient),  // MAPI_CC
                 3 => bcc_emails.push(recipient), // MAPI_BCC
-                _ => to_emails.push(recipient),
+                _ => {
+                    tracing::warn!(recipient_type, "Unknown MAPI recipient type; skipping recipient");
+                }
             }
         }
     }
@@ -288,19 +299,18 @@ fn prop_value_to_string(value: &PropertyValue) -> Option<String> {
 
 #[cfg(feature = "email")]
 fn windows_filetime_to_string(filetime: i64) -> String {
-    use chrono::{DateTime, Utc};
+    use chrono::DateTime;
 
     // 100-nanosecond intervals between 1601-01-01 and 1970-01-01
     const EPOCH_DIFF_100NS: i64 = 116_444_736_000_000_000;
-    let unix_100ns = filetime.saturating_sub(EPOCH_DIFF_100NS);
+    if filetime < EPOCH_DIFF_100NS {
+        return format!("(invalid timestamp: {})", filetime);
+    }
+    let unix_100ns = filetime - EPOCH_DIFF_100NS;
     let unix_secs = unix_100ns / 10_000_000;
     let nsecs = (unix_100ns % 10_000_000) * 100;
 
-    if unix_100ns < 0 {
-        return format!("(invalid timestamp: {})", filetime);
-    }
-
-    DateTime::<Utc>::from_timestamp(unix_secs, nsecs as u32)
+    DateTime::from_timestamp(unix_secs, nsecs as u32)
         .map(|dt| dt.to_rfc3339_opts(chrono::SecondsFormat::Secs, true))
         .unwrap_or_else(|| format!("(invalid timestamp: {})", filetime))
 }
@@ -311,4 +321,67 @@ pub fn extract_pst_messages(_pst_data: &[u8]) -> Result<(Vec<EmailExtractionResu
         feature: "email".to_string(),
         context: Some("PST extraction requires the 'email' feature to be enabled".to_string()),
     })
+}
+
+#[cfg(test)]
+#[cfg(feature = "email")]
+mod tests {
+    use super::*;
+    use outlook_pst::ltp::prop_context::PropertyValue;
+
+    // ── FILETIME conversion ──────────────────────────────────────────────────
+
+    #[test]
+    fn test_filetime_known_epoch() {
+        // FILETIME for 1970-01-01T00:00:00Z is exactly EPOCH_DIFF_100NS
+        let filetime: i64 = 116_444_736_000_000_000;
+        let result = windows_filetime_to_string(filetime);
+        assert_eq!(result, "1970-01-01T00:00:00Z");
+    }
+
+    #[test]
+    fn test_filetime_known_date() {
+        // 2024-03-15T12:00:00Z as FILETIME
+        // seconds since 1970: 1710504000
+        // filetime = 1710504000 * 10_000_000 + 116_444_736_000_000_000 = 133_549_776_000_000_000
+        let filetime: i64 = 133_549_776_000_000_000;
+        let result = windows_filetime_to_string(filetime);
+        assert_eq!(result, "2024-03-15T12:00:00Z");
+    }
+
+    #[test]
+    fn test_filetime_before_unix_epoch_is_invalid() {
+        // Any filetime less than EPOCH_DIFF_100NS represents a date before 1970-01-01
+        let filetime: i64 = 116_444_735_999_999_999;
+        let result = windows_filetime_to_string(filetime);
+        assert!(result.starts_with("(invalid timestamp:"));
+    }
+
+    #[test]
+    fn test_filetime_zero_is_invalid() {
+        let result = windows_filetime_to_string(0);
+        assert!(result.starts_with("(invalid timestamp:"));
+    }
+
+    // ── prop_value_to_string ─────────────────────────────────────────────────
+    // Unicode/String8/Binary newtypes have private fields so we can only
+    // test the non-string arms directly here.
+
+    #[test]
+    fn test_prop_value_integer32_returns_none() {
+        let val = PropertyValue::Integer32(42);
+        assert_eq!(prop_value_to_string(&val), None);
+    }
+
+    #[test]
+    fn test_prop_value_boolean_returns_none() {
+        let val = PropertyValue::Boolean(true);
+        assert_eq!(prop_value_to_string(&val), None);
+    }
+
+    #[test]
+    fn test_prop_value_time_returns_none() {
+        let val = PropertyValue::Time(133_549_776_000_000_000);
+        assert_eq!(prop_value_to_string(&val), None);
+    }
 }

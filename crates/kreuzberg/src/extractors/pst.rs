@@ -144,10 +144,76 @@ impl DocumentExtractor for PstExtractor {
             extractor.name = self.name(),
         )
     ))]
-    #[cfg(feature = "tokio-runtime")]
     async fn extract_file(&self, path: &Path, mime_type: &str, config: &ExtractionConfig) -> Result<ExtractionResult> {
-        let bytes = tokio::fs::read(path).await?;
-        self.extract_bytes(&bytes, mime_type, config).await
+        // Call extract_pst_from_path directly to avoid reading the whole file into memory
+        // before writing it back out to a tempfile — PSTs can be multi-GB.
+        let _ = config;
+        let (messages, processing_warnings) = crate::extraction::pst::extract_pst_from_path(path)?;
+
+        let mut all_text_parts = Vec::with_capacity(messages.len());
+        for msg in &messages {
+            let msg_text = crate::extraction::email::build_email_text_output(msg);
+            if !msg_text.is_empty() {
+                all_text_parts.push(msg_text);
+            }
+        }
+
+        let content_text = all_text_parts.join("\n\n---\n\n");
+
+        let (subject, format_metadata, created_at) = if let Some(first) = messages.first() {
+            let attachment_names: Vec<String> = first
+                .attachments
+                .iter()
+                .filter_map(|a| a.filename.clone().or_else(|| a.name.clone()))
+                .collect();
+
+            let email_metadata = crate::types::EmailMetadata {
+                from_email: first.from_email.clone(),
+                from_name: None,
+                to_emails: first.to_emails.clone(),
+                cc_emails: first.cc_emails.clone(),
+                bcc_emails: first.bcc_emails.clone(),
+                message_id: first.message_id.clone(),
+                attachments: attachment_names,
+            };
+
+            (first.subject.clone(), Some(crate::types::FormatMetadata::Email(email_metadata)), first.date.clone())
+        } else {
+            (None, None, None)
+        };
+
+        let mut additional: ahash::AHashMap<std::borrow::Cow<'static, str>, serde_json::Value> = ahash::AHashMap::new();
+        additional.insert(
+            std::borrow::Cow::Borrowed("message_count"),
+            serde_json::json!(messages.len()),
+        );
+
+        Ok(ExtractionResult {
+            content: content_text,
+            mime_type: mime_type.to_string().into(),
+            metadata: crate::types::Metadata {
+                format: format_metadata,
+                subject,
+                created_at,
+                additional,
+                ..Default::default()
+            },
+            tables: vec![],
+            detected_languages: None,
+            chunks: None,
+            images: None,
+            pages: None,
+            djot_content: None,
+            elements: None,
+            ocr_elements: None,
+            document: None,
+            #[cfg(any(feature = "keywords-yake", feature = "keywords-rake"))]
+            extracted_keywords: None,
+            quality_score: None,
+            processing_warnings,
+            annotations: None,
+            children: None,
+        })
     }
 
     fn supported_mime_types(&self) -> &[&str] {
