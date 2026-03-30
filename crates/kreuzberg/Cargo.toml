@@ -14,7 +14,13 @@ categories = ["parser-implementations", "text-processing"]
 readme = "README.md"
 
 [package.metadata.cargo-machete]
-ignored = ["opentelemetry", "opentelemetry_sdk", "tracing-opentelemetry", "kamadak-exif"]
+ignored = [
+    "opentelemetry",
+    "opentelemetry_sdk",
+    "tracing-opentelemetry",
+    "kamadak-exif",
+    "serde_toon_format",
+]
 
 [lib]
 crate-type = ["rlib"]

@@ -12,6 +12,9 @@ documentation = "https://docs.kreuzberg.dev"
 keywords = ["document", "extraction", "cli", "tool", "parser"]
 categories = ["command-line-utilities", "text-processing"]
 
+[package.metadata.cargo-machete]
+ignored = ["serde_toon_format"]
+
 [[bin]]
 name = "kreuzberg"
 path = "src/main.rs"
