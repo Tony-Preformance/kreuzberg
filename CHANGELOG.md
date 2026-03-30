@@ -28,8 +28,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Renderer registry**: Trait-based `Renderer` and `RendererRegistry` for custom output format plugins. Built-in renderers (markdown, HTML, djot, plain) registered at startup. External crates can register custom renderers (e.g., DOCX output) via `register_renderer()`.
 - **comrak-based rendering**: Markdown and HTML rendering now uses comrak AST bridge instead of hand-rolled string building. Produces GFM-compliant markdown and semantic HTML5. Paragraph consolidation merges consecutive same-format paragraphs at sentence boundaries (fixes DOCX CV fragmentation where each visual line was a separate `*...*` italic block).
 - **Benchmark quality scoring improvements**: Content normalization for HTML blocks in markdown scoring, Image↔Paragraph and Table↔ListItem type compatibility, `correct` field in `QualityMetrics`, HTML detection in ground truth validation.
+- **URI extraction**: New `Uri` type with `UriKind` classification (Hyperlink, Image, Anchor, Citation, Reference, Email) extracted from 20+ document formats. URIs are always-on, deduplicated by (url, kind) pair, and capped at 100k per document. Available in `ExtractionResult.uris`.
+- **Recursive email attachment extraction**: EML/MSG/PST attachments are now recursively extracted as `ArchiveEntry` children using the same pattern as archive extractors. Nested `message/rfc822` parts also extracted as children. Respects `max_archive_depth`.
+- **PDF embedded file extraction**: PDF file attachments (portfolios) are now recursively extracted as `ArchiveEntry` children via lopdf. Includes filename sanitization, decompression size limits, and name tree depth guards.
+- **PDF bookmark/outline extraction**: Document outlines (bookmarks) extracted as URIs — page destinations as `UriKind::Anchor`, external links as `UriKind::Hyperlink`.
+- **DOCX/PPTX embedded object extraction**: OLE objects and embedded files from `word/embeddings/` and `ppt/embeddings/` directories are now recursively extracted as children.
+- **PPTX hyperlink extraction**: Hyperlinks from slide XML (`<a:hlinkClick>` in run properties) now resolved via relationship files and extracted as URIs.
+- **Image path resolution for markup formats**: When using `extract_file()`, relative image paths in Markdown, MDX, LaTeX, RST, OrgMode, Typst, Djot, and DocBook are resolved from the filesystem and extracted as `ExtractedImage` data. OS-agnostic with path traversal prevention.
+- **Unified image OCR pipeline stage**: Image OCR moved from per-extractor calls to a single pipeline stage after derivation. All extracted images (including path-resolved markup images) are now OCR'd uniformly when OCR is configured. Concurrency limited to 8 concurrent tasks.
+- **FictionBook image and link extraction**: Base64-encoded `<binary>` images and `<a>` hyperlinks now extracted from FB2 documents.
+- **Apple iWork extractor improvements**: Numbers outputs tables instead of paragraphs, Keynote has improved slide structure, Pages has heading detection. All three extract metadata from ZIP plist.
 
 ### Fixed
+
+- **Metadata standardization**: Metadata from PPTX, Excel, ODT, RST, OrgMode, Typst, RTF, JATS, DOC, PPT, HTML, Email, BibTeX, and Citation extractors now mapped to standard `Metadata` struct fields (title, authors, dates, keywords, language) instead of only `additional` map.
+- **MDX link parity with Markdown**: Links and annotations in headings and list items now extracted (was silently dropped).
+- **RST hyperlink extraction**: Inline hyperlinks (`` `text <url>`_ ``) and reference targets now extracted.
+- **LaTeX `\url{}` extraction**: `\url{...}` commands now extracted as URIs alongside `\href`.
+- **OrgMode image detection**: Added .webp, .bmp, .tiff, .avif to recognized image extensions.
+- **BibTeX URI classification**: URL fields now correctly classified as Hyperlink (was Citation). Entry title used as label instead of BibTeX key.
+- **JATS title field**: Article title now stored in `metadata.title` (was only in `subject`).
+- **PDF bookmark stack safety**: Sibling traversal converted from recursion to iterative loop preventing stack overflow on wide outlines.
+- **PDF embedded file security**: Filename sanitization (strip directory components), decompressed size limit (50MB), name tree depth limit (50 levels).
 
 - **Tesseract C++ exception crash** (#606): Fixed fatal runtime error where C++ exceptions from Tesseract unwound through Rust FFI frames, triggering `std::terminate()`. Now compiles Tesseract with `-fno-exceptions` on macOS, Linux, and MinGW. The Tesseract CLI executable target (which uses `try`/`catch`) is patched out of CMakeLists.txt at build time since only the library is needed.
 
