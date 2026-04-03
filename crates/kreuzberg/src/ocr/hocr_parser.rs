@@ -88,7 +88,13 @@ pub fn parse_hocr_to_internal_document(hocr_html: &str) -> InternalDocument {
 
         // ── ocr_par ──────────────────────────────────────────────
         if is_paragraph_tag(tag_content) {
-            let (paragraph, end_pos) = parse_paragraph(hocr_html, pos, last_page.unwrap_or(1), element_index);
+            let par_tag_name = tag_content
+                .split_whitespace()
+                .next()
+                .unwrap_or("p")
+                .to_ascii_lowercase();
+            let (paragraph, end_pos) =
+                parse_paragraph(hocr_html, pos, last_page.unwrap_or(1), element_index, &par_tag_name);
             pos = end_pos;
 
             if let Some(elem) = paragraph {
@@ -217,9 +223,20 @@ struct HocrWordInfo {
 /// Parse a single `<p class="ocr_par">` (or `<span class="ocr_par">`) and all nested
 /// content up to the matching closing tag.
 ///
+/// `par_tag` is the lowercase tag name of the paragraph element (e.g. "p", "span", "div").
+/// Depth tracking uses ONLY matching tag names to find the paragraph's closing tag.
+/// This prevents inner elements (lines, words, formatting) from interfering with
+/// the paragraph boundary detection — even if their subtrees are malformed.
+///
 /// Returns the constructed element (if any words were found) and the byte position
 /// after the closing tag.
-fn parse_paragraph(html: &str, start: usize, page: u32, element_index: u32) -> (Option<InternalElement>, usize) {
+fn parse_paragraph(
+    html: &str,
+    start: usize,
+    page: u32,
+    element_index: u32,
+    par_tag: &str,
+) -> (Option<InternalElement>, usize) {
     let bytes = html.as_bytes();
     let mut pos = start;
 
@@ -227,8 +244,11 @@ fn parse_paragraph(html: &str, start: usize, page: u32, element_index: u32) -> (
     let mut current_line: Vec<HocrWordInfo> = Vec::new();
     let mut in_line = false;
 
-    // Track nesting depth for the paragraph container so we can find the
-    // correct closing tag even when paragraphs contain nested block elements.
+    // Track nesting depth using ONLY tags matching the paragraph's own tag name.
+    // This ensures that inner elements (ocr_line spans, ocrx_word spans,
+    // formatting tags, etc.) cannot interfere with finding the paragraph's
+    // closing tag — even when their subtrees contain unbalanced or malformed
+    // same-name tags that cause word-level skip functions to overshoot.
     let mut depth: u32 = 1; // we already consumed the opening tag
 
     while pos < bytes.len() {
@@ -244,7 +264,7 @@ fn parse_paragraph(html: &str, start: usize, page: u32, element_index: u32) -> (
         // ── closing tags ─────────────────────────────────────────
         if let Some(stripped) = tag_content.strip_prefix('/') {
             let closing_name = stripped.trim().to_ascii_lowercase();
-            if closing_name == "p" || closing_name == "span" || closing_name == "div" {
+            if closing_name == par_tag {
                 depth = depth.saturating_sub(1);
                 if depth == 0 {
                     // End of our paragraph — flush current line
@@ -262,7 +282,6 @@ fn parse_paragraph(html: &str, start: usize, page: u32, element_index: u32) -> (
             continue;
         }
 
-        // Track nesting depth for p/span/div tags that are NOT hOCR elements
         let tag_name = tag_content.split_whitespace().next().unwrap_or("").to_ascii_lowercase();
 
         // ── ocr_line / ocrx_line ─────────────────────────────────
@@ -271,7 +290,8 @@ fn parse_paragraph(html: &str, start: usize, page: u32, element_index: u32) -> (
                 lines.push(std::mem::take(&mut current_line));
             }
             in_line = true;
-            if tag_name == "p" || tag_name == "span" || tag_name == "div" {
+            // Only track depth for tags matching the paragraph's tag name.
+            if tag_name == par_tag {
                 depth += 1;
             }
             continue;
@@ -282,7 +302,10 @@ fn parse_paragraph(html: &str, start: usize, page: u32, element_index: u32) -> (
             let title = extract_title_attr(tag_content);
             let props = parse_title_properties(&title);
 
-            // Extract text content up to the next `<` (may span nested formatting tags)
+            // Extract text content up to the matching close tag (stripping
+            // nested formatting tags). The paragraph depth counter is
+            // unaffected by skip_to_matching_close because depth only
+            // tracks the paragraph's own tag type, not word/line spans.
             let word_text = extract_inner_text(html, pos);
             let trimmed = decode_html_entities(&word_text);
             let trimmed = trimmed.trim();
@@ -304,8 +327,8 @@ fn parse_paragraph(html: &str, start: usize, page: u32, element_index: u32) -> (
             continue;
         }
 
-        // Track depth for non-hOCR container tags
-        if tag_name == "p" || tag_name == "span" || tag_name == "div" {
+        // Only track depth for tags matching the paragraph's tag name.
+        if tag_name == par_tag {
             depth += 1;
         }
     }
@@ -821,6 +844,437 @@ mod tests {
         assert!(
             !doc.elements.is_empty(),
             "Should extract from v4 hOCR with embedded tables"
+        );
+    }
+
+    #[test]
+    fn test_many_paragraphs_all_captured() {
+        // Regression test: parser must capture ALL paragraphs on a page,
+        // including those near the bottom. Reproduces the pdfa_006 bug where
+        // the last ~7 paragraphs were dropped.
+        let paragraph_texts: Vec<&str> = vec![
+            "First paragraph",
+            "Second paragraph",
+            "Third paragraph",
+            "Fourth paragraph",
+            "Fifth paragraph",
+            "Sixth paragraph",
+            "Seventh paragraph",
+            "Eighth paragraph",
+            "Ninth paragraph",
+            "Tenth paragraph",
+            "Eleventh paragraph",
+            "Twelfth paragraph",
+            "Thirteenth paragraph",
+            "Fourteenth paragraph",
+            "Fifteenth paragraph",
+            "Sixteenth paragraph",
+            "Seventeenth paragraph",
+            "Eighteenth paragraph",
+            "Nineteenth paragraph",
+            "Twentieth paragraph",
+            "Twenty-first paragraph",
+            "Twenty-second paragraph",
+            "Twenty-third paragraph",
+            "Twenty-fourth paragraph",
+            "Twenty-fifth paragraph",
+            "Service category alpha",
+            "Service category beta",
+            "Service category gamma",
+            "Service category delta",
+            "All other categories",
+            "Items provided by client",
+            "*** Note this is the last paragraph",
+        ];
+
+        let mut hocr = String::from(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+ <head>
+  <title></title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+  <meta name='ocr-system' content='tesseract 5.5.1' />
+ </head>
+ <body>
+  <div class='ocr_page' id='page_1' title='image "test.png"; bbox 0 0 2550 3300; ppageno 0; scan_res 300 300'>
+"#,
+        );
+
+        let mut y = 100;
+        for (i, text) in paragraph_texts.iter().enumerate() {
+            let block_id = i + 1;
+            let par_id = i + 1;
+            let line_id = i + 1;
+            let y0 = y;
+            let y1 = y + 30;
+
+            hocr.push_str(&format!(
+                r#"   <div class='ocr_carea' id='block_1_{block_id}' title="bbox 100 {y0} 2400 {y1}">
+    <p class='ocr_par' id='par_1_{par_id}' lang='eng' title="bbox 100 {y0} 2400 {y1}">
+     <span class='ocr_line' id='line_1_{line_id}' title="bbox 100 {y0} 2400 {y1}; baseline 0 0; x_size 30; x_descenders 6; x_ascenders 8">
+"#
+            ));
+
+            // Add words for this paragraph
+            let mut wx = 100;
+            for (wi, word) in text.split_whitespace().enumerate() {
+                let word_id = i * 10 + wi + 1;
+                let wx1 = wx + word.len() as u32 * 20;
+                hocr.push_str(&format!(
+                    "      <span class='ocrx_word' id='word_1_{word_id}' title='bbox {wx} {y0} {wx1} {y1}; x_wconf 90'>{word}</span>\n"
+                ));
+                wx = wx1 + 10;
+            }
+
+            hocr.push_str("     </span>\n    </p>\n   </div>\n");
+
+            y = y1 + 10;
+        }
+
+        hocr.push_str("  </div>\n </body>\n</html>\n");
+
+        let doc = parse_hocr_to_internal_document(&hocr);
+
+        // Filter out page breaks, keep only OcrText elements
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+
+        assert_eq!(
+            text_elements.len(),
+            paragraph_texts.len(),
+            "Expected {} paragraphs but got {}. Missing paragraphs from the end.",
+            paragraph_texts.len(),
+            text_elements.len()
+        );
+
+        // Verify each paragraph's text matches
+        for (i, (elem, expected)) in text_elements.iter().zip(paragraph_texts.iter()).enumerate() {
+            assert_eq!(
+                elem.text,
+                *expected,
+                "Paragraph {} mismatch: expected '{}', got '{}'",
+                i + 1,
+                expected,
+                elem.text
+            );
+        }
+
+        // Specifically verify the last few paragraphs are present (the ones
+        // that were dropped in the pdfa_006 bug)
+        let last_text = &text_elements.last().unwrap().text;
+        assert_eq!(
+            last_text, "*** Note this is the last paragraph",
+            "Last paragraph should be captured"
+        );
+    }
+
+    #[test]
+    fn test_paragraph_with_nested_span_in_word() {
+        // Test that a word containing a nested <span> (e.g., font info) doesn't
+        // cause depth tracking issues that swallow subsequent paragraphs.
+        let hocr = r#"<div class="ocr_page" title="ppageno 0">
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 10 50 30; x_wconf 90"><span class="ocrx_font" style="font-size:12px">Hello</span></span>
+        <span class="ocrx_word" title="bbox 60 10 100 30; x_wconf 90">World</span>
+      </span>
+    </p>
+  </div>
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 50 80 70; x_wconf 90">Second</span>
+        <span class="ocrx_word" title="bbox 90 50 180 70; x_wconf 90">paragraph</span>
+      </span>
+    </p>
+  </div>
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 90 80 110; x_wconf 90">Third</span>
+        <span class="ocrx_word" title="bbox 90 90 180 110; x_wconf 90">paragraph</span>
+      </span>
+    </p>
+  </div>
+</div>"#;
+
+        let doc = parse_hocr_to_internal_document(hocr);
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+
+        assert_eq!(text_elements.len(), 3, "Should capture all 3 paragraphs");
+        assert_eq!(text_elements[0].text, "Hello World");
+        assert_eq!(text_elements[1].text, "Second paragraph");
+        assert_eq!(text_elements[2].text, "Third paragraph");
+    }
+
+    #[test]
+    fn test_paragraph_with_words_outside_line() {
+        // Words directly inside ocr_par, without ocr_line wrapping.
+        // This can happen with some Tesseract configurations.
+        let hocr = r#"<div class="ocr_page" title="ppageno 0">
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocrx_word" title="bbox 10 10 50 30; x_wconf 90">Direct</span>
+      <span class="ocrx_word" title="bbox 60 10 120 30; x_wconf 90">words</span>
+    </p>
+  </div>
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 50 80 70; x_wconf 90">Next</span>
+        <span class="ocrx_word" title="bbox 90 50 160 70; x_wconf 90">paragraph</span>
+      </span>
+    </p>
+  </div>
+</div>"#;
+
+        let doc = parse_hocr_to_internal_document(hocr);
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+
+        assert_eq!(text_elements.len(), 2, "Should capture both paragraphs");
+        assert_eq!(text_elements[0].text, "Direct words");
+        assert_eq!(text_elements[1].text, "Next paragraph");
+    }
+
+    #[test]
+    fn test_paragraph_depth_with_extra_div_nesting() {
+        // Test that extra div nesting (ocr_carea or other containers)
+        // inside a paragraph doesn't break depth tracking.
+        let hocr = r#"<div class="ocr_page" title="ppageno 0">
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <div class="ocr_column">
+        <span class="ocr_line">
+          <span class="ocrx_word" title="bbox 10 10 50 30; x_wconf 90">Nested</span>
+        </span>
+      </div>
+    </p>
+  </div>
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 50 80 70; x_wconf 90">After</span>
+        <span class="ocrx_word" title="bbox 90 50 160 70; x_wconf 90">nested</span>
+      </span>
+    </p>
+  </div>
+</div>"#;
+
+        let doc = parse_hocr_to_internal_document(hocr);
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+
+        assert_eq!(
+            text_elements.len(),
+            2,
+            "Should capture both paragraphs even with extra div nesting"
+        );
+        assert_eq!(text_elements[0].text, "Nested");
+        assert_eq!(text_elements[1].text, "After nested");
+    }
+
+    #[test]
+    fn test_paragraph_div_swallows_carea_close() {
+        // If ocr_par uses <div> and carea also uses <div>, make sure
+        // the parser doesn't get confused when ocr_par lacks explicit close.
+        // Also test with missing par close (carea close used instead).
+        let hocr = r#"<div class="ocr_page" title="ppageno 0">
+  <div class="ocr_carea">
+    <div class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 10 50 30; x_wconf 90">First</span>
+      </span>
+    </div>
+  </div>
+  <div class="ocr_carea">
+    <div class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 50 50 70; x_wconf 90">Second</span>
+      </span>
+    </div>
+  </div>
+  <div class="ocr_carea">
+    <div class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 90 50 110; x_wconf 90">Third</span>
+      </span>
+    </div>
+  </div>
+</div>"#;
+
+        let doc = parse_hocr_to_internal_document(hocr);
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+
+        assert_eq!(text_elements.len(), 3, "Should capture all 3 div-based paragraphs");
+    }
+
+    #[test]
+    fn test_paragraph_unclosed_par_div_steals_carea_close() {
+        // When ocr_par <div> is not closed, the carea </div> closes
+        // the paragraph instead. Subsequent careas should still be found.
+        let hocr = r#"<div class="ocr_page" title="ppageno 0">
+  <div class="ocr_carea">
+    <div class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 10 50 30; x_wconf 90">First</span>
+      </span>
+  </div>
+  <div class="ocr_carea">
+    <div class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 50 50 70; x_wconf 90">Second</span>
+      </span>
+  </div>
+</div>"#;
+
+        let doc = parse_hocr_to_internal_document(hocr);
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+
+        // Even with missing par close, should still find both paragraphs
+        // (first par closed by carea's div, second par closed by page's div)
+        assert_eq!(
+            text_elements.len(),
+            2,
+            "Should find both paragraphs even with unclosed par divs. Got: {:?}",
+            text_elements.iter().map(|e| e.text.as_str()).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn test_depth_tracking_uses_paragraph_tag_name() {
+        // Regression test: parse_paragraph tracks depth using only the
+        // paragraph's own tag name (e.g., "p"). Inner span elements
+        // (lines, words, formatting) do not affect the paragraph's depth.
+        // This prevents skip_to_matching_close for words from causing the
+        // paragraph to overshoot and merge/drop subsequent paragraphs.
+        //
+        // Previously, depth tracked all p/span/div generically. If a word's
+        // skip_to_matching_close consumed a line's </span>, the depth counter
+        // stayed elevated, causing the paragraph to scan past its own </p>
+        // and consume subsequent paragraphs.
+
+        // Case 1: Paragraphs in separate ocr_carea containers.
+        let hocr_separate = r#"<div class="ocr_page" title="ppageno 0">
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 10 50 30; x_wconf 90"><span>Styled</span></span>
+        <span class="ocrx_word" title="bbox 60 10 120 30; x_wconf 90">text</span>
+      </span>
+    </p>
+  </div>
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 50 80 70; x_wconf 90">After</span>
+      </span>
+    </p>
+  </div>
+</div>"#;
+
+        let doc = parse_hocr_to_internal_document(hocr_separate);
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+        assert_eq!(text_elements.len(), 2);
+        assert_eq!(text_elements[0].text, "Styled text");
+        assert_eq!(text_elements[1].text, "After");
+
+        // Case 2: Multiple paragraphs in the same ocr_carea.
+        // The depth counter must correctly find each </p> because it
+        // only tracks <p>/<p> nesting, not inner <span>s.
+        let hocr_same_carea = r#"<div class="ocr_page" title="ppageno 0">
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 10 50 30; x_wconf 90"><span>Styled</span></span>
+      </span>
+    </p>
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 50 80 70; x_wconf 90">Should</span>
+        <span class="ocrx_word" title="bbox 90 50 180 70; x_wconf 90">be</span>
+        <span class="ocrx_word" title="bbox 190 50 280 70; x_wconf 90">separate</span>
+      </span>
+    </p>
+  </div>
+</div>"#;
+
+        let doc = parse_hocr_to_internal_document(hocr_same_carea);
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+        assert_eq!(
+            text_elements.len(),
+            2,
+            "Should find both paragraphs separately. Got: {:?}",
+            text_elements.iter().map(|e| e.text.as_str()).collect::<Vec<_>>()
+        );
+        assert_eq!(text_elements[0].text, "Styled");
+        assert_eq!(text_elements[1].text, "Should be separate");
+    }
+
+    #[test]
+    fn test_paragraph_with_ocr_separator_between_paragraphs() {
+        // ocr_separator divs between paragraphs should not interfere.
+        let hocr = r#"<div class="ocr_page" title="ppageno 0">
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 10 50 30; x_wconf 90">Before</span>
+      </span>
+    </p>
+  </div>
+  <div class="ocr_separator" title="bbox 10 40 500 42"></div>
+  <div class="ocr_carea">
+    <p class="ocr_par">
+      <span class="ocr_line">
+        <span class="ocrx_word" title="bbox 10 50 50 70; x_wconf 90">After</span>
+      </span>
+    </p>
+  </div>
+</div>"#;
+
+        let doc = parse_hocr_to_internal_document(hocr);
+        let text_elements: Vec<_> = doc
+            .elements
+            .iter()
+            .filter(|e| matches!(e.kind, ElementKind::OcrText { .. }))
+            .collect();
+
+        assert_eq!(
+            text_elements.len(),
+            2,
+            "Should capture both paragraphs around separator"
         );
     }
 }
