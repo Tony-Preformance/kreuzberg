@@ -85,20 +85,6 @@
 			}
 		},
 		{
-			"includes": ["examples/**/*.ts"],
-			"linter": {
-				"rules": {
-					"suspicious": {
-						"noExplicitAny": "off"
-					},
-					"correctness": {
-						"noUnusedPrivateClassMembers": "off",
-						"noUnusedFunctionParameters": "off"
-					}
-				}
-			}
-		},
-		{
 			"includes": ["crates/kreuzberg-node/index.js"],
 			"linter": {
 				"rules": {
@@ -144,9 +130,7 @@
 		{
 			"includes": [
 				"docs/**/*.html",
-				"examples/**/*.html",
 				"crates/kreuzberg-wasm/examples/**/*.html",
-				"examples/wasm-deno/fixtures/**/*.html",
 				"packages/java/src/test/resources/**/*.html"
 			],
 			"linter": {

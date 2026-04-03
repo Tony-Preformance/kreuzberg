@@ -1,75 +1,32 @@
-# Git
-.git/
-.github/
-.gitignore
-.gitattributes
+# =============================================================================
+# .dockerignore — Docker builds only need Cargo.toml, Cargo.lock, and crates/
+# Exclude everything else to minimize context and speed up builds.
+# =============================================================================
 
-# Build artifacts
-target/
+# Start by ignoring everything
+*
+
+# Allow only what Docker builds need
+!Cargo.toml
+!Cargo.lock
+!crates/kreuzberg/
+!crates/kreuzberg-cli/
+!crates/kreuzberg-tesseract/
+!crates/kreuzberg-paddle-ocr/
+!crates/kreuzberg-pdfium-render/
+!crates/kreuzberg-ffi/
+!crates/kreuzberg-py/
+!crates/kreuzberg-node/
+!crates/kreuzberg-wasm/
+!docker/
+
+# Re-exclude build artifacts inside allowed dirs
 **/target/
-dist/
-build/
-
-# Documentation
-docs/
-*.md
-!README.md
-CHANGELOG.md
-LICENSE
-
-# Tests and benchmarks
-tests/
-benchmarks/
-test_documents/
-tools/benchmark-harness/
-
-# Python
-packages/python/
-*.pyc
-*.pyd
-*.pyo
-.Python
-__pycache__/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.venv/
-venv/
-*.egg-info/
-uv.lock
-
-# Node.js / TypeScript
-packages/typescript/
-crates/kreuzberg-node/
-node_modules/
-*.node
-package-lock.json
-pnpm-lock.yaml
-yarn.lock
-
-# Ruby
-packages/ruby/
-crates/kreuzberg-rb/
-*.gem
-.bundle/
-
-# IDE and editors
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# CI/CD
-.github/workflows/
-
-# Misc
-.env
-.env.*
-*.log
-*.bak
-*.tmp
-.dockerignore
-Dockerfile
-docker-compose.yaml
+**/.git/
+**/node_modules/
+**/__pycache__/
+**/*.pyc
+**/*.so
+**/*.dylib
+**/*.dll
+**/*.node

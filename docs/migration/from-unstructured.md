@@ -311,7 +311,6 @@ for page in result.pages:
 
 - **Documentation**: <https://github.com/kreuzberg-dev/kreuzberg>
 - **Issues**: <https://github.com/kreuzberg-dev/kreuzberg/issues>
-- **Examples**: See `examples/` directory for full workflow samples
 - **API Reference**: See `docs/api/` for endpoint documentation
 
 ## Next Steps

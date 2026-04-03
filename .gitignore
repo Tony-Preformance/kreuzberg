@@ -1,199 +1,201 @@
-!benchmarks/baselines/
-tools/benchmark-harness/datasets/
-!vendor/rb-sys/build/
-!vendor/rb-sys/build/**
-*$py.class
+# Build artifacts
+target/
+build/
+dist/
+dist-musl/
+*.so
+*.dylib
+*.dll
+*.pdb
+*.node
+*.whl
+*.tar.gz
+*.gem
+*.jar
+wheels/
 **/bin/
 **/obj/
-*.Cache
-*.cobertura.xml
-*.cscfg
-*.dll
-*.dylib
-*.egg-info/
-*.gem
-*.log
-*.node
-*.pdb
-*.py[cod]
+
+# Rust
 *.rs.bk
-*.so
-*.suo
-*.tar.gz
-*.temp
-*.tmp
-*.tsbuildinfo
-*.user
-*.whl
-*/.fastembed_cache/
-*temp/
-.benchmarks/
-.cache/
-.Rhistory
-.RData
-.mvn/
-.claude/
+*.profraw
+rust-coverage.lcov
+rust_out
+
+# Python
+*.py[cod]
+*$py.class
+*.egg-info/
+__pycache__/
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
 .coverage
 .coverage*
-.cursorrules
-.dist/
-.DS_store
-.env
-.fastembed_cache/
-.gemini/
-.hypothesis/
-.idea/
-.kreuzberg/
-.mcp.json
-.mypy_cache/
-.nox/
-.playwright-mcp/
+htmlcov/
+share/python-wheels/
+prompt_template.egg-info/
+packages/python/kreuzberg/kreuzberg-cli
+
+# Node.js / WASM
+node_modules/
+*.tsbuildinfo
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+crates/kreuzberg-node/index.d.ts
+crates/kreuzberg-node/index.js
+libpdfium.a
+.wrangler/
 .pnpm-store/
-.pytest_cache/
-.python-version
-.ropeproject
-.ruff_cache/
-.run/
-.tmp/
-.tmp/
-.tox/
-.venv/
-.vscode/
-.windsurfrules
-/tmp/kreuzberg-docker-test-results.json
-[Tt][Oo][Dd][Oo]*
-__pycache__/
-AGENTS.md
-aggregated-results/
-benchmark_results.json
-benchmarks/results/
-build/
+
+# Ruby
+packages/ruby/.bundle/
+packages/ruby/vendor/
+!packages/ruby/vendor/rb-sys/
 !vendor/rb-sys/build/
 !vendor/rb-sys/build/**
-CLAUDE.md
+*.Cache
+
+# PHP
+vendor/
+php-kreuzberg.ini
+packages/php/php-kreuzberg.ini
+packages/php/tests.xml
+
+# Java / C# / .NET
+*.suo
+*.user
+*.cscfg
+*.cobertura.xml
+TestResults/
+
+# Go
+tests/test_apps/go/kreuzberg-test-suite
+tests/test_apps/go/main
+
+# R
+packages/r/src/.cargo/
+.Rhistory
+.RData
+
+# Elixir
+.nox/
+
+# C FFI
+crates/kreuzberg-ffi/tests/c/test_*
+!crates/kreuzberg-ffi/tests/c/test_*.c
+crates/kreuzberg-ffi/tests/c/*.o
+crates/kreuzberg-ffi/tests/c/*.dSYM/
+e2e/c/test_*
+!e2e/c/test_*.c
+e2e/c/*.o
+e2e/c/*.dSYM/
+
+# Generated pkg-config
+*.pc
+
+# Coverage
+coverage/
 coverage.info
 coverage.json
 coverage.lcov
 coverage.out
 coverage.xml
-coverage/
-crates/kreuzberg-node/index.d.ts
-crates/kreuzberg-node/index.js
-# Global dist/ ignore
-dist/
-dist-musl/
-docker-compose.yaml
-docker-logs/
-docs/_build/
-docs/build/
-docs/benchmarks/charts/
-examples.txt
-GEMINI.md
-htmlcov/
-node_modules/
-npm-debug.log*
-output.txt
 packages/*/.coverage
 packages/*/coverage.json
 packages/*/coverage.out
 packages/*/htmlcov/
 packages/*/test-results/
 packages/*/TestResults/
-packages/ruby/.bundle/
-!packages/ruby/vendor/rb-sys/
-packages/ruby/vendor/
-pnpm-debug.log*
-prompt_template.egg-info/
+
+# IDE / Editor
+.idea/
+.vscode/
+.run/
+.DS_store
+
+# CI / Tools
+.cache/
+.tmp/
+*temp/
+*.temp
+*.tmp
+*.log
+.mvn/
+.tox/
+.artifacts/
+.remote-cache/
+.rumdl_cache/
+docker-logs/
+
+# Benchmarks
+benchmark-results/
+benchmark_results.json
+benchmarks/results/
+!benchmarks/baselines/
+aggregated-results/
+results/
 reports/
-requirements.txt
-results/
-results/
-rust-coverage.lcov
-share/python-wheels/
-site/
-target/
-temp-test-*
-test_report.json
-TestResults/
 tests/benchmarks/results/
-tests/benchmarks/results/*.csv
-tests/benchmarks/results/*.html
-tests/benchmarks/results/*.json
-tests/e2e/logs/
-tests/e2e/test_report.json
-todo.md
-visualizations/
-wheels/
-yarn-debug.log*
-yarn-error.log*
-packages/python/kreuzberg/kreuzberg-cli
-
-# WASM build artifacts
-libpdfium.a
-.wrangler/
-
-# Generated pkg-config files
-*.pc
-
-# Java JAR files (downloaded at build/benchmark time)
-*.jar
-
-# Rust coverage profiling artifacts
-*.profraw
-
-# Profiling artifacts
 profiling-results/
 profiling-results-*/
-.remote-cache/
 
-# Generated PHP ini files (contain machine-specific paths)
-php-kreuzberg.ini
-packages/php/php-kreuzberg.ini
+# Docs
+docs/_build/
+docs/build/
+docs/benchmarks/charts/
+site/
 
-# Temporary debug/test files
+# Tests
+test_report.json
+tests/e2e/logs/
+tests/e2e/test_report.json
+temp-test-*
 packages/csharp/test_html_debug.cs
-.artifacts/
 
-# AI Rules generated files
-.codex/
-
-# Git worktrees
-.worktrees/
-packages/php/tests.xml
-
-# Clippy fix temporary output
-rust_out
-
-# Test-generated image artifacts
-crates/kreuzberg-pdfium-render/*.jpg
-
-# R package vendored cargo cache
-packages/r/src/.cargo/
-
-# C FFI test binaries and build artifacts
-crates/kreuzberg-ffi/tests/c/test_*
-!crates/kreuzberg-ffi/tests/c/test_*.c
-crates/kreuzberg-ffi/tests/c/*.o
-crates/kreuzberg-ffi/tests/c/*.dSYM/
-
-# C e2e test binaries and build artifacts
-e2e/c/test_*
-!e2e/c/test_*.c
-e2e/c/*.o
-e2e/c/*.dSYM/
-
-# Go test binaries
-
-tests/test_apps/go/kreuzberg-test-suite
-tests/test_apps/go/main
-
-# Lock files under test_apps (installed from registry, not workspace)
+# Test app lock files (installed from registry, not workspace)
 tests/test_apps/**/package-lock.json
 tests/test_apps/**/pnpm-lock.yaml
 tests/test_apps/**/Gemfile.lock
 tests/test_apps/**/composer.lock
 tests/test_apps/**/mix.lock
 
-# PHP Composer vendor directory
-vendor/
+# WASM build artifacts
+libpdfium.a
+
+# Pdfium test artifacts
+crates/kreuzberg-pdfium-render/*.jpg
+
+# AI / MCP / Agent config
+.claude/
+.codex/
+.gemini/
+.kreuzberg/
+.mcp.json
+.playwright-mcp/
+.fastembed_cache/
+*/.fastembed_cache/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.cursorrules
+.windsurfrules
+[Tt][Oo][Dd][Oo]*
+
+# Git worktrees
+.worktrees/
+
+# Misc
+.env
+output.txt
+examples.txt
+requirements.txt
+docker-compose.yaml
+/tmp/kreuzberg-docker-test-results.json
+tools/benchmark-harness/datasets/
 tools/benchmark-harness/vendored/docling/md/iso_21111_10.md
+visualizations/

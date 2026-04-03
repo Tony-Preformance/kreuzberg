@@ -1,20 +1,19 @@
 {
-	"name": "@kreuzberg/e2e-tests",
+	"name": "@kreuzberg/e2e-wasm-tests",
 	"version": "4.7.0",
 	"type": "module",
-	"description": "End-to-end tests for Kreuzberg TypeScript bindings config parity",
+	"description": "End-to-end tests for Kreuzberg WASM bindings",
 	"scripts": {
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:ui": "vitest --ui"
 	},
 	"dependencies": {
-		"@kreuzberg/node": "workspace:*"
+		"@kreuzberg/wasm": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "^25.5.1",
 		"@vitest/ui": "^4.1.2",
-		"oxlint": "^1.58.0",
 		"typescript": "^6.0.2",
 		"vitest": "^4.1.2"
 	}

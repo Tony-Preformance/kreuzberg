@@ -145,7 +145,7 @@ pub fn to_go_pascal_case(s: &str) -> String {
 /// Return the feature profile name that applies to a given language target.
 pub fn profile_for_language(lang: &str) -> &'static str {
     match lang {
-        "wasm-deno" | "wasm-workers" => "wasm",
+        "wasm-deno" | "wasm-workers" | "wasm" => "wasm",
         "c" => "ffi",
         _ => "full",
     }

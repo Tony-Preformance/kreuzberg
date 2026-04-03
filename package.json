@@ -7,6 +7,8 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.10",
+		"@emnapi/core": "^1.9.2",
+		"@emnapi/runtime": "1.9.2",
 		"@vitest/coverage-v8": "^4.1.2",
 		"oxlint": "^1.58.0",
 		"tsx": "^4.21.0",

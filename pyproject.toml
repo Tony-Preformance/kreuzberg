@@ -37,7 +37,7 @@ doc = [
 ]
 
 [tool.uv]
-workspace.members = [ "e2e/python", "examples/python", "packages/python" ]
+workspace.members = [ "e2e/python", "packages/python" ]
 cache-keys = [
   { file = "pyproject.toml" },
   { file = "Cargo.toml" },
@@ -125,24 +125,6 @@ lint.per-file-ignores."e2e/python/conftest.py" = [
   "ANN001",
   "ANN201",
   "ARG001",
-]
-lint.per-file-ignores."examples/**/*.py" = [
-  "ANN",
-  "ANN202",
-  "ARG002",
-  "B007",
-  "BLE001",
-  "D102",
-  "D103",
-  "DTZ005",
-  "ERA001",
-  "INP001",
-  "PERF203",
-  "PLC0415",
-  "PTH123",
-  "PTH207",
-  "S112",
-  "T201",
 ]
 lint.per-file-ignores."packages/python/build.py" = [ "INP001" ]
 lint.per-file-ignores."packages/python/tests/e2e/*_test.py" = [ "T201" ]

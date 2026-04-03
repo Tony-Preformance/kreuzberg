@@ -12,8 +12,7 @@ mod r;
 mod ruby;
 mod rust;
 mod typescript;
-mod wasm_deno;
-mod wasm_workers;
+mod wasm;
 
 use anyhow::Result;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -69,8 +68,7 @@ enum Language {
     Php,
     Elixir,
     R,
-    WasmDeno,
-    WasmWorkers,
+    Wasm,
 }
 
 impl Language {
@@ -87,8 +85,7 @@ impl Language {
             Language::Php,
             Language::Elixir,
             Language::R,
-            Language::WasmDeno,
-            Language::WasmWorkers,
+            Language::Wasm,
         ]
     }
 }
@@ -193,19 +190,12 @@ fn main() -> Result<()> {
                         }
                         run_styler_format(&output.join("r"));
                     }
-                    Language::WasmDeno => {
-                        wasm_deno::generate(&fixtures, output.as_path())?;
+                    Language::Wasm => {
+                        wasm::generate(&fixtures, output.as_path())?;
                         if let Some(ref m) = manifest {
-                            wasm_deno::generate_parity(m, output.as_path())?;
+                            wasm::generate_parity(m, output.as_path())?;
                         }
-                        run_biome_format(&output.join("wasm-deno"));
-                    }
-                    Language::WasmWorkers => {
-                        wasm_workers::generate(&fixtures, output.as_path())?;
-                        if let Some(ref m) = manifest {
-                            wasm_workers::generate_parity(m, output.as_path())?;
-                        }
-                        run_biome_format(&output.join("wasm-workers"));
+                        run_biome_format(&output.join("wasm"));
                     }
                 };
             }

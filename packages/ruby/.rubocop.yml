@@ -45,13 +45,11 @@ Metrics/MethodLength:
   Max: 18
   Exclude:
     - 'spec/**/*'
-    - 'examples/**/*'
 
 Metrics/AbcSize:
   Max: 20
   Exclude:
     - 'spec/**/*'
-    - 'examples/**/*'
     - 'lib/kreuzberg/config.rb'
 
 Naming/FileName:

@@ -64,7 +64,7 @@ repos:
     rev: v1.20.0
     hooks:
       - id: mypy
-        exclude: "e2e/|scripts/|examples/|tests/test_apps/|benchmarks/"
+        exclude: "e2e/|scripts/|tests/test_apps/|benchmarks/"
 
   # Rust: formatting, linting, and license checking
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo

@@ -310,8 +310,11 @@ jobs:
           filters: |
             core:
               - 'crates/kreuzberg/**'
+              - 'crates/kreuzberg-tesseract/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
+              - 'rust-toolchain.toml'
+              - '.cargo/config.toml'
             rust:
               - 'crates/kreuzberg/**'
               - 'crates/kreuzberg-cli/**'
@@ -1120,6 +1123,15 @@ jobs:
           cd crates/kreuzberg-node
           npm pack --ignore-scripts
 
+      - name: Build TypeScript wrapper
+        shell: bash
+        env:
+          VERBOSE: "1"
+        run: |
+          set -x
+          time task node:build
+          set +x
+
       - name: Verify TypeScript build artifacts
         shell: bash
         run: scripts/ci/node/verify-ts-artifacts.sh
@@ -1133,6 +1145,7 @@ jobs:
             crates/kreuzberg-node/index.js
             crates/kreuzberg-node/*.tgz
             crates/kreuzberg-node/artifacts/**
+            crates/kreuzberg-node/dist/**
           retention-days: 7
 
       - name: Cleanup Rust cache
@@ -1149,7 +1162,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
     runs-on: ${{ matrix.os }}
     # Note: BUNDLE_GEMFILE is set per-step to avoid Windows path issues.
     # On Windows, github.workspace paths like D:/a/... get mangled to D:/d/a/... in bash shells.
@@ -1426,7 +1439,7 @@ jobs:
       fail-fast: true
       matrix:
         # Windows excluded: ext-php-rs requires nightly Rust for abi_vectorcall feature
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
         php-version: ["8.4"]
     runs-on: ${{ matrix.os }}
     steps:
@@ -1659,7 +1672,7 @@ jobs:
     name: "Build: Java (${{ matrix.os }})"
     if: |
       github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
-      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.core == 'true' || needs.changes.outputs.java == 'true')
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.core == 'true' || needs.changes.outputs.java == 'true' || needs.changes.outputs.ffi == 'true')
     timeout-minutes: 240
     strategy:
       fail-fast: true
@@ -1790,7 +1803,7 @@ jobs:
     name: "Build: C# (${{ matrix.os }})"
     if: |
       github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
-      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.core == 'true' || needs.changes.outputs.csharp == 'true')
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.core == 'true' || needs.changes.outputs.csharp == 'true' || needs.changes.outputs.ffi == 'true')
     timeout-minutes: 240
     strategy:
       fail-fast: true
@@ -2032,6 +2045,9 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             coverage: false
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            coverage: false
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
@@ -2091,15 +2107,6 @@ jobs:
       - name: Install Task
         uses: kreuzberg-dev/actions/install-task@v1
 
-      - name: Build TypeScript wrapper
-        shell: bash
-        env:
-          VERBOSE: "1"
-        run: |
-          set -x
-          time task node:build
-          set +x
-
       - name: Run TypeScript tests (Node.js)
         shell: bash
         env:
@@ -2131,7 +2138,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: ""
@@ -2262,7 +2269,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: ""
@@ -2365,8 +2372,11 @@ jobs:
 
   test-go:
     name: "Test: Go (${{ matrix.os }})"
-    if: github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]'
-    needs: [build-ffi]
+    if: |
+      always() && !cancelled() &&
+      github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.go == 'true' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
+    needs: [build-ffi, changes]
     timeout-minutes: 240
     strategy:
       fail-fast: true
@@ -2848,8 +2858,11 @@ jobs:
 
   test-elixir:
     name: "Test: Elixir (${{ matrix.os }})"
-    if: github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]'
-    needs: [build-ffi]
+    if: |
+      always() && !cancelled() &&
+      github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.elixir == 'true' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
+    needs: [build-ffi, changes]
     timeout-minutes: 240
     strategy:
       fail-fast: true
@@ -3011,8 +3024,11 @@ jobs:
 
   test-r:
     name: "Test: R (${{ matrix.os }})"
-    if: github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]'
-    needs: [build-ffi]
+    if: |
+      always() && !cancelled() &&
+      github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.r == 'true' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
+    needs: [build-ffi, changes]
     timeout-minutes: 180
     strategy:
       fail-fast: true
@@ -3097,14 +3113,18 @@ jobs:
 
   test-c-ffi:
     name: "Test: C FFI (${{ matrix.os }})"
-    if: github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]'
-    needs: [build-ffi]
+    if: |
+      always() && !cancelled() &&
+      github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
+    needs: [build-ffi, changes]
     timeout-minutes: 60
     strategy:
       fail-fast: true
       matrix:
         include:
           - os: ubuntu-latest
+          - os: ubuntu-24.04-arm
           - os: macos-latest
           - os: windows-latest
     runs-on: ${{ matrix.os }}
@@ -3262,48 +3282,17 @@ jobs:
         env:
           RUST_BACKTRACE: 1
 
-      - name: Install Deno
-        if: matrix.os == 'ubuntu-latest'
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: "2.x"
-
-      - name: Download tessdata
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash
-        run: |
-          mkdir -p tessdata
-          wget -q https://github.com/tesseract-ocr/tessdata_fast/raw/main/eng.traineddata -O tessdata/eng.traineddata
-
-      - name: Build WASM (all targets for E2E)
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash
-        run: task wasm:build:all
-
-      - name: Generate and run Deno E2E tests
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash
-        run: |
-          task wasm:e2e:deno:generate
-          task wasm:e2e:deno:test
-        env:
-          TESSDATA_PREFIX: ${{ github.workspace }}/tessdata
-
-      - name: Generate and run Workers E2E tests
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash
-        run: |
-          task wasm:e2e:workers:generate
-          task wasm:e2e:workers:test
-
       - name: Cleanup Rust cache
         if: always() && steps.checkout.outcome == 'success'
         uses: kreuzberg-dev/actions/cleanup-rust-cache@v1
 
   test-cli:
     name: "Test: CLI (${{ matrix.os }})"
-    if: github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]'
-    needs: [build-ffi]
+    if: |
+      always() && !cancelled() &&
+      github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
+    needs: [build-ffi, changes]
     timeout-minutes: 60
     strategy:
       fail-fast: true

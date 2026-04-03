@@ -21,7 +21,8 @@ package kreuzberg
 //   Development: ${SRCDIR}/../../../target/release/ (monorepo builds)
 
 // macOS: Direct path to static library (Apple ld does not support -Bstatic)
-#cgo darwin LDFLAGS: ${SRCDIR}/../../../target/release/libkreuzberg_ffi.a -framework CoreFoundation -framework CoreServices -framework SystemConfiguration -framework Security -lc++
+// Foundation is required for ONNX Runtime CoreML backend (NSString, NSFileManager, etc.)
+#cgo darwin LDFLAGS: ${SRCDIR}/../../../target/release/libkreuzberg_ffi.a -framework CoreFoundation -framework CoreServices -framework SystemConfiguration -framework Security -framework Foundation -lc++
 
 // Linux: Use GNU ld static/dynamic switching
 #cgo linux LDFLAGS: -L${SRCDIR}/../../../target/release -Wl,-Bstatic -lkreuzberg_ffi -Wl,-Bdynamic -lpthread -ldl -lm -lstdc++
