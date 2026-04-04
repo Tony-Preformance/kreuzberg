@@ -3,7 +3,7 @@ mod helpers;
 mod plugins;
 mod render;
 
-use crate::fixtures::{ExtractionMethod, Fixture, InputType, RenderAssertions};
+use crate::fixtures::{ExtractionMethod, Fixture, GenerationMode, InputType, RenderAssertions};
 use crate::parity::{self, ParityManifest, TypeDef};
 use anyhow::{Context, Result};
 use camino::Utf8Path;
@@ -46,7 +46,7 @@ exclusions: list(
   )
 "#;
 
-pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
+pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
     let r_root = output_root.join("r");
     let test_dir = r_root.join("tests").join("testthat");
 
@@ -343,7 +343,7 @@ fn render_render_assertions_r(assertions: &RenderAssertions, var: &str, code: &m
 // Parity test generation
 // ---------------------------------------------------------------------------
 
-pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path) -> Result<()> {
+pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
     let r_root = output_root.join("r");
     let test_dir = r_root.join("tests").join("testthat");
     fs::create_dir_all(&test_dir).context("Failed to create R test directory")?;

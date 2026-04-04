@@ -1,4 +1,4 @@
-use crate::fixtures::{Assertions, ExtractionMethod, Fixture, InputType, RenderAssertions};
+use crate::fixtures::{Assertions, ExtractionMethod, Fixture, GenerationMode, InputType, RenderAssertions};
 use crate::parity::{self, ParityManifest, TypeDef};
 use anyhow::{Context, Result};
 use camino::Utf8Path;
@@ -28,12 +28,17 @@ var (
 		if err != nil {
 			panic(fmt.Sprintf("failed to determine working directory: %v", err))
 		}
-		root := filepath.Clean(filepath.Join(wd, "..", ".."))
-		abs, err := filepath.Abs(root)
-		if err != nil {
-			panic(fmt.Sprintf("failed to resolve workspace root: %v", err))
+		dir := wd
+		for {
+			if info, err := os.Stat(filepath.Join(dir, "test_documents")); err == nil && info.IsDir() {
+				return dir
+			}
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				panic("could not find workspace root (directory containing test_documents/)")
+			}
+			dir = parent
 		}
-		return abs
 	}()
 	testDocuments = filepath.Join(workspaceRoot, "test_documents")
 )
@@ -687,11 +692,11 @@ func assertMinByteLength(t *testing.T, data []byte, minLen int) {
 }
 "##;
 
-pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
+pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
     let go_root = output_root.join("go");
     fs::create_dir_all(&go_root).context("failed to create go e2e directory")?;
 
-    write_go_mod(&go_root)?;
+    write_go_mod(&go_root, mode)?;
     clean_tests(&go_root)?;
     write_helpers(&go_root)?;
 
@@ -729,16 +734,27 @@ pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
     Ok(())
 }
 
-fn write_go_mod(go_root: &Utf8Path) -> Result<()> {
+fn write_go_mod(go_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
     let go_mod = go_root.join("go.mod");
-    let template = r#"module github.com/kreuzberg-dev/kreuzberg/e2e/go
-
-go 1.26
-
-require github.com/kreuzberg-dev/kreuzberg/packages/go/v4 v4.0.0
-
-replace github.com/kreuzberg-dev/kreuzberg/packages/go/v4 => ../../packages/go/v4
-"#;
+    let template = match mode {
+        GenerationMode::Published { version } => {
+            format!(
+                "module github.com/kreuzberg-dev/kreuzberg/e2e/go\n\
+                 \n\
+                 go 1.26\n\
+                 \n\
+                 require github.com/kreuzberg-dev/kreuzberg/packages/go/v4 v{version}\n"
+            )
+        }
+        GenerationMode::Local => "module github.com/kreuzberg-dev/kreuzberg/e2e/go\n\
+             \n\
+             go 1.26\n\
+             \n\
+             require github.com/kreuzberg-dev/kreuzberg/packages/go/v4 v4.0.0\n\
+             \n\
+             replace github.com/kreuzberg-dev/kreuzberg/packages/go/v4 => ../../packages/go/v4\n"
+            .to_string(),
+    };
     fs::write(go_mod.as_std_path(), template).context("failed to write go.mod")?;
     Ok(())
 }
@@ -1954,7 +1970,7 @@ fn resolve_go_type_name(manifest_name: &str) -> Option<String> {
 ///
 /// Produces `e2e/go/parity_test.go` that verifies all manifest struct types
 /// expose the expected fields via reflection.
-pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path) -> Result<()> {
+pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
     let go_root = output_root.join("go");
     fs::create_dir_all(&go_root).context("Failed to create Go e2e directory for parity")?;
 

@@ -1,7 +1,7 @@
 default_install_hook_types:
   - pre-commit
   - commit-msg
-exclude: ^docs/snippets/|vendor/|node_modules/|target/|invalid*|dist/|artifacts/|test_documents/|scripts/ci/|packages/.*/tools/vendor-
+exclude: ^docs/snippets/|vendor/|node_modules/|target/|invalid*|dist/|artifacts/|test_documents/|test_apps/|scripts/ci/|packages/.*/tools/vendor-
 
 repos:
   # Commit message linting
@@ -64,7 +64,7 @@ repos:
     rev: v1.20.0
     hooks:
       - id: mypy
-        exclude: "e2e/|scripts/|tests/test_apps/|benchmarks/"
+        exclude: "e2e/|scripts/|test_apps/|benchmarks/"
 
   # Rust: formatting, linting, and license checking
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo
@@ -164,14 +164,14 @@ repos:
     hooks:
       - id: shellcheck
         args: ['-x']
-        exclude: ^tests/test_apps/docker/tests/
+        exclude: ^test_apps/docker/tests/
 
   # Markdown: linting
   - repo: https://github.com/rvben/rumdl-pre-commit
     rev: "v0.1.66"
     hooks:
       - id: rumdl-fmt
-        exclude: '^(tests/test_apps/|tools/benchmark-harness/vendored/)'
+        exclude: '^(test_apps/|tools/benchmark-harness/vendored/)'
 
   # GitHub Actions: linting
   - repo: https://github.com/rhysd/actionlint
@@ -184,7 +184,7 @@ repos:
     rev: v0.6.37
     hooks:
       - id: cpd
-        exclude: ^(\.mvn/wrapper/|e2e/|tests/test_apps/|tools/e2e-generator/e2e/|crates/kreuzberg-wasm/e2e/)
+        exclude: ^(\.mvn/wrapper/|e2e/|test_apps/|tools/e2e-generator/e2e/|crates/kreuzberg-wasm/e2e/)
       - id: checkstyle
         args:
           [
@@ -193,7 +193,7 @@ repos:
             "-p",
             "packages/java/checkstyle.properties",
           ]
-        exclude: ^(\.mvn/wrapper/|e2e/|tests/test_apps/|tools/e2e-generator/e2e/|crates/kreuzberg-wasm/e2e/)
+        exclude: ^(\.mvn/wrapper/|e2e/|test_apps/|tools/e2e-generator/e2e/|crates/kreuzberg-wasm/e2e/)
 
   # Local hooks for unsupported languages (Ruby, Java, C#, PHP, Elixir, R) and custom configurations
   - repo: local

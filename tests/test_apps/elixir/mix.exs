@@ -1,30 +1,27 @@
-defmodule KreuzbergTestApp.MixProject do
+defmodule E2E.MixProject do
   use Mix.Project
 
   def project do
+    System.put_env("KREUZBERG_BUILD", "true")
+
     [
-      app: :kreuzberg_test_app,
-      version: "4.7.1",
+      app: :e2e_elixir,
+      version: "0.1.0",
       elixir: "~> 1.14",
-      start_permanent: Mix.env() == :prod,
+      start_permanent: false,
       deps: deps(),
-      test_paths: ["test"],
-      elixirc_paths: elixirc_paths(Mix.env())
+      elixirc_paths: ["test/support"]
     ]
   end
 
   def application do
-    [
-      extra_applications: [:logger]
-    ]
+    [extra_applications: [:logger]]
   end
 
   defp deps do
     [
-      {:kreuzberg, "~> 4.7.1"}
+      {:kreuzberg, path: "../../../packages/elixir"},
+      {:rustler, "~> 0.37.0", runtime: false}
     ]
   end
-
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_), do: ["lib"]
 end

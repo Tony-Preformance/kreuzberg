@@ -1,12 +1,11 @@
 {
-	"name": "kreuzberg/test-app",
-	"description": "Comprehensive test application for Kreuzberg PHP bindings",
-	"type": "project",
-	"license": "MIT",
-	"require": {
-		"php": "^8.4"
+	"autoload": {
+		"psr-4": {
+			"E2EPhp\\": "tests/",
+			"E2EPhp\\Tests\\": "tests/"
+		}
 	},
-	"config": {
-		"sort-packages": true
+	"require-dev": {
+		"phpunit/phpunit": "^13.1"
 	}
 }

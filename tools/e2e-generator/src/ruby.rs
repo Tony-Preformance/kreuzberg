@@ -1,4 +1,4 @@
-use crate::fixtures::{Assertions, ExtractionMethod, Fixture, InputType, RenderAssertions};
+use crate::fixtures::{Assertions, ExtractionMethod, Fixture, GenerationMode, InputType, RenderAssertions};
 use crate::parity::{self, ParityManifest, TypeDef};
 use anyhow::{Context, Result, bail};
 use camino::Utf8Path;
@@ -23,7 +23,15 @@ require 'rspec/core'
 module E2ERuby
   module_function
 
-  WORKSPACE_ROOT = Pathname.new(__dir__).join('..', '..', '..').expand_path
+  WORKSPACE_ROOT = begin
+    dir = Pathname.new(__dir__).expand_path
+    loop do
+      break dir if dir.join('test_documents').directory?
+      parent = dir.parent
+      raise 'Could not find workspace root (directory containing test_documents/)' if parent == dir
+      dir = parent
+    end
+  end
   TEST_DOCUMENTS = WORKSPACE_ROOT.join('test_documents')
 
   def resolve_document(relative)
@@ -564,13 +572,13 @@ Metrics/ParameterLists:
 
 const RUBY_RSPEC_TEMPLATE: &str = "--format progress\n--color\n--require spec_helper\n";
 
-pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
+pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
     let ruby_root = output_root.join("ruby");
     let spec_dir = ruby_root.join("spec");
 
     fs::create_dir_all(&spec_dir).context("Failed to create Ruby spec directory")?;
 
-    write_gemfile(&ruby_root)?;
+    write_gemfile(&ruby_root, mode)?;
     write_rubocop(&ruby_root)?;
     write_rspec(&ruby_root)?;
     write_helpers(&spec_dir)?;
@@ -633,9 +641,16 @@ fn clean_spec_files(spec_dir: &Utf8Path) -> Result<()> {
     Ok(())
 }
 
-fn write_gemfile(ruby_root: &Utf8Path) -> Result<()> {
+fn write_gemfile(ruby_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
     let path = ruby_root.join("Gemfile");
-    fs::write(&path, RUBY_GEMFILE_TEMPLATE).context("Failed to write Gemfile")
+    let content = match mode {
+        GenerationMode::Local => RUBY_GEMFILE_TEMPLATE.to_string(),
+        GenerationMode::Published { version } => RUBY_GEMFILE_TEMPLATE.replace(
+            "gem 'kreuzberg', path: '../../packages/ruby'",
+            &format!("gem 'kreuzberg', '{version}'"),
+        ),
+    };
+    fs::write(&path, content).context("Failed to write Gemfile")
 }
 
 fn write_rubocop(ruby_root: &Utf8Path) -> Result<()> {
@@ -1820,7 +1835,7 @@ fn render_render_assertions_ruby(assertions: &RenderAssertions, var: &str, code:
 ///
 /// Produces `e2e/ruby/spec/parity_spec.rb` that verifies all manifest struct
 /// types expose the expected fields via `respond_to?`.
-pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path) -> Result<()> {
+pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
     let spec_dir = output_root.join("ruby/spec");
     fs::create_dir_all(&spec_dir).context("Failed to create Ruby spec directory for parity")?;
 

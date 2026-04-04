@@ -1,5 +1,6 @@
 use crate::fixtures::{
-    Assertions, ExtractionMethod, Fixture, InputType, PluginAssertions, PluginTestSpec, RenderAssertions,
+    Assertions, ExtractionMethod, Fixture, GenerationMode, InputType, PluginAssertions, PluginTestSpec,
+    RenderAssertions,
 };
 use crate::parity::{self, ParityManifest, TypeDef};
 use anyhow::{Context, Result};
@@ -35,8 +36,18 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Helper utilities for E2E tests.
  */
 public final class E2EHelpers {
-    private static final Path WORKSPACE_ROOT =
-            Paths.get("").toAbsolutePath().getParent().getParent();
+    private static final Path WORKSPACE_ROOT = findWorkspaceRoot();
+
+    private static Path findWorkspaceRoot() {
+        Path dir = Paths.get("").toAbsolutePath();
+        while (dir != null) {
+            if (Files.isDirectory(dir.resolve("test_documents"))) {
+                return dir;
+            }
+            dir = dir.getParent();
+        }
+        throw new RuntimeException("Could not find workspace root (directory containing test_documents/)");
+    }
     private static final Path TEST_DOCUMENTS = WORKSPACE_ROOT.resolve("test_documents");
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -727,7 +738,36 @@ public final class E2EHelpers {
 }
 "#;
 
-const JAVA_POM_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8"?>
+fn build_pom_template(mode: &GenerationMode) -> String {
+    let kreuzberg_dep = match mode {
+        GenerationMode::Published { version } => {
+            format!(
+                "        <dependency>\n\
+                 \x20           <groupId>dev.kreuzberg</groupId>\n\
+                 \x20           <artifactId>kreuzberg</artifactId>\n\
+                 \x20           <version>{version}</version>\n\
+                 \x20       </dependency>"
+            )
+        }
+        GenerationMode::Local => {
+            "        <dependency>\n\
+             \x20           <groupId>dev.kreuzberg</groupId>\n\
+             \x20           <artifactId>kreuzberg</artifactId>\n\
+             \x20           <version>4.7.1</version>\n\
+             \x20           <scope>system</scope>\n\
+             \x20           <systemPath>${project.basedir}/../../packages/java/target/kreuzberg-4.7.1.jar</systemPath>\n\
+             \x20       </dependency>"
+                .to_string()
+        }
+    };
+
+    let kreuzberg_version = match mode {
+        GenerationMode::Published { version } => version.as_str(),
+        GenerationMode::Local => "4.7.1",
+    };
+
+    format!(
+        r#"<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -744,35 +784,29 @@ const JAVA_POM_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8"?>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.11.3</junit.version>
         <jackson.version>2.18.2</jackson.version>
-        <kreuzberg.version>4.7.1</kreuzberg.version>
+        <kreuzberg.version>{kreuzberg_version}</kreuzberg.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>dev.kreuzberg</groupId>
-            <artifactId>kreuzberg</artifactId>
-            <version>4.7.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../../packages/java/target/kreuzberg-4.7.1.jar</systemPath>
-        </dependency>
+{kreuzberg_dep}
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
+            <version>${{junit.version}}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${{jackson.version}}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-parameter-names</artifactId>
-            <version>${jackson.version}</version>
+            <version>${{jackson.version}}</version>
         </dependency>
     </dependencies>
 
@@ -794,16 +828,18 @@ const JAVA_POM_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8"?>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.4</version>
                 <configuration>
-                    <argLine>--enable-native-access=ALL-UNNAMED --enable-preview -Djava.library.path=${project.basedir}/../../target/release</argLine>
+                    <argLine>--enable-native-access=ALL-UNNAMED --enable-preview -Djava.library.path=${{project.basedir}}/../../target/release</argLine>
                     <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 </project>
-"#;
+"#
+    )
+}
 
-pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
+pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
     let java_root = output_root.join("java");
     let src_test = java_root.join("src/test/java/com/kreuzberg/e2e");
 
@@ -811,7 +847,7 @@ pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
 
     write_helpers(&src_test)?;
     write_package_info(&src_test)?;
-    write_pom(&java_root)?;
+    write_pom(&java_root, mode)?;
     clean_test_files(&src_test)?;
 
     let doc_fixtures: Vec<_> = fixtures.iter().filter(|f| f.is_document_extraction()).collect();
@@ -891,9 +927,10 @@ package com.kreuzberg.e2e;
     fs::write(&package_info_path, content).context("Failed to write package-info.java")
 }
 
-fn write_pom(java_root: &Utf8Path) -> Result<()> {
+fn write_pom(java_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
     let pom_path = java_root.join("pom.xml");
-    fs::write(&pom_path, JAVA_POM_TEMPLATE).context("Failed to write pom.xml")
+    let content = build_pom_template(mode);
+    fs::write(&pom_path, content).context("Failed to write pom.xml")
 }
 
 fn render_category(category: &str, class_name: &str, fixtures: &[&Fixture]) -> Result<String> {
@@ -2602,7 +2639,7 @@ fn to_java_accessor_with_type(type_name: &str, field_name: &str, json_type: Opti
 /// Produces `e2e/java/src/test/java/com/kreuzberg/e2e/ParityTest.java` that
 /// verifies all manifest struct types expose the expected getter methods via
 /// reflection.
-pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path) -> Result<()> {
+pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
     let src_test = output_root.join("java/src/test/java/com/kreuzberg/e2e");
     fs::create_dir_all(&src_test).context("Failed to create Java test directory for parity")?;
 

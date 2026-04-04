@@ -1,4 +1,4 @@
-use crate::fixtures::{Assertions, ExtractionMethod, Fixture, InputType, RenderAssertions};
+use crate::fixtures::{Assertions, ExtractionMethod, Fixture, GenerationMode, InputType, RenderAssertions};
 use crate::parity::{self, ParityManifest, TypeDef};
 use anyhow::{Context, Result, bail};
 use camino::Utf8Path;
@@ -17,7 +17,21 @@ defmodule E2E.Helpers do
 
   import ExUnit.Assertions
 
-  @workspace_root Path.expand("../../../..", __DIR__)
+  @workspace_root (fn ->
+    dir = Path.expand(__DIR__)
+    Enum.reduce_while(0..20, dir, fn _, acc ->
+      if File.dir?(Path.join(acc, "test_documents")) do
+        {:halt, acc}
+      else
+        parent = Path.dirname(acc)
+        if parent == acc do
+          raise "Could not find workspace root (directory containing test_documents/)"
+        else
+          {:cont, parent}
+        end
+      end
+    end)
+  end).()
   @test_documents Path.join(@workspace_root, "test_documents")
 
   def resolve_document(relative) do
@@ -826,7 +840,7 @@ const ELIXIR_FORMATTER_TEMPLATE: &str = r#"[
 ]
 "#;
 
-pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
+pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
     let elixir_root = output_root.join("elixir");
     let test_dir = elixir_root.join("test");
     let support_dir = test_dir.join("support");
@@ -835,7 +849,7 @@ pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
     fs::create_dir_all(&e2e_dir).context("Failed to create Elixir test/e2e directory")?;
     fs::create_dir_all(&support_dir).context("Failed to create Elixir test/support directory")?;
 
-    write_mix_file(&elixir_root)?;
+    write_mix_file(&elixir_root, mode)?;
     write_formatter_file(&elixir_root)?;
     write_test_helper(&test_dir)?;
     write_helpers(&support_dir)?;
@@ -889,9 +903,16 @@ fn clean_test_files(e2e_dir: &Utf8Path) -> Result<()> {
     Ok(())
 }
 
-fn write_mix_file(elixir_root: &Utf8Path) -> Result<()> {
+fn write_mix_file(elixir_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
     let mix_path = elixir_root.join("mix.exs");
-    fs::write(&mix_path, ELIXIR_MIX_TEMPLATE).context("Failed to write mix.exs")
+    let content = match mode {
+        GenerationMode::Local => ELIXIR_MIX_TEMPLATE.to_string(),
+        GenerationMode::Published { version } => ELIXIR_MIX_TEMPLATE.replace(
+            r#"{:kreuzberg, path: "../../packages/elixir"}"#,
+            &format!(r#"{{:kreuzberg, "~> {version}"}}"#),
+        ),
+    };
+    fs::write(&mix_path, content).context("Failed to write mix.exs")
 }
 
 fn write_formatter_file(elixir_root: &Utf8Path) -> Result<()> {
@@ -2065,7 +2086,7 @@ fn render_render_assertions_elixir(assertions: &RenderAssertions, var: &str, cod
     Ok(())
 }
 
-pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path) -> Result<()> {
+pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
     let elixir_root = output_root.join("elixir");
     let e2e_dir = elixir_root.join("test").join("e2e");
     fs::create_dir_all(&e2e_dir).context("Failed to create Elixir test/e2e directory")?;

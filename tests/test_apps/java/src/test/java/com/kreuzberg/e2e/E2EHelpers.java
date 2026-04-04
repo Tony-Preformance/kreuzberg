@@ -20,8 +20,7 @@ import org.junit.jupiter.api.Assumptions;
 
 /** Helper utilities for E2E tests. */
 public final class E2EHelpers {
-  private static final Path WORKSPACE_ROOT =
-      Paths.get("").toAbsolutePath().getParent().getParent().getParent();
+  private static final Path WORKSPACE_ROOT = Paths.get("").toAbsolutePath().getParent().getParent();
   private static final Path TEST_DOCUMENTS = WORKSPACE_ROOT.resolve("test_documents");
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -84,11 +83,16 @@ public final class E2EHelpers {
     return details;
   }
 
-  public static void skipIfPaddleOcrUnavailable() {
-    String flag = System.getenv("KREUZBERG_PADDLE_OCR_AVAILABLE");
+  public static void skipIfFeatureUnavailable(String feature) {
+    String envVar = "KREUZBERG_" + feature.replace("-", "_").toUpperCase() + "_AVAILABLE";
+    String flag = System.getenv(envVar);
     Assumptions.assumeTrue(
         flag != null && !flag.isEmpty() && !"0".equals(flag) && !"false".equalsIgnoreCase(flag),
-        "Skipping: PaddleOCR not available (set KREUZBERG_PADDLE_OCR_AVAILABLE=1)");
+        String.format("Skipping: feature '%s' not available (set %s=1)", feature, envVar));
+  }
+
+  public static void skipIfPaddleOcrUnavailable() {
+    skipIfFeatureUnavailable("paddle-ocr");
   }
 
   public static void runFixture(
@@ -337,7 +341,10 @@ public final class E2EHelpers {
         Integer minCount,
         Integer maxCount,
         Boolean eachHasContent,
-        Boolean eachHasEmbedding) {
+        Boolean eachHasEmbedding,
+        Boolean eachHasHeadingContext,
+        Boolean eachHasChunkType,
+        Boolean contentStartsWithHeading) {
       var chunks = result.getChunks();
       int count = chunks != null ? chunks.size() : 0;
       if (minCount != null) {
@@ -359,6 +366,38 @@ public final class E2EHelpers {
       if (chunks != null && eachHasEmbedding != null && eachHasEmbedding) {
         for (var chunk : chunks) {
           assertNotNull(chunk.getEmbedding(), "Expected each chunk to have an embedding");
+        }
+      }
+      if (chunks != null && eachHasHeadingContext != null && eachHasHeadingContext) {
+        for (var chunk : chunks) {
+          assertNotNull(
+              chunk.getMetadata().getHeadingContext(),
+              "Expected each chunk to have heading_context");
+        }
+      }
+      if (chunks != null && eachHasHeadingContext != null && !eachHasHeadingContext) {
+        for (var chunk : chunks) {
+          assertTrue(
+              chunk.getMetadata().getHeadingContext().isEmpty(),
+              "Expected each chunk to have no heading_context");
+        }
+      }
+      if (chunks != null && eachHasChunkType != null && eachHasChunkType) {
+        for (var chunk : chunks) {
+          String type = chunk.getChunkType();
+          assertTrue(
+              type != null && !"unknown".equals(type),
+              "Expected each chunk to have a specific chunk_type");
+        }
+      }
+      if (chunks != null && contentStartsWithHeading != null && contentStartsWithHeading) {
+        String headingPrefix = String.valueOf((char) 35);
+        for (var chunk : chunks) {
+          if (chunk.getMetadata().getHeadingContext().isEmpty()) continue;
+          String content = chunk.getContent();
+          assertTrue(
+              content != null && content.startsWith(headingPrefix),
+              "Expected each chunk content to start with a heading");
         }
       }
     }
@@ -642,5 +681,25 @@ public final class E2EHelpers {
                 "Expected at least %d annotations, got %d", minCount, annotations.size()));
       }
     }
+  }
+
+  public static void assertIsPng(byte[] data) {
+    assertNotNull(data, "PNG data should not be null");
+    assertTrue(data.length >= 4, String.format("Data too short for PNG: %d bytes", data.length));
+    assertTrue(
+        data[0] == (byte) 0x89
+            && data[1] == (byte) 0x50
+            && data[2] == (byte) 0x4E
+            && data[3] == (byte) 0x47,
+        String.format(
+            "Missing PNG magic bytes, got: [%02x, %02x, %02x, %02x]",
+            data[0], data[1], data[2], data[3]));
+  }
+
+  public static void assertMinByteLength(byte[] data, int minLength) {
+    assertNotNull(data, "Data should not be null");
+    assertTrue(
+        data.length >= minLength,
+        String.format("Expected at least %d bytes, got %d", minLength, data.length));
   }
 }

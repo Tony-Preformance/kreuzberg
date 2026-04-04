@@ -1,4 +1,4 @@
-use crate::fixtures::{Assertions, ExtractionMethod, Fixture, InputType, RenderAssertions};
+use crate::fixtures::{Assertions, ExtractionMethod, Fixture, GenerationMode, InputType, RenderAssertions};
 use crate::parity::{self, ParityManifest, TypeDef};
 use anyhow::{Context, Result};
 use camino::Utf8Path;
@@ -983,13 +983,15 @@ export const chunkAssertions = {
 };
 "#;
 
-pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
-    let ts_impl_dir = output_root.join("typescript/tests");
+pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
+    let ts_root = output_root.join("typescript");
+    let ts_impl_dir = ts_root.join("tests");
 
     fs::create_dir_all(&ts_impl_dir).context("Failed to create TypeScript tests directory")?;
 
     clean_ts_files(&ts_impl_dir)?;
     write_helpers(&ts_impl_dir)?;
+    write_package_json(&ts_root, mode)?;
 
     let doc_fixtures: Vec<_> = fixtures.iter().filter(|f| f.is_document_extraction()).collect();
 
@@ -1023,6 +1025,40 @@ pub fn generate(fixtures: &[Fixture], output_root: &Utf8Path) -> Result<()> {
             .context("Failed to write TypeScript render test file")?;
     }
 
+    Ok(())
+}
+
+fn write_package_json(ts_root: &Utf8Path, mode: &GenerationMode) -> Result<()> {
+    let kreuzberg_dep = match mode {
+        GenerationMode::Local => "\"workspace:*\"".to_string(),
+        GenerationMode::Published { version } => format!("\"{version}\""),
+    };
+    let content = format!(
+        r#"{{
+  "name": "@kreuzberg/e2e-tests",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "End-to-end tests for Kreuzberg TypeScript bindings",
+  "scripts": {{
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
+  }},
+  "dependencies": {{
+    "@kreuzberg/node": {kreuzberg_dep}
+  }},
+  "devDependencies": {{
+    "@types/node": "^25.5.2",
+    "@vitest/ui": "^4.1.2",
+    "oxlint": "^1.58.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }}
+}}
+"#
+    );
+    let path = ts_root.join("package.json");
+    fs::write(&path, content).context("Failed to write package.json")?;
     Ok(())
 }
 
@@ -2166,7 +2202,7 @@ fn render_render_assertions_ts(
     Ok(())
 }
 
-pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path) -> Result<()> {
+pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
     let ts_tests_dir = output_root.join("typescript/tests");
     fs::create_dir_all(&ts_tests_dir).context("Failed to create TypeScript tests directory")?;
 

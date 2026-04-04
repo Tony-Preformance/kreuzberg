@@ -1,5 +1,6 @@
 use crate::fixtures::{
-    Assertions, ExtractionMethod, Fixture, InputType, PluginAssertions, PluginTestSpec, RenderAssertions,
+    Assertions, ExtractionMethod, Fixture, GenerationMode, InputType, PluginAssertions, PluginTestSpec,
+    RenderAssertions,
 };
 use crate::parity::{self, ParityManifest, TypeDef};
 use anyhow::{Context, Result};
@@ -28,7 +29,18 @@ class Helpers
     public static function getWorkspaceRoot(): string
     {
         if (self::$workspaceRoot === null) {
-            self::$workspaceRoot = realpath(__DIR__ . '/../../..');
+            $dir = __DIR__;
+            while (true) {
+                if (is_dir($dir . '/test_documents')) {
+                    self::$workspaceRoot = $dir;
+                    break;
+                }
+                $parent = dirname($dir);
+                if ($parent === $dir) {
+                    throw new \RuntimeException('Could not find workspace root (directory containing test_documents/)');
+                }
+                $dir = $parent;
+            }
         }
         return self::$workspaceRoot;
     }
@@ -847,11 +859,13 @@ class Helpers
 }
 "#;
 
-pub fn generate(fixtures: &[Fixture], output_dir: &Utf8Path) -> Result<()> {
-    let tests_dir = output_dir.join("php").join("tests");
+pub fn generate(fixtures: &[Fixture], output_dir: &Utf8Path, mode: &GenerationMode) -> Result<()> {
+    let php_root = output_dir.join("php");
+    let tests_dir = php_root.join("tests");
     fs::create_dir_all(&tests_dir).context("Failed to create PHP tests directory")?;
     clean_tests(&tests_dir)?;
     write_helpers(&tests_dir)?;
+    write_composer_json(&php_root, mode)?;
 
     let mut categories = BTreeMap::new();
     for fixture in fixtures {
@@ -884,6 +898,17 @@ pub fn generate(fixtures: &[Fixture], output_dir: &Utf8Path) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn write_composer_json(php_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
+    let content = r#"{
+    "require-dev": {
+        "phpunit/phpunit": "^13.1"
+    }
+}
+"#;
+    let path = php_root.join("composer.json");
+    fs::write(&path, content).context("Failed to write composer.json")
 }
 
 fn clean_tests(dir: &Utf8Path) -> Result<()> {
@@ -2023,7 +2048,7 @@ fn render_render_assertions_php(
     Ok(())
 }
 
-pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path) -> Result<()> {
+pub fn generate_parity(manifest: &ParityManifest, output_root: &Utf8Path, _mode: &GenerationMode) -> Result<()> {
     let php_root = output_root.join("php");
     let tests_dir = php_root.join("tests");
     fs::create_dir_all(&tests_dir).context("Failed to create PHP tests directory")?;

@@ -6,6 +6,30 @@ use serde_json::{Map, Value};
 use std::collections::BTreeMap;
 use walkdir::WalkDir;
 
+/// Generation mode: local workspace dependencies or published registry versions.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum GenerationMode {
+    /// Use local path dependencies (workspace references).
+    Local,
+    /// Use published package versions from registries.
+    Published { version: String },
+}
+
+impl GenerationMode {
+    /// Returns the version string if in published mode.
+    pub fn version(&self) -> Option<&str> {
+        match self {
+            GenerationMode::Local => None,
+            GenerationMode::Published { version } => Some(version),
+        }
+    }
+
+    /// Returns true if this is published mode.
+    pub fn is_published(&self) -> bool {
+        matches!(self, GenerationMode::Published { .. })
+    }
+}
+
 /// Target for WASM code generation
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum WasmTarget {
