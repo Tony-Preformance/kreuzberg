@@ -2463,6 +2463,7 @@ jobs:
     name: "Test: Go (${{ matrix.os }})"
     if: |
       always() && !cancelled() &&
+      needs.build-ffi.result == 'success' &&
       github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
       (github.event_name == 'workflow_dispatch' || needs.changes.outputs.go == 'true' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
     needs: [build-ffi, changes]
@@ -2949,6 +2950,7 @@ jobs:
     name: "Test: Elixir (${{ matrix.os }})"
     if: |
       always() && !cancelled() &&
+      needs.build-ffi.result == 'success' &&
       github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
       (github.event_name == 'workflow_dispatch' || needs.changes.outputs.elixir == 'true' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
     needs: [build-ffi, changes]
@@ -3115,6 +3117,7 @@ jobs:
     name: "Test: R (${{ matrix.os }})"
     if: |
       always() && !cancelled() &&
+      needs.build-ffi.result == 'success' &&
       github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
       (github.event_name == 'workflow_dispatch' || needs.changes.outputs.r == 'true' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
     needs: [build-ffi, changes]
@@ -3204,6 +3207,7 @@ jobs:
     name: "Test: C FFI (${{ matrix.os }})"
     if: |
       always() && !cancelled() &&
+      needs.build-ffi.result == 'success' &&
       github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
       (github.event_name == 'workflow_dispatch' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true')
     needs: [build-ffi, changes]
@@ -3379,6 +3383,7 @@ jobs:
     name: "Test: CLI (${{ matrix.os }})"
     if: |
       always() && !cancelled() &&
+      needs.build-ffi.result == 'success' &&
       github.repository == 'kreuzberg-dev/kreuzberg' && github.actor != 'dependabot[bot]' &&
       (github.event_name == 'workflow_dispatch' || needs.changes.outputs.core == 'true' || needs.changes.outputs.ffi == 'true' || needs.changes.outputs.rust == 'true')
     needs: [build-ffi, changes]
