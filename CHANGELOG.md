@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **License changed from MIT to Elastic License 2.0 (ELv2)** — copyright holder changed to Kreuzberg, Inc. Forked upstream crates (kreuzberg-paddle-ocr, kreuzberg-tesseract, kreuzberg-pdfium-render) retain their original MIT licenses.
 - All `ExtractionResult` constructors refactored to use `..Default::default()` for forward compatibility
 - Embed CLI command extended with `--provider llm` and `--model` flags
 - Embed MCP tool extended with `model` and `api_key` parameters

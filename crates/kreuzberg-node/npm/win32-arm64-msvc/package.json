@@ -33,7 +33,7 @@
 		"url": "https://kreuzberg.dev"
 	},
 	"homepage": "https://kreuzberg.dev",
-	"license": "MIT",
+	"license": "Elastic-2.0",
 	"engines": {
 		"node": ">= 22"
 	},

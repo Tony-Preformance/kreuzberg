@@ -206,7 +206,7 @@ The vendored code has been modified from the original fastembed-rs:
 
 ### License Compatibility
 
-The original Apache-2.0 license is fully compatible with Kreuzberg's MIT license. The original copyright and attribution are preserved in the vendored code's comments.
+The original Apache-2.0 license is fully compatible with Kreuzberg's Elastic License 2.0 (ELv2). The original copyright and attribution are preserved in the vendored code's comments.
 
 ---
 

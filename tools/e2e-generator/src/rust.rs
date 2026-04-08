@@ -100,7 +100,7 @@ name = "e2e-rust"
 version = "0.0.0"
 edition = "2024"
 publish = false
-license = "MIT"
+license = "Elastic-2.0"
 
 [package.metadata.cargo-machete]
 ignored = ["kreuzberg", "serde_json", "tokio"]
@@ -134,7 +134,7 @@ name = "e2e-rust"
 version = "0.0.0"
 edition = "2024"
 publish = false
-license = "MIT"
+license = "Elastic-2.0"
 
 [package.metadata.cargo-machete]
 ignored = ["kreuzberg", "serde_json", "tokio"]

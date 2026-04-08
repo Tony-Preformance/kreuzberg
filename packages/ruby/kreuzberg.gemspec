@@ -165,7 +165,7 @@ Gem::Specification.new do |spec|
     Features async/sync APIs, text chunking, language detection, and keyword extraction.
   DESC
   spec.homepage = 'https://github.com/kreuzberg-dev/kreuzberg'
-  spec.license = 'MIT'
+  spec.license = 'Elastic-2.0'
   spec.required_ruby_version = ['>= 3.2.0', '< 5.0']
 
   spec.metadata = {

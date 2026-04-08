@@ -33,7 +33,7 @@
 		"type": "git",
 		"url": "git+https://github.com/kreuzberg-dev/kreuzberg.git"
 	},
-	"license": "MIT",
+	"license": "Elastic-2.0",
 	"keywords": [
 		"document-intelligence",
 		"document-extraction",
