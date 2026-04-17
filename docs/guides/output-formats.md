@@ -124,9 +124,9 @@ for title in titles:
     print(f"[{level}] {title.text}")
 ```
 
-### Unstructured.io Compatibility
+### Migrating from Unstructured.io
 
-Element-based output follows Unstructured.io's element array structure. Key differences when migrating:
+If you're migrating from Unstructured.io, element-based output follows a similar structure with these key differences:
 
 | Aspect | Unstructured.io | Kreuzberg |
 |--------|----------------|-----------|

@@ -71,7 +71,7 @@ Render extracted document content as styled HTML with semantic `kb-*` CSS classe
 | `theme` | `HtmlTheme` | `unstyled` | Built-in colour/typography theme |
 | `css` | `string?` | `None` | Inline CSS string appended after theme stylesheet |
 | `css_file` | `path?` | `None` | CSS file loaded at render time (max 1 MiB) |
-| `class_prefix` | `string` | `"kb-"` | CSS class prefix. Must be alphanumeric + hyphens + underscores only |
+| `class_prefix` | `string` | `"kb-"` | CSS class prefix (alphanumeric, hyphens, underscores only) |
 | `embed_css` | `bool` | `true` | Include `<style>` block in output. Set `false` for external stylesheets |
 
 === "Python"

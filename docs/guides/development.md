@@ -171,7 +171,7 @@ task benchmark:profile FRAMEWORK=kreuzberg MODE=single-file
 
 Results appear in the `flamegraphs/` directory as interactive SVGs.
 
-See the [Benchmarking](#benchmarking) section below for detailed instructions, benchmark fixtures, and CI integration. View live benchmark results at <https://kreuzberg.dev/benchmarks>.
+View live benchmark results at <https://kreuzberg.dev/benchmarks>.
 
 ---
 
@@ -322,13 +322,6 @@ Kreuzberg's core is written in Rust, which enables zero-copy memory handling, SI
 
 ### Benchmarking Your Workload
 
-Measure with your actual files using the benchmark harness:
-
-```bash title="Terminal"
-task benchmark:run FRAMEWORK=kreuzberg MODE=single-file
-task benchmark:run FRAMEWORK=kreuzberg MODE=batch
-```
-
-For profiling and detailed analysis, see the [Benchmarking](#benchmarking) section above and <https://kreuzberg.dev/benchmarks> for live results.
+Measure with your actual files using the benchmark harness (see [Benchmarking](#benchmarking) section for full instructions). For detailed analysis and live benchmark results, visit <https://kreuzberg.dev/benchmarks>.
 
 ---

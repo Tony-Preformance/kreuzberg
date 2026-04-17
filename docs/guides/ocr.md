@@ -263,24 +263,6 @@ Skip OCR entirely, even for image files that would normally require it. When `di
     // result.content will be empty — OCR was skipped
     ```
 
-### Using EasyOCR (Python Only)
-
-=== "Go"
-
-    --8<-- "snippets/go/ocr/ocr_easyocr.md"
-
-=== "Java"
-
-    --8<-- "snippets/java/ocr/ocr_easyocr.md"
-
-=== "Ruby"
-
-    --8<-- "snippets/ruby/ocr/ocr_easyocr.md"
-
-=== "R"
-
-    --8<-- "snippets/r/ocr/ocr_easyocr.md"
-
 ### Using PaddleOCR
 
 === "Python"

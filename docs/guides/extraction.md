@@ -435,8 +435,6 @@ Kreuzberg supports 75+ file formats across 8 categories:
 | **Text** | `.md`, `.txt`, `.xml`, `.json`, `.yaml`, `.toml`, `.csv` | Direct extraction |
 | **Archives** | `.zip`, `.tar`, `.tar.gz`, `.tar.bz2` | Recursive extraction |
 
-See the [installation guide](../getting-started/installation.md#system-dependencies) for optional dependencies (Tesseract).
-
 ## Page Tracking
 
 Kreuzberg can track page boundaries and extract per-page content. Page tracking availability depends on the format:
@@ -491,8 +489,6 @@ Render individual PDF pages as PNG images. Unlike the extraction pipeline (which
 | `render_pdf_page` | You know which page you need, or only need a few pages |
 | `PdfPageIterator` | Process every page sequentially without loading all images into memory |
 
-See the [PDF Page Rendering](#pdf-page-rendering) section above for complete examples and language-specific syntax.
-
 ### DPI Configuration
 
 | DPI | Pixel size (US Letter) | Use case |
@@ -505,17 +501,7 @@ See the [PDF Page Rendering](#pdf-page-rendering) section above for complete exa
 
 ## MIME Type Detection
 
-Kreuzberg automatically detects file MIME types from the file extension and content, then selects the right parser. If you need to override the detection or work with files without extensions, you can provide an explicit MIME type.
-
-### How It Works
-
-- **From file path:** Extension normalized and mapped to MIME type (e.g., `.pdf` → `application/pdf`)
-- **From bytes:** MIME type is required since there's no extension to infer from
-- **Explicit override:** Pass `mime_type` to skip auto-detection
-
-### Supported Formats
-
-Kreuzberg supports 75+ formats across 8 categories: PDF, Images, Office (DOCX/XLSX/PPTX), Legacy Office (DOC/PPT), Email, Web, Text (Markdown/JSON/XML), and Archives. See the [format reference](../reference/formats.md) for the complete list.
+When extracting from bytes, Kreuzberg requires an explicit MIME type since there's no file extension to infer it from. For file paths, auto-detection from the extension is automatic.
 
 ### Example: Override MIME Type
 
@@ -525,8 +511,6 @@ from kreuzberg import extract_file
 # File without extension — provide MIME type explicitly
 result = extract_file("document_copy", mime_type="application/pdf", config=config)
 ```
-
-See [Format Support](../reference/formats.md) for the complete list of supported formats and MIME type detection information.
 
 ## Error Handling
 

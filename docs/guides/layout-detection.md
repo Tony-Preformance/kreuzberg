@@ -7,13 +7,13 @@ Detect document layout regions (tables, figures, headers, text blocks, etc.) in 
 
 ## Model
 
-Layout detection uses the **RT-DETR v2** model (17 layout classes), an ONNX-based deep learning model for accurate document layout analysis.
+Layout detection uses the **RT-DETR v2** model, an ONNX-based deep learning model that detects 17 layout element classes: text blocks, tables, figures, headers, footers, captions, code, lists, sections, formulas, footnotes, page headers/footers, titles, checkboxes, key-value regions, and document indexes.
 
 ### When to Enable
 
-**Recommended for:** complex multi-column PDFs, scanned documents, academic papers, business forms, documents where table extraction quality matters.
+**Recommended for:** complex multi-column PDFs, scanned documents, academic papers, business forms, and any document where layout understanding improves extraction accuracy.
 
-**Less beneficial for:** simple single-column text, high-throughput pipelines where latency is critical (consider GPU), documents already well-handled by the PDF structure tree.
+**Less beneficial for:** simple single-column text documents, high-throughput pipelines where latency is critical (consider GPU acceleration), or documents already well-handled by PDF structure trees.
 
 ### Performance Impact
 
@@ -24,8 +24,8 @@ Layout detection uses the **RT-DETR v2** model (17 layout classes), an ONNX-base
 
 *171-document PDF corpus, CPU only. GPU acceleration significantly reduces the time penalty.*
 
-!!! Warning "`preset` removed"
-    The `preset` field (`"fast"` / `"accurate"`) was removed from `LayoutDetectionConfig`. If it appears in a config file it is silently ignored. Only the RT-DETR v2 model is used for layout detection.
+!!! Note "Layout Detection Model"
+    Kreuzberg uses only the RT-DETR v2 model for layout detection. The `preset` field is not available in `LayoutDetectionConfig`. Configure table structure recognition separately via `table_model` — see "Table Structure Models" below.
 
 ## Configuration
 
