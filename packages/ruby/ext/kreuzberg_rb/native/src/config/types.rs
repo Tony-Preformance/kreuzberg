@@ -42,6 +42,7 @@ pub fn parse_ocr_config(ruby: &Ruby, hash: RHash) -> Result<OcrConfig, Error> {
     };
 
     let mut config = OcrConfig {
+        enabled: true,
         backend,
         language,
         paddle_ocr_config: None,

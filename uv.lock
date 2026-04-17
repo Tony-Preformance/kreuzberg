@@ -27,28 +27,28 @@ members = [
 
 [manifest.dependency-groups]
 bench-docling = [{ name = "docling", specifier = ">=2.64.1" }]
-bench-markitdown = [{ name = "markitdown", extras = ["all"], specifier = ">=0.1.4" }]
+bench-markitdown = [{ name = "markitdown", extras = ["all"], specifier = ">=0.1.5" }]
 bench-mineru = [
     { name = "mineru", extras = ["pipeline"], specifier = ">=2.6.7" },
     { name = "onnxruntime" },
 ]
 bench-pdfminer = [{ name = "pdfminer-six", specifier = ">=20231228" }]
 bench-pdfplumber = [{ name = "pdfplumber", specifier = ">=0.11.4" }]
-bench-pdftotext = [{ name = "pdftotext", specifier = ">=2.2.2" }]
+bench-pdftotext = [{ name = "pdftotext", specifier = ">=3.0.0" }]
 bench-playa-pdf = [{ name = "playa-pdf", specifier = ">=1.0.0" }]
 bench-pymupdf4llm = [
     { name = "pillow", specifier = ">=10.0.0" },
     { name = "pymupdf-layout", specifier = ">=0.0.1" },
-    { name = "pymupdf4llm", specifier = ">=0.0.17" },
+    { name = "pymupdf4llm", specifier = ">=1.27.2.2" },
 ]
 bench-pypdf = [{ name = "pypdf", specifier = ">=6.10.2" }]
 bench-unstructured = [{ name = "unstructured", extras = ["all-docs"], specifier = ">=0.18.21" }]
 dev = [
     { name = "covdefaults", specifier = ">=2.3.0" },
     { name = "httpx", specifier = ">=0.27.0" },
-    { name = "maturin", specifier = ">=1.10.2" },
+    { name = "maturin", specifier = ">=1.13.1" },
     { name = "mypy", specifier = ">=1.19.0" },
-    { name = "prek", specifier = ">=0.2.21" },
+    { name = "prek", specifier = ">=0.3.9" },
     { name = "pyproject-fmt", specifier = ">=2.11.1" },
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
@@ -2954,7 +2954,7 @@ pipeline = [
 
 [[package]]
 name = "mineru-vl-utils"
-version = "0.2.4"
+version = "0.2.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -2965,7 +2965,7 @@ dependencies = [
     { name = "pydantic" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/72/7775d85c4e94c3822bd5bcf3f43eab61ed7a2b8da41e9fef846786123d95/mineru_vl_utils-0.2.4-py3-none-any.whl", hash = "sha256:9eb6491f5b89ef41d3112821200e4a48a084fa8681c6b3d71e4bd635af633588", size = 80140, upload-time = "2026-04-17T10:50:38.861Z" },
+    { url = "https://files.pythonhosted.org/packages/99/87/90461253f776962ecc3601b455c3edd3a3f21fd6d1102619c94f677bb339/mineru_vl_utils-0.2.5-py3-none-any.whl", hash = "sha256:deed304b32cb524bae56d3aacd253d751afe58734f2f7ba978f1f8a7a7faba08", size = 80698, upload-time = "2026-04-17T15:41:51.37Z" },
 ]
 
 [[package]]
