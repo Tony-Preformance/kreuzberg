@@ -43,6 +43,12 @@ pub struct PyCancellationToken {
     pub(crate) inner: kreuzberg::CancellationToken,
 }
 
+impl Default for PyCancellationToken {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[pymethods]
 impl PyCancellationToken {
     /// Create a new, un-cancelled cancellation token.

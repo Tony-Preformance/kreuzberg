@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.9.1] - Unreleased
+
+### Fixed
+
+- Add missing `Default` impl for `PyCancellationToken` to satisfy clippy `new_without_default` lint
+
+---
+
 ## [4.9.0] - 2026-04-18
 
 ### Fixed
