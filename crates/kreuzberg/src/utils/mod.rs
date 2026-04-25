@@ -27,8 +27,6 @@ pub(crate) use pool_sizing::{PoolSizeHint, estimate_pool_size};
 
 pub use json_utils::{camel_to_snake, snake_to_camel};
 
-pub(crate) use xml_utils::xml_tag_name;
-
 use std::borrow::Cow;
 
 /// Escape `&`, `<`, and `>` in text destined for markdown/HTML output.
