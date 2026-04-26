@@ -10,7 +10,7 @@ namespace Kreuzberg;
 /// <summary>Controls how the visitor affects the conversion pipeline.</summary>
 public abstract record VisitResult
 {
-    private VisitResult() {}
+    private VisitResult() { }
 
     /// <summary>Proceed with default conversion.</summary>
     public sealed record Continue : VisitResult;

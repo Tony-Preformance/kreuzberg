@@ -137,8 +137,25 @@ pub enum KreuzbergError {
     #[error("Extraction cancelled")]
     Cancelled,
 
+    #[error("Security violation: {message}")]
+    Security {
+        message: String,
+        #[source]
+        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+    },
+
     #[error("{0}")]
     Other(String),
+}
+
+impl From<crate::extractors::security::SecurityError> for KreuzbergError {
+    fn from(err: crate::extractors::security::SecurityError) -> Self {
+        let message = err.to_string();
+        KreuzbergError::Security {
+            message,
+            source: Some(Box::new(err)),
+        }
+    }
 }
 
 #[cfg(any(feature = "excel", feature = "excel-wasm"))]
@@ -224,6 +241,7 @@ impl KreuzbergError {
     error_constructor!(image_processing, ImageProcessing);
     error_constructor!(serialization, Serialization);
     error_constructor!(embedding, Embedding);
+    error_constructor!(security, Security);
 }
 
 #[cfg(test)]

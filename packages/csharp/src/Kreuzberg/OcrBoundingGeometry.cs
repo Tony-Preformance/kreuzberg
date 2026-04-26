@@ -68,25 +68,25 @@ internal sealed class OcrBoundingGeometryJsonConverter : JsonConverter<OcrBoundi
         switch (value)
         {
             case OcrBoundingGeometry.Rectangle v:
-            {
-                var doc = JsonSerializer.SerializeToDocument(v, options);
-                writer.WriteStartObject();
-                writer.WriteString("type", "rectangle");
-                foreach (var prop in doc.RootElement.EnumerateObject())
-                    if (prop.Name != "type") prop.WriteTo(writer);
-                writer.WriteEndObject();
-                break;
-            }
+                {
+                    var doc = JsonSerializer.SerializeToDocument(v, options);
+                    writer.WriteStartObject();
+                    writer.WriteString("type", "rectangle");
+                    foreach (var prop in doc.RootElement.EnumerateObject())
+                        if (prop.Name != "type") prop.WriteTo(writer);
+                    writer.WriteEndObject();
+                    break;
+                }
             case OcrBoundingGeometry.Quadrilateral v:
-            {
-                var doc = JsonSerializer.SerializeToDocument(v, options);
-                writer.WriteStartObject();
-                writer.WriteString("type", "quadrilateral");
-                foreach (var prop in doc.RootElement.EnumerateObject())
-                    if (prop.Name != "type") prop.WriteTo(writer);
-                writer.WriteEndObject();
-                break;
-            }
+                {
+                    var doc = JsonSerializer.SerializeToDocument(v, options);
+                    writer.WriteStartObject();
+                    writer.WriteString("type", "quadrilateral");
+                    foreach (var prop in doc.RootElement.EnumerateObject())
+                        if (prop.Name != "type") prop.WriteTo(writer);
+                    writer.WriteEndObject();
+                    break;
+                }
             default: throw new JsonException($"Unknown OcrBoundingGeometry subtype: {value.GetType().Name}");
         }
     }

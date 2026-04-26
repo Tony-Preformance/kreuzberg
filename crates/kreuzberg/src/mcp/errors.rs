@@ -110,6 +110,15 @@ pub(crate) fn map_kreuzberg_error_to_mcp(error: KreuzbergError) -> McpError {
             message: "Extraction cancelled".into(),
             data: None,
         },
+
+        KreuzbergError::Security { message, source } => {
+            let mut error_message = format!("Security violation: {}", message);
+            if let Some(src) = source {
+                let _ = write!(error_message, " (caused by: {})", src);
+            }
+            // Hostile / malformed user input → invalid params per MCP spec.
+            McpError::invalid_params(error_message, None)
+        }
     }
 }
 

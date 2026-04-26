@@ -45,7 +45,6 @@ typedef struct KREUZBERGCsvMetadata KREUZBERGCsvMetadata;
 typedef struct KREUZBERGCustomProperties KREUZBERGCustomProperties;
 typedef struct KREUZBERGDbfFieldInfo KREUZBERGDbfFieldInfo;
 typedef struct KREUZBERGDbfMetadata KREUZBERGDbfMetadata;
-typedef struct KREUZBERGDepthValidator KREUZBERGDepthValidator;
 typedef struct KREUZBERGDetectMimeTypeParams KREUZBERGDetectMimeTypeParams;
 typedef struct KREUZBERGDetectResponse KREUZBERGDetectResponse;
 typedef struct KREUZBERGDetectedBoundary KREUZBERGDetectedBoundary;
@@ -54,6 +53,7 @@ typedef struct KREUZBERGDjotContent KREUZBERGDjotContent;
 typedef struct KREUZBERGDjotImage KREUZBERGDjotImage;
 typedef struct KREUZBERGDjotLink KREUZBERGDjotLink;
 typedef struct KREUZBERGDoclingCompatResponse KREUZBERGDoclingCompatResponse;
+typedef struct KREUZBERGDocumentExtractor KREUZBERGDocumentExtractor;
 typedef struct KREUZBERGDocumentNode KREUZBERGDocumentNode;
 typedef struct KREUZBERGDocumentRelationship KREUZBERGDocumentRelationship;
 typedef struct KREUZBERGDocumentStructure KREUZBERGDocumentStructure;
@@ -70,9 +70,9 @@ typedef struct KREUZBERGEmbedRequest KREUZBERGEmbedRequest;
 typedef struct KREUZBERGEmbedResponse KREUZBERGEmbedResponse;
 typedef struct KREUZBERGEmbedTextParams KREUZBERGEmbedTextParams;
 typedef struct KREUZBERGEmbeddedFile KREUZBERGEmbeddedFile;
+typedef struct KREUZBERGEmbeddingBackend KREUZBERGEmbeddingBackend;
 typedef struct KREUZBERGEmbeddingConfig KREUZBERGEmbeddingConfig;
 typedef struct KREUZBERGEmbeddingModelType KREUZBERGEmbeddingModelType;
-typedef struct KREUZBERGEntityValidator KREUZBERGEntityValidator;
 typedef struct KREUZBERGEpubMetadata KREUZBERGEpubMetadata;
 typedef struct KREUZBERGErrorMetadata KREUZBERGErrorMetadata;
 typedef struct KREUZBERGExcelMetadata KREUZBERGExcelMetadata;
@@ -114,7 +114,6 @@ typedef struct KREUZBERGImageType KREUZBERGImageType;
 typedef struct KREUZBERGInfoResponse KREUZBERGInfoResponse;
 typedef struct KREUZBERGInlineElement KREUZBERGInlineElement;
 typedef struct KREUZBERGInlineType KREUZBERGInlineType;
-typedef struct KREUZBERGIterationValidator KREUZBERGIterationValidator;
 typedef struct KREUZBERGJatsMetadata KREUZBERGJatsMetadata;
 typedef struct KREUZBERGKeyword KREUZBERGKeyword;
 typedef struct KREUZBERGKeywordAlgorithm KREUZBERGKeywordAlgorithm;
@@ -175,10 +174,12 @@ typedef struct KREUZBERGPdfImage KREUZBERGPdfImage;
 typedef struct KREUZBERGPdfUnifiedExtractionResult KREUZBERGPdfUnifiedExtractionResult;
 typedef struct KREUZBERGPlugin KREUZBERGPlugin;
 typedef struct KREUZBERGPoolError KREUZBERGPoolError;
+typedef struct KREUZBERGPostProcessor KREUZBERGPostProcessor;
 typedef struct KREUZBERGPostProcessorConfig KREUZBERGPostProcessorConfig;
 typedef struct KREUZBERGPptxAppProperties KREUZBERGPptxAppProperties;
 typedef struct KREUZBERGPptxExtractionResult KREUZBERGPptxExtractionResult;
 typedef struct KREUZBERGPptxMetadata KREUZBERGPptxMetadata;
+typedef struct KREUZBERGProcessingStage KREUZBERGProcessingStage;
 typedef struct KREUZBERGProcessingWarning KREUZBERGProcessingWarning;
 typedef struct KREUZBERGPsmMode KREUZBERGPsmMode;
 typedef struct KREUZBERGPstMetadata KREUZBERGPstMetadata;
@@ -191,7 +192,6 @@ typedef struct KREUZBERGResolvedStyle KREUZBERGResolvedStyle;
 typedef struct KREUZBERGServerConfig KREUZBERGServerConfig;
 typedef struct KREUZBERGStreamReader KREUZBERGStreamReader;
 typedef struct KREUZBERGStringBufferPool KREUZBERGStringBufferPool;
-typedef struct KREUZBERGStringGrowthValidator KREUZBERGStringGrowthValidator;
 typedef struct KREUZBERGStructuredData KREUZBERGStructuredData;
 typedef struct KREUZBERGStructuredDataResult KREUZBERGStructuredDataResult;
 typedef struct KREUZBERGStructuredDataType KREUZBERGStructuredDataType;
@@ -202,7 +202,6 @@ typedef struct KREUZBERGSupportedFormat KREUZBERGSupportedFormat;
 typedef struct KREUZBERGSyncExtractor KREUZBERGSyncExtractor;
 typedef struct KREUZBERGTableModel KREUZBERGTableModel;
 typedef struct KREUZBERGTableProperties KREUZBERGTableProperties;
-typedef struct KREUZBERGTableValidator KREUZBERGTableValidator;
 typedef struct KREUZBERGTessdataManager KREUZBERGTessdataManager;
 typedef struct KREUZBERGTesseractConfig KREUZBERGTesseractConfig;
 typedef struct KREUZBERGTextAnnotation KREUZBERGTextAnnotation;
@@ -216,6 +215,7 @@ typedef struct KREUZBERGTreeSitterConfig KREUZBERGTreeSitterConfig;
 typedef struct KREUZBERGTreeSitterProcessConfig KREUZBERGTreeSitterProcessConfig;
 typedef struct KREUZBERGUri KREUZBERGUri;
 typedef struct KREUZBERGUriKind KREUZBERGUriKind;
+typedef struct KREUZBERGValidator KREUZBERGValidator;
 typedef struct KREUZBERGVersionResponse KREUZBERGVersionResponse;
 typedef struct KREUZBERGWarmRequest KREUZBERGWarmRequest;
 typedef struct KREUZBERGWarmResponse KREUZBERGWarmResponse;
@@ -457,6 +457,521 @@ typedef struct KREUZBERGKreuzbergOcrBackendVTable {
    */
   void (*free_user_data)(void*);
 } KREUZBERGKreuzbergOcrBackendVTable;
+
+/**
+ * VTable for C plugin bridges implementing the `PostProcessor` trait.
+ *
+ * # Safety
+ *
+ * All function pointers must be valid for the lifetime of any bridge created from
+ * this vtable.  `free_user_data`, when non-null, is called once with `user_data`
+ * when the bridge is dropped.
+ */
+typedef struct KREUZBERGKreuzbergPostProcessorVTable {
+  /**
+   * Return a null-terminated UTF-8 name string into `out_name`.
+   */
+  void (*name_fn)(const void *user_data,
+                  char **out_name);
+  /**
+   * Return a null-terminated UTF-8 version string into `out_version`.
+   */
+  void (*version_fn)(const void *user_data,
+                     char **out_version);
+  /**
+   * Initialise the plugin; return 0 on success, non-zero on failure (error text in `out_error`).
+   */
+  int32_t (*initialize_fn)(const void *user_data,
+                           char **out_error);
+  /**
+   * Shut down the plugin; return 0 on success, non-zero on failure (error text in `out_error`).
+   */
+  int32_t (*shutdown_fn)(const void *user_data,
+                         char **out_error);
+  /**
+   * Process an extraction result.
+   *
+   * Transform or enrich the extraction result. Can modify:
+   * - `content` - The extracted text
+   * - `metadata` - Add or update metadata fields
+   * - `tables` - Modify or enhance table data
+   *
+   * # Arguments
+   *
+   * * `result` - Mutable reference to the extraction result to process
+   * * `config` - Extraction configuration
+   *
+   * # Returns
+   *
+   * `Ok(())` if processing succeeded, `Err(...)` for fatal failures.
+   *
+   * # Errors
+   *
+   * Return errors for fatal processing failures. Non-fatal errors should be
+   * captured in metadata directly on the result.
+   *
+   * # Performance
+   *
+   * This signature avoids unnecessary cloning of large extraction results by
+   * taking a mutable reference instead of ownership. Processors modify the
+   * result in place.
+   *
+   * # Example - Language Detection
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, PostProcessor, ProcessingStage};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig};
+   * # use async_trait::async_trait;
+   * # struct LanguageDetector;
+   * # impl Plugin for LanguageDetector {
+   * #     fn name(&self) -> &str { "language-detector" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl PostProcessor for LanguageDetector {
+   * #     fn processing_stage(&self) -> ProcessingStage { ProcessingStage::Early }
+   * async fn process(&self, result: &mut ExtractionResult, config: &ExtractionConfig)
+   * -> Result<()> {
+   * // Detect language (simplified - use real detection library in practice)
+   * let language = "en"; // Placeholder detection
+   *
+   * // Add to metadata
+   * result.metadata.additional.insert("detected_language".to_string().into(), serde_json::json!(language));
+   *
+   * Ok(())
+   * }
+   * # }
+   * ```
+   *
+   * # Example - Text Cleaning
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, PostProcessor, ProcessingStage};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig};
+   * # use async_trait::async_trait;
+   * # struct TextCleaner;
+   * # impl Plugin for TextCleaner {
+   * #     fn name(&self) -> &str { "text-cleaner" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl PostProcessor for TextCleaner {
+   * #     fn processing_stage(&self) -> ProcessingStage { ProcessingStage::Middle }
+   * async fn process(&self, result: &mut ExtractionResult, config: &ExtractionConfig)
+   * -> Result<()> {
+   * // Remove excessive whitespace
+   * result.content = result
+   * .content
+   * .split_whitespace()
+   * .collect::<Vec<_>>()
+   * .join(" ");
+   *
+   * Ok(())
+   * }
+   * # }
+   * ```
+   */
+  int32_t (*process)(const void *user_data,
+                     const char *result,
+                     const char *config,
+                     char **out_error);
+  /**
+   * Get the processing stage for this post-processor.
+   *
+   * Determines when this processor runs in the pipeline.
+   *
+   * # Returns
+   *
+   * The `ProcessingStage` (Early, Middle, or Late).
+   *
+   * # Example
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, PostProcessor, ProcessingStage};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig};
+   * # use async_trait::async_trait;
+   * # struct MyProcessor;
+   * # impl Plugin for MyProcessor {
+   * #     fn name(&self) -> &str { "my-processor" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl PostProcessor for MyProcessor {
+   * #     async fn process(&self, result: &mut ExtractionResult, _: &ExtractionConfig) -> Result<()> { Ok(()) }
+   * fn processing_stage(&self) -> ProcessingStage {
+   * ProcessingStage::Early  // Run before other processors
+   * }
+   * # }
+   * ```
+   */
+  int32_t (*processing_stage)(const void *user_data,
+                              char **out_result);
+  /**
+   * Optional: Check if this processor should run for a given result.
+   *
+   * Allows conditional processing based on MIME type, metadata, or content.
+   * Defaults to `true` (always run).
+   *
+   * # Arguments
+   *
+   * * `result` - The extraction result to check
+   * * `config` - Extraction configuration
+   *
+   * # Returns
+   *
+   * `true` if the processor should run, `false` to skip.
+   *
+   * # Example
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, PostProcessor, ProcessingStage};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig};
+   * # use async_trait::async_trait;
+   * # struct PdfOnlyProcessor;
+   * # impl Plugin for PdfOnlyProcessor {
+   * #     fn name(&self) -> &str { "pdf-only" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl PostProcessor for PdfOnlyProcessor {
+   * #     fn processing_stage(&self) -> ProcessingStage { ProcessingStage::Middle }
+   * #     async fn process(&self, result: &mut ExtractionResult, _: &ExtractionConfig) -> Result<()> { Ok(()) }
+   * Only process PDF documents
+   * fn should_process(&self, result: &ExtractionResult, config: &ExtractionConfig) -> bool {
+   * result.mime_type == "application/pdf"
+   * }
+   * # }
+   * ```
+   */
+  int32_t (*should_process)(const void *user_data,
+                            const char *_result,
+                            const char *_config);
+  /**
+   * Optional: Estimate processing time in milliseconds.
+   *
+   * Used for logging and debugging. Defaults to 0 (unknown).
+   *
+   * # Arguments
+   *
+   * * `result` - The extraction result to estimate for
+   *
+   * # Returns
+   *
+   * Estimated processing time in milliseconds.
+   */
+  uint64_t (*estimated_duration_ms)(const void *user_data,
+                                    const char *_result);
+  /**
+   * Optional destructor: called once with `user_data` when the bridge is dropped.
+   */
+  void (*free_user_data)(void*);
+} KREUZBERGKreuzbergPostProcessorVTable;
+
+/**
+ * VTable for C plugin bridges implementing the `Validator` trait.
+ *
+ * # Safety
+ *
+ * All function pointers must be valid for the lifetime of any bridge created from
+ * this vtable.  `free_user_data`, when non-null, is called once with `user_data`
+ * when the bridge is dropped.
+ */
+typedef struct KREUZBERGKreuzbergValidatorVTable {
+  /**
+   * Return a null-terminated UTF-8 name string into `out_name`.
+   */
+  void (*name_fn)(const void *user_data,
+                  char **out_name);
+  /**
+   * Return a null-terminated UTF-8 version string into `out_version`.
+   */
+  void (*version_fn)(const void *user_data,
+                     char **out_version);
+  /**
+   * Initialise the plugin; return 0 on success, non-zero on failure (error text in `out_error`).
+   */
+  int32_t (*initialize_fn)(const void *user_data,
+                           char **out_error);
+  /**
+   * Shut down the plugin; return 0 on success, non-zero on failure (error text in `out_error`).
+   */
+  int32_t (*shutdown_fn)(const void *user_data,
+                         char **out_error);
+  /**
+   * Validate an extraction result.
+   *
+   * Check the extraction result and return `Ok(())` if valid, or an error
+   * if validation fails.
+   *
+   * # Arguments
+   *
+   * * `result` - The extraction result to validate
+   * * `config` - Extraction configuration
+   *
+   * # Returns
+   *
+   * - `Ok(())` if validation passes
+   * - `Err(...)` if validation fails (extraction will fail)
+   *
+   * # Errors
+   *
+   * - `KreuzbergError::Validation` - Validation failed
+   * - Any other error type appropriate for the failure
+   *
+   * # Example - Content Length Validation
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, Validator};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig, KreuzbergError};
+   * # use async_trait::async_trait;
+   * # struct ContentLengthValidator { min: usize, max: usize }
+   * # impl Plugin for ContentLengthValidator {
+   * #     fn name(&self) -> &str { "length-validator" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl Validator for ContentLengthValidator {
+   * async fn validate(&self, result: &ExtractionResult, config: &ExtractionConfig)
+   * -> Result<()> {
+   * let length = result.content.len();
+   *
+   * if length < self.min {
+   * return Err(KreuzbergError::validation(format!(
+   * "Content too short: {} < {} characters",
+   * length, self.min
+   * )));
+   * }
+   *
+   * if length > self.max {
+   * return Err(KreuzbergError::validation(format!(
+   * "Content too long: {} > {} characters",
+   * length, self.max
+   * )));
+   * }
+   *
+   * Ok(())
+   * }
+   * # }
+   * ```
+   *
+   * # Example - Quality Score Validation
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, Validator};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig, KreuzbergError};
+   * # use async_trait::async_trait;
+   * # struct QualityValidator { min_score: f64 }
+   * # impl Plugin for QualityValidator {
+   * #     fn name(&self) -> &str { "quality-validator" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl Validator for QualityValidator {
+   * async fn validate(&self, result: &ExtractionResult, config: &ExtractionConfig)
+   * -> Result<()> {
+   * // Check if quality_score exists in metadata
+   * let score = result.metadata
+   * .additional
+   * .get("quality_score")
+   * .and_then(|v| v.as_f64())
+   * .unwrap_or(0.0);
+   *
+   * if score < self.min_score {
+   * return Err(KreuzbergError::validation(format!(
+   * "Quality score too low: {} < {}",
+   * score, self.min_score
+   * )));
+   * }
+   *
+   * Ok(())
+   * }
+   * # }
+   * ```
+   *
+   * # Example - Security Validation
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, Validator};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig, KreuzbergError};
+   * # use async_trait::async_trait;
+   * # struct SecurityValidator { blocked_patterns: Vec<String> }
+   * # impl Plugin for SecurityValidator {
+   * #     fn name(&self) -> &str { "security-validator" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl Validator for SecurityValidator {
+   * async fn validate(&self, result: &ExtractionResult, config: &ExtractionConfig)
+   * -> Result<()> {
+   * // Check for blocked patterns
+   * for pattern in &self.blocked_patterns {
+   * if result.content.contains(pattern) {
+   * return Err(KreuzbergError::validation(format!(
+   * "Content contains blocked pattern: {}",
+   * pattern
+   * )));
+   * }
+   * }
+   *
+   * Ok(())
+   * }
+   * # }
+   * ```
+   */
+  int32_t (*validate)(const void *user_data,
+                      const char *result,
+                      const char *config,
+                      char **out_error);
+  /**
+   * Optional: Check if this validator should run for a given result.
+   *
+   * Allows conditional validation based on MIME type, metadata, or content.
+   * Defaults to `true` (always run).
+   *
+   * # Arguments
+   *
+   * * `result` - The extraction result to check
+   * * `config` - Extraction configuration
+   *
+   * # Returns
+   *
+   * `true` if the validator should run, `false` to skip.
+   *
+   * # Example
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, Validator};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig};
+   * # use async_trait::async_trait;
+   * # struct PdfValidator;
+   * # impl Plugin for PdfValidator {
+   * #     fn name(&self) -> &str { "pdf-validator" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl Validator for PdfValidator {
+   * #     async fn validate(&self, _: &ExtractionResult, _: &ExtractionConfig) -> Result<()> { Ok(()) }
+   * Only validate PDF documents
+   * fn should_validate(&self, result: &ExtractionResult, config: &ExtractionConfig) -> bool {
+   * result.mime_type == "application/pdf"
+   * }
+   * # }
+   * ```
+   */
+  int32_t (*should_validate)(const void *user_data,
+                             const char *_result,
+                             const char *_config);
+  /**
+   * Optional: Get the validation priority.
+   *
+   * Higher priority validators run first. Useful for ordering validation checks
+   * (e.g., run cheap validations before expensive ones).
+   *
+   * Default priority is 50.
+   *
+   * # Returns
+   *
+   * Priority value (higher = runs earlier).
+   *
+   * # Example
+   *
+   * ```rust
+   * # use kreuzberg::plugins::{Plugin, Validator};
+   * # use kreuzberg::{Result, ExtractionResult, ExtractionConfig};
+   * # use async_trait::async_trait;
+   * # struct FastValidator;
+   * # impl Plugin for FastValidator {
+   * #     fn name(&self) -> &str { "fast-validator" }
+   * #     fn version(&self) -> String { "1.0.0".to_string() }
+   * #     fn initialize(&self) -> Result<()> { Ok(()) }
+   * #     fn shutdown(&self) -> Result<()> { Ok(()) }
+   * # }
+   * # #[async_trait]
+   * # impl Validator for FastValidator {
+   * #     async fn validate(&self, _: &ExtractionResult, _: &ExtractionConfig) -> Result<()> { Ok(()) }
+   * Run this validator first (it's fast)
+   * fn priority(&self) -> i32 {
+   * 100
+   * }
+   * # }
+   * ```
+   */
+  int32_t (*priority)(const void *user_data);
+  /**
+   * Optional destructor: called once with `user_data` when the bridge is dropped.
+   */
+  void (*free_user_data)(void*);
+} KREUZBERGKreuzbergValidatorVTable;
+
+/**
+ * VTable for C plugin bridges implementing the `EmbeddingBackend` trait.
+ *
+ * # Safety
+ *
+ * All function pointers must be valid for the lifetime of any bridge created from
+ * this vtable.  `free_user_data`, when non-null, is called once with `user_data`
+ * when the bridge is dropped.
+ */
+typedef struct KREUZBERGKreuzbergEmbeddingBackendVTable {
+  /**
+   * Return a null-terminated UTF-8 name string into `out_name`.
+   */
+  void (*name_fn)(const void *user_data,
+                  char **out_name);
+  /**
+   * Return a null-terminated UTF-8 version string into `out_version`.
+   */
+  void (*version_fn)(const void *user_data,
+                     char **out_version);
+  /**
+   * Initialise the plugin; return 0 on success, non-zero on failure (error text in `out_error`).
+   */
+  int32_t (*initialize_fn)(const void *user_data,
+                           char **out_error);
+  /**
+   * Shut down the plugin; return 0 on success, non-zero on failure (error text in `out_error`).
+   */
+  int32_t (*shutdown_fn)(const void *user_data,
+                         char **out_error);
+  /**
+   * Embedding vector dimension. Must be `> 0` and must match the length of
+   * every vector returned by `embed`.
+   */
+  uintptr_t (*dimensions)(const void *user_data);
+  /**
+   * Embed a batch of texts, returning one vector per input in order.
+   *
+   * # Errors
+   *
+   * Implementations should return [`crate::KreuzbergError::Plugin`] for
+   * backend-specific failures. The dispatcher layers its own validation
+   * (length, per-vector dimension) on top.
+   */
+  int32_t (*embed)(const void *user_data,
+                   const char *texts,
+                   char **out_result,
+                   char **out_error);
+  /**
+   * Optional destructor: called once with `user_data` when the bridge is dropped.
+   */
+  void (*free_user_data)(void*);
+} KREUZBERGKreuzbergEmbeddingBackendVTable;
 
 /**
  * Return the last error code (0 means no error).
@@ -2183,6 +2698,13 @@ char *kreuzberg_embedding_config_cache_dir(const KREUZBERGEmbeddingConfig *ptr);
 KREUZBERGAccelerationConfig *kreuzberg_embedding_config_acceleration(const KREUZBERGEmbeddingConfig *ptr);
 
 /**
+ * Get the `max_embed_duration_secs` field from a `EmbeddingConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint64_t kreuzberg_embedding_config_max_embed_duration_secs(const KREUZBERGEmbeddingConfig *ptr);
+
+/**
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
@@ -3307,41 +3829,6 @@ int32_t kreuzberg_odt_properties_image_count(const KREUZBERGOdtProperties *ptr);
  * Pointer must have been returned by this library, or be null.
  */
 void kreuzberg_zip_bomb_validator_free(KREUZBERGZipBombValidator *ptr);
-
-/**
- * Free a `StringGrowthValidator` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void kreuzberg_string_growth_validator_free(KREUZBERGStringGrowthValidator *ptr);
-
-/**
- * Free a `IterationValidator` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void kreuzberg_iteration_validator_free(KREUZBERGIterationValidator *ptr);
-
-/**
- * Free a `DepthValidator` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void kreuzberg_depth_validator_free(KREUZBERGDepthValidator *ptr);
-
-/**
- * Free a `EntityValidator` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void kreuzberg_entity_validator_free(KREUZBERGEntityValidator *ptr);
-
-/**
- * Free a `TableValidator` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void kreuzberg_table_validator_free(KREUZBERGTableValidator *ptr);
 
 /**
  * Create a `TokenReductionConfig` from a JSON string. Returns null on failure.
@@ -7654,11 +8141,11 @@ char *kreuzberg_layout_region_to_json(const KREUZBERGLayoutRegion *ptr);
 void kreuzberg_layout_region_free(KREUZBERGLayoutRegion *ptr);
 
 /**
- * Get the `class` field from a `LayoutRegion`.
+ * Get the `class_name` field from a `LayoutRegion`.
  * # Safety
  * Pointer must be a valid handle returned by this library.
  */
-char *kreuzberg_layout_region_class(const KREUZBERGLayoutRegion *ptr);
+char *kreuzberg_layout_region_class_name(const KREUZBERGLayoutRegion *ptr);
 
 /**
  * Get the `confidence` field from a `LayoutRegion`.
@@ -8765,6 +9252,13 @@ char *kreuzberg_embed_text_params_model(const KREUZBERGEmbedTextParams *ptr);
 char *kreuzberg_embed_text_params_api_key(const KREUZBERGEmbedTextParams *ptr);
 
 /**
+ * Get the `embedding_plugin` field from a `EmbedTextParams`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *kreuzberg_embed_text_params_embedding_plugin(const KREUZBERGEmbedTextParams *ptr);
+
+/**
  * Free a `ExtractStructuredParams` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -9232,6 +9726,35 @@ char *kreuzberg_recognized_table_markdown(const KREUZBERGRecognizedTable *ptr);
 void kreuzberg_tessdata_manager_free(KREUZBERGTessdataManager *ptr);
 
 /**
+ * Get the cache directory path.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+char *kreuzberg_tessdata_manager_cache_dir(const KREUZBERGTessdataManager *this_);
+
+/**
+ * Check if a specific language traineddata file is cached.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_tessdata_manager_is_language_cached(const KREUZBERGTessdataManager *this_,
+                                                      const char *lang);
+
+/**
+ * Downloads all tessdata_fast traineddata files to the cache directory.
+ *
+ * Skips files that already exist. Returns the count of newly downloaded files.
+ *
+ * Requires the `paddle-ocr` feature for HTTP download support (ureq).
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+uintptr_t kreuzberg_tessdata_manager_ensure_all_languages(const KREUZBERGTessdataManager *this_);
+
+/**
  * Create a `PaddleOcrConfig` from a JSON string. Returns null on failure.
  * # Safety
  * JSON string must be valid UTF-8 and null-terminated.
@@ -9337,6 +9860,168 @@ float kreuzberg_paddle_ocr_config_drop_score(const KREUZBERGPaddleOcrConfig *ptr
  * Pointer must be a valid handle returned by this library.
  */
 char *kreuzberg_paddle_ocr_config_model_tier(const KREUZBERGPaddleOcrConfig *ptr);
+
+/**
+ * Sets a custom cache directory for model files.
+ *
+ * # Arguments
+ *
+ * * `path` - Path to cache directory
+ *
+ * # Examples
+ *
+ * ```no_run
+ * use kreuzberg::PaddleOcrConfig;
+ * use std::path::PathBuf;
+ *
+ * let config = PaddleOcrConfig::new("en")
+ *     .with_cache_dir(PathBuf::from("/tmp/paddle-cache"));
+ * ```
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_cache_dir(KREUZBERGPaddleOcrConfig *this_,
+                                                                     const char *path);
+
+/**
+ * Enables or disables table structure detection.
+ *
+ * # Arguments
+ *
+ * * `enable` - Whether to enable table detection
+ *
+ * # Examples
+ *
+ * ```no_run
+ * use kreuzberg::PaddleOcrConfig;
+ *
+ * let config = PaddleOcrConfig::new("en")
+ *     .with_table_detection(true);
+ * ```
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_table_detection(KREUZBERGPaddleOcrConfig *this_,
+                                                                           int32_t enable);
+
+/**
+ * Enables or disables angle classification for rotated text.
+ *
+ * # Arguments
+ *
+ * * `enable` - Whether to enable angle classification
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_angle_cls(KREUZBERGPaddleOcrConfig *this_,
+                                                                     int32_t enable);
+
+/**
+ * Sets the database threshold for text detection.
+ *
+ * # Arguments
+ *
+ * * `threshold` - Detection threshold (0.0-1.0)
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_det_db_thresh(KREUZBERGPaddleOcrConfig *this_,
+                                                                         float threshold);
+
+/**
+ * Sets the box threshold for text bounding box refinement.
+ *
+ * # Arguments
+ *
+ * * `threshold` - Box threshold (0.0-1.0)
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_det_db_box_thresh(KREUZBERGPaddleOcrConfig *this_,
+                                                                             float threshold);
+
+/**
+ * Sets the unclip ratio for expanding text bounding boxes.
+ *
+ * # Arguments
+ *
+ * * `ratio` - Unclip ratio (typically 1.5-2.0)
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_det_db_unclip_ratio(KREUZBERGPaddleOcrConfig *this_,
+                                                                               float ratio);
+
+/**
+ * Sets the maximum side length for detection images.
+ *
+ * # Arguments
+ *
+ * * `length` - Maximum side length in pixels
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_det_limit_side_len(KREUZBERGPaddleOcrConfig *this_,
+                                                                              uint32_t length);
+
+/**
+ * Sets the batch size for recognition inference.
+ *
+ * # Arguments
+ *
+ * * `batch_size` - Number of text regions to process simultaneously
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_rec_batch_num(KREUZBERGPaddleOcrConfig *this_,
+                                                                         uint32_t batch_size);
+
+/**
+ * Sets the minimum recognition confidence threshold.
+ *
+ * # Arguments
+ *
+ * * `score` - Minimum confidence (0.0-1.0), text below this is dropped
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_drop_score(KREUZBERGPaddleOcrConfig *this_,
+                                                                      float score);
+
+/**
+ * Sets padding in pixels added around images before detection.
+ *
+ * # Arguments
+ *
+ * * `padding` - Padding in pixels (0-100)
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_padding(KREUZBERGPaddleOcrConfig *this_,
+                                                                   uint32_t padding);
+
+/**
+ * Sets the model tier controlling detection/recognition model size.
+ *
+ * # Arguments
+ *
+ * * `tier` - `"mobile"` (default, lightweight, faster) or `"server"` (high accuracy, GPU/complex documents)
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+KREUZBERGPaddleOcrConfig *kreuzberg_paddle_ocr_config_with_model_tier(KREUZBERGPaddleOcrConfig *this_,
+                                                                      const char *tier);
 
 /**
  * Creates a default configuration with English language support.
@@ -9477,11 +10162,11 @@ char *kreuzberg_layout_detection_to_json(const KREUZBERGLayoutDetection *ptr);
 void kreuzberg_layout_detection_free(KREUZBERGLayoutDetection *ptr);
 
 /**
- * Get the `class` field from a `LayoutDetection`.
+ * Get the `class_name` field from a `LayoutDetection`.
  * # Safety
  * Pointer must be a valid handle returned by this library.
  */
-KREUZBERGLayoutClass *kreuzberg_layout_detection_class(const KREUZBERGLayoutDetection *ptr);
+KREUZBERGLayoutClass *kreuzberg_layout_detection_class_name(const KREUZBERGLayoutDetection *ptr);
 
 /**
  * Get the `confidence` field from a `LayoutDetection`.
@@ -9960,6 +10645,21 @@ int32_t kreuzberg_ocr_backend_type_from_i32(int32_t value);
  * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
  */
 int32_t kreuzberg_ocr_backend_type_from_str(const char *name);
+
+/**
+ * Convert an integer to a `ProcessingStage` variant. Returns -1 on invalid input.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_processing_stage_from_i32(int32_t value);
+
+/**
+ * Convert a `ProcessingStage` variant name (C string) to its integer value. Returns -1 on invalid input.
+ * # Safety
+ * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+ */
+int32_t kreuzberg_processing_stage_from_str(const char *name);
 
 /**
  * Convert an integer to a `ReductionLevel` variant. Returns -1 on invalid input.
@@ -11484,6 +12184,84 @@ char *kreuzberg_normalize_whitespace(const char *s);
 int32_t kreuzberg_register_default_extractors(void);
 
 /**
+ * Unregister a document extractor by name.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_unregister_extractor(const char *name);
+
+/**
+ * List names of all registered document extractors.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+char *kreuzberg_list_extractors(void);
+
+/**
+ * Remove all registered document extractors.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_clear_extractors(void);
+
+/**
+ * List all registered OCR backends.
+ *
+ * Returns the names of all OCR backends currently registered in the global registry.
+ *
+ * # Returns
+ *
+ * A vector of OCR backend names.
+ *
+ * # Example
+ *
+ * ```rust
+ * use kreuzberg::plugins::list_ocr_backends;
+ *
+ * # tokio_test::block_on(async {
+ * let backends = list_ocr_backends()?;
+ * for name in backends {
+ *     println!("Registered OCR backend: {}", name);
+ * }
+ * # Ok::<(), kreuzberg::KreuzbergError>(())
+ * # });
+ * ```
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+char *kreuzberg_list_ocr_backends(void);
+
+/**
+ * Clear all OCR backends from the global registry.
+ *
+ * Removes all OCR backends and calls their `shutdown()` methods.
+ *
+ * # Returns
+ *
+ * - `Ok(())` if all backends were cleared successfully
+ * - `Err(...)` if any shutdown method failed
+ *
+ * # Example
+ *
+ * ```rust
+ * use kreuzberg::plugins::clear_ocr_backends;
+ *
+ * # tokio_test::block_on(async {
+ * clear_ocr_backends()?;
+ * # Ok::<(), kreuzberg::KreuzbergError>(())
+ * # });
+ * ```
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_clear_ocr_backends(void);
+
+/**
  * List all registered post-processor names.
  *
  * Returns a vector of all post-processor names currently registered in the
@@ -11512,6 +12290,46 @@ int32_t kreuzberg_register_default_extractors(void);
  * Returned pointers must be freed with the appropriate free function.
  */
 char *kreuzberg_list_post_processors(void);
+
+/**
+ * Unregister a renderer by name.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_unregister_renderer(const char *name);
+
+/**
+ * List names of all registered renderers.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+char *kreuzberg_list_renderers(void);
+
+/**
+ * Remove all registered renderers.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_clear_renderers(void);
+
+/**
+ * List names of all registered validators.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+char *kreuzberg_list_validators(void);
+
+/**
+ * Remove all registered validators.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_clear_validators(void);
 
 /**
  * Sanitize a file path to return only the filename (no directory).
@@ -11604,50 +12422,6 @@ char *kreuzberg_clean_extracted_text(const char *text);
 char *kreuzberg_reduce_tokens(const char *text,
                               const KREUZBERGTokenReductionConfig *config,
                               const char *language_hint);
-
-/**
- * Reduces token count for multiple texts efficiently using parallel processing.
- *
- * This function processes multiple texts in parallel using Rayon, providing
- * significant performance improvements for batch operations. All texts use the
- * same configuration and language hint for consistency.
- *
- * # Arguments
- *
- * * `texts` - Slice of text references to reduce
- * * `config` - Configuration specifying reduction level and options
- * * `language_hint` - Optional ISO 639-3 language code (e.g., "eng", "spa")
- *
- * # Returns
- *
- * Returns a vector of reduced texts in the same order as the input.
- *
- * # Errors
- *
- * Returns an error if the language hint is invalid or stopwords cannot be loaded.
- *
- * # Examples
- *
- * ```rust
- * use kreuzberg::text::token_reduction::{batch_reduce_tokens, TokenReductionConfig, ReductionLevel};
- *
- * let texts: Vec<String> = vec![
- *     "This is the first document with some text.".to_string(),
- *     "Here is another document with different content.".to_string(),
- *     "And finally, a third document to process.".to_string(),
- * ];
- * let config = TokenReductionConfig::default();
- * let reduced = batch_reduce_tokens(&texts, &config, Some("eng"))?;
- * assert_eq!(reduced.len(), 3);
- * # Ok::<(), kreuzberg::error::KreuzbergError>(())
- * ```
- * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
- */
-char *kreuzberg_batch_reduce_tokens(const char *texts,
-                                    const KREUZBERGTokenReductionConfig *config,
-                                    const char *language_hint);
 
 /**
  * Create a bold annotation for the given byte range.
@@ -11846,114 +12620,36 @@ KREUZBERGByteBufferPool *kreuzberg_create_byte_buffer_pool(uintptr_t pool_size,
                                                            uintptr_t buffer_capacity);
 
 /**
- * Split text into chunks with optional page boundary tracking.
+ * Generate OpenAPI JSON schema.
  *
- * This is the primary API function for chunking text. It supports both plain text
- * and Markdown with configurable chunk size, overlap, and page boundary mapping.
- *
- * # Arguments
- *
- * * `text` - The text to split into chunks
- * * `config` - Chunking configuration (max size, overlap, type)
- * * `page_boundaries` - Optional page boundary markers for mapping chunks to pages
- *
- * # Returns
- *
- * A ChunkingResult containing all chunks and their metadata.
+ * Returns the complete OpenAPI 3.1 specification as a JSON string.
  *
  * # Examples
  *
- * ```rust
- * use kreuzberg::chunking::{chunk_text, ChunkingConfig, ChunkerType};
+ * ```no_run
+ * use kreuzberg::api::openapi::openapi_json;
  *
- * # fn example() -> kreuzberg::Result<()> {
- * let config = ChunkingConfig {
- *     max_characters: 500,
- *     overlap: 50,
- *     trim: true,
- *     chunker_type: ChunkerType::Text,
- *     ..Default::default()
- * };
- * let result = chunk_text("Long text...", &config, None)?;
- * assert!(!result.chunks.is_empty());
- * # Ok(())
- * # }
+ * let schema = openapi_json();
+ * println!("{}", schema);
  * ```
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
  */
-KREUZBERGChunkingResult *kreuzberg_chunk_text(const char *text,
-                                              const KREUZBERGChunkingConfig *config,
-                                              const char *page_boundaries);
+char *kreuzberg_openapi_json(void);
 
 /**
- * Chunk text with an optional separate markdown source for heading context resolution.
+ * Start the API server with default host and port.
  *
- * When `heading_source` is provided, it is used instead of `text` for building the
- * heading map. This is needed when `text` is plain text (no markdown headings) but
- * the original document had headings that were stripped during rendering.
+ * Defaults: host = "127.0.0.1", port = 8000
+ *
+ * Uses config file discovery (searches current/parent directories for kreuzberg.toml/yaml/json).
+ * Validates plugins at startup to help diagnose configuration issues.
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
  */
-KREUZBERGChunkingResult *kreuzberg_chunk_text_with_heading_source(const char *text,
-                                                                  const KREUZBERGChunkingConfig *config,
-                                                                  const char *page_boundaries,
-                                                                  const char *heading_source);
-
-/**
- * Batch process multiple texts with the same configuration.
- *
- * This convenience function applies the same chunking configuration to multiple
- * texts in sequence.
- *
- * # Arguments
- *
- * * `texts` - Slice of text strings to chunk
- * * `config` - Chunking configuration to apply to all texts
- *
- * # Returns
- *
- * A vector of ChunkingResult objects, one per input text.
- *
- * # Errors
- *
- * Returns an error if chunking any individual text fails.
- *
- * # Examples
- *
- * ```rust
- * use kreuzberg::chunking::{chunk_texts_batch, ChunkingConfig};
- *
- * # fn example() -> kreuzberg::Result<()> {
- * let config = ChunkingConfig::default();
- * let texts: Vec<String> = vec!["First text".to_string(), "Second text".to_string()];
- * let results = chunk_texts_batch(&texts, &config)?;
- * assert_eq!(results.len(), 2);
- * # Ok(())
- * # }
- * ```
- * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
- */
-char *kreuzberg_chunk_texts_batch(const char *texts,
-                                  const KREUZBERGChunkingConfig *config);
-
-/**
- * Split text into semantically coherent chunks.
- *
- * Splits text into fine-grained segments, detects structural (and optionally
- * embedding-based) topic boundaries, then merges segments into chunks that
- * respect those boundaries and the configured size budget.
- * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
- */
-KREUZBERGChunkingResult *kreuzberg_chunk_semantic(const char *text,
-                                                  const KREUZBERGChunkingConfig *config,
-                                                  const char *page_boundaries);
+int32_t kreuzberg_serve_default(void);
 
 /**
  * L2-normalize a vector.
@@ -12113,36 +12809,6 @@ char *kreuzberg_extract_keywords(const char *text,
 char *kreuzberg_compute_hash(const char *data);
 
 /**
- * Render a single PDF page to a PNG-encoded byte buffer.
- *
- * # Errors
- *
- * Returns an error if the PDF is invalid, the page index is out of bounds,
- * or if the page fails to render.
- *
- * # Example
- *
- * ```rust,no_run
- * use kreuzberg::pdf::render_pdf_page_to_png;
- *
- * # fn example() -> kreuzberg::pdf::error::Result<()> {
- * let pdf_bytes = std::fs::read("document.pdf")?;
- * let png = render_pdf_page_to_png(&pdf_bytes, 0, Some(150), None)?;
- * std::fs::write("page_0.png", png)?;
- * # Ok(())
- * # }
- * ```
- * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
- */
-uint8_t *kreuzberg_render_pdf_page_to_png(const uint8_t *pdf_bytes,
-                                          uintptr_t pdf_bytes_len,
-                                          uintptr_t page_index,
-                                          int32_t dpi,
-                                          const char *password);
-
-/**
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
@@ -12204,5 +12870,113 @@ int32_t kreuzberg_register_ocr_backend(const char *name,
  */
 int32_t kreuzberg_unregister_ocr_backend(const char *name,
                                          char **out_error);
+
+/**
+ * Register a C plugin implementing `PostProcessor` via a vtable.
+ *
+ * # Parameters
+ *
+ * - `name`: null-terminated UTF-8 plugin name. Must not be null.
+ * - `vtable`: vtable with function pointers implementing the trait.
+ * - `user_data`: opaque pointer forwarded to every vtable function.
+ * - `out_error`: receives a heap-allocated error string on failure.
+ *
+ * # Safety
+ *
+ * All function pointers in `vtable` must remain valid until the plugin is
+ * unregistered. `user_data` must be safe to use from any thread that calls
+ * into the plugin.
+ */
+int32_t kreuzberg_register_post_processor(const char *name,
+                                          struct KREUZBERGKreuzbergPostProcessorVTable vtable,
+                                          const void *user_data,
+                                          char **out_error);
+
+/**
+ * Unregister a previously registered C plugin by name.
+ *
+ * # Parameters
+ *
+ * - `name`: null-terminated UTF-8 plugin name. Must not be null.
+ * - `out_error`: receives a heap-allocated error string on failure.
+ *
+ * # Safety
+ *
+ * `name` must point to a valid null-terminated C string.
+ */
+int32_t kreuzberg_unregister_post_processor(const char *name,
+                                            char **out_error);
+
+/**
+ * Register a C plugin implementing `Validator` via a vtable.
+ *
+ * # Parameters
+ *
+ * - `name`: null-terminated UTF-8 plugin name. Must not be null.
+ * - `vtable`: vtable with function pointers implementing the trait.
+ * - `user_data`: opaque pointer forwarded to every vtable function.
+ * - `out_error`: receives a heap-allocated error string on failure.
+ *
+ * # Safety
+ *
+ * All function pointers in `vtable` must remain valid until the plugin is
+ * unregistered. `user_data` must be safe to use from any thread that calls
+ * into the plugin.
+ */
+int32_t kreuzberg_register_validator(const char *name,
+                                     struct KREUZBERGKreuzbergValidatorVTable vtable,
+                                     const void *user_data,
+                                     char **out_error);
+
+/**
+ * Unregister a previously registered C plugin by name.
+ *
+ * # Parameters
+ *
+ * - `name`: null-terminated UTF-8 plugin name. Must not be null.
+ * - `out_error`: receives a heap-allocated error string on failure.
+ *
+ * # Safety
+ *
+ * `name` must point to a valid null-terminated C string.
+ */
+int32_t kreuzberg_unregister_validator(const char *name,
+                                       char **out_error);
+
+/**
+ * Register a C plugin implementing `EmbeddingBackend` via a vtable.
+ *
+ * # Parameters
+ *
+ * - `name`: null-terminated UTF-8 plugin name. Must not be null.
+ * - `vtable`: vtable with function pointers implementing the trait.
+ * - `user_data`: opaque pointer forwarded to every vtable function.
+ * - `out_error`: receives a heap-allocated error string on failure.
+ *
+ * # Safety
+ *
+ * All function pointers in `vtable` must remain valid until the plugin is
+ * unregistered. `user_data` must be safe to use from any thread that calls
+ * into the plugin.
+ */
+int32_t kreuzberg_register_embedding_backend(const char *name,
+                                             struct KREUZBERGKreuzbergEmbeddingBackendVTable vtable,
+                                             const void *user_data,
+                                             char **out_error);
+
+/**
+ * Unregister a previously registered C plugin by name.
+ *
+ * # Parameters
+ *
+ * - `name`: null-terminated UTF-8 plugin name. Must not be null.
+ * - `out_error`: receives a heap-allocated error string on failure.
+ *
+ * # Safety
+ *
+ * `name` must point to a valid null-terminated C string.
+ */
+int32_t kreuzberg_unregister_embedding_backend(const char *name,
+                                               char **out_error);
 
 #endif  /* KREUZBERG_H */

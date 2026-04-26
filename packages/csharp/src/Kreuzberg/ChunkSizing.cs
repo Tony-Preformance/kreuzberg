@@ -65,25 +65,25 @@ internal sealed class ChunkSizingJsonConverter : JsonConverter<ChunkSizing>
         switch (value)
         {
             case ChunkSizing.Characters v:
-            {
-                var doc = JsonSerializer.SerializeToDocument(v, options);
-                writer.WriteStartObject();
-                writer.WriteString("type", "characters");
-                foreach (var prop in doc.RootElement.EnumerateObject())
-                    if (prop.Name != "type") prop.WriteTo(writer);
-                writer.WriteEndObject();
-                break;
-            }
+                {
+                    var doc = JsonSerializer.SerializeToDocument(v, options);
+                    writer.WriteStartObject();
+                    writer.WriteString("type", "characters");
+                    foreach (var prop in doc.RootElement.EnumerateObject())
+                        if (prop.Name != "type") prop.WriteTo(writer);
+                    writer.WriteEndObject();
+                    break;
+                }
             case ChunkSizing.Tokenizer v:
-            {
-                var doc = JsonSerializer.SerializeToDocument(v, options);
-                writer.WriteStartObject();
-                writer.WriteString("type", "tokenizer");
-                foreach (var prop in doc.RootElement.EnumerateObject())
-                    if (prop.Name != "type") prop.WriteTo(writer);
-                writer.WriteEndObject();
-                break;
-            }
+                {
+                    var doc = JsonSerializer.SerializeToDocument(v, options);
+                    writer.WriteStartObject();
+                    writer.WriteString("type", "tokenizer");
+                    foreach (var prop in doc.RootElement.EnumerateObject())
+                        if (prop.Name != "type") prop.WriteTo(writer);
+                    writer.WriteEndObject();
+                    break;
+                }
             default: throw new JsonException($"Unknown ChunkSizing subtype: {value.GetType().Name}");
         }
     }

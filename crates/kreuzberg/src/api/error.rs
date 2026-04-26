@@ -119,6 +119,7 @@ impl ApiError {
             KreuzbergError::Timeout { .. } => "TimeoutError",
             KreuzbergError::Other(_) => "Error",
             KreuzbergError::Cancelled => "CancelledError",
+            KreuzbergError::Security { .. } => "SecurityError",
         };
 
         Self {
