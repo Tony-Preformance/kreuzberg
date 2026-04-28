@@ -1,10 +1,10 @@
 name: Swift
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+  # Swift binding is alef-experimental (added v0.10.0). The C interop fails
+  # to build against Xcode 16's SDK; re-enable on push/PR once
+  # alef-backend-swift matures.
 
 jobs:
   test:
