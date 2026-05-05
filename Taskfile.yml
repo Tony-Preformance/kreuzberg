@@ -254,6 +254,16 @@ tasks:
     cmds:
       - task: e2e:run
 
+  rust:e2e:
+    desc: "Run Rust e2e tests via alef"
+    deps: [pdfium:ensure]
+    env:
+      KREUZBERG_PDFIUM_PATH: "{{.ROOT_DIR}}/target/release"
+      DYLD_LIBRARY_PATH: "{{.ROOT_DIR}}/target/release"
+      LD_LIBRARY_PATH: "{{.ROOT_DIR}}/target/release"
+    cmds:
+      - alef test --e2e --lang rust
+
   python:e2e:
     desc: "Run Python e2e tests (builds kreuzberg-py via maturin first)"
     deps: [pdfium:ensure]

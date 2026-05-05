@@ -1053,7 +1053,7 @@ e2e = "cd e2e/java && mvn test -q"
 
 [crates.test.csharp]
 precondition = "command -v dotnet >/dev/null 2>&1"
-before = "cargo build --release -p kreuzberg-ffi"
+before = "cargo build --release -p kreuzberg-ffi && bash scripts/stage_csharp_native_local.sh"
 e2e = "dotnet test e2e/csharp"
 
 [crates.test.elixir]
@@ -1068,8 +1068,8 @@ e2e = "cd e2e/r && Rscript -e \"devtools::load_all('../../packages/r'); testthat
 
 [crates.test.wasm]
 precondition = "command -v wasm-pack >/dev/null 2>&1"
-before = "wasm-pack build crates/kreuzberg-wasm --release --target web && cd e2e/wasm && npm install"
-e2e = "cd e2e/wasm && npm test"
+before = "wasm-pack build crates/kreuzberg-wasm --release --target web && cd e2e/wasm && pnpm install"
+e2e = "cd e2e/wasm && pnpm test"
 
 [crates.test.rust]
 precondition = "command -v cargo >/dev/null 2>&1"
