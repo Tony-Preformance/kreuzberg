@@ -17,6 +17,7 @@ repositories {
 
 dependencies {
   api("net.java.dev.jna:jna:5.18.1")
+  api("org.jspecify:jspecify:1.0.0")
   // Jackson is on the public surface because the alef-emitted Java records
   // include `@JsonProperty` annotations for serialization round-tripping.
   api("com.fasterxml.jackson.core:jackson-annotations:2.18.2")
