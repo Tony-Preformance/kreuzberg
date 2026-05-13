@@ -120,6 +120,7 @@ ort-dynamic = ["ort/load-dynamic"]
 # Layout detection via ONNX Runtime (YOLO + RT-DETR)
 # Document orientation detection using PP-LCNet for auto_rotate
 auto-rotate = [
+    "auto-rotate-types",
     "dep:ort",
     "dep:ndarray",
     "dep:hf-hub",
@@ -129,6 +130,7 @@ auto-rotate = [
     "ort-bundled",
 ]
 layout-detection = [
+    "layout-types",
     "dep:ort",
     "dep:ndarray",
     "dep:hf-hub",
@@ -138,6 +140,12 @@ layout-detection = [
     "ort-bundled",
 ]
 language-detection = ["dep:whatlang"]
+# layout-types: pure-Rust layout struct definitions — no ORT dependency.
+# Included by layout-detection; also usable standalone on WASM/Android targets.
+layout-types = []
+# auto-rotate-types: pure-Rust OrientationResult struct — no ORT dependency.
+# Included by auto-rotate; also usable standalone on WASM/Android targets.
+auto-rotate-types = []
 chunking = [
     "dep:auto_enums",
     "dep:either",
@@ -150,6 +158,7 @@ chunking-tokenizers = ["chunking", "dep:tokenizers"]
 # embedding-presets: static preset metadata (WASM-safe, no ORT)
 embedding-presets = []
 # embeddings: full embedding generation with ONNX Runtime (ORT-dependent, WASM-incompatible)
+# NOTE: embedding-presets is a subset of embeddings (no ORT); always implied by embeddings.
 embeddings = [
     "dep:hf-hub",
     "dep:ort",
@@ -185,7 +194,10 @@ mcp-http = ["mcp", "api"]
 
 otel = ["dep:opentelemetry", "dep:opentelemetry_sdk", "dep:tracing-opentelemetry"]
 
-wasm-target = [
+# no-ort-target: shared base for targets that cannot use ONNX Runtime (Android x86_64 emulator,
+# WASM). Pure-Rust only — no ORT, no native-only C++ deps. Used as a foundation for both
+# wasm-target and android-target to avoid duplication.
+no-ort-target = [
     "pdf",
     "html",
     "xml",
@@ -198,13 +210,30 @@ wasm-target = [
     "iwork",
     "hwp",
     "mdx",
-    "excel-wasm",
     "archives",
-    "tree-sitter-wasm",
-    "ocr-wasm",
     "liter-llm",
     "stopwords",
     "embedding-presets",
+    "layout-types",
+    "auto-rotate-types",
+]
+# wasm-target: no-ort-target plus WASM-specific overrides (excel-wasm, tree-sitter-wasm, ocr-wasm).
+wasm-target = [
+    "no-ort-target",
+    "excel-wasm",
+    "tree-sitter-wasm",
+    "ocr-wasm",
+]
+# android-target: no-ort-target plus native-Linux variants that work on Android ABI
+# (excel with tokio, native tree-sitter, Tesseract OCR, and API/MCP transport).
+# Excludes ORT-dependent features (paddle-ocr, layout-detection, embeddings, auto-rotate).
+android-target = [
+    "no-ort-target",
+    "excel",
+    "tree-sitter",
+    "ocr",
+    "api",
+    "mcp",
 ]
 # Mobile deployment preset — formats + analysis + Tesseract OCR + code intelligence + API types.
 # Excludes ORT-dependent features (paddle-ocr, layout-detection, embeddings, auto-rotate)

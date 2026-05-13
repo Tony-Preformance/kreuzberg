@@ -33,7 +33,7 @@ pub use extraction::{
 pub use formats::OutputFormat;
 #[cfg(feature = "html")]
 pub use html_output::{HtmlOutputConfig, HtmlTheme};
-#[cfg(feature = "layout-detection")]
+#[cfg(feature = "layout-types")]
 pub use layout::{LayoutDetectionConfig, TableModel};
 pub use llm::{LlmConfig, StructuredExtractionConfig};
 pub use ocr::{OcrConfig, OcrPipelineConfig, OcrPipelineStage, OcrQualityThresholds};

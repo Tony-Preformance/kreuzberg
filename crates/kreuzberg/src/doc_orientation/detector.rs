@@ -1,7 +1,7 @@
-//! Document orientation detection using PP-LCNet_x1_0_doc_ori.
+//! Document orientation detection implementation using PP-LCNet_x1_0_doc_ori.
 //!
 //! Detects page-level orientation (0°, 90°, 180°, 270°) for scanned documents
-//! and images. Gated behind the `auto-rotate` feature.
+//! and images. Requires the `auto-rotate` feature (ONNX Runtime).
 //!
 //! Used by ALL OCR backends when `auto_rotate` is enabled in `OcrConfig`.
 //! More reliable than Tesseract's `DetectOrientationScript` which crashes
@@ -17,6 +17,8 @@ use ort::value::Tensor;
 
 use crate::Result;
 use crate::error::KreuzbergError;
+
+use super::types::OrientationResult;
 
 /// HuggingFace repository containing the model.
 const HF_REPO_ID: &str = "Kreuzberg/paddleocr-onnx-models";
@@ -34,15 +36,6 @@ const ORIENTATION_LABELS: [u32; 4] = [0, 90, 180, 270];
 /// PP-LCNet doc_ori outputs ~45% confidence for correct class in a 4-class problem.
 /// Uniform baseline is 25%. A threshold of 0.35 provides good discrimination.
 pub const MIN_CONFIDENCE: f32 = 0.35;
-
-/// Document orientation detection result.
-#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
-pub struct OrientationResult {
-    /// Detected orientation in degrees (0, 90, 180, or 270).
-    pub degrees: u32,
-    /// Confidence score (0.0-1.0).
-    pub confidence: f32,
-}
 
 /// Detects document page orientation using the PP-LCNet model.
 ///

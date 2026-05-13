@@ -104,10 +104,10 @@ pub(crate) mod model_download;
 #[cfg(feature = "paddle-ocr")]
 pub mod paddle_ocr;
 
-#[cfg(feature = "auto-rotate")]
+#[cfg(feature = "auto-rotate-types")]
 pub mod doc_orientation;
 
-#[cfg(feature = "layout-detection")]
+#[cfg(feature = "layout-types")]
 pub mod layout;
 
 #[cfg(feature = "pdf")]
@@ -156,10 +156,10 @@ pub use rendering::StyledHtmlRenderer;
 #[cfg(feature = "paddle-ocr")]
 pub use paddle_ocr::{CacheStats, ModelManager, ModelPaths, PaddleLanguage, PaddleOcrBackend, PaddleOcrConfig};
 
-#[cfg(feature = "layout-detection")]
+#[cfg(feature = "layout-types")]
 pub use core::config::{LayoutDetectionConfig, TableModel};
 
-#[cfg(feature = "layout-detection")]
+#[cfg(feature = "layout-types")]
 pub use layout::types::{BBox, DetectionResult, LayoutClass, LayoutDetection};
 
 #[cfg(all(feature = "ocr", feature = "layout-detection"))]
@@ -169,7 +169,7 @@ pub use ocr::types::PSMMode;
 
 pub use core::config::{OcrPipelineConfig, OcrPipelineStage, OcrQualityThresholds};
 
-#[cfg(feature = "auto-rotate")]
+#[cfg(feature = "auto-rotate-types")]
 pub use doc_orientation::OrientationResult;
 
 #[cfg(any(feature = "keywords-yake", feature = "keywords-rake"))]
@@ -216,7 +216,7 @@ pub use plugins::{
 };
 
 // ── Embeddings — public API (4 functions + 1 type, feature-gated) ────────────
-#[cfg(feature = "embeddings")]
+#[cfg(feature = "embedding-presets")]
 pub use embeddings::EmbeddingPreset;
 
 /// Embed a list of texts using the configured embedding model.
