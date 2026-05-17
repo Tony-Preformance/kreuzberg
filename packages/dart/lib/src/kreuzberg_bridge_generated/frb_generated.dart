@@ -184,7 +184,6 @@ abstract class RustLibApi extends BaseApi {
     required BoxFnDartFnFutureVecString supportedMimeTypes,
     required BoxFnDartFnFutureI64 priority,
     required BoxFnStringStringDartFnFutureBool canHandle,
-    required BoxFnDartFnFutureOptionSyncExtractor asSyncExtractor,
   });
 
   Future<DocumentNode> crateCreateDocumentNodeFromJson({required String json});
@@ -663,15 +662,6 @@ abstract class RustLibApi extends BaseApi {
 
   CrossPlatformFinalizerArg
   get rust_arc_decrement_strong_count_BoxFnDartFnFutureOcrBackendTypePtr;
-
-  RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_BoxFnDartFnFutureOptionSyncExtractor;
-
-  RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_BoxFnDartFnFutureOptionSyncExtractor;
-
-  CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_BoxFnDartFnFutureOptionSyncExtractorPtr;
 
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_BoxFnDartFnFutureProcessingStage;
@@ -1853,7 +1843,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required BoxFnDartFnFutureVecString supportedMimeTypes,
     required BoxFnDartFnFutureI64 priority,
     required BoxFnStringStringDartFnFutureBool canHandle,
-    required BoxFnDartFnFutureOptionSyncExtractor asSyncExtractor,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1881,10 +1870,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             canHandle,
             serializer,
           );
-          sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync(
-            asSyncExtractor,
-            serializer,
-          );
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -1906,7 +1891,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           supportedMimeTypes,
           priority,
           canHandle,
-          asSyncExtractor,
         ],
         apiImpl: this,
       ),
@@ -1924,7 +1908,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "supportedMimeTypes",
           "priority",
           "canHandle",
-          "asSyncExtractor",
         ],
       );
 
@@ -6520,14 +6503,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOcrBackendTypeSendSync;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_BoxFnDartFnFutureOptionSyncExtractor => wire
-      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync;
-
-  RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_BoxFnDartFnFutureOptionSyncExtractor => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync;
-
-  RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_BoxFnDartFnFutureProcessingStage => wire
       .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureProcessingStageSendSync;
 
@@ -6702,17 +6677,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return BoxFnDartFnFutureOcrBackendTypeImpl.frbInternalDcoDecode(
-      raw as List<dynamic>,
-    );
-  }
-
-  @protected
-  BoxFnDartFnFutureOptionSyncExtractor
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return BoxFnDartFnFutureOptionSyncExtractorImpl.frbInternalDcoDecode(
       raw as List<dynamic>,
     );
   }
@@ -6985,17 +6949,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return BoxFnDartFnFutureOcrBackendTypeImpl.frbInternalDcoDecode(
-      raw as List<dynamic>,
-    );
-  }
-
-  @protected
-  BoxFnDartFnFutureOptionSyncExtractor
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return BoxFnDartFnFutureOptionSyncExtractorImpl.frbInternalDcoDecode(
       raw as List<dynamic>,
     );
   }
@@ -11001,18 +10954,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  BoxFnDartFnFutureOptionSyncExtractor
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return BoxFnDartFnFutureOptionSyncExtractorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
   BoxFnDartFnFutureProcessingStage
   sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureProcessingStageSendSync(
     SseDeserializer deserializer,
@@ -11309,18 +11250,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return BoxFnDartFnFutureOcrBackendTypeImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
-  BoxFnDartFnFutureOptionSyncExtractor
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return BoxFnDartFnFutureOptionSyncExtractorImpl.frbInternalSseDecode(
       sse_decode_usize(deserializer),
       sse_decode_i_32(deserializer),
     );
@@ -16694,21 +16623,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync(
-    BoxFnDartFnFutureOptionSyncExtractor self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as BoxFnDartFnFutureOptionSyncExtractorImpl).frbInternalSseEncode(
-        move: true,
-      ),
-      serializer,
-    );
-  }
-
-  @protected
-  void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureProcessingStageSendSync(
     BoxFnDartFnFutureProcessingStage self,
     SseSerializer serializer,
@@ -17054,21 +16968,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as BoxFnDartFnFutureOcrBackendTypeImpl).frbInternalSseEncode(
-        move: null,
-      ),
-      serializer,
-    );
-  }
-
-  @protected
-  void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynFnDartFnFutureOptionSyncExtractorSendSync(
-    BoxFnDartFnFutureOptionSyncExtractor self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as BoxFnDartFnFutureOptionSyncExtractorImpl).frbInternalSseEncode(
         move: null,
       ),
       serializer,
@@ -21730,36 +21629,6 @@ class BoxFnDartFnFutureOcrBackendTypeImpl extends RustOpaque
         .instance
         .api
         .rust_arc_decrement_strong_count_BoxFnDartFnFutureOcrBackendTypePtr,
-  );
-}
-
-@sealed
-class BoxFnDartFnFutureOptionSyncExtractorImpl extends RustOpaque
-    implements BoxFnDartFnFutureOptionSyncExtractor {
-  // Not to be used by end users
-  BoxFnDartFnFutureOptionSyncExtractorImpl.frbInternalDcoDecode(
-    List<dynamic> wire,
-  ) : super.frbInternalDcoDecode(wire, _kStaticData);
-
-  // Not to be used by end users
-  BoxFnDartFnFutureOptionSyncExtractorImpl.frbInternalSseDecode(
-    BigInt ptr,
-    int externalSizeOnNative,
-  ) : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
-
-  static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount: RustLib
-        .instance
-        .api
-        .rust_arc_increment_strong_count_BoxFnDartFnFutureOptionSyncExtractor,
-    rustArcDecrementStrongCount: RustLib
-        .instance
-        .api
-        .rust_arc_decrement_strong_count_BoxFnDartFnFutureOptionSyncExtractor,
-    rustArcDecrementStrongCountPtr: RustLib
-        .instance
-        .api
-        .rust_arc_decrement_strong_count_BoxFnDartFnFutureOptionSyncExtractorPtr,
   );
 }
 

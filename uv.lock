@@ -42,7 +42,7 @@ dev = [
     { name = "types-psutil", specifier = ">=7.2.2.20260508" },
     { name = "validate-pyproject", specifier = ">=0.24.1" },
 ]
-docs = [
+doc = [
     { name = "mkdocstrings", specifier = ">=1.0.4" },
     { name = "mkdocstrings-python", specifier = ">=2.0.3" },
     { name = "zensical" },

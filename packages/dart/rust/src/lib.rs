@@ -14,8 +14,6 @@ mod frb_generated;
 pub use flutter_rust_bridge::DartFnFuture;
 use flutter_rust_bridge::frb;
 #[allow(unused_imports)]
-pub use kreuzberg::extractors::SyncExtractor;
-#[allow(unused_imports)]
 pub use kreuzberg::internal::InternalDocument;
 
 /// Hardware acceleration configuration for ONNX Runtime models.
@@ -9863,8 +9861,6 @@ pub struct DocumentExtractorDartImpl {
     supported_mime_types: Box<dyn Fn() -> flutter_rust_bridge::DartFnFuture<Vec<String>> + Send + Sync>,
     priority: Box<dyn Fn() -> flutter_rust_bridge::DartFnFuture<i64> + Send + Sync>,
     can_handle: Box<dyn Fn(String, String) -> flutter_rust_bridge::DartFnFuture<bool> + Send + Sync>,
-    as_sync_extractor:
-        Box<dyn Fn() -> flutter_rust_bridge::DartFnFuture<Option<kreuzberg::extractors::SyncExtractor>> + Send + Sync>,
 }
 impl ::std::fmt::Debug for DocumentExtractorDartImpl {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
@@ -9945,14 +9941,6 @@ impl kreuzberg::plugins::DocumentExtractor for DocumentExtractorDartImpl {
             .block_on(async { (self.can_handle)(_path, _mime_type).await });
         __result
     }
-
-    fn as_sync_extractor(&self) -> Option<kreuzberg::extractors::SyncExtractor> {
-        let __result = ::tokio::runtime::Builder::new_current_thread()
-            .build()
-            .expect("build alef visitor tokio runtime")
-            .block_on(async { (self.as_sync_extractor)().await });
-        __result
-    }
 }
 
 /// Create a `DocumentExtractorDartImpl` from Dart callback closures.
@@ -9981,9 +9969,6 @@ pub fn create_document_extractor_dart_impl(
     supported_mime_types: Box<dyn Fn() -> flutter_rust_bridge::DartFnFuture<Vec<String>> + Send + Sync>,
     priority: Box<dyn Fn() -> flutter_rust_bridge::DartFnFuture<i64> + Send + Sync>,
     can_handle: Box<dyn Fn(String, String) -> flutter_rust_bridge::DartFnFuture<bool> + Send + Sync>,
-    as_sync_extractor: Box<
-        dyn Fn() -> flutter_rust_bridge::DartFnFuture<Option<kreuzberg::extractors::SyncExtractor>> + Send + Sync,
-    >,
 ) -> DocumentExtractorDartImpl {
     DocumentExtractorDartImpl {
         plugin_name,
@@ -9993,7 +9978,6 @@ pub fn create_document_extractor_dart_impl(
         supported_mime_types,
         priority,
         can_handle,
-        as_sync_extractor,
     }
 }
 
