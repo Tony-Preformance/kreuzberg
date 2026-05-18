@@ -1091,7 +1091,7 @@ jobs:
           fetch-depth: 0
 
           submodules: recursive
-      - uses: erlef/setup-beam@v1.24
+      - uses: erlef/setup-beam@v1.24.0
         with:
           elixir-version: "1.17"
           otp-version: "27"
@@ -1863,7 +1863,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
 
           submodules: recursive
-      - uses: erlef/setup-beam@v1.24
+      - uses: erlef/setup-beam@v1.24.0
         with:
           elixir-version: "1.17"
           otp-version: "27"
