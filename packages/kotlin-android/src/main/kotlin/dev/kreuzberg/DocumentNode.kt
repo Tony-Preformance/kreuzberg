@@ -35,7 +35,7 @@ data class DocumentNode(
     /**
      * Node content — tagged enum, type-specific data only.
      */
-    val content: String,
+    val content: NodeContent,
     /**
      * Parent node index (`null` = root-level node).
      */

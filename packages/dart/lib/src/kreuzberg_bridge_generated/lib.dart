@@ -8,8 +8,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'lib.freezed.dart';
 
-// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `DrawingType`, `ExtractedImageMetadata`, `ExtractionMethod2`, `FormatMetadata2`, `FracType`, `LayoutClass2`, `NodeContent2`, `OcrBackendType`, `OcrCacheStats`, `PSMMode`, `PaddleLanguage2`, `ProcessingStage`, `TransformListType`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `backend_type`, `can_handle`, `dimensions`, `embed`, `estimated_duration_ms`, `extract_bytes`, `extract_file`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `name`, `name`, `name`, `name`, `name`, `name`, `priority`, `priority`, `priority`, `process_document`, `process_image_file`, `process_image`, `process`, `processing_stage`, `render`, `should_process`, `should_validate`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `supported_languages`, `supported_mime_types`, `supports_document_processing`, `supports_language`, `supports_table_detection`, `validate`, `version`, `version`, `version`, `version`, `version`, `version`
+// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `DrawingType`, `ExtractedImageMetadata`, `FracType`, `KreuzbergError`, `ListType`, `OcrBackendType`, `OcrCacheStats`, `PSMMode`, `PaddleLanguage`, `ProcessingStage`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `backend_type`, `can_handle`, `dimensions`, `embed`, `estimated_duration_ms`, `extract_bytes`, `extract_file`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `name`, `name`, `name`, `name`, `name`, `name`, `priority`, `priority`, `priority`, `process_document`, `process_image_file`, `process_image`, `process`, `processing_stage`, `render`, `should_process`, `should_validate`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `supported_languages`, `supported_mime_types`, `supports_document_processing`, `supports_language`, `supports_table_detection`, `validate`, `version`, `version`, `version`, `version`, `version`, `version`
 
 /// Extract content from a byte array.
 ///
@@ -325,7 +325,7 @@ Future<List<Float64List>> embedTexts({
 ///
 /// Returns `null` if no preset with the given name exists. Returns an owned
 /// clone so the value is safe to pass across FFI boundaries.
-Future<String?> getEmbeddingPreset({required String name}) =>
+Future<EmbeddingPreset?> getEmbeddingPreset({required String name}) =>
     RustLib.instance.api.crateGetEmbeddingPreset(name: name);
 
 /// List the names of all available embedding presets.
@@ -722,9 +722,8 @@ Future<Uri> createUriFromJson({required String json}) =>
 Future<DetectResponse> createDetectResponseFromJson({required String json}) =>
     RustLib.instance.api.crateCreateDetectResponseFromJson(json: json);
 
-Future<EmbeddingPreset2> createEmbeddingPreset2FromJson({
-  required String json,
-}) => RustLib.instance.api.crateCreateEmbeddingPreset2FromJson(json: json);
+Future<EmbeddingPreset> createEmbeddingPresetFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateEmbeddingPresetFromJson(json: json);
 
 Future<YakeParams> createYakeParamsFromJson({required String json}) =>
     RustLib.instance.api.crateCreateYakeParamsFromJson(json: json);
@@ -762,6 +761,9 @@ Future<DetectionResult> createDetectionResultFromJson({required String json}) =>
 
 Future<EmbeddedFile> createEmbeddedFileFromJson({required String json}) =>
     RustLib.instance.api.crateCreateEmbeddedFileFromJson(json: json);
+
+Future<PdfMetadata> createPdfMetadataFromJson({required String json}) =>
+    RustLib.instance.api.crateCreatePdfMetadataFromJson(json: json);
 
 /// Create a `OcrBackendDartImpl` from Dart callback closures.
 /// `plugin_name` and `plugin_version` are required for the Plugin super-trait.
@@ -2229,7 +2231,7 @@ class DocumentNode {
   final String id;
 
   /// Node content — tagged enum, type-specific data only.
-  final String content;
+  final NodeContent content;
 
   /// Parent node index (`None` = root-level node).
   final PlatformInt64? parent;
@@ -3069,7 +3071,7 @@ sealed class EmbeddingModelType with _$EmbeddingModelType {
 ///
 /// All string fields are owned `String` for FFI compatibility — instances
 /// are safe to clone and pass across language boundaries.
-class EmbeddingPreset2 {
+class EmbeddingPreset {
   final String name;
   final PlatformInt64 chunkSize;
   final PlatformInt64 overlap;
@@ -3085,7 +3087,7 @@ class EmbeddingPreset2 {
   final PlatformInt64 dimensions;
   final String description;
 
-  const EmbeddingPreset2({
+  const EmbeddingPreset({
     required this.name,
     required this.chunkSize,
     required this.overlap,
@@ -3110,7 +3112,7 @@ class EmbeddingPreset2 {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is EmbeddingPreset2 &&
+      other is EmbeddingPreset &&
           runtimeType == other.runtimeType &&
           name == other.name &&
           chunkSize == other.chunkSize &&
@@ -3778,6 +3780,9 @@ class ExtractionConfig {
           cancelToken == other.cancelToken;
 }
 
+/// How the extracted text was produced.
+enum ExtractionMethod { native, ocr, mixed }
+
 /// General extraction result used by the core extraction API.
 ///
 /// This is the main result type returned by all extraction functions.
@@ -3790,7 +3795,7 @@ class ExtractionResult {
   ///
   /// Populated when the extractor can reliably distinguish native text extraction,
   /// OCR-only extraction, or mixed native/OCR output.
-  final String? extractionMethod;
+  final ExtractionMethod? extractionMethod;
   final List<Table> tables;
   final List<String>? detectedLanguages;
 
@@ -4255,6 +4260,53 @@ class Footnote {
           runtimeType == other.runtimeType &&
           label == other.label &&
           content == other.content;
+}
+
+@freezed
+sealed class FormatMetadata with _$FormatMetadata {
+  const FormatMetadata._();
+
+  const factory FormatMetadata.pdf({required PdfMetadata field0}) =
+      FormatMetadata_Pdf;
+  const factory FormatMetadata.docx({required DocxMetadata field0}) =
+      FormatMetadata_Docx;
+  const factory FormatMetadata.excel({required ExcelMetadata field0}) =
+      FormatMetadata_Excel;
+  const factory FormatMetadata.email({required EmailMetadata field0}) =
+      FormatMetadata_Email;
+  const factory FormatMetadata.pptx({required PptxMetadata field0}) =
+      FormatMetadata_Pptx;
+  const factory FormatMetadata.archive({required ArchiveMetadata field0}) =
+      FormatMetadata_Archive;
+  const factory FormatMetadata.image({required ImageMetadata field0}) =
+      FormatMetadata_Image;
+  const factory FormatMetadata.xml({required XmlMetadata field0}) =
+      FormatMetadata_Xml;
+  const factory FormatMetadata.text({required TextMetadata field0}) =
+      FormatMetadata_Text;
+  const factory FormatMetadata.html({required HtmlMetadata field0}) =
+      FormatMetadata_Html;
+  const factory FormatMetadata.ocr({required OcrMetadata field0}) =
+      FormatMetadata_Ocr;
+  const factory FormatMetadata.csv({required CsvMetadata field0}) =
+      FormatMetadata_Csv;
+  const factory FormatMetadata.bibtex({required BibtexMetadata field0}) =
+      FormatMetadata_Bibtex;
+  const factory FormatMetadata.citation({required CitationMetadata field0}) =
+      FormatMetadata_Citation;
+  const factory FormatMetadata.fictionBook({
+    required FictionBookMetadata field0,
+  }) = FormatMetadata_FictionBook;
+  const factory FormatMetadata.dbf({required DbfMetadata field0}) =
+      FormatMetadata_Dbf;
+  const factory FormatMetadata.jats({required JatsMetadata field0}) =
+      FormatMetadata_Jats;
+  const factory FormatMetadata.epub({required EpubMetadata field0}) =
+      FormatMetadata_Epub;
+  const factory FormatMetadata.pst({required PstMetadata field0}) =
+      FormatMetadata_Pst;
+  const factory FormatMetadata.code({required String field0}) =
+      FormatMetadata_Code;
 }
 
 /// Block-level element in a Djot document.
@@ -5371,9 +5423,36 @@ class LanguageDetectionConfig {
           detectMultiple == other.detectMultiple;
 }
 
+/// The 17 canonical document layout classes.
+///
+/// All model backends (RT-DETR, YOLO, etc.) map their native class IDs
+/// to this shared set. Models with fewer classes (DocLayNet: 11, PubLayNet: 5)
+/// map to the closest equivalent.
+///
+/// Wire format is snake_case in all serializers (JSON, TOML, YAML).
+enum LayoutClass {
+  caption,
+  footnote,
+  formula,
+  listItem,
+  pageFooter,
+  pageHeader,
+  picture,
+  sectionHeader,
+  table,
+  text,
+  title,
+  documentIndex,
+  code,
+  checkboxSelected,
+  checkboxUnselected,
+  form,
+  keyValueRegion,
+}
+
 /// A single layout detection result.
 class LayoutDetection {
-  final String className;
+  final LayoutClass className;
   final double confidence;
   final BBox bbox;
 
@@ -5733,7 +5812,7 @@ class Metadata {
   ///
   /// Contains detailed metadata specific to the document format.
   /// Serialized as a nested `"format"` object with a `format_type` discriminator field.
-  final String? format;
+  final FormatMetadata? format;
 
   /// Image preprocessing metadata (when OCR preprocessing was applied)
   final ImagePreprocessingMetadata? imagePreprocessing;
@@ -5897,6 +5976,119 @@ class ModelPaths {
           clsModel == other.clsModel &&
           recModel == other.recModel &&
           dictFile == other.dictFile;
+}
+
+@freezed
+sealed class NodeContent with _$NodeContent {
+  const NodeContent._();
+
+  /// Document title.
+  const factory NodeContent.title({required String text}) = NodeContent_Title;
+
+  /// Section heading with level (1-6).
+  const factory NodeContent.heading({
+    required PlatformInt64 level,
+    required String text,
+  }) = NodeContent_Heading;
+
+  /// Body text paragraph.
+  const factory NodeContent.paragraph({required String text}) =
+      NodeContent_Paragraph;
+
+  /// List container — children are `ListItem` nodes.
+  const factory NodeContent.list({required bool ordered}) = NodeContent_List;
+
+  /// Individual list item.
+  const factory NodeContent.listItem({required String text}) =
+      NodeContent_ListItem;
+
+  /// Table with structured cell grid.
+  const factory NodeContent.table({required TableGrid grid}) =
+      NodeContent_Table;
+
+  /// Image reference.
+  const factory NodeContent.image({
+    required String description,
+    required PlatformInt64 imageIndex,
+
+    /// Source URL or path of the image (from `<img src="...">` or `![](src)`).
+    required String src,
+  }) = NodeContent_Image;
+
+  /// Code block.
+  const factory NodeContent.code({
+    required String text,
+    required String language,
+  }) = NodeContent_Code;
+
+  /// Block quote — container, children carry the quoted content.
+  const factory NodeContent.quote() = NodeContent_Quote;
+
+  /// Mathematical formula / equation.
+  const factory NodeContent.formula({required String text}) =
+      NodeContent_Formula;
+
+  /// Footnote reference content.
+  const factory NodeContent.footnote({required String text}) =
+      NodeContent_Footnote;
+
+  /// Logical grouping container (section, key-value area).
+  ///
+  /// `heading_level` + `heading_text` capture the section heading directly
+  /// rather than relying on a first-child positional convention.
+  const factory NodeContent.group({
+    required String label,
+    required PlatformInt64 headingLevel,
+    required String headingText,
+  }) = NodeContent_Group;
+
+  /// Page break marker.
+  const factory NodeContent.pageBreak() = NodeContent_PageBreak;
+
+  /// Presentation slide container — children are the slide's content nodes.
+  const factory NodeContent.slide({
+    /// 1-indexed slide number.
+    required PlatformInt64 number,
+    required String title,
+  }) = NodeContent_Slide;
+
+  /// Definition list container — children are `DefinitionItem` nodes.
+  const factory NodeContent.definitionList() = NodeContent_DefinitionList;
+
+  /// Individual definition list entry with term and definition.
+  const factory NodeContent.definitionItem({
+    required String term,
+    required String definition,
+  }) = NodeContent_DefinitionItem;
+
+  /// Citation or bibliographic reference.
+  const factory NodeContent.citation({
+    required String key,
+    required String text,
+  }) = NodeContent_Citation;
+
+  /// Admonition / callout container (note, warning, tip, etc.).
+  ///
+  /// Children carry the admonition body content.
+  const factory NodeContent.admonition({
+    /// Kind of admonition (e.g. "note", "warning", "tip", "danger").
+    required String kind,
+    required String title,
+  }) = NodeContent_Admonition;
+
+  /// Raw block preserved verbatim from the source format.
+  ///
+  /// Used for content that cannot be mapped to a semantic node type
+  /// (e.g. JSX in MDX, raw LaTeX in markdown, embedded HTML).
+  const factory NodeContent.rawBlock({
+    /// Source format identifier (e.g. "html", "latex", "jsx").
+    required String format,
+    required String content,
+  }) = NodeContent_RawBlock;
+
+  /// Structured metadata block (email headers, YAML frontmatter, etc.).
+  const factory NodeContent.metadataBlock({required List<String> entries}) =
+      NodeContent_MetadataBlock;
 }
 
 @freezed
@@ -7315,6 +7507,61 @@ class PdfConfig {
           bottomMarginFraction == other.bottomMarginFraction &&
           allowSingleColumnTables == other.allowSingleColumnTables &&
           ocrInlineImages == other.ocrInlineImages;
+}
+
+/// PDF-specific metadata.
+///
+/// Contains metadata fields specific to PDF documents that are not in the common
+/// `Metadata` structure. Common fields like title, authors, keywords, and dates
+/// are at the `Metadata` level.
+class PdfMetadata {
+  /// PDF version (e.g., "1.7", "2.0")
+  final String? pdfVersion;
+
+  /// PDF producer (application that created the PDF)
+  final String? producer;
+
+  /// Whether the PDF is encrypted/password-protected
+  final bool? isEncrypted;
+
+  /// First page width in points (1/72 inch)
+  final PlatformInt64? width;
+
+  /// First page height in points (1/72 inch)
+  final PlatformInt64? height;
+
+  /// Total number of pages in the PDF document
+  final PlatformInt64? pageCount;
+
+  const PdfMetadata({
+    this.pdfVersion,
+    this.producer,
+    this.isEncrypted,
+    this.width,
+    this.height,
+    this.pageCount,
+  });
+
+  @override
+  int get hashCode =>
+      pdfVersion.hashCode ^
+      producer.hashCode ^
+      isEncrypted.hashCode ^
+      width.hashCode ^
+      height.hashCode ^
+      pageCount.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PdfMetadata &&
+          runtimeType == other.runtimeType &&
+          pdfVersion == other.pdfVersion &&
+          producer == other.producer &&
+          isEncrypted == other.isEncrypted &&
+          width == other.width &&
+          height == other.height &&
+          pageCount == other.pageCount;
 }
 
 /// Post-processor configuration.

@@ -4015,7 +4015,7 @@ internal extension DetectResponse {
 ///
 /// All string fields are owned `String` for FFI compatibility — instances
 /// are safe to clone and pass across language boundaries.
-public struct EmbeddingPreset2: Codable, Sendable, Hashable {
+public struct EmbeddingPreset: Codable, Sendable, Hashable {
     public let name: String
     public let chunkSize: UInt
     public let overlap: UInt
@@ -4049,9 +4049,9 @@ public struct EmbeddingPreset2: Codable, Sendable, Hashable {
     }
 }
 
-// MARK: - Internal FFI conversions for EmbeddingPreset2
-internal extension EmbeddingPreset2 {
-    init(_ rb: RustBridge.EmbeddingPreset2) throws {
+// MARK: - Internal FFI conversions for EmbeddingPreset
+internal extension EmbeddingPreset {
+    init(_ rb: RustBridge.EmbeddingPreset) throws {
         self.name = rb.name().toString()
         self.chunkSize = rb.chunk_size()
         self.overlap = rb.overlap()
@@ -4061,10 +4061,10 @@ internal extension EmbeddingPreset2 {
         self.dimensions = rb.dimensions()
         self.description = rb.description().toString()
     }
-    func intoRust() throws -> RustBridge.EmbeddingPreset2 {
+    func intoRust() throws -> RustBridge.EmbeddingPreset {
         let data = try JSONEncoder().encode(self)
         let json = String(data: data, encoding: .utf8) ?? "{}"
-        return try RustBridge.embeddingPreset2FromJson(json)
+        return try RustBridge.embeddingPresetFromJson(json)
     }
 }
 
@@ -4295,10 +4295,10 @@ internal extension BBox {
 
 /// A single layout detection result.
 public struct LayoutDetection: Codable, Sendable, Hashable {
-    public let className: String
+    public let className: LayoutClass
     public let confidence: Float
     public let bbox: BBox
-    public init(className: String, confidence: Float, bbox: BBox) {
+    public init(className: LayoutClass, confidence: Float, bbox: BBox) {
         self.className = className
         self.confidence = confidence
         self.bbox = bbox
@@ -4313,7 +4313,7 @@ public struct LayoutDetection: Codable, Sendable, Hashable {
 // MARK: - Internal FFI conversions for LayoutDetection
 internal extension LayoutDetection {
     init(_ rb: RustBridge.LayoutDetection) throws {
-        self.className = rb.class_name().toString()
+        self.className = LayoutClass(rawValue: rb.class_name().toString()) ?? { fatalError("Unknown LayoutClass: \(rb.class_name().toString())") }()
         self.confidence = rb.confidence()
         self.bbox = try BBox(rb.bbox())
     }
@@ -4396,6 +4396,57 @@ internal extension DetectionResult {
 
 /// Embedded file descriptor extracted from the PDF name tree.
 public typealias EmbeddedFile = RustBridge.EmbeddedFile
+
+/// PDF-specific metadata.
+///
+/// Contains metadata fields specific to PDF documents that are not in the common
+/// `Metadata` structure. Common fields like title, authors, keywords, and dates
+/// are at the `Metadata` level.
+public struct PdfMetadata: Codable, Sendable, Hashable {
+    /// PDF version (e.g., "1.7", "2.0")
+    public let pdfVersion: String?
+    /// PDF producer (application that created the PDF)
+    public let producer: String?
+    /// Whether the PDF is encrypted/password-protected
+    public let isEncrypted: Bool?
+    /// First page width in points (1/72 inch)
+    public let width: Int64?
+    /// First page height in points (1/72 inch)
+    public let height: Int64?
+    /// Total number of pages in the PDF document
+    public let pageCount: UInt32?
+    public init(pdfVersion: String? = nil, producer: String? = nil, isEncrypted: Bool? = nil, width: Int64? = nil, height: Int64? = nil, pageCount: UInt32? = nil) {
+        self.pdfVersion = pdfVersion
+        self.producer = producer
+        self.isEncrypted = isEncrypted
+        self.width = width
+        self.height = height
+        self.pageCount = pageCount
+    }
+    private enum CodingKeys: String, CodingKey {
+        case pdfVersion = "pdf_version"
+        case producer = "producer"
+        case isEncrypted = "is_encrypted"
+        case width = "width"
+        case height = "height"
+        case pageCount = "page_count"
+    }
+}
+
+// MARK: - Internal FFI conversions for PdfMetadata
+internal extension PdfMetadata {
+    init(_ rb: RustBridge.PdfMetadata) throws {
+        self.pdfVersion = rb.pdf_version()?.toString()
+        self.producer = rb.producer()?.toString()
+        self.isEncrypted = rb.is_encrypted()
+        self.width = rb.width()
+        self.height = rb.height()
+        self.pageCount = rb.page_count()
+    }
+    func intoRust() throws -> RustBridge.PdfMetadata {
+        return RustBridge.PdfMetadata(self.pdfVersion, self.producer, self.isEncrypted, self.width, self.height, self.pageCount)
+    }
+}
 
 /// ONNX Runtime execution provider type.
 ///
@@ -4560,7 +4611,7 @@ public enum CodeContentMode: String, Codable, Sendable, Hashable {
 }
 
 /// Type of list detection.
-public typealias TransformListType = RustBridge.TransformListType
+public typealias ListType = RustBridge.ListType
 
 /// Whether the drawing is inline or anchored.
 public enum DrawingType {
@@ -4715,7 +4766,7 @@ public enum ContentLayer: String, Codable, Sendable, Hashable {
 ///
 /// Uses `#[serde(tag = "node_type")]` to avoid "type" keyword collision in
 /// Go/Java/TypeScript bindings.
-public enum NodeContent2 {
+public enum NodeContent {
     /// Document title.
     case title(text: String)
     /// Section heading with level (1-6).
@@ -4787,7 +4838,7 @@ public enum AnnotationKind {
 }
 
 /// How the extracted text was produced.
-public enum ExtractionMethod2: String, Codable, Sendable, Hashable {
+public enum ExtractionMethod: String, Codable, Sendable, Hashable {
     case native
     case ocr
     case mixed
@@ -4898,8 +4949,8 @@ public enum ElementType: String, Codable, Sendable, Hashable {
 ///
 /// Only one format type can exist per extraction result. This provides
 /// type-safe, clean metadata without nested optionals.
-public enum FormatMetadata2 {
-    case pdf(field0: String)
+public enum FormatMetadata {
+    case pdf(field0: PdfMetadata)
     case docx(field0: DocxMetadata)
     case excel(field0: ExcelMetadata)
     case email(field0: EmailMetadata)
@@ -5052,7 +5103,7 @@ public enum PSMMode: String, Codable, Sendable, Hashable {
 /// Supported languages in PaddleOCR.
 ///
 /// Maps user-friendly language codes to paddle-ocr-rs language identifiers.
-public enum PaddleLanguage2: String, Codable, Sendable, Hashable {
+public enum PaddleLanguage: String, Codable, Sendable, Hashable {
     /// English
     case english = "English"
     /// Simplified Chinese
@@ -5094,7 +5145,7 @@ public enum PaddleLanguage2: String, Codable, Sendable, Hashable {
 /// map to the closest equivalent.
 ///
 /// Wire format is snake_case in all serializers (JSON, TOML, YAML).
-public enum LayoutClass2: String, Codable, Sendable, Hashable {
+public enum LayoutClass: String, Codable, Sendable, Hashable {
     case caption
     case footnote
     case formula
@@ -5504,7 +5555,7 @@ public func embedTexts(texts: [String], config: EmbeddingConfig) throws -> [[Flo
 ///
 /// Returns `None` if no preset with the given name exists. Returns an owned
 /// clone so the value is safe to pass across FFI boundaries.
-public func getEmbeddingPreset(name: String) -> String? {
+public func getEmbeddingPreset(name: String) -> EmbeddingPreset? {
     return RustBridge.getEmbeddingPreset(name)
 }
 

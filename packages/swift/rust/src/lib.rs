@@ -917,7 +917,7 @@ mod ffi {
             content: String,
             mime_type: String,
             metadata: Metadata,
-            extraction_method: Option<String>,
+            extraction_method: Option<ExtractionMethod>,
             tables: Vec<Table>,
             detected_languages: Option<Vec<String>>,
             chunks: Option<Vec<Chunk>>,
@@ -1265,7 +1265,7 @@ mod ffi {
             created_by: Option<String>,
             modified_by: Option<String>,
             pages: Option<PageStructure>,
-            format: Option<String>,
+            format: Option<FormatMetadata>,
             image_preprocessing: Option<ImagePreprocessingMetadata>,
             json_schema: Option<String>,
             error: Option<ErrorMetadata>,
@@ -1791,7 +1791,7 @@ mod ffi {
     }
 
     extern "Rust" {
-        type EmbeddingPreset2;
+        type EmbeddingPreset;
         fn name(&self) -> String;
         fn chunk_size(&self) -> usize;
         fn overlap(&self) -> usize;
@@ -1940,6 +1940,25 @@ mod ffi {
     }
 
     extern "Rust" {
+        type PdfMetadata;
+        #[swift_bridge(init)]
+        fn new(
+            pdf_version: Option<String>,
+            producer: Option<String>,
+            is_encrypted: Option<bool>,
+            width: Option<i64>,
+            height: Option<i64>,
+            page_count: Option<u32>,
+        ) -> PdfMetadata;
+        fn pdf_version(&self) -> Option<String>;
+        fn producer(&self) -> Option<String>;
+        fn is_encrypted(&self) -> Option<bool>;
+        fn width(&self) -> Option<i64>;
+        fn height(&self) -> Option<i64>;
+        fn page_count(&self) -> Option<u32>;
+    }
+
+    extern "Rust" {
         type ExecutionProviderType;
         fn to_string(&self) -> String;
     }
@@ -1980,7 +1999,7 @@ mod ffi {
     }
 
     extern "Rust" {
-        type TransformListType;
+        type ListType;
         fn to_string(&self) -> String;
     }
 
@@ -2035,7 +2054,7 @@ mod ffi {
     }
 
     extern "Rust" {
-        type NodeContent2;
+        type NodeContent;
         fn to_string(&self) -> String;
     }
 
@@ -2045,7 +2064,7 @@ mod ffi {
     }
 
     extern "Rust" {
-        type ExtractionMethod2;
+        type ExtractionMethod;
         fn to_string(&self) -> String;
     }
 
@@ -2070,7 +2089,7 @@ mod ffi {
     }
 
     extern "Rust" {
-        type FormatMetadata2;
+        type FormatMetadata;
         fn to_string(&self) -> String;
     }
 
@@ -2125,12 +2144,12 @@ mod ffi {
     }
 
     extern "Rust" {
-        type PaddleLanguage2;
+        type PaddleLanguage;
         fn to_string(&self) -> String;
     }
 
     extern "Rust" {
-        type LayoutClass2;
+        type LayoutClass;
         fn to_string(&self) -> String;
     }
 
@@ -2209,7 +2228,7 @@ mod ffi {
         #[swift_bridge(swift_name = "embedTexts")]
         fn embed_texts(texts: Vec<String>, config: EmbeddingConfig) -> Result<String, String>;
         #[swift_bridge(swift_name = "getEmbeddingPreset")]
-        fn get_embedding_preset(name: String) -> String;
+        fn get_embedding_preset(name: String) -> Option<EmbeddingPreset>;
         #[swift_bridge(swift_name = "listEmbeddingPresets")]
         fn list_embedding_presets() -> Vec<String>;
     }
@@ -2511,8 +2530,8 @@ mod ffi {
         fn uri_from_json(json: String) -> Result<Uri, String>;
         #[swift_bridge(swift_name = "detectResponseFromJson")]
         fn detect_response_from_json(json: String) -> Result<DetectResponse, String>;
-        #[swift_bridge(swift_name = "embeddingPreset2FromJson")]
-        fn embedding_preset2_from_json(json: String) -> Result<EmbeddingPreset2, String>;
+        #[swift_bridge(swift_name = "embeddingPresetFromJson")]
+        fn embedding_preset_from_json(json: String) -> Result<EmbeddingPreset, String>;
         #[swift_bridge(swift_name = "keywordFromJson")]
         fn keyword_from_json(json: String) -> Result<Keyword, String>;
         #[swift_bridge(swift_name = "modelPathsFromJson")]
@@ -5333,7 +5352,7 @@ impl DocumentNode {
         serde_json::to_string(&self.0.id).unwrap_or_default()
     }
     pub fn content(&self) -> String {
-        serde_json::to_string(&self.0.content).unwrap_or_default()
+        NodeContent::from(self.0.content.clone()).to_string()
     }
     pub fn parent(&self) -> Option<u32> {
         self.0.parent.as_ref().and_then(|v| {
@@ -5471,7 +5490,7 @@ impl ExtractionResult {
         content: String,
         mime_type: String,
         metadata: Metadata,
-        extraction_method: Option<String>,
+        extraction_method: Option<ExtractionMethod>,
         tables: Vec<Table>,
         detected_languages: Option<Vec<String>>,
         chunks: Option<Vec<Chunk>>,
@@ -5504,13 +5523,7 @@ impl ExtractionResult {
             }
         }
         __target.metadata = metadata.0;
-        if let Some(s) = extraction_method {
-            if let Ok(v) = ::serde_json::from_str::<::serde_json::Value>(&s) {
-                if let Ok(t) = ::serde_json::from_value(v) {
-                    __target.extraction_method = Some(t);
-                }
-            }
-        }
+        // alef: extraction_method (ExtractionMethod) is an enum; reverse From not generated — left at default
         __target.tables = tables.into_iter().map(|w| w.0).collect();
         if let Ok(__v) = ::serde_json::to_value(detected_languages) {
             if let Ok(t) = ::serde_json::from_value(__v) {
@@ -5591,8 +5604,8 @@ impl ExtractionResult {
     pub fn extraction_method(&self) -> Option<String> {
         self.0
             .extraction_method
-            .as_ref()
-            .and_then(|v| serde_json::to_string(v).ok())
+            .clone()
+            .map(|w| ExtractionMethod::from(w).to_string())
     }
     pub fn tables(&self) -> Vec<Table> {
         self.0.tables.iter().map(|elem| Table(elem.clone())).collect()
@@ -6654,7 +6667,7 @@ impl Metadata {
         created_by: Option<String>,
         modified_by: Option<String>,
         pages: Option<PageStructure>,
-        format: Option<String>,
+        format: Option<FormatMetadata>,
         image_preprocessing: Option<ImagePreprocessingMetadata>,
         json_schema: Option<String>,
         error: Option<ErrorMetadata>,
@@ -6730,13 +6743,7 @@ impl Metadata {
         if let Some(w) = pages {
             __target.pages = Some(w.0);
         }
-        if let Some(s) = format {
-            if let Ok(v) = ::serde_json::from_str::<::serde_json::Value>(&s) {
-                if let Ok(t) = ::serde_json::from_value(v) {
-                    __target.format = Some(t);
-                }
-            }
-        }
+        // alef: format (FormatMetadata) is an enum; reverse From not generated — left at default
         if let Some(w) = image_preprocessing {
             __target.image_preprocessing = Some(w.0);
         }
@@ -6831,7 +6838,7 @@ impl Metadata {
         self.0.pages.clone().map(PageStructure)
     }
     pub fn format(&self) -> Option<String> {
-        self.0.format.as_ref().and_then(|v| serde_json::to_string(v).ok())
+        self.0.format.clone().map(|w| FormatMetadata::from(w).to_string())
     }
     pub fn image_preprocessing(&self) -> Option<ImagePreprocessingMetadata> {
         self.0.image_preprocessing.clone().map(ImagePreprocessingMetadata)
@@ -8469,8 +8476,8 @@ impl DetectResponse {
     }
 }
 
-pub struct EmbeddingPreset2(pub kreuzberg::EmbeddingPreset);
-impl EmbeddingPreset2 {
+pub struct EmbeddingPreset(pub kreuzberg::EmbeddingPreset);
+impl EmbeddingPreset {
     pub fn name(&self) -> String {
         self.0.name.clone()
     }
@@ -8826,7 +8833,7 @@ impl BBox {
 pub struct LayoutDetection(pub kreuzberg::LayoutDetection);
 impl LayoutDetection {
     pub fn class_name(&self) -> String {
-        serde_json::to_string(&self.0.class_name).unwrap_or_default()
+        LayoutClass::from(self.0.class_name.clone()).to_string()
     }
     pub fn confidence(&self) -> f32 {
         ::serde_json::to_value(&self.0.confidence)
@@ -8885,6 +8892,73 @@ impl EmbeddedFile {
     }
     pub fn mime_type(&self) -> Option<String> {
         self.0.mime_type.clone()
+    }
+}
+
+pub struct PdfMetadata(pub kreuzberg::pdf::metadata::PdfMetadata);
+impl PdfMetadata {
+    pub fn new(
+        pdf_version: Option<String>,
+        producer: Option<String>,
+        is_encrypted: Option<bool>,
+        width: Option<i64>,
+        height: Option<i64>,
+        page_count: Option<u32>,
+    ) -> PdfMetadata {
+        let mut __target: kreuzberg::pdf::metadata::PdfMetadata = ::std::default::Default::default();
+        if let Some(s) = pdf_version {
+            if let Ok(v) = ::serde_json::from_str::<::serde_json::Value>(&s) {
+                if let Ok(t) = ::serde_json::from_value(v) {
+                    __target.pdf_version = Some(t);
+                }
+            }
+        }
+        if let Some(s) = producer {
+            if let Ok(v) = ::serde_json::from_str::<::serde_json::Value>(&s) {
+                if let Ok(t) = ::serde_json::from_value(v) {
+                    __target.producer = Some(t);
+                }
+            }
+        }
+        __target.is_encrypted = is_encrypted;
+        __target.width = width;
+        __target.height = height;
+        __target.page_count = page_count;
+        PdfMetadata(__target)
+    }
+    pub fn pdf_version(&self) -> Option<String> {
+        self.0.pdf_version.clone()
+    }
+    pub fn producer(&self) -> Option<String> {
+        self.0.producer.clone()
+    }
+    pub fn is_encrypted(&self) -> Option<bool> {
+        self.0.is_encrypted.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn width(&self) -> Option<i64> {
+        self.0.width.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn height(&self) -> Option<i64> {
+        self.0.height.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn page_count(&self) -> Option<u32> {
+        self.0.page_count.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
     }
 }
 
@@ -9126,14 +9200,14 @@ impl CodeContentMode {
     }
 }
 
-pub enum TransformListType {
+pub enum ListType {
     Bullet,
     Numbered,
     Lettered,
     Indented,
 }
 
-impl From<kreuzberg::extraction::transform::ListType> for TransformListType {
+impl From<kreuzberg::extraction::transform::ListType> for ListType {
     fn from(val: kreuzberg::extraction::transform::ListType) -> Self {
         match val {
             kreuzberg::extraction::transform::ListType::Bullet => Self::Bullet,
@@ -9144,7 +9218,7 @@ impl From<kreuzberg::extraction::transform::ListType> for TransformListType {
     }
 }
 
-impl TransformListType {
+impl ListType {
     pub fn to_string(&self) -> String {
         match self {
             Self::Bullet => "Bullet".to_string(),
@@ -9530,7 +9604,7 @@ impl ContentLayer {
     }
 }
 
-pub enum NodeContent2 {
+pub enum NodeContent {
     Quote,
     PageBreak,
     DefinitionList,
@@ -9538,7 +9612,7 @@ pub enum NodeContent2 {
     Unknown,
 }
 
-impl From<kreuzberg::NodeContent> for NodeContent2 {
+impl From<kreuzberg::NodeContent> for NodeContent {
     fn from(val: kreuzberg::NodeContent) -> Self {
         match val {
             kreuzberg::NodeContent::Quote => Self::Quote,
@@ -9549,7 +9623,7 @@ impl From<kreuzberg::NodeContent> for NodeContent2 {
     }
 }
 
-impl NodeContent2 {
+impl NodeContent {
     pub fn to_string(&self) -> String {
         match self {
             Self::Quote => "quote".to_string(),
@@ -9605,13 +9679,13 @@ impl AnnotationKind {
     }
 }
 
-pub enum ExtractionMethod2 {
+pub enum ExtractionMethod {
     Native,
     Ocr,
     Mixed,
 }
 
-impl From<kreuzberg::ExtractionMethod> for ExtractionMethod2 {
+impl From<kreuzberg::ExtractionMethod> for ExtractionMethod {
     fn from(val: kreuzberg::ExtractionMethod) -> Self {
         match val {
             kreuzberg::ExtractionMethod::Native => Self::Native,
@@ -9621,7 +9695,7 @@ impl From<kreuzberg::ExtractionMethod> for ExtractionMethod2 {
     }
 }
 
-impl ExtractionMethod2 {
+impl ExtractionMethod {
     pub fn to_string(&self) -> String {
         match self {
             Self::Native => "native".to_string(),
@@ -9810,12 +9884,12 @@ impl ElementType {
     }
 }
 
-pub enum FormatMetadata2 {
+pub enum FormatMetadata {
     /// Data variants not directly bridgeable — represented as Unknown.
     Unknown,
 }
 
-impl From<kreuzberg::FormatMetadata> for FormatMetadata2 {
+impl From<kreuzberg::FormatMetadata> for FormatMetadata {
     fn from(val: kreuzberg::FormatMetadata) -> Self {
         match val {
             _ => Self::Unknown,
@@ -9823,7 +9897,7 @@ impl From<kreuzberg::FormatMetadata> for FormatMetadata2 {
     }
 }
 
-impl FormatMetadata2 {
+impl FormatMetadata {
     pub fn to_string(&self) -> String {
         match self {
             Self::Unknown => "unknown".to_string(),
@@ -10131,7 +10205,7 @@ impl PSMMode {
     }
 }
 
-pub enum PaddleLanguage2 {
+pub enum PaddleLanguage {
     English,
     Chinese,
     Japanese,
@@ -10150,7 +10224,7 @@ pub enum PaddleLanguage2 {
     Telugu,
 }
 
-impl From<kreuzberg::PaddleLanguage> for PaddleLanguage2 {
+impl From<kreuzberg::PaddleLanguage> for PaddleLanguage {
     fn from(val: kreuzberg::PaddleLanguage) -> Self {
         match val {
             kreuzberg::PaddleLanguage::English => Self::English,
@@ -10173,7 +10247,7 @@ impl From<kreuzberg::PaddleLanguage> for PaddleLanguage2 {
     }
 }
 
-impl PaddleLanguage2 {
+impl PaddleLanguage {
     pub fn to_string(&self) -> String {
         match self {
             Self::English => "English".to_string(),
@@ -10196,7 +10270,7 @@ impl PaddleLanguage2 {
     }
 }
 
-pub enum LayoutClass2 {
+pub enum LayoutClass {
     Caption,
     Footnote,
     Formula,
@@ -10216,7 +10290,7 @@ pub enum LayoutClass2 {
     KeyValueRegion,
 }
 
-impl From<kreuzberg::LayoutClass> for LayoutClass2 {
+impl From<kreuzberg::LayoutClass> for LayoutClass {
     fn from(val: kreuzberg::LayoutClass) -> Self {
         match val {
             kreuzberg::LayoutClass::Caption => Self::Caption,
@@ -10240,7 +10314,7 @@ impl From<kreuzberg::LayoutClass> for LayoutClass2 {
     }
 }
 
-impl LayoutClass2 {
+impl LayoutClass {
     pub fn to_string(&self) -> String {
         match self {
             Self::Caption => "caption".to_string(),
@@ -10430,8 +10504,8 @@ pub fn embed_texts(texts: Vec<String>, config: EmbeddingConfig) -> Result<String
         .map(|v| serde_json::to_string(&v).expect("serializable return"))
 }
 
-pub fn get_embedding_preset(name: String) -> String {
-    serde_json::to_string(&(kreuzberg::get_embedding_preset(&name))).expect("serializable return")
+pub fn get_embedding_preset(name: String) -> Option<EmbeddingPreset> {
+    (kreuzberg::get_embedding_preset(&name)).map(EmbeddingPreset)
 }
 
 pub fn list_embedding_presets() -> Vec<String> {
@@ -11452,9 +11526,9 @@ pub fn detect_response_from_json(json: String) -> Result<DetectResponse, String>
         .map_err(|e| e.to_string())
 }
 
-pub fn embedding_preset2_from_json(json: String) -> Result<EmbeddingPreset2, String> {
+pub fn embedding_preset_from_json(json: String) -> Result<EmbeddingPreset, String> {
     serde_json::from_str::<kreuzberg::EmbeddingPreset>(&json)
-        .map(EmbeddingPreset2)
+        .map(EmbeddingPreset)
         .map_err(|e| e.to_string())
 }
 

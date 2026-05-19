@@ -12,7 +12,6 @@ use crate::types::PageStructure;
 /// Contains metadata fields specific to PDF documents that are not in the common
 /// `Metadata` structure. Common fields like title, authors, keywords, and dates
 /// are at the `Metadata` level.
-#[cfg_attr(alef, alef(skip))]
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "api", derive(utoipa::ToSchema))]
 pub struct PdfMetadata {

@@ -1458,6 +1458,3112 @@ as String,
 }
 
 /// @nodoc
+mixin _$FormatMetadata {
+
+ Object get field0;
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata&&const DeepCollectionEquality().equals(other.field0, field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(field0));
+
+@override
+String toString() {
+  return 'FormatMetadata(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+class $FormatMetadataCopyWith<$Res>  {
+$FormatMetadataCopyWith(FormatMetadata _, $Res Function(FormatMetadata) __);
+}
+
+
+/// Adds pattern-matching-related methods to [FormatMetadata].
+extension FormatMetadataPatterns on FormatMetadata {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( FormatMetadata_Pdf value)?  pdf,TResult Function( FormatMetadata_Docx value)?  docx,TResult Function( FormatMetadata_Excel value)?  excel,TResult Function( FormatMetadata_Email value)?  email,TResult Function( FormatMetadata_Pptx value)?  pptx,TResult Function( FormatMetadata_Archive value)?  archive,TResult Function( FormatMetadata_Image value)?  image,TResult Function( FormatMetadata_Xml value)?  xml,TResult Function( FormatMetadata_Text value)?  text,TResult Function( FormatMetadata_Html value)?  html,TResult Function( FormatMetadata_Ocr value)?  ocr,TResult Function( FormatMetadata_Csv value)?  csv,TResult Function( FormatMetadata_Bibtex value)?  bibtex,TResult Function( FormatMetadata_Citation value)?  citation,TResult Function( FormatMetadata_FictionBook value)?  fictionBook,TResult Function( FormatMetadata_Dbf value)?  dbf,TResult Function( FormatMetadata_Jats value)?  jats,TResult Function( FormatMetadata_Epub value)?  epub,TResult Function( FormatMetadata_Pst value)?  pst,TResult Function( FormatMetadata_Code value)?  code,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case FormatMetadata_Pdf() when pdf != null:
+return pdf(_that);case FormatMetadata_Docx() when docx != null:
+return docx(_that);case FormatMetadata_Excel() when excel != null:
+return excel(_that);case FormatMetadata_Email() when email != null:
+return email(_that);case FormatMetadata_Pptx() when pptx != null:
+return pptx(_that);case FormatMetadata_Archive() when archive != null:
+return archive(_that);case FormatMetadata_Image() when image != null:
+return image(_that);case FormatMetadata_Xml() when xml != null:
+return xml(_that);case FormatMetadata_Text() when text != null:
+return text(_that);case FormatMetadata_Html() when html != null:
+return html(_that);case FormatMetadata_Ocr() when ocr != null:
+return ocr(_that);case FormatMetadata_Csv() when csv != null:
+return csv(_that);case FormatMetadata_Bibtex() when bibtex != null:
+return bibtex(_that);case FormatMetadata_Citation() when citation != null:
+return citation(_that);case FormatMetadata_FictionBook() when fictionBook != null:
+return fictionBook(_that);case FormatMetadata_Dbf() when dbf != null:
+return dbf(_that);case FormatMetadata_Jats() when jats != null:
+return jats(_that);case FormatMetadata_Epub() when epub != null:
+return epub(_that);case FormatMetadata_Pst() when pst != null:
+return pst(_that);case FormatMetadata_Code() when code != null:
+return code(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( FormatMetadata_Pdf value)  pdf,required TResult Function( FormatMetadata_Docx value)  docx,required TResult Function( FormatMetadata_Excel value)  excel,required TResult Function( FormatMetadata_Email value)  email,required TResult Function( FormatMetadata_Pptx value)  pptx,required TResult Function( FormatMetadata_Archive value)  archive,required TResult Function( FormatMetadata_Image value)  image,required TResult Function( FormatMetadata_Xml value)  xml,required TResult Function( FormatMetadata_Text value)  text,required TResult Function( FormatMetadata_Html value)  html,required TResult Function( FormatMetadata_Ocr value)  ocr,required TResult Function( FormatMetadata_Csv value)  csv,required TResult Function( FormatMetadata_Bibtex value)  bibtex,required TResult Function( FormatMetadata_Citation value)  citation,required TResult Function( FormatMetadata_FictionBook value)  fictionBook,required TResult Function( FormatMetadata_Dbf value)  dbf,required TResult Function( FormatMetadata_Jats value)  jats,required TResult Function( FormatMetadata_Epub value)  epub,required TResult Function( FormatMetadata_Pst value)  pst,required TResult Function( FormatMetadata_Code value)  code,}){
+final _that = this;
+switch (_that) {
+case FormatMetadata_Pdf():
+return pdf(_that);case FormatMetadata_Docx():
+return docx(_that);case FormatMetadata_Excel():
+return excel(_that);case FormatMetadata_Email():
+return email(_that);case FormatMetadata_Pptx():
+return pptx(_that);case FormatMetadata_Archive():
+return archive(_that);case FormatMetadata_Image():
+return image(_that);case FormatMetadata_Xml():
+return xml(_that);case FormatMetadata_Text():
+return text(_that);case FormatMetadata_Html():
+return html(_that);case FormatMetadata_Ocr():
+return ocr(_that);case FormatMetadata_Csv():
+return csv(_that);case FormatMetadata_Bibtex():
+return bibtex(_that);case FormatMetadata_Citation():
+return citation(_that);case FormatMetadata_FictionBook():
+return fictionBook(_that);case FormatMetadata_Dbf():
+return dbf(_that);case FormatMetadata_Jats():
+return jats(_that);case FormatMetadata_Epub():
+return epub(_that);case FormatMetadata_Pst():
+return pst(_that);case FormatMetadata_Code():
+return code(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( FormatMetadata_Pdf value)?  pdf,TResult? Function( FormatMetadata_Docx value)?  docx,TResult? Function( FormatMetadata_Excel value)?  excel,TResult? Function( FormatMetadata_Email value)?  email,TResult? Function( FormatMetadata_Pptx value)?  pptx,TResult? Function( FormatMetadata_Archive value)?  archive,TResult? Function( FormatMetadata_Image value)?  image,TResult? Function( FormatMetadata_Xml value)?  xml,TResult? Function( FormatMetadata_Text value)?  text,TResult? Function( FormatMetadata_Html value)?  html,TResult? Function( FormatMetadata_Ocr value)?  ocr,TResult? Function( FormatMetadata_Csv value)?  csv,TResult? Function( FormatMetadata_Bibtex value)?  bibtex,TResult? Function( FormatMetadata_Citation value)?  citation,TResult? Function( FormatMetadata_FictionBook value)?  fictionBook,TResult? Function( FormatMetadata_Dbf value)?  dbf,TResult? Function( FormatMetadata_Jats value)?  jats,TResult? Function( FormatMetadata_Epub value)?  epub,TResult? Function( FormatMetadata_Pst value)?  pst,TResult? Function( FormatMetadata_Code value)?  code,}){
+final _that = this;
+switch (_that) {
+case FormatMetadata_Pdf() when pdf != null:
+return pdf(_that);case FormatMetadata_Docx() when docx != null:
+return docx(_that);case FormatMetadata_Excel() when excel != null:
+return excel(_that);case FormatMetadata_Email() when email != null:
+return email(_that);case FormatMetadata_Pptx() when pptx != null:
+return pptx(_that);case FormatMetadata_Archive() when archive != null:
+return archive(_that);case FormatMetadata_Image() when image != null:
+return image(_that);case FormatMetadata_Xml() when xml != null:
+return xml(_that);case FormatMetadata_Text() when text != null:
+return text(_that);case FormatMetadata_Html() when html != null:
+return html(_that);case FormatMetadata_Ocr() when ocr != null:
+return ocr(_that);case FormatMetadata_Csv() when csv != null:
+return csv(_that);case FormatMetadata_Bibtex() when bibtex != null:
+return bibtex(_that);case FormatMetadata_Citation() when citation != null:
+return citation(_that);case FormatMetadata_FictionBook() when fictionBook != null:
+return fictionBook(_that);case FormatMetadata_Dbf() when dbf != null:
+return dbf(_that);case FormatMetadata_Jats() when jats != null:
+return jats(_that);case FormatMetadata_Epub() when epub != null:
+return epub(_that);case FormatMetadata_Pst() when pst != null:
+return pst(_that);case FormatMetadata_Code() when code != null:
+return code(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PdfMetadata field0)?  pdf,TResult Function( DocxMetadata field0)?  docx,TResult Function( ExcelMetadata field0)?  excel,TResult Function( EmailMetadata field0)?  email,TResult Function( PptxMetadata field0)?  pptx,TResult Function( ArchiveMetadata field0)?  archive,TResult Function( ImageMetadata field0)?  image,TResult Function( XmlMetadata field0)?  xml,TResult Function( TextMetadata field0)?  text,TResult Function( HtmlMetadata field0)?  html,TResult Function( OcrMetadata field0)?  ocr,TResult Function( CsvMetadata field0)?  csv,TResult Function( BibtexMetadata field0)?  bibtex,TResult Function( CitationMetadata field0)?  citation,TResult Function( FictionBookMetadata field0)?  fictionBook,TResult Function( DbfMetadata field0)?  dbf,TResult Function( JatsMetadata field0)?  jats,TResult Function( EpubMetadata field0)?  epub,TResult Function( PstMetadata field0)?  pst,TResult Function( String field0)?  code,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case FormatMetadata_Pdf() when pdf != null:
+return pdf(_that.field0);case FormatMetadata_Docx() when docx != null:
+return docx(_that.field0);case FormatMetadata_Excel() when excel != null:
+return excel(_that.field0);case FormatMetadata_Email() when email != null:
+return email(_that.field0);case FormatMetadata_Pptx() when pptx != null:
+return pptx(_that.field0);case FormatMetadata_Archive() when archive != null:
+return archive(_that.field0);case FormatMetadata_Image() when image != null:
+return image(_that.field0);case FormatMetadata_Xml() when xml != null:
+return xml(_that.field0);case FormatMetadata_Text() when text != null:
+return text(_that.field0);case FormatMetadata_Html() when html != null:
+return html(_that.field0);case FormatMetadata_Ocr() when ocr != null:
+return ocr(_that.field0);case FormatMetadata_Csv() when csv != null:
+return csv(_that.field0);case FormatMetadata_Bibtex() when bibtex != null:
+return bibtex(_that.field0);case FormatMetadata_Citation() when citation != null:
+return citation(_that.field0);case FormatMetadata_FictionBook() when fictionBook != null:
+return fictionBook(_that.field0);case FormatMetadata_Dbf() when dbf != null:
+return dbf(_that.field0);case FormatMetadata_Jats() when jats != null:
+return jats(_that.field0);case FormatMetadata_Epub() when epub != null:
+return epub(_that.field0);case FormatMetadata_Pst() when pst != null:
+return pst(_that.field0);case FormatMetadata_Code() when code != null:
+return code(_that.field0);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PdfMetadata field0)  pdf,required TResult Function( DocxMetadata field0)  docx,required TResult Function( ExcelMetadata field0)  excel,required TResult Function( EmailMetadata field0)  email,required TResult Function( PptxMetadata field0)  pptx,required TResult Function( ArchiveMetadata field0)  archive,required TResult Function( ImageMetadata field0)  image,required TResult Function( XmlMetadata field0)  xml,required TResult Function( TextMetadata field0)  text,required TResult Function( HtmlMetadata field0)  html,required TResult Function( OcrMetadata field0)  ocr,required TResult Function( CsvMetadata field0)  csv,required TResult Function( BibtexMetadata field0)  bibtex,required TResult Function( CitationMetadata field0)  citation,required TResult Function( FictionBookMetadata field0)  fictionBook,required TResult Function( DbfMetadata field0)  dbf,required TResult Function( JatsMetadata field0)  jats,required TResult Function( EpubMetadata field0)  epub,required TResult Function( PstMetadata field0)  pst,required TResult Function( String field0)  code,}) {final _that = this;
+switch (_that) {
+case FormatMetadata_Pdf():
+return pdf(_that.field0);case FormatMetadata_Docx():
+return docx(_that.field0);case FormatMetadata_Excel():
+return excel(_that.field0);case FormatMetadata_Email():
+return email(_that.field0);case FormatMetadata_Pptx():
+return pptx(_that.field0);case FormatMetadata_Archive():
+return archive(_that.field0);case FormatMetadata_Image():
+return image(_that.field0);case FormatMetadata_Xml():
+return xml(_that.field0);case FormatMetadata_Text():
+return text(_that.field0);case FormatMetadata_Html():
+return html(_that.field0);case FormatMetadata_Ocr():
+return ocr(_that.field0);case FormatMetadata_Csv():
+return csv(_that.field0);case FormatMetadata_Bibtex():
+return bibtex(_that.field0);case FormatMetadata_Citation():
+return citation(_that.field0);case FormatMetadata_FictionBook():
+return fictionBook(_that.field0);case FormatMetadata_Dbf():
+return dbf(_that.field0);case FormatMetadata_Jats():
+return jats(_that.field0);case FormatMetadata_Epub():
+return epub(_that.field0);case FormatMetadata_Pst():
+return pst(_that.field0);case FormatMetadata_Code():
+return code(_that.field0);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PdfMetadata field0)?  pdf,TResult? Function( DocxMetadata field0)?  docx,TResult? Function( ExcelMetadata field0)?  excel,TResult? Function( EmailMetadata field0)?  email,TResult? Function( PptxMetadata field0)?  pptx,TResult? Function( ArchiveMetadata field0)?  archive,TResult? Function( ImageMetadata field0)?  image,TResult? Function( XmlMetadata field0)?  xml,TResult? Function( TextMetadata field0)?  text,TResult? Function( HtmlMetadata field0)?  html,TResult? Function( OcrMetadata field0)?  ocr,TResult? Function( CsvMetadata field0)?  csv,TResult? Function( BibtexMetadata field0)?  bibtex,TResult? Function( CitationMetadata field0)?  citation,TResult? Function( FictionBookMetadata field0)?  fictionBook,TResult? Function( DbfMetadata field0)?  dbf,TResult? Function( JatsMetadata field0)?  jats,TResult? Function( EpubMetadata field0)?  epub,TResult? Function( PstMetadata field0)?  pst,TResult? Function( String field0)?  code,}) {final _that = this;
+switch (_that) {
+case FormatMetadata_Pdf() when pdf != null:
+return pdf(_that.field0);case FormatMetadata_Docx() when docx != null:
+return docx(_that.field0);case FormatMetadata_Excel() when excel != null:
+return excel(_that.field0);case FormatMetadata_Email() when email != null:
+return email(_that.field0);case FormatMetadata_Pptx() when pptx != null:
+return pptx(_that.field0);case FormatMetadata_Archive() when archive != null:
+return archive(_that.field0);case FormatMetadata_Image() when image != null:
+return image(_that.field0);case FormatMetadata_Xml() when xml != null:
+return xml(_that.field0);case FormatMetadata_Text() when text != null:
+return text(_that.field0);case FormatMetadata_Html() when html != null:
+return html(_that.field0);case FormatMetadata_Ocr() when ocr != null:
+return ocr(_that.field0);case FormatMetadata_Csv() when csv != null:
+return csv(_that.field0);case FormatMetadata_Bibtex() when bibtex != null:
+return bibtex(_that.field0);case FormatMetadata_Citation() when citation != null:
+return citation(_that.field0);case FormatMetadata_FictionBook() when fictionBook != null:
+return fictionBook(_that.field0);case FormatMetadata_Dbf() when dbf != null:
+return dbf(_that.field0);case FormatMetadata_Jats() when jats != null:
+return jats(_that.field0);case FormatMetadata_Epub() when epub != null:
+return epub(_that.field0);case FormatMetadata_Pst() when pst != null:
+return pst(_that.field0);case FormatMetadata_Code() when code != null:
+return code(_that.field0);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Pdf extends FormatMetadata {
+  const FormatMetadata_Pdf({required this.field0}): super._();
+  
+
+@override final  PdfMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_PdfCopyWith<FormatMetadata_Pdf> get copyWith => _$FormatMetadata_PdfCopyWithImpl<FormatMetadata_Pdf>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Pdf&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.pdf(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_PdfCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_PdfCopyWith(FormatMetadata_Pdf value, $Res Function(FormatMetadata_Pdf) _then) = _$FormatMetadata_PdfCopyWithImpl;
+@useResult
+$Res call({
+ PdfMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_PdfCopyWithImpl<$Res>
+    implements $FormatMetadata_PdfCopyWith<$Res> {
+  _$FormatMetadata_PdfCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Pdf _self;
+  final $Res Function(FormatMetadata_Pdf) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Pdf(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as PdfMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Docx extends FormatMetadata {
+  const FormatMetadata_Docx({required this.field0}): super._();
+  
+
+@override final  DocxMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_DocxCopyWith<FormatMetadata_Docx> get copyWith => _$FormatMetadata_DocxCopyWithImpl<FormatMetadata_Docx>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Docx&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.docx(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_DocxCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_DocxCopyWith(FormatMetadata_Docx value, $Res Function(FormatMetadata_Docx) _then) = _$FormatMetadata_DocxCopyWithImpl;
+@useResult
+$Res call({
+ DocxMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_DocxCopyWithImpl<$Res>
+    implements $FormatMetadata_DocxCopyWith<$Res> {
+  _$FormatMetadata_DocxCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Docx _self;
+  final $Res Function(FormatMetadata_Docx) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Docx(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as DocxMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Excel extends FormatMetadata {
+  const FormatMetadata_Excel({required this.field0}): super._();
+  
+
+@override final  ExcelMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_ExcelCopyWith<FormatMetadata_Excel> get copyWith => _$FormatMetadata_ExcelCopyWithImpl<FormatMetadata_Excel>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Excel&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.excel(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_ExcelCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_ExcelCopyWith(FormatMetadata_Excel value, $Res Function(FormatMetadata_Excel) _then) = _$FormatMetadata_ExcelCopyWithImpl;
+@useResult
+$Res call({
+ ExcelMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_ExcelCopyWithImpl<$Res>
+    implements $FormatMetadata_ExcelCopyWith<$Res> {
+  _$FormatMetadata_ExcelCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Excel _self;
+  final $Res Function(FormatMetadata_Excel) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Excel(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as ExcelMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Email extends FormatMetadata {
+  const FormatMetadata_Email({required this.field0}): super._();
+  
+
+@override final  EmailMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_EmailCopyWith<FormatMetadata_Email> get copyWith => _$FormatMetadata_EmailCopyWithImpl<FormatMetadata_Email>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Email&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.email(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_EmailCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_EmailCopyWith(FormatMetadata_Email value, $Res Function(FormatMetadata_Email) _then) = _$FormatMetadata_EmailCopyWithImpl;
+@useResult
+$Res call({
+ EmailMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_EmailCopyWithImpl<$Res>
+    implements $FormatMetadata_EmailCopyWith<$Res> {
+  _$FormatMetadata_EmailCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Email _self;
+  final $Res Function(FormatMetadata_Email) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Email(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as EmailMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Pptx extends FormatMetadata {
+  const FormatMetadata_Pptx({required this.field0}): super._();
+  
+
+@override final  PptxMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_PptxCopyWith<FormatMetadata_Pptx> get copyWith => _$FormatMetadata_PptxCopyWithImpl<FormatMetadata_Pptx>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Pptx&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.pptx(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_PptxCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_PptxCopyWith(FormatMetadata_Pptx value, $Res Function(FormatMetadata_Pptx) _then) = _$FormatMetadata_PptxCopyWithImpl;
+@useResult
+$Res call({
+ PptxMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_PptxCopyWithImpl<$Res>
+    implements $FormatMetadata_PptxCopyWith<$Res> {
+  _$FormatMetadata_PptxCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Pptx _self;
+  final $Res Function(FormatMetadata_Pptx) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Pptx(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as PptxMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Archive extends FormatMetadata {
+  const FormatMetadata_Archive({required this.field0}): super._();
+  
+
+@override final  ArchiveMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_ArchiveCopyWith<FormatMetadata_Archive> get copyWith => _$FormatMetadata_ArchiveCopyWithImpl<FormatMetadata_Archive>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Archive&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.archive(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_ArchiveCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_ArchiveCopyWith(FormatMetadata_Archive value, $Res Function(FormatMetadata_Archive) _then) = _$FormatMetadata_ArchiveCopyWithImpl;
+@useResult
+$Res call({
+ ArchiveMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_ArchiveCopyWithImpl<$Res>
+    implements $FormatMetadata_ArchiveCopyWith<$Res> {
+  _$FormatMetadata_ArchiveCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Archive _self;
+  final $Res Function(FormatMetadata_Archive) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Archive(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as ArchiveMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Image extends FormatMetadata {
+  const FormatMetadata_Image({required this.field0}): super._();
+  
+
+@override final  ImageMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_ImageCopyWith<FormatMetadata_Image> get copyWith => _$FormatMetadata_ImageCopyWithImpl<FormatMetadata_Image>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Image&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.image(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_ImageCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_ImageCopyWith(FormatMetadata_Image value, $Res Function(FormatMetadata_Image) _then) = _$FormatMetadata_ImageCopyWithImpl;
+@useResult
+$Res call({
+ ImageMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_ImageCopyWithImpl<$Res>
+    implements $FormatMetadata_ImageCopyWith<$Res> {
+  _$FormatMetadata_ImageCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Image _self;
+  final $Res Function(FormatMetadata_Image) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Image(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as ImageMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Xml extends FormatMetadata {
+  const FormatMetadata_Xml({required this.field0}): super._();
+  
+
+@override final  XmlMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_XmlCopyWith<FormatMetadata_Xml> get copyWith => _$FormatMetadata_XmlCopyWithImpl<FormatMetadata_Xml>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Xml&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.xml(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_XmlCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_XmlCopyWith(FormatMetadata_Xml value, $Res Function(FormatMetadata_Xml) _then) = _$FormatMetadata_XmlCopyWithImpl;
+@useResult
+$Res call({
+ XmlMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_XmlCopyWithImpl<$Res>
+    implements $FormatMetadata_XmlCopyWith<$Res> {
+  _$FormatMetadata_XmlCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Xml _self;
+  final $Res Function(FormatMetadata_Xml) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Xml(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as XmlMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Text extends FormatMetadata {
+  const FormatMetadata_Text({required this.field0}): super._();
+  
+
+@override final  TextMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_TextCopyWith<FormatMetadata_Text> get copyWith => _$FormatMetadata_TextCopyWithImpl<FormatMetadata_Text>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Text&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.text(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_TextCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_TextCopyWith(FormatMetadata_Text value, $Res Function(FormatMetadata_Text) _then) = _$FormatMetadata_TextCopyWithImpl;
+@useResult
+$Res call({
+ TextMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_TextCopyWithImpl<$Res>
+    implements $FormatMetadata_TextCopyWith<$Res> {
+  _$FormatMetadata_TextCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Text _self;
+  final $Res Function(FormatMetadata_Text) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Text(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as TextMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Html extends FormatMetadata {
+  const FormatMetadata_Html({required this.field0}): super._();
+  
+
+@override final  HtmlMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_HtmlCopyWith<FormatMetadata_Html> get copyWith => _$FormatMetadata_HtmlCopyWithImpl<FormatMetadata_Html>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Html&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.html(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_HtmlCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_HtmlCopyWith(FormatMetadata_Html value, $Res Function(FormatMetadata_Html) _then) = _$FormatMetadata_HtmlCopyWithImpl;
+@useResult
+$Res call({
+ HtmlMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_HtmlCopyWithImpl<$Res>
+    implements $FormatMetadata_HtmlCopyWith<$Res> {
+  _$FormatMetadata_HtmlCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Html _self;
+  final $Res Function(FormatMetadata_Html) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Html(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as HtmlMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Ocr extends FormatMetadata {
+  const FormatMetadata_Ocr({required this.field0}): super._();
+  
+
+@override final  OcrMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_OcrCopyWith<FormatMetadata_Ocr> get copyWith => _$FormatMetadata_OcrCopyWithImpl<FormatMetadata_Ocr>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Ocr&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.ocr(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_OcrCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_OcrCopyWith(FormatMetadata_Ocr value, $Res Function(FormatMetadata_Ocr) _then) = _$FormatMetadata_OcrCopyWithImpl;
+@useResult
+$Res call({
+ OcrMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_OcrCopyWithImpl<$Res>
+    implements $FormatMetadata_OcrCopyWith<$Res> {
+  _$FormatMetadata_OcrCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Ocr _self;
+  final $Res Function(FormatMetadata_Ocr) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Ocr(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as OcrMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Csv extends FormatMetadata {
+  const FormatMetadata_Csv({required this.field0}): super._();
+  
+
+@override final  CsvMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_CsvCopyWith<FormatMetadata_Csv> get copyWith => _$FormatMetadata_CsvCopyWithImpl<FormatMetadata_Csv>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Csv&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.csv(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_CsvCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_CsvCopyWith(FormatMetadata_Csv value, $Res Function(FormatMetadata_Csv) _then) = _$FormatMetadata_CsvCopyWithImpl;
+@useResult
+$Res call({
+ CsvMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_CsvCopyWithImpl<$Res>
+    implements $FormatMetadata_CsvCopyWith<$Res> {
+  _$FormatMetadata_CsvCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Csv _self;
+  final $Res Function(FormatMetadata_Csv) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Csv(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as CsvMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Bibtex extends FormatMetadata {
+  const FormatMetadata_Bibtex({required this.field0}): super._();
+  
+
+@override final  BibtexMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_BibtexCopyWith<FormatMetadata_Bibtex> get copyWith => _$FormatMetadata_BibtexCopyWithImpl<FormatMetadata_Bibtex>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Bibtex&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.bibtex(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_BibtexCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_BibtexCopyWith(FormatMetadata_Bibtex value, $Res Function(FormatMetadata_Bibtex) _then) = _$FormatMetadata_BibtexCopyWithImpl;
+@useResult
+$Res call({
+ BibtexMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_BibtexCopyWithImpl<$Res>
+    implements $FormatMetadata_BibtexCopyWith<$Res> {
+  _$FormatMetadata_BibtexCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Bibtex _self;
+  final $Res Function(FormatMetadata_Bibtex) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Bibtex(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as BibtexMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Citation extends FormatMetadata {
+  const FormatMetadata_Citation({required this.field0}): super._();
+  
+
+@override final  CitationMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_CitationCopyWith<FormatMetadata_Citation> get copyWith => _$FormatMetadata_CitationCopyWithImpl<FormatMetadata_Citation>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Citation&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.citation(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_CitationCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_CitationCopyWith(FormatMetadata_Citation value, $Res Function(FormatMetadata_Citation) _then) = _$FormatMetadata_CitationCopyWithImpl;
+@useResult
+$Res call({
+ CitationMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_CitationCopyWithImpl<$Res>
+    implements $FormatMetadata_CitationCopyWith<$Res> {
+  _$FormatMetadata_CitationCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Citation _self;
+  final $Res Function(FormatMetadata_Citation) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Citation(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as CitationMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_FictionBook extends FormatMetadata {
+  const FormatMetadata_FictionBook({required this.field0}): super._();
+  
+
+@override final  FictionBookMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_FictionBookCopyWith<FormatMetadata_FictionBook> get copyWith => _$FormatMetadata_FictionBookCopyWithImpl<FormatMetadata_FictionBook>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_FictionBook&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.fictionBook(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_FictionBookCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_FictionBookCopyWith(FormatMetadata_FictionBook value, $Res Function(FormatMetadata_FictionBook) _then) = _$FormatMetadata_FictionBookCopyWithImpl;
+@useResult
+$Res call({
+ FictionBookMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_FictionBookCopyWithImpl<$Res>
+    implements $FormatMetadata_FictionBookCopyWith<$Res> {
+  _$FormatMetadata_FictionBookCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_FictionBook _self;
+  final $Res Function(FormatMetadata_FictionBook) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_FictionBook(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as FictionBookMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Dbf extends FormatMetadata {
+  const FormatMetadata_Dbf({required this.field0}): super._();
+  
+
+@override final  DbfMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_DbfCopyWith<FormatMetadata_Dbf> get copyWith => _$FormatMetadata_DbfCopyWithImpl<FormatMetadata_Dbf>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Dbf&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.dbf(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_DbfCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_DbfCopyWith(FormatMetadata_Dbf value, $Res Function(FormatMetadata_Dbf) _then) = _$FormatMetadata_DbfCopyWithImpl;
+@useResult
+$Res call({
+ DbfMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_DbfCopyWithImpl<$Res>
+    implements $FormatMetadata_DbfCopyWith<$Res> {
+  _$FormatMetadata_DbfCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Dbf _self;
+  final $Res Function(FormatMetadata_Dbf) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Dbf(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as DbfMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Jats extends FormatMetadata {
+  const FormatMetadata_Jats({required this.field0}): super._();
+  
+
+@override final  JatsMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_JatsCopyWith<FormatMetadata_Jats> get copyWith => _$FormatMetadata_JatsCopyWithImpl<FormatMetadata_Jats>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Jats&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.jats(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_JatsCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_JatsCopyWith(FormatMetadata_Jats value, $Res Function(FormatMetadata_Jats) _then) = _$FormatMetadata_JatsCopyWithImpl;
+@useResult
+$Res call({
+ JatsMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_JatsCopyWithImpl<$Res>
+    implements $FormatMetadata_JatsCopyWith<$Res> {
+  _$FormatMetadata_JatsCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Jats _self;
+  final $Res Function(FormatMetadata_Jats) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Jats(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as JatsMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Epub extends FormatMetadata {
+  const FormatMetadata_Epub({required this.field0}): super._();
+  
+
+@override final  EpubMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_EpubCopyWith<FormatMetadata_Epub> get copyWith => _$FormatMetadata_EpubCopyWithImpl<FormatMetadata_Epub>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Epub&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.epub(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_EpubCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_EpubCopyWith(FormatMetadata_Epub value, $Res Function(FormatMetadata_Epub) _then) = _$FormatMetadata_EpubCopyWithImpl;
+@useResult
+$Res call({
+ EpubMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_EpubCopyWithImpl<$Res>
+    implements $FormatMetadata_EpubCopyWith<$Res> {
+  _$FormatMetadata_EpubCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Epub _self;
+  final $Res Function(FormatMetadata_Epub) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Epub(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as EpubMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Pst extends FormatMetadata {
+  const FormatMetadata_Pst({required this.field0}): super._();
+  
+
+@override final  PstMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_PstCopyWith<FormatMetadata_Pst> get copyWith => _$FormatMetadata_PstCopyWithImpl<FormatMetadata_Pst>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Pst&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.pst(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_PstCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_PstCopyWith(FormatMetadata_Pst value, $Res Function(FormatMetadata_Pst) _then) = _$FormatMetadata_PstCopyWithImpl;
+@useResult
+$Res call({
+ PstMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_PstCopyWithImpl<$Res>
+    implements $FormatMetadata_PstCopyWith<$Res> {
+  _$FormatMetadata_PstCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Pst _self;
+  final $Res Function(FormatMetadata_Pst) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Pst(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as PstMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FormatMetadata_Code extends FormatMetadata {
+  const FormatMetadata_Code({required this.field0}): super._();
+  
+
+@override final  String field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_CodeCopyWith<FormatMetadata_Code> get copyWith => _$FormatMetadata_CodeCopyWithImpl<FormatMetadata_Code>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Code&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.code(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_CodeCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_CodeCopyWith(FormatMetadata_Code value, $Res Function(FormatMetadata_Code) _then) = _$FormatMetadata_CodeCopyWithImpl;
+@useResult
+$Res call({
+ String field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_CodeCopyWithImpl<$Res>
+    implements $FormatMetadata_CodeCopyWith<$Res> {
+  _$FormatMetadata_CodeCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Code _self;
+  final $Res Function(FormatMetadata_Code) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Code(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$NodeContent {
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'NodeContent()';
+}
+
+
+}
+
+/// @nodoc
+class $NodeContentCopyWith<$Res>  {
+$NodeContentCopyWith(NodeContent _, $Res Function(NodeContent) __);
+}
+
+
+/// Adds pattern-matching-related methods to [NodeContent].
+extension NodeContentPatterns on NodeContent {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( NodeContent_Title value)?  title,TResult Function( NodeContent_Heading value)?  heading,TResult Function( NodeContent_Paragraph value)?  paragraph,TResult Function( NodeContent_List value)?  list,TResult Function( NodeContent_ListItem value)?  listItem,TResult Function( NodeContent_Table value)?  table,TResult Function( NodeContent_Image value)?  image,TResult Function( NodeContent_Code value)?  code,TResult Function( NodeContent_Quote value)?  quote,TResult Function( NodeContent_Formula value)?  formula,TResult Function( NodeContent_Footnote value)?  footnote,TResult Function( NodeContent_Group value)?  group,TResult Function( NodeContent_PageBreak value)?  pageBreak,TResult Function( NodeContent_Slide value)?  slide,TResult Function( NodeContent_DefinitionList value)?  definitionList,TResult Function( NodeContent_DefinitionItem value)?  definitionItem,TResult Function( NodeContent_Citation value)?  citation,TResult Function( NodeContent_Admonition value)?  admonition,TResult Function( NodeContent_RawBlock value)?  rawBlock,TResult Function( NodeContent_MetadataBlock value)?  metadataBlock,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case NodeContent_Title() when title != null:
+return title(_that);case NodeContent_Heading() when heading != null:
+return heading(_that);case NodeContent_Paragraph() when paragraph != null:
+return paragraph(_that);case NodeContent_List() when list != null:
+return list(_that);case NodeContent_ListItem() when listItem != null:
+return listItem(_that);case NodeContent_Table() when table != null:
+return table(_that);case NodeContent_Image() when image != null:
+return image(_that);case NodeContent_Code() when code != null:
+return code(_that);case NodeContent_Quote() when quote != null:
+return quote(_that);case NodeContent_Formula() when formula != null:
+return formula(_that);case NodeContent_Footnote() when footnote != null:
+return footnote(_that);case NodeContent_Group() when group != null:
+return group(_that);case NodeContent_PageBreak() when pageBreak != null:
+return pageBreak(_that);case NodeContent_Slide() when slide != null:
+return slide(_that);case NodeContent_DefinitionList() when definitionList != null:
+return definitionList(_that);case NodeContent_DefinitionItem() when definitionItem != null:
+return definitionItem(_that);case NodeContent_Citation() when citation != null:
+return citation(_that);case NodeContent_Admonition() when admonition != null:
+return admonition(_that);case NodeContent_RawBlock() when rawBlock != null:
+return rawBlock(_that);case NodeContent_MetadataBlock() when metadataBlock != null:
+return metadataBlock(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( NodeContent_Title value)  title,required TResult Function( NodeContent_Heading value)  heading,required TResult Function( NodeContent_Paragraph value)  paragraph,required TResult Function( NodeContent_List value)  list,required TResult Function( NodeContent_ListItem value)  listItem,required TResult Function( NodeContent_Table value)  table,required TResult Function( NodeContent_Image value)  image,required TResult Function( NodeContent_Code value)  code,required TResult Function( NodeContent_Quote value)  quote,required TResult Function( NodeContent_Formula value)  formula,required TResult Function( NodeContent_Footnote value)  footnote,required TResult Function( NodeContent_Group value)  group,required TResult Function( NodeContent_PageBreak value)  pageBreak,required TResult Function( NodeContent_Slide value)  slide,required TResult Function( NodeContent_DefinitionList value)  definitionList,required TResult Function( NodeContent_DefinitionItem value)  definitionItem,required TResult Function( NodeContent_Citation value)  citation,required TResult Function( NodeContent_Admonition value)  admonition,required TResult Function( NodeContent_RawBlock value)  rawBlock,required TResult Function( NodeContent_MetadataBlock value)  metadataBlock,}){
+final _that = this;
+switch (_that) {
+case NodeContent_Title():
+return title(_that);case NodeContent_Heading():
+return heading(_that);case NodeContent_Paragraph():
+return paragraph(_that);case NodeContent_List():
+return list(_that);case NodeContent_ListItem():
+return listItem(_that);case NodeContent_Table():
+return table(_that);case NodeContent_Image():
+return image(_that);case NodeContent_Code():
+return code(_that);case NodeContent_Quote():
+return quote(_that);case NodeContent_Formula():
+return formula(_that);case NodeContent_Footnote():
+return footnote(_that);case NodeContent_Group():
+return group(_that);case NodeContent_PageBreak():
+return pageBreak(_that);case NodeContent_Slide():
+return slide(_that);case NodeContent_DefinitionList():
+return definitionList(_that);case NodeContent_DefinitionItem():
+return definitionItem(_that);case NodeContent_Citation():
+return citation(_that);case NodeContent_Admonition():
+return admonition(_that);case NodeContent_RawBlock():
+return rawBlock(_that);case NodeContent_MetadataBlock():
+return metadataBlock(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( NodeContent_Title value)?  title,TResult? Function( NodeContent_Heading value)?  heading,TResult? Function( NodeContent_Paragraph value)?  paragraph,TResult? Function( NodeContent_List value)?  list,TResult? Function( NodeContent_ListItem value)?  listItem,TResult? Function( NodeContent_Table value)?  table,TResult? Function( NodeContent_Image value)?  image,TResult? Function( NodeContent_Code value)?  code,TResult? Function( NodeContent_Quote value)?  quote,TResult? Function( NodeContent_Formula value)?  formula,TResult? Function( NodeContent_Footnote value)?  footnote,TResult? Function( NodeContent_Group value)?  group,TResult? Function( NodeContent_PageBreak value)?  pageBreak,TResult? Function( NodeContent_Slide value)?  slide,TResult? Function( NodeContent_DefinitionList value)?  definitionList,TResult? Function( NodeContent_DefinitionItem value)?  definitionItem,TResult? Function( NodeContent_Citation value)?  citation,TResult? Function( NodeContent_Admonition value)?  admonition,TResult? Function( NodeContent_RawBlock value)?  rawBlock,TResult? Function( NodeContent_MetadataBlock value)?  metadataBlock,}){
+final _that = this;
+switch (_that) {
+case NodeContent_Title() when title != null:
+return title(_that);case NodeContent_Heading() when heading != null:
+return heading(_that);case NodeContent_Paragraph() when paragraph != null:
+return paragraph(_that);case NodeContent_List() when list != null:
+return list(_that);case NodeContent_ListItem() when listItem != null:
+return listItem(_that);case NodeContent_Table() when table != null:
+return table(_that);case NodeContent_Image() when image != null:
+return image(_that);case NodeContent_Code() when code != null:
+return code(_that);case NodeContent_Quote() when quote != null:
+return quote(_that);case NodeContent_Formula() when formula != null:
+return formula(_that);case NodeContent_Footnote() when footnote != null:
+return footnote(_that);case NodeContent_Group() when group != null:
+return group(_that);case NodeContent_PageBreak() when pageBreak != null:
+return pageBreak(_that);case NodeContent_Slide() when slide != null:
+return slide(_that);case NodeContent_DefinitionList() when definitionList != null:
+return definitionList(_that);case NodeContent_DefinitionItem() when definitionItem != null:
+return definitionItem(_that);case NodeContent_Citation() when citation != null:
+return citation(_that);case NodeContent_Admonition() when admonition != null:
+return admonition(_that);case NodeContent_RawBlock() when rawBlock != null:
+return rawBlock(_that);case NodeContent_MetadataBlock() when metadataBlock != null:
+return metadataBlock(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String text)?  title,TResult Function( PlatformInt64 level,  String text)?  heading,TResult Function( String text)?  paragraph,TResult Function( bool ordered)?  list,TResult Function( String text)?  listItem,TResult Function( TableGrid grid)?  table,TResult Function( String description,  PlatformInt64 imageIndex,  String src)?  image,TResult Function( String text,  String language)?  code,TResult Function()?  quote,TResult Function( String text)?  formula,TResult Function( String text)?  footnote,TResult Function( String label,  PlatformInt64 headingLevel,  String headingText)?  group,TResult Function()?  pageBreak,TResult Function( PlatformInt64 number,  String title)?  slide,TResult Function()?  definitionList,TResult Function( String term,  String definition)?  definitionItem,TResult Function( String key,  String text)?  citation,TResult Function( String kind,  String title)?  admonition,TResult Function( String format,  String content)?  rawBlock,TResult Function( List<String> entries)?  metadataBlock,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case NodeContent_Title() when title != null:
+return title(_that.text);case NodeContent_Heading() when heading != null:
+return heading(_that.level,_that.text);case NodeContent_Paragraph() when paragraph != null:
+return paragraph(_that.text);case NodeContent_List() when list != null:
+return list(_that.ordered);case NodeContent_ListItem() when listItem != null:
+return listItem(_that.text);case NodeContent_Table() when table != null:
+return table(_that.grid);case NodeContent_Image() when image != null:
+return image(_that.description,_that.imageIndex,_that.src);case NodeContent_Code() when code != null:
+return code(_that.text,_that.language);case NodeContent_Quote() when quote != null:
+return quote();case NodeContent_Formula() when formula != null:
+return formula(_that.text);case NodeContent_Footnote() when footnote != null:
+return footnote(_that.text);case NodeContent_Group() when group != null:
+return group(_that.label,_that.headingLevel,_that.headingText);case NodeContent_PageBreak() when pageBreak != null:
+return pageBreak();case NodeContent_Slide() when slide != null:
+return slide(_that.number,_that.title);case NodeContent_DefinitionList() when definitionList != null:
+return definitionList();case NodeContent_DefinitionItem() when definitionItem != null:
+return definitionItem(_that.term,_that.definition);case NodeContent_Citation() when citation != null:
+return citation(_that.key,_that.text);case NodeContent_Admonition() when admonition != null:
+return admonition(_that.kind,_that.title);case NodeContent_RawBlock() when rawBlock != null:
+return rawBlock(_that.format,_that.content);case NodeContent_MetadataBlock() when metadataBlock != null:
+return metadataBlock(_that.entries);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String text)  title,required TResult Function( PlatformInt64 level,  String text)  heading,required TResult Function( String text)  paragraph,required TResult Function( bool ordered)  list,required TResult Function( String text)  listItem,required TResult Function( TableGrid grid)  table,required TResult Function( String description,  PlatformInt64 imageIndex,  String src)  image,required TResult Function( String text,  String language)  code,required TResult Function()  quote,required TResult Function( String text)  formula,required TResult Function( String text)  footnote,required TResult Function( String label,  PlatformInt64 headingLevel,  String headingText)  group,required TResult Function()  pageBreak,required TResult Function( PlatformInt64 number,  String title)  slide,required TResult Function()  definitionList,required TResult Function( String term,  String definition)  definitionItem,required TResult Function( String key,  String text)  citation,required TResult Function( String kind,  String title)  admonition,required TResult Function( String format,  String content)  rawBlock,required TResult Function( List<String> entries)  metadataBlock,}) {final _that = this;
+switch (_that) {
+case NodeContent_Title():
+return title(_that.text);case NodeContent_Heading():
+return heading(_that.level,_that.text);case NodeContent_Paragraph():
+return paragraph(_that.text);case NodeContent_List():
+return list(_that.ordered);case NodeContent_ListItem():
+return listItem(_that.text);case NodeContent_Table():
+return table(_that.grid);case NodeContent_Image():
+return image(_that.description,_that.imageIndex,_that.src);case NodeContent_Code():
+return code(_that.text,_that.language);case NodeContent_Quote():
+return quote();case NodeContent_Formula():
+return formula(_that.text);case NodeContent_Footnote():
+return footnote(_that.text);case NodeContent_Group():
+return group(_that.label,_that.headingLevel,_that.headingText);case NodeContent_PageBreak():
+return pageBreak();case NodeContent_Slide():
+return slide(_that.number,_that.title);case NodeContent_DefinitionList():
+return definitionList();case NodeContent_DefinitionItem():
+return definitionItem(_that.term,_that.definition);case NodeContent_Citation():
+return citation(_that.key,_that.text);case NodeContent_Admonition():
+return admonition(_that.kind,_that.title);case NodeContent_RawBlock():
+return rawBlock(_that.format,_that.content);case NodeContent_MetadataBlock():
+return metadataBlock(_that.entries);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String text)?  title,TResult? Function( PlatformInt64 level,  String text)?  heading,TResult? Function( String text)?  paragraph,TResult? Function( bool ordered)?  list,TResult? Function( String text)?  listItem,TResult? Function( TableGrid grid)?  table,TResult? Function( String description,  PlatformInt64 imageIndex,  String src)?  image,TResult? Function( String text,  String language)?  code,TResult? Function()?  quote,TResult? Function( String text)?  formula,TResult? Function( String text)?  footnote,TResult? Function( String label,  PlatformInt64 headingLevel,  String headingText)?  group,TResult? Function()?  pageBreak,TResult? Function( PlatformInt64 number,  String title)?  slide,TResult? Function()?  definitionList,TResult? Function( String term,  String definition)?  definitionItem,TResult? Function( String key,  String text)?  citation,TResult? Function( String kind,  String title)?  admonition,TResult? Function( String format,  String content)?  rawBlock,TResult? Function( List<String> entries)?  metadataBlock,}) {final _that = this;
+switch (_that) {
+case NodeContent_Title() when title != null:
+return title(_that.text);case NodeContent_Heading() when heading != null:
+return heading(_that.level,_that.text);case NodeContent_Paragraph() when paragraph != null:
+return paragraph(_that.text);case NodeContent_List() when list != null:
+return list(_that.ordered);case NodeContent_ListItem() when listItem != null:
+return listItem(_that.text);case NodeContent_Table() when table != null:
+return table(_that.grid);case NodeContent_Image() when image != null:
+return image(_that.description,_that.imageIndex,_that.src);case NodeContent_Code() when code != null:
+return code(_that.text,_that.language);case NodeContent_Quote() when quote != null:
+return quote();case NodeContent_Formula() when formula != null:
+return formula(_that.text);case NodeContent_Footnote() when footnote != null:
+return footnote(_that.text);case NodeContent_Group() when group != null:
+return group(_that.label,_that.headingLevel,_that.headingText);case NodeContent_PageBreak() when pageBreak != null:
+return pageBreak();case NodeContent_Slide() when slide != null:
+return slide(_that.number,_that.title);case NodeContent_DefinitionList() when definitionList != null:
+return definitionList();case NodeContent_DefinitionItem() when definitionItem != null:
+return definitionItem(_that.term,_that.definition);case NodeContent_Citation() when citation != null:
+return citation(_that.key,_that.text);case NodeContent_Admonition() when admonition != null:
+return admonition(_that.kind,_that.title);case NodeContent_RawBlock() when rawBlock != null:
+return rawBlock(_that.format,_that.content);case NodeContent_MetadataBlock() when metadataBlock != null:
+return metadataBlock(_that.entries);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Title extends NodeContent {
+  const NodeContent_Title({required this.text}): super._();
+  
+
+ final  String text;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_TitleCopyWith<NodeContent_Title> get copyWith => _$NodeContent_TitleCopyWithImpl<NodeContent_Title>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Title&&(identical(other.text, text) || other.text == text));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,text);
+
+@override
+String toString() {
+  return 'NodeContent.title(text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_TitleCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_TitleCopyWith(NodeContent_Title value, $Res Function(NodeContent_Title) _then) = _$NodeContent_TitleCopyWithImpl;
+@useResult
+$Res call({
+ String text
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_TitleCopyWithImpl<$Res>
+    implements $NodeContent_TitleCopyWith<$Res> {
+  _$NodeContent_TitleCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Title _self;
+  final $Res Function(NodeContent_Title) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? text = null,}) {
+  return _then(NodeContent_Title(
+text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Heading extends NodeContent {
+  const NodeContent_Heading({required this.level, required this.text}): super._();
+  
+
+ final  PlatformInt64 level;
+ final  String text;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_HeadingCopyWith<NodeContent_Heading> get copyWith => _$NodeContent_HeadingCopyWithImpl<NodeContent_Heading>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Heading&&(identical(other.level, level) || other.level == level)&&(identical(other.text, text) || other.text == text));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,level,text);
+
+@override
+String toString() {
+  return 'NodeContent.heading(level: $level, text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_HeadingCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_HeadingCopyWith(NodeContent_Heading value, $Res Function(NodeContent_Heading) _then) = _$NodeContent_HeadingCopyWithImpl;
+@useResult
+$Res call({
+ PlatformInt64 level, String text
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_HeadingCopyWithImpl<$Res>
+    implements $NodeContent_HeadingCopyWith<$Res> {
+  _$NodeContent_HeadingCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Heading _self;
+  final $Res Function(NodeContent_Heading) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? level = null,Object? text = null,}) {
+  return _then(NodeContent_Heading(
+level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Paragraph extends NodeContent {
+  const NodeContent_Paragraph({required this.text}): super._();
+  
+
+ final  String text;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_ParagraphCopyWith<NodeContent_Paragraph> get copyWith => _$NodeContent_ParagraphCopyWithImpl<NodeContent_Paragraph>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Paragraph&&(identical(other.text, text) || other.text == text));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,text);
+
+@override
+String toString() {
+  return 'NodeContent.paragraph(text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_ParagraphCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_ParagraphCopyWith(NodeContent_Paragraph value, $Res Function(NodeContent_Paragraph) _then) = _$NodeContent_ParagraphCopyWithImpl;
+@useResult
+$Res call({
+ String text
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_ParagraphCopyWithImpl<$Res>
+    implements $NodeContent_ParagraphCopyWith<$Res> {
+  _$NodeContent_ParagraphCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Paragraph _self;
+  final $Res Function(NodeContent_Paragraph) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? text = null,}) {
+  return _then(NodeContent_Paragraph(
+text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_List extends NodeContent {
+  const NodeContent_List({required this.ordered}): super._();
+  
+
+ final  bool ordered;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_ListCopyWith<NodeContent_List> get copyWith => _$NodeContent_ListCopyWithImpl<NodeContent_List>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_List&&(identical(other.ordered, ordered) || other.ordered == ordered));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,ordered);
+
+@override
+String toString() {
+  return 'NodeContent.list(ordered: $ordered)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_ListCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_ListCopyWith(NodeContent_List value, $Res Function(NodeContent_List) _then) = _$NodeContent_ListCopyWithImpl;
+@useResult
+$Res call({
+ bool ordered
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_ListCopyWithImpl<$Res>
+    implements $NodeContent_ListCopyWith<$Res> {
+  _$NodeContent_ListCopyWithImpl(this._self, this._then);
+
+  final NodeContent_List _self;
+  final $Res Function(NodeContent_List) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? ordered = null,}) {
+  return _then(NodeContent_List(
+ordered: null == ordered ? _self.ordered : ordered // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_ListItem extends NodeContent {
+  const NodeContent_ListItem({required this.text}): super._();
+  
+
+ final  String text;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_ListItemCopyWith<NodeContent_ListItem> get copyWith => _$NodeContent_ListItemCopyWithImpl<NodeContent_ListItem>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_ListItem&&(identical(other.text, text) || other.text == text));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,text);
+
+@override
+String toString() {
+  return 'NodeContent.listItem(text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_ListItemCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_ListItemCopyWith(NodeContent_ListItem value, $Res Function(NodeContent_ListItem) _then) = _$NodeContent_ListItemCopyWithImpl;
+@useResult
+$Res call({
+ String text
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_ListItemCopyWithImpl<$Res>
+    implements $NodeContent_ListItemCopyWith<$Res> {
+  _$NodeContent_ListItemCopyWithImpl(this._self, this._then);
+
+  final NodeContent_ListItem _self;
+  final $Res Function(NodeContent_ListItem) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? text = null,}) {
+  return _then(NodeContent_ListItem(
+text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Table extends NodeContent {
+  const NodeContent_Table({required this.grid}): super._();
+  
+
+ final  TableGrid grid;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_TableCopyWith<NodeContent_Table> get copyWith => _$NodeContent_TableCopyWithImpl<NodeContent_Table>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Table&&(identical(other.grid, grid) || other.grid == grid));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,grid);
+
+@override
+String toString() {
+  return 'NodeContent.table(grid: $grid)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_TableCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_TableCopyWith(NodeContent_Table value, $Res Function(NodeContent_Table) _then) = _$NodeContent_TableCopyWithImpl;
+@useResult
+$Res call({
+ TableGrid grid
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_TableCopyWithImpl<$Res>
+    implements $NodeContent_TableCopyWith<$Res> {
+  _$NodeContent_TableCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Table _self;
+  final $Res Function(NodeContent_Table) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? grid = null,}) {
+  return _then(NodeContent_Table(
+grid: null == grid ? _self.grid : grid // ignore: cast_nullable_to_non_nullable
+as TableGrid,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Image extends NodeContent {
+  const NodeContent_Image({required this.description, required this.imageIndex, required this.src}): super._();
+  
+
+ final  String description;
+ final  PlatformInt64 imageIndex;
+/// Source URL or path of the image (from `<img src="...">` or `![](src)`).
+ final  String src;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_ImageCopyWith<NodeContent_Image> get copyWith => _$NodeContent_ImageCopyWithImpl<NodeContent_Image>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Image&&(identical(other.description, description) || other.description == description)&&(identical(other.imageIndex, imageIndex) || other.imageIndex == imageIndex)&&(identical(other.src, src) || other.src == src));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,description,imageIndex,src);
+
+@override
+String toString() {
+  return 'NodeContent.image(description: $description, imageIndex: $imageIndex, src: $src)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_ImageCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_ImageCopyWith(NodeContent_Image value, $Res Function(NodeContent_Image) _then) = _$NodeContent_ImageCopyWithImpl;
+@useResult
+$Res call({
+ String description, PlatformInt64 imageIndex, String src
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_ImageCopyWithImpl<$Res>
+    implements $NodeContent_ImageCopyWith<$Res> {
+  _$NodeContent_ImageCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Image _self;
+  final $Res Function(NodeContent_Image) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? description = null,Object? imageIndex = null,Object? src = null,}) {
+  return _then(NodeContent_Image(
+description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,imageIndex: null == imageIndex ? _self.imageIndex : imageIndex // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,src: null == src ? _self.src : src // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Code extends NodeContent {
+  const NodeContent_Code({required this.text, required this.language}): super._();
+  
+
+ final  String text;
+ final  String language;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_CodeCopyWith<NodeContent_Code> get copyWith => _$NodeContent_CodeCopyWithImpl<NodeContent_Code>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Code&&(identical(other.text, text) || other.text == text)&&(identical(other.language, language) || other.language == language));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,text,language);
+
+@override
+String toString() {
+  return 'NodeContent.code(text: $text, language: $language)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_CodeCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_CodeCopyWith(NodeContent_Code value, $Res Function(NodeContent_Code) _then) = _$NodeContent_CodeCopyWithImpl;
+@useResult
+$Res call({
+ String text, String language
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_CodeCopyWithImpl<$Res>
+    implements $NodeContent_CodeCopyWith<$Res> {
+  _$NodeContent_CodeCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Code _self;
+  final $Res Function(NodeContent_Code) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? text = null,Object? language = null,}) {
+  return _then(NodeContent_Code(
+text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Quote extends NodeContent {
+  const NodeContent_Quote(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Quote);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'NodeContent.quote()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class NodeContent_Formula extends NodeContent {
+  const NodeContent_Formula({required this.text}): super._();
+  
+
+ final  String text;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_FormulaCopyWith<NodeContent_Formula> get copyWith => _$NodeContent_FormulaCopyWithImpl<NodeContent_Formula>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Formula&&(identical(other.text, text) || other.text == text));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,text);
+
+@override
+String toString() {
+  return 'NodeContent.formula(text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_FormulaCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_FormulaCopyWith(NodeContent_Formula value, $Res Function(NodeContent_Formula) _then) = _$NodeContent_FormulaCopyWithImpl;
+@useResult
+$Res call({
+ String text
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_FormulaCopyWithImpl<$Res>
+    implements $NodeContent_FormulaCopyWith<$Res> {
+  _$NodeContent_FormulaCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Formula _self;
+  final $Res Function(NodeContent_Formula) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? text = null,}) {
+  return _then(NodeContent_Formula(
+text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Footnote extends NodeContent {
+  const NodeContent_Footnote({required this.text}): super._();
+  
+
+ final  String text;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_FootnoteCopyWith<NodeContent_Footnote> get copyWith => _$NodeContent_FootnoteCopyWithImpl<NodeContent_Footnote>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Footnote&&(identical(other.text, text) || other.text == text));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,text);
+
+@override
+String toString() {
+  return 'NodeContent.footnote(text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_FootnoteCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_FootnoteCopyWith(NodeContent_Footnote value, $Res Function(NodeContent_Footnote) _then) = _$NodeContent_FootnoteCopyWithImpl;
+@useResult
+$Res call({
+ String text
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_FootnoteCopyWithImpl<$Res>
+    implements $NodeContent_FootnoteCopyWith<$Res> {
+  _$NodeContent_FootnoteCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Footnote _self;
+  final $Res Function(NodeContent_Footnote) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? text = null,}) {
+  return _then(NodeContent_Footnote(
+text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Group extends NodeContent {
+  const NodeContent_Group({required this.label, required this.headingLevel, required this.headingText}): super._();
+  
+
+ final  String label;
+ final  PlatformInt64 headingLevel;
+ final  String headingText;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_GroupCopyWith<NodeContent_Group> get copyWith => _$NodeContent_GroupCopyWithImpl<NodeContent_Group>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Group&&(identical(other.label, label) || other.label == label)&&(identical(other.headingLevel, headingLevel) || other.headingLevel == headingLevel)&&(identical(other.headingText, headingText) || other.headingText == headingText));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,label,headingLevel,headingText);
+
+@override
+String toString() {
+  return 'NodeContent.group(label: $label, headingLevel: $headingLevel, headingText: $headingText)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_GroupCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_GroupCopyWith(NodeContent_Group value, $Res Function(NodeContent_Group) _then) = _$NodeContent_GroupCopyWithImpl;
+@useResult
+$Res call({
+ String label, PlatformInt64 headingLevel, String headingText
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_GroupCopyWithImpl<$Res>
+    implements $NodeContent_GroupCopyWith<$Res> {
+  _$NodeContent_GroupCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Group _self;
+  final $Res Function(NodeContent_Group) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? label = null,Object? headingLevel = null,Object? headingText = null,}) {
+  return _then(NodeContent_Group(
+label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,headingLevel: null == headingLevel ? _self.headingLevel : headingLevel // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,headingText: null == headingText ? _self.headingText : headingText // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_PageBreak extends NodeContent {
+  const NodeContent_PageBreak(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_PageBreak);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'NodeContent.pageBreak()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class NodeContent_Slide extends NodeContent {
+  const NodeContent_Slide({required this.number, required this.title}): super._();
+  
+
+/// 1-indexed slide number.
+ final  PlatformInt64 number;
+ final  String title;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_SlideCopyWith<NodeContent_Slide> get copyWith => _$NodeContent_SlideCopyWithImpl<NodeContent_Slide>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Slide&&(identical(other.number, number) || other.number == number)&&(identical(other.title, title) || other.title == title));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,number,title);
+
+@override
+String toString() {
+  return 'NodeContent.slide(number: $number, title: $title)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_SlideCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_SlideCopyWith(NodeContent_Slide value, $Res Function(NodeContent_Slide) _then) = _$NodeContent_SlideCopyWithImpl;
+@useResult
+$Res call({
+ PlatformInt64 number, String title
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_SlideCopyWithImpl<$Res>
+    implements $NodeContent_SlideCopyWith<$Res> {
+  _$NodeContent_SlideCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Slide _self;
+  final $Res Function(NodeContent_Slide) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? number = null,Object? title = null,}) {
+  return _then(NodeContent_Slide(
+number: null == number ? _self.number : number // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_DefinitionList extends NodeContent {
+  const NodeContent_DefinitionList(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_DefinitionList);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'NodeContent.definitionList()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class NodeContent_DefinitionItem extends NodeContent {
+  const NodeContent_DefinitionItem({required this.term, required this.definition}): super._();
+  
+
+ final  String term;
+ final  String definition;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_DefinitionItemCopyWith<NodeContent_DefinitionItem> get copyWith => _$NodeContent_DefinitionItemCopyWithImpl<NodeContent_DefinitionItem>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_DefinitionItem&&(identical(other.term, term) || other.term == term)&&(identical(other.definition, definition) || other.definition == definition));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,term,definition);
+
+@override
+String toString() {
+  return 'NodeContent.definitionItem(term: $term, definition: $definition)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_DefinitionItemCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_DefinitionItemCopyWith(NodeContent_DefinitionItem value, $Res Function(NodeContent_DefinitionItem) _then) = _$NodeContent_DefinitionItemCopyWithImpl;
+@useResult
+$Res call({
+ String term, String definition
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_DefinitionItemCopyWithImpl<$Res>
+    implements $NodeContent_DefinitionItemCopyWith<$Res> {
+  _$NodeContent_DefinitionItemCopyWithImpl(this._self, this._then);
+
+  final NodeContent_DefinitionItem _self;
+  final $Res Function(NodeContent_DefinitionItem) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? term = null,Object? definition = null,}) {
+  return _then(NodeContent_DefinitionItem(
+term: null == term ? _self.term : term // ignore: cast_nullable_to_non_nullable
+as String,definition: null == definition ? _self.definition : definition // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Citation extends NodeContent {
+  const NodeContent_Citation({required this.key, required this.text}): super._();
+  
+
+ final  String key;
+ final  String text;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_CitationCopyWith<NodeContent_Citation> get copyWith => _$NodeContent_CitationCopyWithImpl<NodeContent_Citation>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Citation&&(identical(other.key, key) || other.key == key)&&(identical(other.text, text) || other.text == text));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,key,text);
+
+@override
+String toString() {
+  return 'NodeContent.citation(key: $key, text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_CitationCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_CitationCopyWith(NodeContent_Citation value, $Res Function(NodeContent_Citation) _then) = _$NodeContent_CitationCopyWithImpl;
+@useResult
+$Res call({
+ String key, String text
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_CitationCopyWithImpl<$Res>
+    implements $NodeContent_CitationCopyWith<$Res> {
+  _$NodeContent_CitationCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Citation _self;
+  final $Res Function(NodeContent_Citation) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? key = null,Object? text = null,}) {
+  return _then(NodeContent_Citation(
+key: null == key ? _self.key : key // ignore: cast_nullable_to_non_nullable
+as String,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_Admonition extends NodeContent {
+  const NodeContent_Admonition({required this.kind, required this.title}): super._();
+  
+
+/// Kind of admonition (e.g. "note", "warning", "tip", "danger").
+ final  String kind;
+ final  String title;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_AdmonitionCopyWith<NodeContent_Admonition> get copyWith => _$NodeContent_AdmonitionCopyWithImpl<NodeContent_Admonition>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Admonition&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.title, title) || other.title == title));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,kind,title);
+
+@override
+String toString() {
+  return 'NodeContent.admonition(kind: $kind, title: $title)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_AdmonitionCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_AdmonitionCopyWith(NodeContent_Admonition value, $Res Function(NodeContent_Admonition) _then) = _$NodeContent_AdmonitionCopyWithImpl;
+@useResult
+$Res call({
+ String kind, String title
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_AdmonitionCopyWithImpl<$Res>
+    implements $NodeContent_AdmonitionCopyWith<$Res> {
+  _$NodeContent_AdmonitionCopyWithImpl(this._self, this._then);
+
+  final NodeContent_Admonition _self;
+  final $Res Function(NodeContent_Admonition) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? title = null,}) {
+  return _then(NodeContent_Admonition(
+kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_RawBlock extends NodeContent {
+  const NodeContent_RawBlock({required this.format, required this.content}): super._();
+  
+
+/// Source format identifier (e.g. "html", "latex", "jsx").
+ final  String format;
+ final  String content;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_RawBlockCopyWith<NodeContent_RawBlock> get copyWith => _$NodeContent_RawBlockCopyWithImpl<NodeContent_RawBlock>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_RawBlock&&(identical(other.format, format) || other.format == format)&&(identical(other.content, content) || other.content == content));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,format,content);
+
+@override
+String toString() {
+  return 'NodeContent.rawBlock(format: $format, content: $content)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_RawBlockCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_RawBlockCopyWith(NodeContent_RawBlock value, $Res Function(NodeContent_RawBlock) _then) = _$NodeContent_RawBlockCopyWithImpl;
+@useResult
+$Res call({
+ String format, String content
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_RawBlockCopyWithImpl<$Res>
+    implements $NodeContent_RawBlockCopyWith<$Res> {
+  _$NodeContent_RawBlockCopyWithImpl(this._self, this._then);
+
+  final NodeContent_RawBlock _self;
+  final $Res Function(NodeContent_RawBlock) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? format = null,Object? content = null,}) {
+  return _then(NodeContent_RawBlock(
+format: null == format ? _self.format : format // ignore: cast_nullable_to_non_nullable
+as String,content: null == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class NodeContent_MetadataBlock extends NodeContent {
+  const NodeContent_MetadataBlock({required final  List<String> entries}): _entries = entries,super._();
+  
+
+ final  List<String> _entries;
+ List<String> get entries {
+  if (_entries is EqualUnmodifiableListView) return _entries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_entries);
+}
+
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$NodeContent_MetadataBlockCopyWith<NodeContent_MetadataBlock> get copyWith => _$NodeContent_MetadataBlockCopyWithImpl<NodeContent_MetadataBlock>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_MetadataBlock&&const DeepCollectionEquality().equals(other._entries, _entries));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_entries));
+
+@override
+String toString() {
+  return 'NodeContent.metadataBlock(entries: $entries)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $NodeContent_MetadataBlockCopyWith<$Res> implements $NodeContentCopyWith<$Res> {
+  factory $NodeContent_MetadataBlockCopyWith(NodeContent_MetadataBlock value, $Res Function(NodeContent_MetadataBlock) _then) = _$NodeContent_MetadataBlockCopyWithImpl;
+@useResult
+$Res call({
+ List<String> entries
+});
+
+
+
+
+}
+/// @nodoc
+class _$NodeContent_MetadataBlockCopyWithImpl<$Res>
+    implements $NodeContent_MetadataBlockCopyWith<$Res> {
+  _$NodeContent_MetadataBlockCopyWithImpl(this._self, this._then);
+
+  final NodeContent_MetadataBlock _self;
+  final $Res Function(NodeContent_MetadataBlock) _then;
+
+/// Create a copy of NodeContent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? entries = null,}) {
+  return _then(NodeContent_MetadataBlock(
+entries: null == entries ? _self._entries : entries // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$OcrBoundingGeometry {
 
 

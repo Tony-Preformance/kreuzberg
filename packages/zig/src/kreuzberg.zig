@@ -1386,7 +1386,7 @@ pub const DocumentNode = struct {
     /// Deterministic identifier (hash of content + position).
     id: []const u8,
     /// Node content — tagged enum, type-specific data only.
-    content: []const u8,
+    content: NodeContent,
     /// Parent node index (`null` = root-level node).
     parent: ?u32,
     /// Child node indices in reading order.
@@ -1464,7 +1464,7 @@ pub const ExtractionResult = struct {
     ///
     /// Populated when the extractor can reliably distinguish native text extraction,
     /// OCR-only extraction, or mixed native/OCR output.
-    extraction_method: ?[]const u8,
+    extraction_method: ?ExtractionMethod,
     tables: []const Table,
     detected_languages: ?[]const []const u8,
     /// Text chunks when chunking is enabled.
@@ -2142,7 +2142,7 @@ pub const Metadata = struct {
     ///
     /// Contains detailed metadata specific to the document format.
     /// Serialized as a nested `"format"` object with a `format_type` discriminator field.
-    format: ?[]const u8,
+    format: ?FormatMetadata,
     /// Image preprocessing metadata (when OCR preprocessing was applied)
     image_preprocessing: ?ImagePreprocessingMetadata,
     /// JSON schema (for structured data extraction)
@@ -2809,7 +2809,7 @@ pub const DetectResponse = struct {
 ///
 /// All string fields are owned `String` for FFI compatibility — instances
 /// are safe to clone and pass across language boundaries.
-pub const EmbeddingPreset2 = struct {
+pub const EmbeddingPreset = struct {
     name: []const u8,
     chunk_size: u64,
     overlap: u64,
@@ -2951,7 +2951,7 @@ pub const BBox = struct {
 
 /// A single layout detection result.
 pub const LayoutDetection = struct {
-    class_name: []const u8,
+    class_name: LayoutClass,
     confidence: f32,
     bbox: BBox,
 };
@@ -2986,6 +2986,26 @@ pub const EmbeddedFile = struct {
     data: []const u8,
     /// MIME type if specified in the filespec, otherwise `null`.
     mime_type: ?[]const u8,
+};
+
+/// PDF-specific metadata.
+///
+/// Contains metadata fields specific to PDF documents that are not in the common
+/// `Metadata` structure. Common fields like title, authors, keywords, and dates
+/// are at the `Metadata` level.
+pub const PdfMetadata = struct {
+    /// PDF version (e.g., "1.7", "2.0")
+    pdf_version: ?[]const u8,
+    /// PDF producer (application that created the PDF)
+    producer: ?[]const u8,
+    /// Whether the PDF is encrypted/password-protected
+    is_encrypted: ?bool,
+    /// First page width in points (1/72 inch)
+    width: ?i64,
+    /// First page height in points (1/72 inch)
+    height: ?i64,
+    /// Total number of pages in the PDF document
+    page_count: ?u32,
 };
 
 /// ONNX Runtime execution provider type.
@@ -3157,7 +3177,7 @@ pub const CodeContentMode = enum {
 };
 
 /// Type of list detection.
-pub const TransformListType = enum {
+pub const ListType = enum {
     /// Bullet points (-, *, •, etc.)
     bullet,
     /// Numbered lists (1., 2., etc.)
@@ -3326,7 +3346,7 @@ pub const ContentLayer = enum {
 ///
 /// Uses `#[serde(tag = "node_type")]` to avoid "type" keyword collision in
 /// Go/Java/TypeScript bindings.
-pub const NodeContent2 = union(enum) {
+pub const NodeContent = union(enum) {
     /// Document title.
     title: []const u8,
     /// Section heading with level (1-6).
@@ -3433,7 +3453,7 @@ pub const AnnotationKind = union(enum) {
 };
 
 /// How the extracted text was produced.
-pub const ExtractionMethod2 = enum {
+pub const ExtractionMethod = enum {
     native,
     ocr,
     mixed,
@@ -3544,8 +3564,8 @@ pub const ElementType = enum {
 ///
 /// Only one format type can exist per extraction result. This provides
 /// type-safe, clean metadata without nested optionals.
-pub const FormatMetadata2 = union(enum) {
-    pdf: []const u8,
+pub const FormatMetadata = union(enum) {
+    pdf: PdfMetadata,
     docx: DocxMetadata,
     excel: ExcelMetadata,
     email: EmailMetadata,
@@ -3703,7 +3723,7 @@ pub const PSMMode = enum {
 /// Supported languages in PaddleOCR.
 ///
 /// Maps user-friendly language codes to paddle-ocr-rs language identifiers.
-pub const PaddleLanguage2 = enum {
+pub const PaddleLanguage = enum {
     /// English
     english,
     /// Simplified Chinese
@@ -3745,7 +3765,7 @@ pub const PaddleLanguage2 = enum {
 /// map to the closest equivalent.
 ///
 /// Wire format is snake_case in all serializers (JSON, TOML, YAML).
-pub const LayoutClass2 = enum {
+pub const LayoutClass = enum {
     caption,
     footnote,
     formula,
@@ -4337,12 +4357,12 @@ pub fn get_embedding_preset(name: []const u8) error{OutOfMemory}!?[]u8 {
     const name_z = try std.fmt.allocPrintSentinel(std.heap.c_allocator, "{s}", .{name}, 0);
     defer std.heap.c_allocator.free(name_z);
     const _result = c.kreuzberg_get_embedding_preset(name_z);
-    const _result_len = c.kreuzberg_get_embedding_preset_len(name_z);
-    return blk: {
-        if (_result == null) break :blk null;
-        const slice = _result[0.._result_len];
+    return if (_result == null) null else blk: {
+        const _json_ptr = c.kreuzberg_embedding_preset_to_json(_result.?);
+        defer _free_string(_json_ptr);
+        c.kreuzberg_embedding_preset_free(_result.?);
+        const slice = std.mem.sliceTo(_json_ptr, 0);
         const owned = try std.heap.c_allocator.dupe(u8, slice);
-        _free_string(_result);
         break :blk owned;
     };
 }

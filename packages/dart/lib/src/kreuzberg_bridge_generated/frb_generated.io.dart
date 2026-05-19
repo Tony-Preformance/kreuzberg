@@ -421,16 +421,31 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AccelerationConfig dco_decode_box_autoadd_acceleration_config(dynamic raw);
 
   @protected
+  ArchiveMetadata dco_decode_box_autoadd_archive_metadata(dynamic raw);
+
+  @protected
+  BibtexMetadata dco_decode_box_autoadd_bibtex_metadata(dynamic raw);
+
+  @protected
   bool dco_decode_box_autoadd_bool(dynamic raw);
 
   @protected
   ChunkingConfig dco_decode_box_autoadd_chunking_config(dynamic raw);
 
   @protected
+  CitationMetadata dco_decode_box_autoadd_citation_metadata(dynamic raw);
+
+  @protected
   ContentFilterConfig dco_decode_box_autoadd_content_filter_config(dynamic raw);
 
   @protected
   CoreProperties dco_decode_box_autoadd_core_properties(dynamic raw);
+
+  @protected
+  CsvMetadata dco_decode_box_autoadd_csv_metadata(dynamic raw);
+
+  @protected
+  DbfMetadata dco_decode_box_autoadd_dbf_metadata(dynamic raw);
 
   @protected
   DjotContent dco_decode_box_autoadd_djot_content(dynamic raw);
@@ -442,16 +457,34 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DocxAppProperties dco_decode_box_autoadd_docx_app_properties(dynamic raw);
 
   @protected
+  DocxMetadata dco_decode_box_autoadd_docx_metadata(dynamic raw);
+
+  @protected
   EmailConfig dco_decode_box_autoadd_email_config(dynamic raw);
+
+  @protected
+  EmailMetadata dco_decode_box_autoadd_email_metadata(dynamic raw);
 
   @protected
   EmbeddingConfig dco_decode_box_autoadd_embedding_config(dynamic raw);
 
   @protected
+  EmbeddingPreset dco_decode_box_autoadd_embedding_preset(dynamic raw);
+
+  @protected
+  EpubMetadata dco_decode_box_autoadd_epub_metadata(dynamic raw);
+
+  @protected
   ErrorMetadata dco_decode_box_autoadd_error_metadata(dynamic raw);
 
   @protected
+  ExcelMetadata dco_decode_box_autoadd_excel_metadata(dynamic raw);
+
+  @protected
   ExtractionConfig dco_decode_box_autoadd_extraction_config(dynamic raw);
+
+  @protected
+  ExtractionMethod dco_decode_box_autoadd_extraction_method(dynamic raw);
 
   @protected
   ExtractionResult dco_decode_box_autoadd_extraction_result(dynamic raw);
@@ -460,15 +493,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double dco_decode_box_autoadd_f_64(dynamic raw);
 
   @protected
+  FictionBookMetadata dco_decode_box_autoadd_fiction_book_metadata(dynamic raw);
+
+  @protected
   FileExtractionConfig dco_decode_box_autoadd_file_extraction_config(
     dynamic raw,
   );
+
+  @protected
+  FormatMetadata dco_decode_box_autoadd_format_metadata(dynamic raw);
 
   @protected
   HeadingContext dco_decode_box_autoadd_heading_context(dynamic raw);
 
   @protected
   HierarchyConfig dco_decode_box_autoadd_hierarchy_config(dynamic raw);
+
+  @protected
+  HtmlMetadata dco_decode_box_autoadd_html_metadata(dynamic raw);
 
   @protected
   HtmlOutputConfig dco_decode_box_autoadd_html_output_config(dynamic raw);
@@ -485,6 +527,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ImageKind dco_decode_box_autoadd_image_kind(dynamic raw);
 
   @protected
+  ImageMetadata dco_decode_box_autoadd_image_metadata(dynamic raw);
+
+  @protected
   ImagePreprocessingConfig dco_decode_box_autoadd_image_preprocessing_config(
     dynamic raw,
   );
@@ -492,6 +537,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   ImagePreprocessingMetadata
   dco_decode_box_autoadd_image_preprocessing_metadata(dynamic raw);
+
+  @protected
+  JatsMetadata dco_decode_box_autoadd_jats_metadata(dynamic raw);
 
   @protected
   KeywordConfig dco_decode_box_autoadd_keyword_config(dynamic raw);
@@ -514,6 +562,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   OcrElementConfig dco_decode_box_autoadd_ocr_element_config(dynamic raw);
+
+  @protected
+  OcrMetadata dco_decode_box_autoadd_ocr_metadata(dynamic raw);
 
   @protected
   OcrPipelineConfig dco_decode_box_autoadd_ocr_pipeline_config(dynamic raw);
@@ -547,7 +598,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PdfConfig dco_decode_box_autoadd_pdf_config(dynamic raw);
 
   @protected
+  PdfMetadata dco_decode_box_autoadd_pdf_metadata(dynamic raw);
+
+  @protected
   PostProcessorConfig dco_decode_box_autoadd_post_processor_config(dynamic raw);
+
+  @protected
+  PptxMetadata dco_decode_box_autoadd_pptx_metadata(dynamic raw);
+
+  @protected
+  PstMetadata dco_decode_box_autoadd_pst_metadata(dynamic raw);
 
   @protected
   RakeParams dco_decode_box_autoadd_rake_params(dynamic raw);
@@ -563,10 +623,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   dco_decode_box_autoadd_structured_extraction_config(dynamic raw);
 
   @protected
+  TableGrid dco_decode_box_autoadd_table_grid(dynamic raw);
+
+  @protected
   TesseractConfig dco_decode_box_autoadd_tesseract_config(dynamic raw);
 
   @protected
   TextDirection dco_decode_box_autoadd_text_direction(dynamic raw);
+
+  @protected
+  TextMetadata dco_decode_box_autoadd_text_metadata(dynamic raw);
 
   @protected
   TokenReductionOptions dco_decode_box_autoadd_token_reduction_options(
@@ -575,6 +641,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   TreeSitterConfig dco_decode_box_autoadd_tree_sitter_config(dynamic raw);
+
+  @protected
+  XmlMetadata dco_decode_box_autoadd_xml_metadata(dynamic raw);
 
   @protected
   YakeParams dco_decode_box_autoadd_yake_params(dynamic raw);
@@ -688,7 +757,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   EmbeddingModelType dco_decode_embedding_model_type(dynamic raw);
 
   @protected
-  EmbeddingPreset2 dco_decode_embedding_preset_2(dynamic raw);
+  EmbeddingPreset dco_decode_embedding_preset(dynamic raw);
 
   @protected
   EpubMetadata dco_decode_epub_metadata(dynamic raw);
@@ -715,6 +784,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ExtractionConfig dco_decode_extraction_config(dynamic raw);
 
   @protected
+  ExtractionMethod dco_decode_extraction_method(dynamic raw);
+
+  @protected
   ExtractionResult dco_decode_extraction_result(dynamic raw);
 
   @protected
@@ -728,6 +800,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Footnote dco_decode_footnote(dynamic raw);
+
+  @protected
+  FormatMetadata dco_decode_format_metadata(dynamic raw);
 
   @protected
   FormattedBlock dco_decode_formatted_block(dynamic raw);
@@ -808,6 +883,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LanguageDetectionConfig dco_decode_language_detection_config(dynamic raw);
+
+  @protected
+  LayoutClass dco_decode_layout_class(dynamic raw);
 
   @protected
   LayoutDetection dco_decode_layout_detection(dynamic raw);
@@ -994,6 +1072,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ModelPaths dco_decode_model_paths(dynamic raw);
 
   @protected
+  NodeContent dco_decode_node_content(dynamic raw);
+
+  @protected
   OcrBoundingGeometry dco_decode_ocr_bounding_geometry(dynamic raw);
 
   @protected
@@ -1091,7 +1172,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   EmbeddingConfig? dco_decode_opt_box_autoadd_embedding_config(dynamic raw);
 
   @protected
+  EmbeddingPreset? dco_decode_opt_box_autoadd_embedding_preset(dynamic raw);
+
+  @protected
   ErrorMetadata? dco_decode_opt_box_autoadd_error_metadata(dynamic raw);
+
+  @protected
+  ExtractionMethod? dco_decode_opt_box_autoadd_extraction_method(dynamic raw);
 
   @protected
   ExtractionResult? dco_decode_opt_box_autoadd_extraction_result(dynamic raw);
@@ -1103,6 +1190,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FileExtractionConfig? dco_decode_opt_box_autoadd_file_extraction_config(
     dynamic raw,
   );
+
+  @protected
+  FormatMetadata? dco_decode_opt_box_autoadd_format_metadata(dynamic raw);
 
   @protected
   HeadingContext? dco_decode_opt_box_autoadd_heading_context(dynamic raw);
@@ -1317,6 +1407,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PdfConfig dco_decode_pdf_config(dynamic raw);
+
+  @protected
+  PdfMetadata dco_decode_pdf_metadata(dynamic raw);
 
   @protected
   PostProcessorConfig dco_decode_post_processor_config(dynamic raw);
@@ -1782,10 +1875,25 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ArchiveMetadata sse_decode_box_autoadd_archive_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  BibtexMetadata sse_decode_box_autoadd_bibtex_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   bool sse_decode_box_autoadd_bool(SseDeserializer deserializer);
 
   @protected
   ChunkingConfig sse_decode_box_autoadd_chunking_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  CitationMetadata sse_decode_box_autoadd_citation_metadata(
     SseDeserializer deserializer,
   );
 
@@ -1798,6 +1906,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CoreProperties sse_decode_box_autoadd_core_properties(
     SseDeserializer deserializer,
   );
+
+  @protected
+  CsvMetadata sse_decode_box_autoadd_csv_metadata(SseDeserializer deserializer);
+
+  @protected
+  DbfMetadata sse_decode_box_autoadd_dbf_metadata(SseDeserializer deserializer);
 
   @protected
   DjotContent sse_decode_box_autoadd_djot_content(SseDeserializer deserializer);
@@ -1813,10 +1927,30 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DocxMetadata sse_decode_box_autoadd_docx_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   EmailConfig sse_decode_box_autoadd_email_config(SseDeserializer deserializer);
 
   @protected
+  EmailMetadata sse_decode_box_autoadd_email_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   EmbeddingConfig sse_decode_box_autoadd_embedding_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  EmbeddingPreset sse_decode_box_autoadd_embedding_preset(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  EpubMetadata sse_decode_box_autoadd_epub_metadata(
     SseDeserializer deserializer,
   );
 
@@ -1826,7 +1960,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ExcelMetadata sse_decode_box_autoadd_excel_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ExtractionConfig sse_decode_box_autoadd_extraction_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ExtractionMethod sse_decode_box_autoadd_extraction_method(
     SseDeserializer deserializer,
   );
 
@@ -1839,7 +1983,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double sse_decode_box_autoadd_f_64(SseDeserializer deserializer);
 
   @protected
+  FictionBookMetadata sse_decode_box_autoadd_fiction_book_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   FileExtractionConfig sse_decode_box_autoadd_file_extraction_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FormatMetadata sse_decode_box_autoadd_format_metadata(
     SseDeserializer deserializer,
   );
 
@@ -1850,6 +2004,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   HierarchyConfig sse_decode_box_autoadd_hierarchy_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  HtmlMetadata sse_decode_box_autoadd_html_metadata(
     SseDeserializer deserializer,
   );
 
@@ -1870,6 +2029,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ImageKind sse_decode_box_autoadd_image_kind(SseDeserializer deserializer);
 
   @protected
+  ImageMetadata sse_decode_box_autoadd_image_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ImagePreprocessingConfig sse_decode_box_autoadd_image_preprocessing_config(
     SseDeserializer deserializer,
   );
@@ -1877,6 +2041,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   ImagePreprocessingMetadata
   sse_decode_box_autoadd_image_preprocessing_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  JatsMetadata sse_decode_box_autoadd_jats_metadata(
     SseDeserializer deserializer,
   );
 
@@ -1905,6 +2074,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   OcrElementConfig sse_decode_box_autoadd_ocr_element_config(
     SseDeserializer deserializer,
   );
+
+  @protected
+  OcrMetadata sse_decode_box_autoadd_ocr_metadata(SseDeserializer deserializer);
 
   @protected
   OcrPipelineConfig sse_decode_box_autoadd_ocr_pipeline_config(
@@ -1946,9 +2118,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PdfConfig sse_decode_box_autoadd_pdf_config(SseDeserializer deserializer);
 
   @protected
+  PdfMetadata sse_decode_box_autoadd_pdf_metadata(SseDeserializer deserializer);
+
+  @protected
   PostProcessorConfig sse_decode_box_autoadd_post_processor_config(
     SseDeserializer deserializer,
   );
+
+  @protected
+  PptxMetadata sse_decode_box_autoadd_pptx_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  PstMetadata sse_decode_box_autoadd_pst_metadata(SseDeserializer deserializer);
 
   @protected
   RakeParams sse_decode_box_autoadd_rake_params(SseDeserializer deserializer);
@@ -1970,12 +2153,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  TableGrid sse_decode_box_autoadd_table_grid(SseDeserializer deserializer);
+
+  @protected
   TesseractConfig sse_decode_box_autoadd_tesseract_config(
     SseDeserializer deserializer,
   );
 
   @protected
   TextDirection sse_decode_box_autoadd_text_direction(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  TextMetadata sse_decode_box_autoadd_text_metadata(
     SseDeserializer deserializer,
   );
 
@@ -1988,6 +2179,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TreeSitterConfig sse_decode_box_autoadd_tree_sitter_config(
     SseDeserializer deserializer,
   );
+
+  @protected
+  XmlMetadata sse_decode_box_autoadd_xml_metadata(SseDeserializer deserializer);
 
   @protected
   YakeParams sse_decode_box_autoadd_yake_params(SseDeserializer deserializer);
@@ -2111,7 +2305,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  EmbeddingPreset2 sse_decode_embedding_preset_2(SseDeserializer deserializer);
+  EmbeddingPreset sse_decode_embedding_preset(SseDeserializer deserializer);
 
   @protected
   EpubMetadata sse_decode_epub_metadata(SseDeserializer deserializer);
@@ -2140,6 +2334,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ExtractionConfig sse_decode_extraction_config(SseDeserializer deserializer);
 
   @protected
+  ExtractionMethod sse_decode_extraction_method(SseDeserializer deserializer);
+
+  @protected
   ExtractionResult sse_decode_extraction_result(SseDeserializer deserializer);
 
   @protected
@@ -2157,6 +2354,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Footnote sse_decode_footnote(SseDeserializer deserializer);
+
+  @protected
+  FormatMetadata sse_decode_format_metadata(SseDeserializer deserializer);
 
   @protected
   FormattedBlock sse_decode_formatted_block(SseDeserializer deserializer);
@@ -2245,6 +2445,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   LanguageDetectionConfig sse_decode_language_detection_config(
     SseDeserializer deserializer,
   );
+
+  @protected
+  LayoutClass sse_decode_layout_class(SseDeserializer deserializer);
 
   @protected
   LayoutDetection sse_decode_layout_detection(SseDeserializer deserializer);
@@ -2489,6 +2692,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ModelPaths sse_decode_model_paths(SseDeserializer deserializer);
 
   @protected
+  NodeContent sse_decode_node_content(SseDeserializer deserializer);
+
+  @protected
   OcrBoundingGeometry sse_decode_ocr_bounding_geometry(
     SseDeserializer deserializer,
   );
@@ -2612,7 +2818,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  EmbeddingPreset? sse_decode_opt_box_autoadd_embedding_preset(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ErrorMetadata? sse_decode_opt_box_autoadd_error_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ExtractionMethod? sse_decode_opt_box_autoadd_extraction_method(
     SseDeserializer deserializer,
   );
 
@@ -2626,6 +2842,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FileExtractionConfig? sse_decode_opt_box_autoadd_file_extraction_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FormatMetadata? sse_decode_opt_box_autoadd_format_metadata(
     SseDeserializer deserializer,
   );
 
@@ -2912,6 +3133,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PdfConfig sse_decode_pdf_config(SseDeserializer deserializer);
+
+  @protected
+  PdfMetadata sse_decode_pdf_metadata(SseDeserializer deserializer);
 
   @protected
   PostProcessorConfig sse_decode_post_processor_config(
@@ -3467,11 +3691,29 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_archive_metadata(
+    ArchiveMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_bibtex_metadata(
+    BibtexMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_bool(bool self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_chunking_config(
     ChunkingConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_citation_metadata(
+    CitationMetadata self,
     SseSerializer serializer,
   );
 
@@ -3484,6 +3726,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_core_properties(
     CoreProperties self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_csv_metadata(
+    CsvMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_dbf_metadata(
+    DbfMetadata self,
     SseSerializer serializer,
   );
 
@@ -3506,8 +3760,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_docx_metadata(
+    DocxMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_email_config(
     EmailConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_email_metadata(
+    EmailMetadata self,
     SseSerializer serializer,
   );
 
@@ -3518,14 +3784,38 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_embedding_preset(
+    EmbeddingPreset self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_epub_metadata(
+    EpubMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_error_metadata(
     ErrorMetadata self,
     SseSerializer serializer,
   );
 
   @protected
+  void sse_encode_box_autoadd_excel_metadata(
+    ExcelMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_extraction_config(
     ExtractionConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_extraction_method(
+    ExtractionMethod self,
     SseSerializer serializer,
   );
 
@@ -3539,8 +3829,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_box_autoadd_f_64(double self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_fiction_book_metadata(
+    FictionBookMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_file_extraction_config(
     FileExtractionConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_format_metadata(
+    FormatMetadata self,
     SseSerializer serializer,
   );
 
@@ -3553,6 +3855,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_hierarchy_config(
     HierarchyConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_html_metadata(
+    HtmlMetadata self,
     SseSerializer serializer,
   );
 
@@ -3581,6 +3889,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_image_metadata(
+    ImageMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_image_preprocessing_config(
     ImagePreprocessingConfig self,
     SseSerializer serializer,
@@ -3589,6 +3903,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_image_preprocessing_metadata(
     ImagePreprocessingMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_jats_metadata(
+    JatsMetadata self,
     SseSerializer serializer,
   );
 
@@ -3625,6 +3945,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_ocr_element_config(
     OcrElementConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_ocr_metadata(
+    OcrMetadata self,
     SseSerializer serializer,
   );
 
@@ -3683,8 +4009,26 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_pdf_metadata(
+    PdfMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_post_processor_config(
     PostProcessorConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_pptx_metadata(
+    PptxMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_pst_metadata(
+    PstMetadata self,
     SseSerializer serializer,
   );
 
@@ -3713,6 +4057,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_table_grid(
+    TableGrid self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_tesseract_config(
     TesseractConfig self,
     SseSerializer serializer,
@@ -3725,6 +4075,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_text_metadata(
+    TextMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_token_reduction_options(
     TokenReductionOptions self,
     SseSerializer serializer,
@@ -3733,6 +4089,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_tree_sitter_config(
     TreeSitterConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_xml_metadata(
+    XmlMetadata self,
     SseSerializer serializer,
   );
 
@@ -3902,8 +4264,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_embedding_preset_2(
-    EmbeddingPreset2 self,
+  void sse_encode_embedding_preset(
+    EmbeddingPreset self,
     SseSerializer serializer,
   );
 
@@ -3941,6 +4303,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_extraction_method(
+    ExtractionMethod self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_extraction_result(
     ExtractionResult self,
     SseSerializer serializer,
@@ -3963,6 +4331,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_footnote(Footnote self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_format_metadata(
+    FormatMetadata self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_formatted_block(
@@ -4077,6 +4451,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     LanguageDetectionConfig self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_layout_class(LayoutClass self, SseSerializer serializer);
 
   @protected
   void sse_encode_layout_detection(
@@ -4379,6 +4756,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_model_paths(ModelPaths self, SseSerializer serializer);
 
   @protected
+  void sse_encode_node_content(NodeContent self, SseSerializer serializer);
+
+  @protected
   void sse_encode_ocr_bounding_geometry(
     OcrBoundingGeometry self,
     SseSerializer serializer,
@@ -4529,8 +4909,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_embedding_preset(
+    EmbeddingPreset? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_error_metadata(
     ErrorMetadata? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_extraction_method(
+    ExtractionMethod? self,
     SseSerializer serializer,
   );
 
@@ -4546,6 +4938,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_opt_box_autoadd_file_extraction_config(
     FileExtractionConfig? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_format_metadata(
+    FormatMetadata? self,
     SseSerializer serializer,
   );
 
@@ -4899,6 +5297,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_pdf_config(PdfConfig self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_pdf_metadata(PdfMetadata self, SseSerializer serializer);
 
   @protected
   void sse_encode_post_processor_config(

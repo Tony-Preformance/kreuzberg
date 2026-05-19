@@ -39,7 +39,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -572269888;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1689775888;
 
 // Section: executor
 
@@ -1396,7 +1396,7 @@ fn wire__crate__create_embedding_config_from_json_impl(
         },
     )
 }
-fn wire__crate__create_embedding_preset2_from_json_impl(
+fn wire__crate__create_embedding_preset_from_json_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -1404,7 +1404,7 @@ fn wire__crate__create_embedding_preset2_from_json_impl(
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "create_embedding_preset2_from_json",
+            debug_name: "create_embedding_preset_from_json",
             port: Some(port_),
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
@@ -1417,7 +1417,7 @@ fn wire__crate__create_embedding_preset2_from_json_impl(
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, String>((move || {
-                    let output_ok = crate::create_embedding_preset2_from_json(api_json)?;
+                    let output_ok = crate::create_embedding_preset_from_json(api_json)?;
                     Ok(output_ok)
                 })())
             }
@@ -3160,6 +3160,34 @@ fn wire__crate__create_pdf_config_from_json_impl(
             move |context| {
                 transform_result_sse::<_, String>((move || {
                     let output_ok = crate::create_pdf_config_from_json(api_json)?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__create_pdf_metadata_from_json_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "create_pdf_metadata_from_json",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_)
+            };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_json = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, String>((move || {
+                    let output_ok = crate::create_pdf_metadata_from_json(api_json)?;
                     Ok(output_ok)
                 })())
             }
@@ -5227,7 +5255,7 @@ const _: fn() = || {
     {
         let DocumentNode = None::<crate::DocumentNode>.unwrap();
         let _: String = DocumentNode.id;
-        let _: String = DocumentNode.content;
+        let _: crate::NodeContent = DocumentNode.content;
         let _: Option<i64> = DocumentNode.parent;
         let _: Vec<i64> = DocumentNode.children;
         let _: crate::ContentLayer = DocumentNode.content_layer;
@@ -5360,15 +5388,15 @@ const _: fn() = || {
         }
     }
     {
-        let EmbeddingPreset2 = None::<crate::EmbeddingPreset2>.unwrap();
-        let _: String = EmbeddingPreset2.name;
-        let _: i64 = EmbeddingPreset2.chunk_size;
-        let _: i64 = EmbeddingPreset2.overlap;
-        let _: String = EmbeddingPreset2.model_repo;
-        let _: String = EmbeddingPreset2.pooling;
-        let _: String = EmbeddingPreset2.model_file;
-        let _: i64 = EmbeddingPreset2.dimensions;
-        let _: String = EmbeddingPreset2.description;
+        let EmbeddingPreset = None::<crate::EmbeddingPreset>.unwrap();
+        let _: String = EmbeddingPreset.name;
+        let _: i64 = EmbeddingPreset.chunk_size;
+        let _: i64 = EmbeddingPreset.overlap;
+        let _: String = EmbeddingPreset.model_repo;
+        let _: String = EmbeddingPreset.pooling;
+        let _: String = EmbeddingPreset.model_file;
+        let _: i64 = EmbeddingPreset.dimensions;
+        let _: String = EmbeddingPreset.description;
     }
     {
         let EpubMetadata = None::<crate::EpubMetadata>.unwrap();
@@ -5464,7 +5492,7 @@ const _: fn() = || {
         let _: String = ExtractionResult.content;
         let _: String = ExtractionResult.mime_type;
         let _: crate::Metadata = ExtractionResult.metadata;
-        let _: Option<String> = ExtractionResult.extraction_method;
+        let _: Option<crate::ExtractionMethod> = ExtractionResult.extraction_method;
         let _: Vec<crate::Table> = ExtractionResult.tables;
         let _: Option<Vec<String>> = ExtractionResult.detected_languages;
         let _: Option<Vec<crate::Chunk>> = ExtractionResult.chunks;
@@ -5521,6 +5549,68 @@ const _: fn() = || {
         let Footnote = None::<crate::Footnote>.unwrap();
         let _: String = Footnote.label;
         let _: Vec<crate::FormattedBlock> = Footnote.content;
+    }
+    match None::<crate::FormatMetadata>.unwrap() {
+        crate::FormatMetadata::Pdf { field0 } => {
+            let _: crate::PdfMetadata = field0;
+        }
+        crate::FormatMetadata::Docx { field0 } => {
+            let _: crate::DocxMetadata = field0;
+        }
+        crate::FormatMetadata::Excel { field0 } => {
+            let _: crate::ExcelMetadata = field0;
+        }
+        crate::FormatMetadata::Email { field0 } => {
+            let _: crate::EmailMetadata = field0;
+        }
+        crate::FormatMetadata::Pptx { field0 } => {
+            let _: crate::PptxMetadata = field0;
+        }
+        crate::FormatMetadata::Archive { field0 } => {
+            let _: crate::ArchiveMetadata = field0;
+        }
+        crate::FormatMetadata::Image { field0 } => {
+            let _: crate::ImageMetadata = field0;
+        }
+        crate::FormatMetadata::Xml { field0 } => {
+            let _: crate::XmlMetadata = field0;
+        }
+        crate::FormatMetadata::Text { field0 } => {
+            let _: crate::TextMetadata = field0;
+        }
+        crate::FormatMetadata::Html { field0 } => {
+            let _: crate::HtmlMetadata = field0;
+        }
+        crate::FormatMetadata::Ocr { field0 } => {
+            let _: crate::OcrMetadata = field0;
+        }
+        crate::FormatMetadata::Csv { field0 } => {
+            let _: crate::CsvMetadata = field0;
+        }
+        crate::FormatMetadata::Bibtex { field0 } => {
+            let _: crate::BibtexMetadata = field0;
+        }
+        crate::FormatMetadata::Citation { field0 } => {
+            let _: crate::CitationMetadata = field0;
+        }
+        crate::FormatMetadata::FictionBook { field0 } => {
+            let _: crate::FictionBookMetadata = field0;
+        }
+        crate::FormatMetadata::Dbf { field0 } => {
+            let _: crate::DbfMetadata = field0;
+        }
+        crate::FormatMetadata::Jats { field0 } => {
+            let _: crate::JatsMetadata = field0;
+        }
+        crate::FormatMetadata::Epub { field0 } => {
+            let _: crate::EpubMetadata = field0;
+        }
+        crate::FormatMetadata::Pst { field0 } => {
+            let _: crate::PstMetadata = field0;
+        }
+        crate::FormatMetadata::Code { field0 } => {
+            let _: String = field0;
+        }
     }
     {
         let FormattedBlock = None::<crate::FormattedBlock>.unwrap();
@@ -5691,7 +5781,7 @@ const _: fn() = || {
     }
     {
         let LayoutDetection = None::<crate::LayoutDetection>.unwrap();
-        let _: String = LayoutDetection.class_name;
+        let _: crate::LayoutClass = LayoutDetection.class_name;
         let _: f64 = LayoutDetection.confidence;
         let _: crate::BBox = LayoutDetection.bbox;
     }
@@ -5750,7 +5840,7 @@ const _: fn() = || {
         let _: Option<String> = Metadata.created_by;
         let _: Option<String> = Metadata.modified_by;
         let _: Option<crate::PageStructure> = Metadata.pages;
-        let _: Option<String> = Metadata.format;
+        let _: Option<crate::FormatMetadata> = Metadata.format;
         let _: Option<crate::ImagePreprocessingMetadata> = Metadata.image_preprocessing;
         let _: Option<String> = Metadata.json_schema;
         let _: Option<crate::ErrorMetadata> = Metadata.error;
@@ -5769,6 +5859,81 @@ const _: fn() = || {
         let _: String = ModelPaths.cls_model;
         let _: String = ModelPaths.rec_model;
         let _: String = ModelPaths.dict_file;
+    }
+    match None::<crate::NodeContent>.unwrap() {
+        crate::NodeContent::Title { text } => {
+            let _: String = text;
+        }
+        crate::NodeContent::Heading { level, text } => {
+            let _: i64 = level;
+            let _: String = text;
+        }
+        crate::NodeContent::Paragraph { text } => {
+            let _: String = text;
+        }
+        crate::NodeContent::List { ordered } => {
+            let _: bool = ordered;
+        }
+        crate::NodeContent::ListItem { text } => {
+            let _: String = text;
+        }
+        crate::NodeContent::Table { grid } => {
+            let _: crate::TableGrid = grid;
+        }
+        crate::NodeContent::Image {
+            description,
+            image_index,
+            src,
+        } => {
+            let _: String = description;
+            let _: i64 = image_index;
+            let _: String = src;
+        }
+        crate::NodeContent::Code { text, language } => {
+            let _: String = text;
+            let _: String = language;
+        }
+        crate::NodeContent::Quote => {}
+        crate::NodeContent::Formula { text } => {
+            let _: String = text;
+        }
+        crate::NodeContent::Footnote { text } => {
+            let _: String = text;
+        }
+        crate::NodeContent::Group {
+            label,
+            heading_level,
+            heading_text,
+        } => {
+            let _: String = label;
+            let _: i64 = heading_level;
+            let _: String = heading_text;
+        }
+        crate::NodeContent::PageBreak => {}
+        crate::NodeContent::Slide { number, title } => {
+            let _: i64 = number;
+            let _: String = title;
+        }
+        crate::NodeContent::DefinitionList => {}
+        crate::NodeContent::DefinitionItem { term, definition } => {
+            let _: String = term;
+            let _: String = definition;
+        }
+        crate::NodeContent::Citation { key, text } => {
+            let _: String = key;
+            let _: String = text;
+        }
+        crate::NodeContent::Admonition { kind, title } => {
+            let _: String = kind;
+            let _: String = title;
+        }
+        crate::NodeContent::RawBlock { format, content } => {
+            let _: String = format;
+            let _: String = content;
+        }
+        crate::NodeContent::MetadataBlock { entries } => {
+            let _: Vec<String> = entries;
+        }
     }
     match None::<crate::OcrBoundingGeometry>.unwrap() {
         crate::OcrBoundingGeometry::Rectangle {
@@ -5993,6 +6158,15 @@ const _: fn() = || {
         let _: Option<f64> = PdfConfig.bottom_margin_fraction;
         let _: bool = PdfConfig.allow_single_column_tables;
         let _: bool = PdfConfig.ocr_inline_images;
+    }
+    {
+        let PdfMetadata = None::<crate::PdfMetadata>.unwrap();
+        let _: Option<String> = PdfMetadata.pdf_version;
+        let _: Option<String> = PdfMetadata.producer;
+        let _: Option<bool> = PdfMetadata.is_encrypted;
+        let _: Option<i64> = PdfMetadata.width;
+        let _: Option<i64> = PdfMetadata.height;
+        let _: Option<i64> = PdfMetadata.page_count;
     }
     {
         let PostProcessorConfig = None::<crate::PostProcessorConfig>.unwrap();
@@ -7481,7 +7655,7 @@ impl SseDecode for crate::DocumentNode {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_id = <String>::sse_decode(deserializer);
-        let mut var_content = <String>::sse_decode(deserializer);
+        let mut var_content = <crate::NodeContent>::sse_decode(deserializer);
         let mut var_parent = <Option<i64>>::sse_decode(deserializer);
         let mut var_children = <Vec<i64>>::sse_decode(deserializer);
         let mut var_contentLayer = <crate::ContentLayer>::sse_decode(deserializer);
@@ -7796,7 +7970,7 @@ impl SseDecode for crate::EmbeddingModelType {
     }
 }
 
-impl SseDecode for crate::EmbeddingPreset2 {
+impl SseDecode for crate::EmbeddingPreset {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
@@ -7807,7 +7981,7 @@ impl SseDecode for crate::EmbeddingPreset2 {
         let mut var_modelFile = <String>::sse_decode(deserializer);
         let mut var_dimensions = <i64>::sse_decode(deserializer);
         let mut var_description = <String>::sse_decode(deserializer);
-        return crate::EmbeddingPreset2 {
+        return crate::EmbeddingPreset {
             name: var_name,
             chunk_size: var_chunkSize,
             overlap: var_overlap,
@@ -8027,13 +8201,26 @@ impl SseDecode for crate::ExtractionConfig {
     }
 }
 
+impl SseDecode for crate::ExtractionMethod {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::ExtractionMethod::Native,
+            1 => crate::ExtractionMethod::Ocr,
+            2 => crate::ExtractionMethod::Mixed,
+            _ => unreachable!("Invalid variant for ExtractionMethod: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::ExtractionResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_content = <String>::sse_decode(deserializer);
         let mut var_mimeType = <String>::sse_decode(deserializer);
         let mut var_metadata = <crate::Metadata>::sse_decode(deserializer);
-        let mut var_extractionMethod = <Option<String>>::sse_decode(deserializer);
+        let mut var_extractionMethod = <Option<crate::ExtractionMethod>>::sse_decode(deserializer);
         let mut var_tables = <Vec<crate::Table>>::sse_decode(deserializer);
         let mut var_detectedLanguages = <Option<Vec<String>>>::sse_decode(deserializer);
         let mut var_chunks = <Option<Vec<crate::Chunk>>>::sse_decode(deserializer);
@@ -8165,6 +8352,98 @@ impl SseDecode for crate::Footnote {
             label: var_label,
             content: var_content,
         };
+    }
+}
+
+impl SseDecode for crate::FormatMetadata {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_field0 = <crate::PdfMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Pdf { field0: var_field0 };
+            }
+            1 => {
+                let mut var_field0 = <crate::DocxMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Docx { field0: var_field0 };
+            }
+            2 => {
+                let mut var_field0 = <crate::ExcelMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Excel { field0: var_field0 };
+            }
+            3 => {
+                let mut var_field0 = <crate::EmailMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Email { field0: var_field0 };
+            }
+            4 => {
+                let mut var_field0 = <crate::PptxMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Pptx { field0: var_field0 };
+            }
+            5 => {
+                let mut var_field0 = <crate::ArchiveMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Archive { field0: var_field0 };
+            }
+            6 => {
+                let mut var_field0 = <crate::ImageMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Image { field0: var_field0 };
+            }
+            7 => {
+                let mut var_field0 = <crate::XmlMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Xml { field0: var_field0 };
+            }
+            8 => {
+                let mut var_field0 = <crate::TextMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Text { field0: var_field0 };
+            }
+            9 => {
+                let mut var_field0 = <crate::HtmlMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Html { field0: var_field0 };
+            }
+            10 => {
+                let mut var_field0 = <crate::OcrMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Ocr { field0: var_field0 };
+            }
+            11 => {
+                let mut var_field0 = <crate::CsvMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Csv { field0: var_field0 };
+            }
+            12 => {
+                let mut var_field0 = <crate::BibtexMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Bibtex { field0: var_field0 };
+            }
+            13 => {
+                let mut var_field0 = <crate::CitationMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Citation { field0: var_field0 };
+            }
+            14 => {
+                let mut var_field0 = <crate::FictionBookMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::FictionBook { field0: var_field0 };
+            }
+            15 => {
+                let mut var_field0 = <crate::DbfMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Dbf { field0: var_field0 };
+            }
+            16 => {
+                let mut var_field0 = <crate::JatsMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Jats { field0: var_field0 };
+            }
+            17 => {
+                let mut var_field0 = <crate::EpubMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Epub { field0: var_field0 };
+            }
+            18 => {
+                let mut var_field0 = <crate::PstMetadata>::sse_decode(deserializer);
+                return crate::FormatMetadata::Pst { field0: var_field0 };
+            }
+            19 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::FormatMetadata::Code { field0: var_field0 };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -8640,10 +8919,37 @@ impl SseDecode for crate::LanguageDetectionConfig {
     }
 }
 
+impl SseDecode for crate::LayoutClass {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::LayoutClass::Caption,
+            1 => crate::LayoutClass::Footnote,
+            2 => crate::LayoutClass::Formula,
+            3 => crate::LayoutClass::ListItem,
+            4 => crate::LayoutClass::PageFooter,
+            5 => crate::LayoutClass::PageHeader,
+            6 => crate::LayoutClass::Picture,
+            7 => crate::LayoutClass::SectionHeader,
+            8 => crate::LayoutClass::Table,
+            9 => crate::LayoutClass::Text,
+            10 => crate::LayoutClass::Title,
+            11 => crate::LayoutClass::DocumentIndex,
+            12 => crate::LayoutClass::Code,
+            13 => crate::LayoutClass::CheckboxSelected,
+            14 => crate::LayoutClass::CheckboxUnselected,
+            15 => crate::LayoutClass::Form,
+            16 => crate::LayoutClass::KeyValueRegion,
+            _ => unreachable!("Invalid variant for LayoutClass: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::LayoutDetection {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_className = <String>::sse_decode(deserializer);
+        let mut var_className = <crate::LayoutClass>::sse_decode(deserializer);
         let mut var_confidence = <f64>::sse_decode(deserializer);
         let mut var_bbox = <crate::BBox>::sse_decode(deserializer);
         return crate::LayoutDetection {
@@ -9379,7 +9685,7 @@ impl SseDecode for crate::Metadata {
         let mut var_createdBy = <Option<String>>::sse_decode(deserializer);
         let mut var_modifiedBy = <Option<String>>::sse_decode(deserializer);
         let mut var_pages = <Option<crate::PageStructure>>::sse_decode(deserializer);
-        let mut var_format = <Option<String>>::sse_decode(deserializer);
+        let mut var_format = <Option<crate::FormatMetadata>>::sse_decode(deserializer);
         let mut var_imagePreprocessing = <Option<crate::ImagePreprocessingMetadata>>::sse_decode(deserializer);
         let mut var_jsonSchema = <Option<String>>::sse_decode(deserializer);
         let mut var_error = <Option<crate::ErrorMetadata>>::sse_decode(deserializer);
@@ -9431,6 +9737,135 @@ impl SseDecode for crate::ModelPaths {
             rec_model: var_recModel,
             dict_file: var_dictFile,
         };
+    }
+}
+
+impl SseDecode for crate::NodeContent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_text = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Title { text: var_text };
+            }
+            1 => {
+                let mut var_level = <i64>::sse_decode(deserializer);
+                let mut var_text = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Heading {
+                    level: var_level,
+                    text: var_text,
+                };
+            }
+            2 => {
+                let mut var_text = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Paragraph { text: var_text };
+            }
+            3 => {
+                let mut var_ordered = <bool>::sse_decode(deserializer);
+                return crate::NodeContent::List { ordered: var_ordered };
+            }
+            4 => {
+                let mut var_text = <String>::sse_decode(deserializer);
+                return crate::NodeContent::ListItem { text: var_text };
+            }
+            5 => {
+                let mut var_grid = <crate::TableGrid>::sse_decode(deserializer);
+                return crate::NodeContent::Table { grid: var_grid };
+            }
+            6 => {
+                let mut var_description = <String>::sse_decode(deserializer);
+                let mut var_imageIndex = <i64>::sse_decode(deserializer);
+                let mut var_src = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Image {
+                    description: var_description,
+                    image_index: var_imageIndex,
+                    src: var_src,
+                };
+            }
+            7 => {
+                let mut var_text = <String>::sse_decode(deserializer);
+                let mut var_language = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Code {
+                    text: var_text,
+                    language: var_language,
+                };
+            }
+            8 => {
+                return crate::NodeContent::Quote;
+            }
+            9 => {
+                let mut var_text = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Formula { text: var_text };
+            }
+            10 => {
+                let mut var_text = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Footnote { text: var_text };
+            }
+            11 => {
+                let mut var_label = <String>::sse_decode(deserializer);
+                let mut var_headingLevel = <i64>::sse_decode(deserializer);
+                let mut var_headingText = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Group {
+                    label: var_label,
+                    heading_level: var_headingLevel,
+                    heading_text: var_headingText,
+                };
+            }
+            12 => {
+                return crate::NodeContent::PageBreak;
+            }
+            13 => {
+                let mut var_number = <i64>::sse_decode(deserializer);
+                let mut var_title = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Slide {
+                    number: var_number,
+                    title: var_title,
+                };
+            }
+            14 => {
+                return crate::NodeContent::DefinitionList;
+            }
+            15 => {
+                let mut var_term = <String>::sse_decode(deserializer);
+                let mut var_definition = <String>::sse_decode(deserializer);
+                return crate::NodeContent::DefinitionItem {
+                    term: var_term,
+                    definition: var_definition,
+                };
+            }
+            16 => {
+                let mut var_key = <String>::sse_decode(deserializer);
+                let mut var_text = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Citation {
+                    key: var_key,
+                    text: var_text,
+                };
+            }
+            17 => {
+                let mut var_kind = <String>::sse_decode(deserializer);
+                let mut var_title = <String>::sse_decode(deserializer);
+                return crate::NodeContent::Admonition {
+                    kind: var_kind,
+                    title: var_title,
+                };
+            }
+            18 => {
+                let mut var_format = <String>::sse_decode(deserializer);
+                let mut var_content = <String>::sse_decode(deserializer);
+                return crate::NodeContent::RawBlock {
+                    format: var_format,
+                    content: var_content,
+                };
+            }
+            19 => {
+                let mut var_entries = <Vec<String>>::sse_decode(deserializer);
+                return crate::NodeContent::MetadataBlock { entries: var_entries };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -9891,11 +10326,33 @@ impl SseDecode for Option<crate::EmbeddingConfig> {
     }
 }
 
+impl SseDecode for Option<crate::EmbeddingPreset> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::EmbeddingPreset>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<crate::ErrorMetadata> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<crate::ErrorMetadata>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::ExtractionMethod> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::ExtractionMethod>::sse_decode(deserializer));
         } else {
             return None;
         }
@@ -9929,6 +10386,17 @@ impl SseDecode for Option<crate::FileExtractionConfig> {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<crate::FileExtractionConfig>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::FormatMetadata> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::FormatMetadata>::sse_decode(deserializer));
         } else {
             return None;
         }
@@ -10761,6 +11229,26 @@ impl SseDecode for crate::PdfConfig {
     }
 }
 
+impl SseDecode for crate::PdfMetadata {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_pdfVersion = <Option<String>>::sse_decode(deserializer);
+        let mut var_producer = <Option<String>>::sse_decode(deserializer);
+        let mut var_isEncrypted = <Option<bool>>::sse_decode(deserializer);
+        let mut var_width = <Option<i64>>::sse_decode(deserializer);
+        let mut var_height = <Option<i64>>::sse_decode(deserializer);
+        let mut var_pageCount = <Option<i64>>::sse_decode(deserializer);
+        return crate::PdfMetadata {
+            pdf_version: var_pdfVersion,
+            producer: var_producer,
+            is_encrypted: var_isEncrypted,
+            width: var_width,
+            height: var_height,
+            page_count: var_pageCount,
+        };
+    }
+}
+
 impl SseDecode for crate::PostProcessorConfig {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -11561,7 +12049,7 @@ fn pde_ffi_dispatcher_primary_impl(
         45 => wire__crate__create_embedded_file_from_json_impl(port, ptr, rust_vec_len, data_len),
         46 => wire__crate__create_embedding_backend_dart_impl_impl(port, ptr, rust_vec_len, data_len),
         47 => wire__crate__create_embedding_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        48 => wire__crate__create_embedding_preset2_from_json_impl(port, ptr, rust_vec_len, data_len),
+        48 => wire__crate__create_embedding_preset_from_json_impl(port, ptr, rust_vec_len, data_len),
         49 => wire__crate__create_epub_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
         50 => wire__crate__create_error_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
         51 => wire__crate__create_excel_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
@@ -11623,70 +12111,71 @@ fn pde_ffi_dispatcher_primary_impl(
         107 => wire__crate__create_page_structure_from_json_impl(port, ptr, rust_vec_len, data_len),
         108 => wire__crate__create_pdf_annotation_from_json_impl(port, ptr, rust_vec_len, data_len),
         109 => wire__crate__create_pdf_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        110 => wire__crate__create_post_processor_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        111 => wire__crate__create_post_processor_dart_impl_impl(port, ptr, rust_vec_len, data_len),
-        112 => wire__crate__create_pptx_app_properties_from_json_impl(port, ptr, rust_vec_len, data_len),
-        113 => wire__crate__create_pptx_extraction_result_from_json_impl(port, ptr, rust_vec_len, data_len),
-        114 => wire__crate__create_pptx_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
-        115 => wire__crate__create_processing_warning_from_json_impl(port, ptr, rust_vec_len, data_len),
-        116 => wire__crate__create_pst_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
-        117 => wire__crate__create_rake_params_from_json_impl(port, ptr, rust_vec_len, data_len),
-        118 => wire__crate__create_recognized_table_from_json_impl(port, ptr, rust_vec_len, data_len),
-        119 => wire__crate__create_renderer_dart_impl_impl(port, ptr, rust_vec_len, data_len),
-        120 => wire__crate__create_security_limits_from_json_impl(port, ptr, rust_vec_len, data_len),
-        121 => wire__crate__create_server_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        122 => wire__crate__create_structured_data_from_json_impl(port, ptr, rust_vec_len, data_len),
-        123 => wire__crate__create_structured_data_result_from_json_impl(port, ptr, rust_vec_len, data_len),
-        124 => wire__crate__create_structured_extraction_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        125 => wire__crate__create_supported_format_from_json_impl(port, ptr, rust_vec_len, data_len),
-        126 => wire__crate__create_table_cell_from_json_impl(port, ptr, rust_vec_len, data_len),
-        127 => wire__crate__create_table_from_json_impl(port, ptr, rust_vec_len, data_len),
-        128 => wire__crate__create_table_grid_from_json_impl(port, ptr, rust_vec_len, data_len),
-        129 => wire__crate__create_tesseract_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        130 => wire__crate__create_text_annotation_from_json_impl(port, ptr, rust_vec_len, data_len),
-        131 => wire__crate__create_text_extraction_result_from_json_impl(port, ptr, rust_vec_len, data_len),
-        132 => wire__crate__create_text_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
-        133 => wire__crate__create_token_reduction_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        134 => wire__crate__create_token_reduction_options_from_json_impl(port, ptr, rust_vec_len, data_len),
-        135 => wire__crate__create_tree_sitter_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        136 => wire__crate__create_tree_sitter_process_config_from_json_impl(port, ptr, rust_vec_len, data_len),
-        137 => wire__crate__create_uri_from_json_impl(port, ptr, rust_vec_len, data_len),
-        138 => wire__crate__create_validator_dart_impl_impl(port, ptr, rust_vec_len, data_len),
-        139 => wire__crate__create_xlsx_app_properties_from_json_impl(port, ptr, rust_vec_len, data_len),
-        140 => wire__crate__create_xml_extraction_result_from_json_impl(port, ptr, rust_vec_len, data_len),
-        141 => wire__crate__create_xml_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
-        142 => wire__crate__create_yake_params_from_json_impl(port, ptr, rust_vec_len, data_len),
-        143 => wire__crate__create_year_range_from_json_impl(port, ptr, rust_vec_len, data_len),
-        144 => wire__crate__detect_mime_type_impl(port, ptr, rust_vec_len, data_len),
-        145 => wire__crate__detect_mime_type_from_bytes_impl(port, ptr, rust_vec_len, data_len),
-        146 => wire__crate__embed_texts_impl(port, ptr, rust_vec_len, data_len),
-        147 => wire__crate__embed_texts_async_impl(port, ptr, rust_vec_len, data_len),
-        148 => wire__crate__extract_bytes_impl(port, ptr, rust_vec_len, data_len),
-        149 => wire__crate__extract_bytes_sync_impl(port, ptr, rust_vec_len, data_len),
-        150 => wire__crate__extract_file_impl(port, ptr, rust_vec_len, data_len),
-        151 => wire__crate__extract_file_sync_impl(port, ptr, rust_vec_len, data_len),
-        152 => wire__crate__get_embedding_preset_impl(port, ptr, rust_vec_len, data_len),
-        153 => wire__crate__get_extensions_for_mime_impl(port, ptr, rust_vec_len, data_len),
-        154 => wire__crate__list_document_extractors_impl(port, ptr, rust_vec_len, data_len),
-        155 => wire__crate__list_embedding_backends_impl(port, ptr, rust_vec_len, data_len),
-        156 => wire__crate__list_embedding_presets_impl(port, ptr, rust_vec_len, data_len),
-        157 => wire__crate__list_ocr_backends_impl(port, ptr, rust_vec_len, data_len),
-        158 => wire__crate__list_post_processors_impl(port, ptr, rust_vec_len, data_len),
-        159 => wire__crate__list_renderers_impl(port, ptr, rust_vec_len, data_len),
-        160 => wire__crate__list_validators_impl(port, ptr, rust_vec_len, data_len),
-        161 => wire__crate__register_document_extractor_impl(port, ptr, rust_vec_len, data_len),
-        162 => wire__crate__register_embedding_backend_impl(port, ptr, rust_vec_len, data_len),
-        163 => wire__crate__register_ocr_backend_impl(port, ptr, rust_vec_len, data_len),
-        164 => wire__crate__register_post_processor_impl(port, ptr, rust_vec_len, data_len),
-        165 => wire__crate__register_renderer_impl(port, ptr, rust_vec_len, data_len),
-        166 => wire__crate__register_validator_impl(port, ptr, rust_vec_len, data_len),
-        167 => wire__crate__render_pdf_page_to_png_impl(port, ptr, rust_vec_len, data_len),
-        168 => wire__crate__unregister_document_extractor_impl(port, ptr, rust_vec_len, data_len),
-        169 => wire__crate__unregister_embedding_backend_impl(port, ptr, rust_vec_len, data_len),
-        170 => wire__crate__unregister_ocr_backend_impl(port, ptr, rust_vec_len, data_len),
-        171 => wire__crate__unregister_post_processor_impl(port, ptr, rust_vec_len, data_len),
-        172 => wire__crate__unregister_renderer_impl(port, ptr, rust_vec_len, data_len),
-        173 => wire__crate__unregister_validator_impl(port, ptr, rust_vec_len, data_len),
+        110 => wire__crate__create_pdf_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
+        111 => wire__crate__create_post_processor_config_from_json_impl(port, ptr, rust_vec_len, data_len),
+        112 => wire__crate__create_post_processor_dart_impl_impl(port, ptr, rust_vec_len, data_len),
+        113 => wire__crate__create_pptx_app_properties_from_json_impl(port, ptr, rust_vec_len, data_len),
+        114 => wire__crate__create_pptx_extraction_result_from_json_impl(port, ptr, rust_vec_len, data_len),
+        115 => wire__crate__create_pptx_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
+        116 => wire__crate__create_processing_warning_from_json_impl(port, ptr, rust_vec_len, data_len),
+        117 => wire__crate__create_pst_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
+        118 => wire__crate__create_rake_params_from_json_impl(port, ptr, rust_vec_len, data_len),
+        119 => wire__crate__create_recognized_table_from_json_impl(port, ptr, rust_vec_len, data_len),
+        120 => wire__crate__create_renderer_dart_impl_impl(port, ptr, rust_vec_len, data_len),
+        121 => wire__crate__create_security_limits_from_json_impl(port, ptr, rust_vec_len, data_len),
+        122 => wire__crate__create_server_config_from_json_impl(port, ptr, rust_vec_len, data_len),
+        123 => wire__crate__create_structured_data_from_json_impl(port, ptr, rust_vec_len, data_len),
+        124 => wire__crate__create_structured_data_result_from_json_impl(port, ptr, rust_vec_len, data_len),
+        125 => wire__crate__create_structured_extraction_config_from_json_impl(port, ptr, rust_vec_len, data_len),
+        126 => wire__crate__create_supported_format_from_json_impl(port, ptr, rust_vec_len, data_len),
+        127 => wire__crate__create_table_cell_from_json_impl(port, ptr, rust_vec_len, data_len),
+        128 => wire__crate__create_table_from_json_impl(port, ptr, rust_vec_len, data_len),
+        129 => wire__crate__create_table_grid_from_json_impl(port, ptr, rust_vec_len, data_len),
+        130 => wire__crate__create_tesseract_config_from_json_impl(port, ptr, rust_vec_len, data_len),
+        131 => wire__crate__create_text_annotation_from_json_impl(port, ptr, rust_vec_len, data_len),
+        132 => wire__crate__create_text_extraction_result_from_json_impl(port, ptr, rust_vec_len, data_len),
+        133 => wire__crate__create_text_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
+        134 => wire__crate__create_token_reduction_config_from_json_impl(port, ptr, rust_vec_len, data_len),
+        135 => wire__crate__create_token_reduction_options_from_json_impl(port, ptr, rust_vec_len, data_len),
+        136 => wire__crate__create_tree_sitter_config_from_json_impl(port, ptr, rust_vec_len, data_len),
+        137 => wire__crate__create_tree_sitter_process_config_from_json_impl(port, ptr, rust_vec_len, data_len),
+        138 => wire__crate__create_uri_from_json_impl(port, ptr, rust_vec_len, data_len),
+        139 => wire__crate__create_validator_dart_impl_impl(port, ptr, rust_vec_len, data_len),
+        140 => wire__crate__create_xlsx_app_properties_from_json_impl(port, ptr, rust_vec_len, data_len),
+        141 => wire__crate__create_xml_extraction_result_from_json_impl(port, ptr, rust_vec_len, data_len),
+        142 => wire__crate__create_xml_metadata_from_json_impl(port, ptr, rust_vec_len, data_len),
+        143 => wire__crate__create_yake_params_from_json_impl(port, ptr, rust_vec_len, data_len),
+        144 => wire__crate__create_year_range_from_json_impl(port, ptr, rust_vec_len, data_len),
+        145 => wire__crate__detect_mime_type_impl(port, ptr, rust_vec_len, data_len),
+        146 => wire__crate__detect_mime_type_from_bytes_impl(port, ptr, rust_vec_len, data_len),
+        147 => wire__crate__embed_texts_impl(port, ptr, rust_vec_len, data_len),
+        148 => wire__crate__embed_texts_async_impl(port, ptr, rust_vec_len, data_len),
+        149 => wire__crate__extract_bytes_impl(port, ptr, rust_vec_len, data_len),
+        150 => wire__crate__extract_bytes_sync_impl(port, ptr, rust_vec_len, data_len),
+        151 => wire__crate__extract_file_impl(port, ptr, rust_vec_len, data_len),
+        152 => wire__crate__extract_file_sync_impl(port, ptr, rust_vec_len, data_len),
+        153 => wire__crate__get_embedding_preset_impl(port, ptr, rust_vec_len, data_len),
+        154 => wire__crate__get_extensions_for_mime_impl(port, ptr, rust_vec_len, data_len),
+        155 => wire__crate__list_document_extractors_impl(port, ptr, rust_vec_len, data_len),
+        156 => wire__crate__list_embedding_backends_impl(port, ptr, rust_vec_len, data_len),
+        157 => wire__crate__list_embedding_presets_impl(port, ptr, rust_vec_len, data_len),
+        158 => wire__crate__list_ocr_backends_impl(port, ptr, rust_vec_len, data_len),
+        159 => wire__crate__list_post_processors_impl(port, ptr, rust_vec_len, data_len),
+        160 => wire__crate__list_renderers_impl(port, ptr, rust_vec_len, data_len),
+        161 => wire__crate__list_validators_impl(port, ptr, rust_vec_len, data_len),
+        162 => wire__crate__register_document_extractor_impl(port, ptr, rust_vec_len, data_len),
+        163 => wire__crate__register_embedding_backend_impl(port, ptr, rust_vec_len, data_len),
+        164 => wire__crate__register_ocr_backend_impl(port, ptr, rust_vec_len, data_len),
+        165 => wire__crate__register_post_processor_impl(port, ptr, rust_vec_len, data_len),
+        166 => wire__crate__register_renderer_impl(port, ptr, rust_vec_len, data_len),
+        167 => wire__crate__register_validator_impl(port, ptr, rust_vec_len, data_len),
+        168 => wire__crate__render_pdf_page_to_png_impl(port, ptr, rust_vec_len, data_len),
+        169 => wire__crate__unregister_document_extractor_impl(port, ptr, rust_vec_len, data_len),
+        170 => wire__crate__unregister_embedding_backend_impl(port, ptr, rust_vec_len, data_len),
+        171 => wire__crate__unregister_ocr_backend_impl(port, ptr, rust_vec_len, data_len),
+        172 => wire__crate__unregister_post_processor_impl(port, ptr, rust_vec_len, data_len),
+        173 => wire__crate__unregister_renderer_impl(port, ptr, rust_vec_len, data_len),
+        174 => wire__crate__unregister_validator_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -13033,7 +13522,7 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::EmbeddingModelType>> fo
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::EmbeddingPreset2> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::EmbeddingPreset> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.0.name.into_into_dart().into_dart(),
@@ -13048,9 +13537,9 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::EmbeddingPreset2> {
         .into_dart()
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::EmbeddingPreset2> {}
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::EmbeddingPreset2>> for crate::EmbeddingPreset2 {
-    fn into_into_dart(self) -> FrbWrapper<crate::EmbeddingPreset2> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::EmbeddingPreset> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::EmbeddingPreset>> for crate::EmbeddingPreset {
+    fn into_into_dart(self) -> FrbWrapper<crate::EmbeddingPreset> {
         self.into()
     }
 }
@@ -13240,6 +13729,23 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::ExtractionConfig>> for 
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::ExtractionMethod> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::ExtractionMethod::Native => 0.into_dart(),
+            crate::ExtractionMethod::Ocr => 1.into_dart(),
+            crate::ExtractionMethod::Mixed => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::ExtractionMethod> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::ExtractionMethod>> for crate::ExtractionMethod {
+    fn into_into_dart(self) -> FrbWrapper<crate::ExtractionMethod> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::ExtractionResult> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -13343,6 +13849,50 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::Footnote> {
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::Footnote> {}
 impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::Footnote>> for crate::Footnote {
     fn into_into_dart(self) -> FrbWrapper<crate::Footnote> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::FormatMetadata> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::FormatMetadata::Pdf { field0 } => [0.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Docx { field0 } => [1.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Excel { field0 } => [2.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Email { field0 } => [3.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Pptx { field0 } => [4.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Archive { field0 } => {
+                [5.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::FormatMetadata::Image { field0 } => [6.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Xml { field0 } => [7.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Text { field0 } => [8.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Html { field0 } => [9.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Ocr { field0 } => [10.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Csv { field0 } => [11.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Bibtex { field0 } => {
+                [12.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::FormatMetadata::Citation { field0 } => {
+                [13.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::FormatMetadata::FictionBook { field0 } => {
+                [14.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::FormatMetadata::Dbf { field0 } => [15.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Jats { field0 } => [16.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Epub { field0 } => [17.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Pst { field0 } => [18.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            crate::FormatMetadata::Code { field0 } => [19.into_dart(), field0.into_into_dart().into_dart()].into_dart(),
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::FormatMetadata> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::FormatMetadata>> for crate::FormatMetadata {
+    fn into_into_dart(self) -> FrbWrapper<crate::FormatMetadata> {
         self.into()
     }
 }
@@ -13832,6 +14382,37 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::LanguageDetectionConfig
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::LayoutClass> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::LayoutClass::Caption => 0.into_dart(),
+            crate::LayoutClass::Footnote => 1.into_dart(),
+            crate::LayoutClass::Formula => 2.into_dart(),
+            crate::LayoutClass::ListItem => 3.into_dart(),
+            crate::LayoutClass::PageFooter => 4.into_dart(),
+            crate::LayoutClass::PageHeader => 5.into_dart(),
+            crate::LayoutClass::Picture => 6.into_dart(),
+            crate::LayoutClass::SectionHeader => 7.into_dart(),
+            crate::LayoutClass::Table => 8.into_dart(),
+            crate::LayoutClass::Text => 9.into_dart(),
+            crate::LayoutClass::Title => 10.into_dart(),
+            crate::LayoutClass::DocumentIndex => 11.into_dart(),
+            crate::LayoutClass::Code => 12.into_dart(),
+            crate::LayoutClass::CheckboxSelected => 13.into_dart(),
+            crate::LayoutClass::CheckboxUnselected => 14.into_dart(),
+            crate::LayoutClass::Form => 15.into_dart(),
+            crate::LayoutClass::KeyValueRegion => 16.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::LayoutClass> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::LayoutClass>> for crate::LayoutClass {
+    fn into_into_dart(self) -> FrbWrapper<crate::LayoutClass> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::LayoutDetection> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -14017,6 +14598,99 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::ModelPaths> {
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::ModelPaths> {}
 impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::ModelPaths>> for crate::ModelPaths {
     fn into_into_dart(self) -> FrbWrapper<crate::ModelPaths> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::NodeContent> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::NodeContent::Title { text } => [0.into_dart(), text.into_into_dart().into_dart()].into_dart(),
+            crate::NodeContent::Heading { level, text } => [
+                1.into_dart(),
+                level.into_into_dart().into_dart(),
+                text.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::Paragraph { text } => [2.into_dart(), text.into_into_dart().into_dart()].into_dart(),
+            crate::NodeContent::List { ordered } => [3.into_dart(), ordered.into_into_dart().into_dart()].into_dart(),
+            crate::NodeContent::ListItem { text } => [4.into_dart(), text.into_into_dart().into_dart()].into_dart(),
+            crate::NodeContent::Table { grid } => [5.into_dart(), grid.into_into_dart().into_dart()].into_dart(),
+            crate::NodeContent::Image {
+                description,
+                image_index,
+                src,
+            } => [
+                6.into_dart(),
+                description.into_into_dart().into_dart(),
+                image_index.into_into_dart().into_dart(),
+                src.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::Code { text, language } => [
+                7.into_dart(),
+                text.into_into_dart().into_dart(),
+                language.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::Quote => [8.into_dart()].into_dart(),
+            crate::NodeContent::Formula { text } => [9.into_dart(), text.into_into_dart().into_dart()].into_dart(),
+            crate::NodeContent::Footnote { text } => [10.into_dart(), text.into_into_dart().into_dart()].into_dart(),
+            crate::NodeContent::Group {
+                label,
+                heading_level,
+                heading_text,
+            } => [
+                11.into_dart(),
+                label.into_into_dart().into_dart(),
+                heading_level.into_into_dart().into_dart(),
+                heading_text.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::PageBreak => [12.into_dart()].into_dart(),
+            crate::NodeContent::Slide { number, title } => [
+                13.into_dart(),
+                number.into_into_dart().into_dart(),
+                title.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::DefinitionList => [14.into_dart()].into_dart(),
+            crate::NodeContent::DefinitionItem { term, definition } => [
+                15.into_dart(),
+                term.into_into_dart().into_dart(),
+                definition.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::Citation { key, text } => [
+                16.into_dart(),
+                key.into_into_dart().into_dart(),
+                text.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::Admonition { kind, title } => [
+                17.into_dart(),
+                kind.into_into_dart().into_dart(),
+                title.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::RawBlock { format, content } => [
+                18.into_dart(),
+                format.into_into_dart().into_dart(),
+                content.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::NodeContent::MetadataBlock { entries } => {
+                [19.into_dart(), entries.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::NodeContent> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::NodeContent>> for crate::NodeContent {
+    fn into_into_dart(self) -> FrbWrapper<crate::NodeContent> {
         self.into()
     }
 }
@@ -14567,6 +15241,26 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::PdfConfig> {
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::PdfConfig> {}
 impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::PdfConfig>> for crate::PdfConfig {
     fn into_into_dart(self) -> FrbWrapper<crate::PdfConfig> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::PdfMetadata> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.pdf_version.into_into_dart().into_dart(),
+            self.0.producer.into_into_dart().into_dart(),
+            self.0.is_encrypted.into_into_dart().into_dart(),
+            self.0.width.into_into_dart().into_dart(),
+            self.0.height.into_into_dart().into_dart(),
+            self.0.page_count.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::PdfMetadata> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::PdfMetadata>> for crate::PdfMetadata {
+    fn into_into_dart(self) -> FrbWrapper<crate::PdfMetadata> {
         self.into()
     }
 }
@@ -16334,7 +17028,7 @@ impl SseEncode for crate::DocumentNode {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.id, serializer);
-        <String>::sse_encode(self.content, serializer);
+        <crate::NodeContent>::sse_encode(self.content, serializer);
         <Option<i64>>::sse_encode(self.parent, serializer);
         <Vec<i64>>::sse_encode(self.children, serializer);
         <crate::ContentLayer>::sse_encode(self.content_layer, serializer);
@@ -16542,7 +17236,7 @@ impl SseEncode for crate::EmbeddingModelType {
     }
 }
 
-impl SseEncode for crate::EmbeddingPreset2 {
+impl SseEncode for crate::EmbeddingPreset {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.name, serializer);
@@ -16685,13 +17379,30 @@ impl SseEncode for crate::ExtractionConfig {
     }
 }
 
+impl SseEncode for crate::ExtractionMethod {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::ExtractionMethod::Native => 0,
+                crate::ExtractionMethod::Ocr => 1,
+                crate::ExtractionMethod::Mixed => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for crate::ExtractionResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.content, serializer);
         <String>::sse_encode(self.mime_type, serializer);
         <crate::Metadata>::sse_encode(self.metadata, serializer);
-        <Option<String>>::sse_encode(self.extraction_method, serializer);
+        <Option<crate::ExtractionMethod>>::sse_encode(self.extraction_method, serializer);
         <Vec<crate::Table>>::sse_encode(self.tables, serializer);
         <Option<Vec<String>>>::sse_encode(self.detected_languages, serializer);
         <Option<Vec<crate::Chunk>>>::sse_encode(self.chunks, serializer);
@@ -16764,6 +17475,97 @@ impl SseEncode for crate::Footnote {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.label, serializer);
         <Vec<crate::FormattedBlock>>::sse_encode(self.content, serializer);
+    }
+}
+
+impl SseEncode for crate::FormatMetadata {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::FormatMetadata::Pdf { field0 } => {
+                <i32>::sse_encode(0, serializer);
+                <crate::PdfMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Docx { field0 } => {
+                <i32>::sse_encode(1, serializer);
+                <crate::DocxMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Excel { field0 } => {
+                <i32>::sse_encode(2, serializer);
+                <crate::ExcelMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Email { field0 } => {
+                <i32>::sse_encode(3, serializer);
+                <crate::EmailMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Pptx { field0 } => {
+                <i32>::sse_encode(4, serializer);
+                <crate::PptxMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Archive { field0 } => {
+                <i32>::sse_encode(5, serializer);
+                <crate::ArchiveMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Image { field0 } => {
+                <i32>::sse_encode(6, serializer);
+                <crate::ImageMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Xml { field0 } => {
+                <i32>::sse_encode(7, serializer);
+                <crate::XmlMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Text { field0 } => {
+                <i32>::sse_encode(8, serializer);
+                <crate::TextMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Html { field0 } => {
+                <i32>::sse_encode(9, serializer);
+                <crate::HtmlMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Ocr { field0 } => {
+                <i32>::sse_encode(10, serializer);
+                <crate::OcrMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Csv { field0 } => {
+                <i32>::sse_encode(11, serializer);
+                <crate::CsvMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Bibtex { field0 } => {
+                <i32>::sse_encode(12, serializer);
+                <crate::BibtexMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Citation { field0 } => {
+                <i32>::sse_encode(13, serializer);
+                <crate::CitationMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::FictionBook { field0 } => {
+                <i32>::sse_encode(14, serializer);
+                <crate::FictionBookMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Dbf { field0 } => {
+                <i32>::sse_encode(15, serializer);
+                <crate::DbfMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Jats { field0 } => {
+                <i32>::sse_encode(16, serializer);
+                <crate::JatsMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Epub { field0 } => {
+                <i32>::sse_encode(17, serializer);
+                <crate::EpubMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Pst { field0 } => {
+                <i32>::sse_encode(18, serializer);
+                <crate::PstMetadata>::sse_encode(field0, serializer);
+            }
+            crate::FormatMetadata::Code { field0 } => {
+                <i32>::sse_encode(19, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -17113,10 +17915,41 @@ impl SseEncode for crate::LanguageDetectionConfig {
     }
 }
 
+impl SseEncode for crate::LayoutClass {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::LayoutClass::Caption => 0,
+                crate::LayoutClass::Footnote => 1,
+                crate::LayoutClass::Formula => 2,
+                crate::LayoutClass::ListItem => 3,
+                crate::LayoutClass::PageFooter => 4,
+                crate::LayoutClass::PageHeader => 5,
+                crate::LayoutClass::Picture => 6,
+                crate::LayoutClass::SectionHeader => 7,
+                crate::LayoutClass::Table => 8,
+                crate::LayoutClass::Text => 9,
+                crate::LayoutClass::Title => 10,
+                crate::LayoutClass::DocumentIndex => 11,
+                crate::LayoutClass::Code => 12,
+                crate::LayoutClass::CheckboxSelected => 13,
+                crate::LayoutClass::CheckboxUnselected => 14,
+                crate::LayoutClass::Form => 15,
+                crate::LayoutClass::KeyValueRegion => 16,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for crate::LayoutDetection {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <String>::sse_encode(self.class_name, serializer);
+        <crate::LayoutClass>::sse_encode(self.class_name, serializer);
         <f64>::sse_encode(self.confidence, serializer);
         <crate::BBox>::sse_encode(self.bbox, serializer);
     }
@@ -17713,7 +18546,7 @@ impl SseEncode for crate::Metadata {
         <Option<String>>::sse_encode(self.created_by, serializer);
         <Option<String>>::sse_encode(self.modified_by, serializer);
         <Option<crate::PageStructure>>::sse_encode(self.pages, serializer);
-        <Option<String>>::sse_encode(self.format, serializer);
+        <Option<crate::FormatMetadata>>::sse_encode(self.format, serializer);
         <Option<crate::ImagePreprocessingMetadata>>::sse_encode(self.image_preprocessing, serializer);
         <Option<String>>::sse_encode(self.json_schema, serializer);
         <Option<crate::ErrorMetadata>>::sse_encode(self.error, serializer);
@@ -17735,6 +18568,113 @@ impl SseEncode for crate::ModelPaths {
         <String>::sse_encode(self.cls_model, serializer);
         <String>::sse_encode(self.rec_model, serializer);
         <String>::sse_encode(self.dict_file, serializer);
+    }
+}
+
+impl SseEncode for crate::NodeContent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::NodeContent::Title { text } => {
+                <i32>::sse_encode(0, serializer);
+                <String>::sse_encode(text, serializer);
+            }
+            crate::NodeContent::Heading { level, text } => {
+                <i32>::sse_encode(1, serializer);
+                <i64>::sse_encode(level, serializer);
+                <String>::sse_encode(text, serializer);
+            }
+            crate::NodeContent::Paragraph { text } => {
+                <i32>::sse_encode(2, serializer);
+                <String>::sse_encode(text, serializer);
+            }
+            crate::NodeContent::List { ordered } => {
+                <i32>::sse_encode(3, serializer);
+                <bool>::sse_encode(ordered, serializer);
+            }
+            crate::NodeContent::ListItem { text } => {
+                <i32>::sse_encode(4, serializer);
+                <String>::sse_encode(text, serializer);
+            }
+            crate::NodeContent::Table { grid } => {
+                <i32>::sse_encode(5, serializer);
+                <crate::TableGrid>::sse_encode(grid, serializer);
+            }
+            crate::NodeContent::Image {
+                description,
+                image_index,
+                src,
+            } => {
+                <i32>::sse_encode(6, serializer);
+                <String>::sse_encode(description, serializer);
+                <i64>::sse_encode(image_index, serializer);
+                <String>::sse_encode(src, serializer);
+            }
+            crate::NodeContent::Code { text, language } => {
+                <i32>::sse_encode(7, serializer);
+                <String>::sse_encode(text, serializer);
+                <String>::sse_encode(language, serializer);
+            }
+            crate::NodeContent::Quote => {
+                <i32>::sse_encode(8, serializer);
+            }
+            crate::NodeContent::Formula { text } => {
+                <i32>::sse_encode(9, serializer);
+                <String>::sse_encode(text, serializer);
+            }
+            crate::NodeContent::Footnote { text } => {
+                <i32>::sse_encode(10, serializer);
+                <String>::sse_encode(text, serializer);
+            }
+            crate::NodeContent::Group {
+                label,
+                heading_level,
+                heading_text,
+            } => {
+                <i32>::sse_encode(11, serializer);
+                <String>::sse_encode(label, serializer);
+                <i64>::sse_encode(heading_level, serializer);
+                <String>::sse_encode(heading_text, serializer);
+            }
+            crate::NodeContent::PageBreak => {
+                <i32>::sse_encode(12, serializer);
+            }
+            crate::NodeContent::Slide { number, title } => {
+                <i32>::sse_encode(13, serializer);
+                <i64>::sse_encode(number, serializer);
+                <String>::sse_encode(title, serializer);
+            }
+            crate::NodeContent::DefinitionList => {
+                <i32>::sse_encode(14, serializer);
+            }
+            crate::NodeContent::DefinitionItem { term, definition } => {
+                <i32>::sse_encode(15, serializer);
+                <String>::sse_encode(term, serializer);
+                <String>::sse_encode(definition, serializer);
+            }
+            crate::NodeContent::Citation { key, text } => {
+                <i32>::sse_encode(16, serializer);
+                <String>::sse_encode(key, serializer);
+                <String>::sse_encode(text, serializer);
+            }
+            crate::NodeContent::Admonition { kind, title } => {
+                <i32>::sse_encode(17, serializer);
+                <String>::sse_encode(kind, serializer);
+                <String>::sse_encode(title, serializer);
+            }
+            crate::NodeContent::RawBlock { format, content } => {
+                <i32>::sse_encode(18, serializer);
+                <String>::sse_encode(format, serializer);
+                <String>::sse_encode(content, serializer);
+            }
+            crate::NodeContent::MetadataBlock { entries } => {
+                <i32>::sse_encode(19, serializer);
+                <Vec<String>>::sse_encode(entries, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -18081,12 +19021,32 @@ impl SseEncode for Option<crate::EmbeddingConfig> {
     }
 }
 
+impl SseEncode for Option<crate::EmbeddingPreset> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::EmbeddingPreset>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<crate::ErrorMetadata> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <crate::ErrorMetadata>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::ExtractionMethod> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::ExtractionMethod>::sse_encode(value, serializer);
         }
     }
 }
@@ -18117,6 +19077,16 @@ impl SseEncode for Option<crate::FileExtractionConfig> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <crate::FileExtractionConfig>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::FormatMetadata> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::FormatMetadata>::sse_encode(value, serializer);
         }
     }
 }
@@ -18824,6 +19794,18 @@ impl SseEncode for crate::PdfConfig {
         <Option<f64>>::sse_encode(self.bottom_margin_fraction, serializer);
         <bool>::sse_encode(self.allow_single_column_tables, serializer);
         <bool>::sse_encode(self.ocr_inline_images, serializer);
+    }
+}
+
+impl SseEncode for crate::PdfMetadata {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Option<String>>::sse_encode(self.pdf_version, serializer);
+        <Option<String>>::sse_encode(self.producer, serializer);
+        <Option<bool>>::sse_encode(self.is_encrypted, serializer);
+        <Option<i64>>::sse_encode(self.width, serializer);
+        <Option<i64>>::sse_encode(self.height, serializer);
+        <Option<i64>>::sse_encode(self.page_count, serializer);
     }
 }
 

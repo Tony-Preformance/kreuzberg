@@ -74,7 +74,7 @@ data class Metadata(
      * Contains detailed metadata specific to the document format.
      * Serialized as a nested `"format"` object with a `format_type` discriminator field.
      */
-    val format: String?,
+    val format: FormatMetadata?,
     /**
      * Image preprocessing metadata (when OCR preprocessing was applied)
      */

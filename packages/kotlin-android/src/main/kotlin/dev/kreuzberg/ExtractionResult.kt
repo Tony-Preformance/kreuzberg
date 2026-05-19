@@ -36,7 +36,7 @@ data class ExtractionResult(
      * Populated when the extractor can reliably distinguish native text extraction,
      * OCR-only extraction, or mixed native/OCR output.
      */
-    val extractionMethod: String?,
+    val extractionMethod: ExtractionMethod?,
     val tables: List<Table>,
     val detectedLanguages: List<String>?,
     /**

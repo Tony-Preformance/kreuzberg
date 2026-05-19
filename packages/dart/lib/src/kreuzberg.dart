@@ -698,7 +698,7 @@ class KreuzbergBridge {
   ///
   /// Returns `None` if no preset with the given name exists. Returns an owned
   /// clone so the value is safe to pass across FFI boundaries.
-  static Future<String?> getEmbeddingPreset(String name) async {
+  static Future<EmbeddingPreset?> getEmbeddingPreset(String name) async {
     return await rust_bridge.getEmbeddingPreset(name: name);
   }
 

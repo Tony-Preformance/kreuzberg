@@ -1473,7 +1473,7 @@ pub struct DocumentNode {
     /// Deterministic identifier (hash of content + position).
     pub id: String,
     /// Node content — tagged enum, type-specific data only.
-    pub content: String,
+    pub content: NodeContent,
     /// Parent node index (`None` = root-level node).
     pub parent: Option<i64>,
     /// Child node indices in reading order.
@@ -1555,7 +1555,7 @@ pub struct ExtractionResult {
     ///
     /// Populated when the extractor can reliably distinguish native text extraction,
     /// OCR-only extraction, or mixed native/OCR output.
-    pub extraction_method: Option<String>,
+    pub extraction_method: Option<ExtractionMethod>,
     pub tables: Vec<Table>,
     pub detected_languages: Option<Vec<String>>,
     /// Text chunks when chunking is enabled.
@@ -2257,7 +2257,7 @@ pub struct Metadata {
     ///
     /// Contains detailed metadata specific to the document format.
     /// Serialized as a nested `"format"` object with a `format_type` discriminator field.
-    pub format: Option<String>,
+    pub format: Option<FormatMetadata>,
     /// Image preprocessing metadata (when OCR preprocessing was applied)
     pub image_preprocessing: Option<ImagePreprocessingMetadata>,
     /// JSON schema (for structured data extraction)
@@ -2965,8 +2965,8 @@ pub struct DetectResponse {
 ///
 /// All string fields are owned `String` for FFI compatibility — instances
 /// are safe to clone and pass across language boundaries.
-#[frb(mirror(EmbeddingPreset2))]
-pub struct EmbeddingPreset2 {
+#[frb(mirror(EmbeddingPreset))]
+pub struct EmbeddingPreset {
     pub name: String,
     pub chunk_size: i64,
     pub overlap: i64,
@@ -3140,7 +3140,7 @@ pub struct BBox {
 /// A single layout detection result.
 #[frb(mirror(LayoutDetection))]
 pub struct LayoutDetection {
-    pub class_name: String,
+    pub class_name: LayoutClass,
     pub confidence: f64,
     pub bbox: BBox,
 }
@@ -3178,6 +3178,27 @@ pub struct EmbeddedFile {
     pub data: Vec<u8>,
     /// MIME type if specified in the filespec, otherwise `None`.
     pub mime_type: Option<String>,
+}
+
+/// PDF-specific metadata.
+///
+/// Contains metadata fields specific to PDF documents that are not in the common
+/// `Metadata` structure. Common fields like title, authors, keywords, and dates
+/// are at the `Metadata` level.
+#[frb(mirror(PdfMetadata))]
+pub struct PdfMetadata {
+    /// PDF version (e.g., "1.7", "2.0")
+    pub pdf_version: Option<String>,
+    /// PDF producer (application that created the PDF)
+    pub producer: Option<String>,
+    /// Whether the PDF is encrypted/password-protected
+    pub is_encrypted: Option<bool>,
+    /// First page width in points (1/72 inch)
+    pub width: Option<i64>,
+    /// First page height in points (1/72 inch)
+    pub height: Option<i64>,
+    /// Total number of pages in the PDF document
+    pub page_count: Option<i64>,
 }
 
 /// ONNX Runtime execution provider type.
@@ -3358,8 +3379,8 @@ pub enum CodeContentMode {
 }
 
 /// Type of list detection.
-#[frb(mirror(TransformListType))]
-pub enum TransformListType {
+#[frb(mirror(ListType))]
+pub enum ListType {
     /// Bullet points (-, *, •, etc.)
     Bullet,
     /// Numbered lists (1., 2., etc.)
@@ -3538,8 +3559,8 @@ pub enum ContentLayer {
 ///
 /// Uses `#[serde(tag = "node_type")]` to avoid "type" keyword collision in
 /// Go/Java/TypeScript bindings.
-#[frb(mirror(NodeContent2))]
-pub enum NodeContent2 {
+#[frb(mirror(NodeContent))]
+pub enum NodeContent {
     /// Document title.
     Title { text: String },
     /// Section heading with level (1-6).
@@ -3643,8 +3664,8 @@ pub enum AnnotationKind {
 }
 
 /// How the extracted text was produced.
-#[frb(mirror(ExtractionMethod2))]
-pub enum ExtractionMethod2 {
+#[frb(mirror(ExtractionMethod))]
+pub enum ExtractionMethod {
     Native,
     Ocr,
     Mixed,
@@ -3759,9 +3780,9 @@ pub enum ElementType {
 ///
 /// Only one format type can exist per extraction result. This provides
 /// type-safe, clean metadata without nested optionals.
-#[frb(mirror(FormatMetadata2))]
-pub enum FormatMetadata2 {
-    Pdf { field0: String },
+#[frb(mirror(FormatMetadata))]
+pub enum FormatMetadata {
+    Pdf { field0: PdfMetadata },
     Docx { field0: DocxMetadata },
     Excel { field0: ExcelMetadata },
     Email { field0: EmailMetadata },
@@ -3936,8 +3957,8 @@ pub enum PSMMode {
 /// Supported languages in PaddleOCR.
 ///
 /// Maps user-friendly language codes to paddle-ocr-rs language identifiers.
-#[frb(mirror(PaddleLanguage2))]
-pub enum PaddleLanguage2 {
+#[frb(mirror(PaddleLanguage))]
+pub enum PaddleLanguage {
     /// English
     English,
     /// Simplified Chinese
@@ -3979,8 +4000,8 @@ pub enum PaddleLanguage2 {
 /// map to the closest equivalent.
 ///
 /// Wire format is snake_case in all serializers (JSON, TOML, YAML).
-#[frb(mirror(LayoutClass2))]
-pub enum LayoutClass2 {
+#[frb(mirror(LayoutClass))]
+pub enum LayoutClass {
     Caption,
     Footnote,
     Formula,
@@ -3998,6 +4019,45 @@ pub enum LayoutClass2 {
     CheckboxUnselected,
     Form,
     KeyValueRegion,
+}
+
+/// Main error type for all Kreuzberg operations.
+///
+/// All errors in Kreuzberg use this enum, which preserves error chains
+/// and provides context for debugging.
+///
+/// # Variants
+///
+/// - `Io` - File system and I/O errors (always bubble up)
+/// - `Parsing` - Document parsing errors (corrupt files, unsupported features)
+/// - `Ocr` - OCR processing errors
+/// - `Validation` - Input validation errors (invalid paths, config, parameters)
+/// - `Cache` - Cache operation errors (non-fatal, can be ignored)
+/// - `ImageProcessing` - Image manipulation errors
+/// - `Serialization` - JSON/MessagePack serialization errors
+/// - `MissingDependency` - Missing optional dependencies (tesseract, etc.)
+/// - `Plugin` - Plugin-specific errors
+/// - `LockPoisoned` - Mutex/RwLock poisoning (should not happen in normal operation)
+/// - `UnsupportedFormat` - Unsupported MIME type or file format
+/// - `Other` - Catch-all for uncommon errors
+#[frb(mirror(KreuzbergError))]
+pub enum KreuzbergError {
+    Io { field0: String },
+    Parsing { message: String, source: String },
+    Ocr { message: String, source: String },
+    Validation { message: String, source: String },
+    Cache { message: String, source: String },
+    ImageProcessing { message: String, source: String },
+    Serialization { message: String, source: String },
+    MissingDependency { field0: String },
+    Plugin { message: String, plugin_name: String },
+    LockPoisoned { field0: String },
+    UnsupportedFormat { field0: String },
+    Embedding { message: String, source: String },
+    Timeout { elapsed_ms: i64, limit_ms: i64 },
+    Cancelled,
+    Security { message: String, source: String },
+    Other { field0: String },
 }
 
 // From<SourceT> conversions for bridge return types.
@@ -4661,7 +4721,7 @@ impl From<kreuzberg::DocumentNode> for DocumentNode {
     fn from(v: kreuzberg::DocumentNode) -> Self {
         DocumentNode {
             id: Default::default(),
-            content: Default::default(),
+            content: NodeContent::from(v.content),
             parent: v.parent.map(|x| x.0 as _),
             children: v.children.into_iter().map(|x| x.0 as _).collect(),
             content_layer: ContentLayer::from(v.content_layer),
@@ -4716,7 +4776,7 @@ impl From<kreuzberg::ExtractionResult> for ExtractionResult {
             content: v.content.into(),
             mime_type: v.mime_type.into_owned(),
             metadata: Metadata::from(v.metadata),
-            extraction_method: Default::default(),
+            extraction_method: v.extraction_method.map(ExtractionMethod::from),
             tables: v.tables.into_iter().map(Table::from).collect(),
             detected_languages: v
                 .detected_languages
@@ -5091,7 +5151,7 @@ impl From<kreuzberg::Metadata> for Metadata {
             created_by: v.created_by.map(|s| s.into()),
             modified_by: v.modified_by.map(|s| s.into()),
             pages: v.pages.map(PageStructure::from),
-            format: Default::default(),
+            format: v.format.map(FormatMetadata::from),
             image_preprocessing: v.image_preprocessing.map(ImagePreprocessingMetadata::from),
             json_schema: v.json_schema.map(|j| serde_json::to_string(&j).unwrap_or_default()),
             error: v.error.map(ErrorMetadata::from),
@@ -5590,9 +5650,9 @@ impl From<kreuzberg::api::DetectResponse> for DetectResponse {
     }
 }
 
-impl From<kreuzberg::EmbeddingPreset> for EmbeddingPreset2 {
+impl From<kreuzberg::EmbeddingPreset> for EmbeddingPreset {
     fn from(v: kreuzberg::EmbeddingPreset) -> Self {
-        EmbeddingPreset2 {
+        EmbeddingPreset {
             name: v.name.into(),
             chunk_size: v.chunk_size as _,
             overlap: v.overlap as _,
@@ -5709,7 +5769,7 @@ impl From<kreuzberg::BBox> for BBox {
 impl From<kreuzberg::LayoutDetection> for LayoutDetection {
     fn from(v: kreuzberg::LayoutDetection) -> Self {
         LayoutDetection {
-            class_name: Default::default(),
+            class_name: LayoutClass::from(v.class_name),
             confidence: v.confidence as _,
             bbox: BBox::from(v.bbox),
         }
@@ -5742,6 +5802,19 @@ impl From<kreuzberg::pdf::embedded_files::EmbeddedFile> for EmbeddedFile {
             name: v.name.into(),
             data: v.data.into(),
             mime_type: v.mime_type.map(|s| s.into()),
+        }
+    }
+}
+
+impl From<kreuzberg::pdf::metadata::PdfMetadata> for PdfMetadata {
+    fn from(v: kreuzberg::pdf::metadata::PdfMetadata) -> Self {
+        PdfMetadata {
+            pdf_version: v.pdf_version.map(|s| s.into()),
+            producer: v.producer.map(|s| s.into()),
+            is_encrypted: v.is_encrypted.map(|x| x as _),
+            width: v.width.map(|x| x as _),
+            height: v.height.map(|x| x as _),
+            page_count: v.page_count.map(|x| x as _),
         }
     }
 }
@@ -5846,13 +5919,13 @@ impl From<kreuzberg::CodeContentMode> for CodeContentMode {
     }
 }
 
-impl From<kreuzberg::extraction::transform::ListType> for TransformListType {
+impl From<kreuzberg::extraction::transform::ListType> for ListType {
     fn from(v: kreuzberg::extraction::transform::ListType) -> Self {
         match v {
-            kreuzberg::extraction::transform::ListType::Bullet => TransformListType::Bullet,
-            kreuzberg::extraction::transform::ListType::Numbered => TransformListType::Numbered,
-            kreuzberg::extraction::transform::ListType::Lettered => TransformListType::Lettered,
-            kreuzberg::extraction::transform::ListType::Indented => TransformListType::Indented,
+            kreuzberg::extraction::transform::ListType::Bullet => ListType::Bullet,
+            kreuzberg::extraction::transform::ListType::Numbered => ListType::Numbered,
+            kreuzberg::extraction::transform::ListType::Lettered => ListType::Lettered,
+            kreuzberg::extraction::transform::ListType::Indented => ListType::Indented,
         }
     }
 }
@@ -5997,61 +6070,61 @@ impl From<kreuzberg::ContentLayer> for ContentLayer {
     }
 }
 
-impl From<kreuzberg::NodeContent> for NodeContent2 {
+impl From<kreuzberg::NodeContent> for NodeContent {
     fn from(v: kreuzberg::NodeContent) -> Self {
         match v {
-            kreuzberg::NodeContent::Title { text } => NodeContent2::Title { text },
-            kreuzberg::NodeContent::Heading { level, text } => NodeContent2::Heading {
+            kreuzberg::NodeContent::Title { text } => NodeContent::Title { text },
+            kreuzberg::NodeContent::Heading { level, text } => NodeContent::Heading {
                 level: level as _,
                 text,
             },
-            kreuzberg::NodeContent::Paragraph { text } => NodeContent2::Paragraph { text },
-            kreuzberg::NodeContent::List { ordered } => NodeContent2::List { ordered: ordered as _ },
-            kreuzberg::NodeContent::ListItem { text } => NodeContent2::ListItem { text },
-            kreuzberg::NodeContent::Table { grid } => NodeContent2::Table {
+            kreuzberg::NodeContent::Paragraph { text } => NodeContent::Paragraph { text },
+            kreuzberg::NodeContent::List { ordered } => NodeContent::List { ordered: ordered as _ },
+            kreuzberg::NodeContent::ListItem { text } => NodeContent::ListItem { text },
+            kreuzberg::NodeContent::Table { grid } => NodeContent::Table {
                 grid: TableGrid::from(grid),
             },
             kreuzberg::NodeContent::Image {
                 description,
                 image_index,
                 src,
-            } => NodeContent2::Image {
+            } => NodeContent::Image {
                 description: description.unwrap_or_default(),
                 image_index: image_index.map(|x| x as _).unwrap_or_default(),
                 src: src.unwrap_or_default(),
             },
-            kreuzberg::NodeContent::Code { text, language } => NodeContent2::Code {
+            kreuzberg::NodeContent::Code { text, language } => NodeContent::Code {
                 text,
                 language: language.unwrap_or_default(),
             },
-            kreuzberg::NodeContent::Quote => NodeContent2::Quote,
-            kreuzberg::NodeContent::Formula { text } => NodeContent2::Formula { text },
-            kreuzberg::NodeContent::Footnote { text } => NodeContent2::Footnote { text },
+            kreuzberg::NodeContent::Quote => NodeContent::Quote,
+            kreuzberg::NodeContent::Formula { text } => NodeContent::Formula { text },
+            kreuzberg::NodeContent::Footnote { text } => NodeContent::Footnote { text },
             kreuzberg::NodeContent::Group {
                 label,
                 heading_level,
                 heading_text,
-            } => NodeContent2::Group {
+            } => NodeContent::Group {
                 label: label.unwrap_or_default(),
                 heading_level: heading_level.map(|x| x as _).unwrap_or_default(),
                 heading_text: heading_text.unwrap_or_default(),
             },
-            kreuzberg::NodeContent::PageBreak => NodeContent2::PageBreak,
-            kreuzberg::NodeContent::Slide { number, title } => NodeContent2::Slide {
+            kreuzberg::NodeContent::PageBreak => NodeContent::PageBreak,
+            kreuzberg::NodeContent::Slide { number, title } => NodeContent::Slide {
                 number: number as _,
                 title: title.unwrap_or_default(),
             },
-            kreuzberg::NodeContent::DefinitionList => NodeContent2::DefinitionList,
+            kreuzberg::NodeContent::DefinitionList => NodeContent::DefinitionList,
             kreuzberg::NodeContent::DefinitionItem { term, definition } => {
-                NodeContent2::DefinitionItem { term, definition }
+                NodeContent::DefinitionItem { term, definition }
             }
-            kreuzberg::NodeContent::Citation { key, text } => NodeContent2::Citation { key, text },
-            kreuzberg::NodeContent::Admonition { kind, title } => NodeContent2::Admonition {
+            kreuzberg::NodeContent::Citation { key, text } => NodeContent::Citation { key, text },
+            kreuzberg::NodeContent::Admonition { kind, title } => NodeContent::Admonition {
                 kind,
                 title: title.unwrap_or_default(),
             },
-            kreuzberg::NodeContent::RawBlock { format, content } => NodeContent2::RawBlock { format, content },
-            kreuzberg::NodeContent::MetadataBlock { entries } => NodeContent2::MetadataBlock {
+            kreuzberg::NodeContent::RawBlock { format, content } => NodeContent::RawBlock { format, content },
+            kreuzberg::NodeContent::MetadataBlock { entries } => NodeContent::MetadataBlock {
                 entries: entries
                     .into_iter()
                     .map(|e| serde_json::to_string(&e).unwrap_or_default())
@@ -6086,12 +6159,12 @@ impl From<kreuzberg::AnnotationKind> for AnnotationKind {
     }
 }
 
-impl From<kreuzberg::ExtractionMethod> for ExtractionMethod2 {
+impl From<kreuzberg::ExtractionMethod> for ExtractionMethod {
     fn from(v: kreuzberg::ExtractionMethod) -> Self {
         match v {
-            kreuzberg::ExtractionMethod::Native => ExtractionMethod2::Native,
-            kreuzberg::ExtractionMethod::Ocr => ExtractionMethod2::Ocr,
-            kreuzberg::ExtractionMethod::Mixed => ExtractionMethod2::Mixed,
+            kreuzberg::ExtractionMethod::Native => ExtractionMethod::Native,
+            kreuzberg::ExtractionMethod::Ocr => ExtractionMethod::Ocr,
+            kreuzberg::ExtractionMethod::Mixed => ExtractionMethod::Mixed,
         }
     }
 }
@@ -6161,67 +6234,67 @@ impl From<kreuzberg::ElementType> for ElementType {
     }
 }
 
-impl From<kreuzberg::FormatMetadata> for FormatMetadata2 {
+impl From<kreuzberg::FormatMetadata> for FormatMetadata {
     fn from(v: kreuzberg::FormatMetadata) -> Self {
         match v {
-            kreuzberg::FormatMetadata::Pdf(f0) => FormatMetadata2::Pdf {
-                field0: serde_json::to_string(&f0).unwrap_or_default(),
+            kreuzberg::FormatMetadata::Pdf(f0) => FormatMetadata::Pdf {
+                field0: PdfMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Docx(f0) => FormatMetadata2::Docx {
+            kreuzberg::FormatMetadata::Docx(f0) => FormatMetadata::Docx {
                 field0: DocxMetadata::from(*f0),
             },
-            kreuzberg::FormatMetadata::Excel(f0) => FormatMetadata2::Excel {
+            kreuzberg::FormatMetadata::Excel(f0) => FormatMetadata::Excel {
                 field0: ExcelMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Email(f0) => FormatMetadata2::Email {
+            kreuzberg::FormatMetadata::Email(f0) => FormatMetadata::Email {
                 field0: EmailMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Pptx(f0) => FormatMetadata2::Pptx {
+            kreuzberg::FormatMetadata::Pptx(f0) => FormatMetadata::Pptx {
                 field0: PptxMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Archive(f0) => FormatMetadata2::Archive {
+            kreuzberg::FormatMetadata::Archive(f0) => FormatMetadata::Archive {
                 field0: ArchiveMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Image(f0) => FormatMetadata2::Image {
+            kreuzberg::FormatMetadata::Image(f0) => FormatMetadata::Image {
                 field0: ImageMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Xml(f0) => FormatMetadata2::Xml {
+            kreuzberg::FormatMetadata::Xml(f0) => FormatMetadata::Xml {
                 field0: XmlMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Text(f0) => FormatMetadata2::Text {
+            kreuzberg::FormatMetadata::Text(f0) => FormatMetadata::Text {
                 field0: TextMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Html(f0) => FormatMetadata2::Html {
+            kreuzberg::FormatMetadata::Html(f0) => FormatMetadata::Html {
                 field0: HtmlMetadata::from(*f0),
             },
-            kreuzberg::FormatMetadata::Ocr(f0) => FormatMetadata2::Ocr {
+            kreuzberg::FormatMetadata::Ocr(f0) => FormatMetadata::Ocr {
                 field0: OcrMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Csv(f0) => FormatMetadata2::Csv {
+            kreuzberg::FormatMetadata::Csv(f0) => FormatMetadata::Csv {
                 field0: CsvMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Bibtex(f0) => FormatMetadata2::Bibtex {
+            kreuzberg::FormatMetadata::Bibtex(f0) => FormatMetadata::Bibtex {
                 field0: BibtexMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Citation(f0) => FormatMetadata2::Citation {
+            kreuzberg::FormatMetadata::Citation(f0) => FormatMetadata::Citation {
                 field0: CitationMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::FictionBook(f0) => FormatMetadata2::FictionBook {
+            kreuzberg::FormatMetadata::FictionBook(f0) => FormatMetadata::FictionBook {
                 field0: FictionBookMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Dbf(f0) => FormatMetadata2::Dbf {
+            kreuzberg::FormatMetadata::Dbf(f0) => FormatMetadata::Dbf {
                 field0: DbfMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Jats(f0) => FormatMetadata2::Jats {
+            kreuzberg::FormatMetadata::Jats(f0) => FormatMetadata::Jats {
                 field0: JatsMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Epub(f0) => FormatMetadata2::Epub {
+            kreuzberg::FormatMetadata::Epub(f0) => FormatMetadata::Epub {
                 field0: EpubMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Pst(f0) => FormatMetadata2::Pst {
+            kreuzberg::FormatMetadata::Pst(f0) => FormatMetadata::Pst {
                 field0: PstMetadata::from(f0),
             },
-            kreuzberg::FormatMetadata::Code(f0) => FormatMetadata2::Code {
+            kreuzberg::FormatMetadata::Code(f0) => FormatMetadata::Code {
                 field0: serde_json::to_string(&f0).unwrap_or_default(),
             },
         }
@@ -6354,49 +6427,49 @@ impl From<kreuzberg::PSMMode> for PSMMode {
     }
 }
 
-impl From<kreuzberg::PaddleLanguage> for PaddleLanguage2 {
+impl From<kreuzberg::PaddleLanguage> for PaddleLanguage {
     fn from(v: kreuzberg::PaddleLanguage) -> Self {
         match v {
-            kreuzberg::PaddleLanguage::English => PaddleLanguage2::English,
-            kreuzberg::PaddleLanguage::Chinese => PaddleLanguage2::Chinese,
-            kreuzberg::PaddleLanguage::Japanese => PaddleLanguage2::Japanese,
-            kreuzberg::PaddleLanguage::Korean => PaddleLanguage2::Korean,
-            kreuzberg::PaddleLanguage::German => PaddleLanguage2::German,
-            kreuzberg::PaddleLanguage::French => PaddleLanguage2::French,
-            kreuzberg::PaddleLanguage::Latin => PaddleLanguage2::Latin,
-            kreuzberg::PaddleLanguage::Cyrillic => PaddleLanguage2::Cyrillic,
-            kreuzberg::PaddleLanguage::TraditionalChinese => PaddleLanguage2::TraditionalChinese,
-            kreuzberg::PaddleLanguage::Thai => PaddleLanguage2::Thai,
-            kreuzberg::PaddleLanguage::Greek => PaddleLanguage2::Greek,
-            kreuzberg::PaddleLanguage::EastSlavic => PaddleLanguage2::EastSlavic,
-            kreuzberg::PaddleLanguage::Arabic => PaddleLanguage2::Arabic,
-            kreuzberg::PaddleLanguage::Devanagari => PaddleLanguage2::Devanagari,
-            kreuzberg::PaddleLanguage::Tamil => PaddleLanguage2::Tamil,
-            kreuzberg::PaddleLanguage::Telugu => PaddleLanguage2::Telugu,
+            kreuzberg::PaddleLanguage::English => PaddleLanguage::English,
+            kreuzberg::PaddleLanguage::Chinese => PaddleLanguage::Chinese,
+            kreuzberg::PaddleLanguage::Japanese => PaddleLanguage::Japanese,
+            kreuzberg::PaddleLanguage::Korean => PaddleLanguage::Korean,
+            kreuzberg::PaddleLanguage::German => PaddleLanguage::German,
+            kreuzberg::PaddleLanguage::French => PaddleLanguage::French,
+            kreuzberg::PaddleLanguage::Latin => PaddleLanguage::Latin,
+            kreuzberg::PaddleLanguage::Cyrillic => PaddleLanguage::Cyrillic,
+            kreuzberg::PaddleLanguage::TraditionalChinese => PaddleLanguage::TraditionalChinese,
+            kreuzberg::PaddleLanguage::Thai => PaddleLanguage::Thai,
+            kreuzberg::PaddleLanguage::Greek => PaddleLanguage::Greek,
+            kreuzberg::PaddleLanguage::EastSlavic => PaddleLanguage::EastSlavic,
+            kreuzberg::PaddleLanguage::Arabic => PaddleLanguage::Arabic,
+            kreuzberg::PaddleLanguage::Devanagari => PaddleLanguage::Devanagari,
+            kreuzberg::PaddleLanguage::Tamil => PaddleLanguage::Tamil,
+            kreuzberg::PaddleLanguage::Telugu => PaddleLanguage::Telugu,
         }
     }
 }
 
-impl From<kreuzberg::LayoutClass> for LayoutClass2 {
+impl From<kreuzberg::LayoutClass> for LayoutClass {
     fn from(v: kreuzberg::LayoutClass) -> Self {
         match v {
-            kreuzberg::LayoutClass::Caption => LayoutClass2::Caption,
-            kreuzberg::LayoutClass::Footnote => LayoutClass2::Footnote,
-            kreuzberg::LayoutClass::Formula => LayoutClass2::Formula,
-            kreuzberg::LayoutClass::ListItem => LayoutClass2::ListItem,
-            kreuzberg::LayoutClass::PageFooter => LayoutClass2::PageFooter,
-            kreuzberg::LayoutClass::PageHeader => LayoutClass2::PageHeader,
-            kreuzberg::LayoutClass::Picture => LayoutClass2::Picture,
-            kreuzberg::LayoutClass::SectionHeader => LayoutClass2::SectionHeader,
-            kreuzberg::LayoutClass::Table => LayoutClass2::Table,
-            kreuzberg::LayoutClass::Text => LayoutClass2::Text,
-            kreuzberg::LayoutClass::Title => LayoutClass2::Title,
-            kreuzberg::LayoutClass::DocumentIndex => LayoutClass2::DocumentIndex,
-            kreuzberg::LayoutClass::Code => LayoutClass2::Code,
-            kreuzberg::LayoutClass::CheckboxSelected => LayoutClass2::CheckboxSelected,
-            kreuzberg::LayoutClass::CheckboxUnselected => LayoutClass2::CheckboxUnselected,
-            kreuzberg::LayoutClass::Form => LayoutClass2::Form,
-            kreuzberg::LayoutClass::KeyValueRegion => LayoutClass2::KeyValueRegion,
+            kreuzberg::LayoutClass::Caption => LayoutClass::Caption,
+            kreuzberg::LayoutClass::Footnote => LayoutClass::Footnote,
+            kreuzberg::LayoutClass::Formula => LayoutClass::Formula,
+            kreuzberg::LayoutClass::ListItem => LayoutClass::ListItem,
+            kreuzberg::LayoutClass::PageFooter => LayoutClass::PageFooter,
+            kreuzberg::LayoutClass::PageHeader => LayoutClass::PageHeader,
+            kreuzberg::LayoutClass::Picture => LayoutClass::Picture,
+            kreuzberg::LayoutClass::SectionHeader => LayoutClass::SectionHeader,
+            kreuzberg::LayoutClass::Table => LayoutClass::Table,
+            kreuzberg::LayoutClass::Text => LayoutClass::Text,
+            kreuzberg::LayoutClass::Title => LayoutClass::Title,
+            kreuzberg::LayoutClass::DocumentIndex => LayoutClass::DocumentIndex,
+            kreuzberg::LayoutClass::Code => LayoutClass::Code,
+            kreuzberg::LayoutClass::CheckboxSelected => LayoutClass::CheckboxSelected,
+            kreuzberg::LayoutClass::CheckboxUnselected => LayoutClass::CheckboxUnselected,
+            kreuzberg::LayoutClass::Form => LayoutClass::Form,
+            kreuzberg::LayoutClass::KeyValueRegion => LayoutClass::KeyValueRegion,
         }
     }
 }
@@ -6799,6 +6872,51 @@ impl From<TreeSitterProcessConfig> for kreuzberg::TreeSitterProcessConfig {
     }
 }
 
+impl From<DocxAppProperties> for kreuzberg::DocxAppProperties {
+    fn from(v: DocxAppProperties) -> Self {
+        kreuzberg::DocxAppProperties {
+            application: v.application.map(Into::into),
+            app_version: v.app_version.map(Into::into),
+            template: v.template.map(Into::into),
+            total_time: v.total_time.map(|x| x as _),
+            pages: v.pages.map(|x| x as _),
+            words: v.words.map(|x| x as _),
+            characters: v.characters.map(|x| x as _),
+            characters_with_spaces: v.characters_with_spaces.map(|x| x as _),
+            lines: v.lines.map(|x| x as _),
+            paragraphs: v.paragraphs.map(|x| x as _),
+            company: v.company.map(Into::into),
+            doc_security: v.doc_security.map(|x| x as _),
+            scale_crop: v.scale_crop.map(|x| x as _),
+            links_up_to_date: v.links_up_to_date.map(|x| x as _),
+            shared_doc: v.shared_doc.map(|x| x as _),
+            hyperlinks_changed: v.hyperlinks_changed.map(|x| x as _),
+        }
+    }
+}
+
+impl From<CoreProperties> for kreuzberg::CoreProperties {
+    fn from(v: CoreProperties) -> Self {
+        kreuzberg::CoreProperties {
+            title: v.title.map(Into::into),
+            subject: v.subject.map(Into::into),
+            creator: v.creator.map(Into::into),
+            keywords: v.keywords.map(Into::into),
+            description: v.description.map(Into::into),
+            last_modified_by: v.last_modified_by.map(Into::into),
+            revision: v.revision.map(Into::into),
+            created: v.created.map(Into::into),
+            modified: v.modified.map(Into::into),
+            category: v.category.map(Into::into),
+            content_status: v.content_status.map(Into::into),
+            language: v.language.map(Into::into),
+            identifier: v.identifier.map(Into::into),
+            version: v.version.map(Into::into),
+            last_printed: v.last_printed.map(Into::into),
+        }
+    }
+}
+
 impl From<SecurityLimits> for kreuzberg::SecurityLimits {
     fn from(v: SecurityLimits) -> Self {
         kreuzberg::SecurityLimits {
@@ -6924,7 +7042,7 @@ impl From<DocumentNode> for kreuzberg::DocumentNode {
     fn from(v: DocumentNode) -> Self {
         kreuzberg::DocumentNode {
             id: Default::default(),
-            content: Default::default(),
+            content: v.content.into(),
             parent: v.parent.map(|x| kreuzberg::NodeIndex(x as _)),
             children: v.children.into_iter().map(|x| kreuzberg::NodeIndex(x as _)).collect(),
             content_layer: v.content_layer.into(),
@@ -6935,6 +7053,30 @@ impl From<DocumentNode> for kreuzberg::DocumentNode {
             attributes: v
                 .attributes
                 .map(|m| m.into_iter().map(|(k, v)| (k.into(), v.into())).collect()),
+        }
+    }
+}
+
+impl From<TableGrid> for kreuzberg::TableGrid {
+    fn from(v: TableGrid) -> Self {
+        kreuzberg::TableGrid {
+            rows: v.rows as _,
+            cols: v.cols as _,
+            cells: v.cells.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<GridCell> for kreuzberg::GridCell {
+    fn from(v: GridCell) -> Self {
+        kreuzberg::GridCell {
+            content: v.content.into(),
+            row: v.row as _,
+            col: v.col as _,
+            row_span: v.row_span as _,
+            col_span: v.col_span as _,
+            is_header: v.is_header as _,
+            bbox: Default::default(),
         }
     }
 }
@@ -6956,7 +7098,7 @@ impl From<ExtractionResult> for kreuzberg::ExtractionResult {
             content: v.content.into(),
             mime_type: v.mime_type.into(),
             metadata: v.metadata.into(),
-            extraction_method: Default::default(),
+            extraction_method: v.extraction_method.map(Into::into),
             tables: v.tables.into_iter().map(Into::into).collect(),
             detected_languages: v
                 .detected_languages
@@ -7186,7 +7328,7 @@ impl From<Metadata> for kreuzberg::Metadata {
             created_by: v.created_by.map(Into::into),
             modified_by: v.modified_by.map(Into::into),
             pages: v.pages.map(Into::into),
-            format: Default::default(),
+            format: v.format.map(Into::into),
             image_preprocessing: v.image_preprocessing.map(Into::into),
             json_schema: v.json_schema.as_deref().and_then(|s| serde_json::from_str(s).ok()),
             error: v.error.map(Into::into),
@@ -7202,11 +7344,304 @@ impl From<Metadata> for kreuzberg::Metadata {
     }
 }
 
+impl From<ExcelMetadata> for kreuzberg::ExcelMetadata {
+    fn from(v: ExcelMetadata) -> Self {
+        kreuzberg::ExcelMetadata {
+            sheet_count: v.sheet_count.map(|x| x as _),
+            sheet_names: v.sheet_names.map(|vec| vec.into_iter().map(Into::into).collect()),
+        }
+    }
+}
+
+impl From<EmailMetadata> for kreuzberg::EmailMetadata {
+    fn from(v: EmailMetadata) -> Self {
+        kreuzberg::EmailMetadata {
+            from_email: v.from_email.map(Into::into),
+            from_name: v.from_name.map(Into::into),
+            to_emails: v.to_emails.into_iter().map(Into::into).collect(),
+            cc_emails: v.cc_emails.into_iter().map(Into::into).collect(),
+            bcc_emails: v.bcc_emails.into_iter().map(Into::into).collect(),
+            message_id: v.message_id.map(Into::into),
+            attachments: v.attachments.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<ArchiveMetadata> for kreuzberg::ArchiveMetadata {
+    fn from(v: ArchiveMetadata) -> Self {
+        kreuzberg::ArchiveMetadata {
+            format: v.format.into(),
+            file_count: v.file_count as _,
+            file_list: v.file_list.into_iter().map(Into::into).collect(),
+            total_size: v.total_size as _,
+            compressed_size: v.compressed_size.map(|x| x as _),
+        }
+    }
+}
+
+impl From<ImageMetadata> for kreuzberg::ImageMetadata {
+    fn from(v: ImageMetadata) -> Self {
+        kreuzberg::ImageMetadata {
+            width: v.width as _,
+            height: v.height as _,
+            format: v.format.into(),
+            exif: v.exif.into_iter().map(|(k, v)| (k.into(), v.into())).collect(),
+        }
+    }
+}
+
+impl From<XmlMetadata> for kreuzberg::XmlMetadata {
+    fn from(v: XmlMetadata) -> Self {
+        kreuzberg::XmlMetadata {
+            element_count: v.element_count as _,
+            unique_elements: v.unique_elements.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<TextMetadata> for kreuzberg::TextMetadata {
+    fn from(v: TextMetadata) -> Self {
+        kreuzberg::TextMetadata {
+            line_count: v.line_count as _,
+            word_count: v.word_count as _,
+            character_count: v.character_count as _,
+            headers: v.headers.map(|vec| vec.into_iter().map(Into::into).collect()),
+            links: Default::default(),
+            code_blocks: Default::default(),
+        }
+    }
+}
+
+impl From<HeaderMetadata> for kreuzberg::HeaderMetadata {
+    fn from(v: HeaderMetadata) -> Self {
+        kreuzberg::HeaderMetadata {
+            level: v.level as _,
+            text: v.text.into(),
+            id: v.id.map(Into::into),
+            depth: v.depth as _,
+            html_offset: v.html_offset as _,
+        }
+    }
+}
+
+impl From<LinkMetadata> for kreuzberg::LinkMetadata {
+    fn from(v: LinkMetadata) -> Self {
+        kreuzberg::LinkMetadata {
+            href: v.href.into(),
+            text: v.text.into(),
+            title: v.title.map(Into::into),
+            link_type: v.link_type.into(),
+            rel: v.rel.into_iter().map(Into::into).collect(),
+            attributes: Default::default(),
+        }
+    }
+}
+
+impl From<ImageMetadataType> for kreuzberg::ImageMetadataType {
+    fn from(v: ImageMetadataType) -> Self {
+        kreuzberg::ImageMetadataType {
+            src: v.src.into(),
+            alt: v.alt.map(Into::into),
+            title: v.title.map(Into::into),
+            dimensions: Default::default(),
+            image_type: v.image_type.into(),
+            attributes: Default::default(),
+        }
+    }
+}
+
+impl From<StructuredData> for kreuzberg::StructuredData {
+    fn from(v: StructuredData) -> Self {
+        kreuzberg::StructuredData {
+            data_type: v.data_type.into(),
+            raw_json: v.raw_json.into(),
+            schema_type: v.schema_type.map(Into::into),
+        }
+    }
+}
+
+impl From<HtmlMetadata> for kreuzberg::HtmlMetadata {
+    fn from(v: HtmlMetadata) -> Self {
+        kreuzberg::HtmlMetadata {
+            title: v.title.map(Into::into),
+            description: v.description.map(Into::into),
+            keywords: v.keywords.into_iter().map(Into::into).collect(),
+            author: v.author.map(Into::into),
+            canonical_url: v.canonical_url.map(Into::into),
+            base_href: v.base_href.map(Into::into),
+            language: v.language.map(Into::into),
+            text_direction: v.text_direction.map(Into::into),
+            open_graph: v.open_graph.into_iter().map(|(k, v)| (k.into(), v.into())).collect(),
+            twitter_card: v.twitter_card.into_iter().map(|(k, v)| (k.into(), v.into())).collect(),
+            meta_tags: v.meta_tags.into_iter().map(|(k, v)| (k.into(), v.into())).collect(),
+            headers: v.headers.into_iter().map(Into::into).collect(),
+            links: v.links.into_iter().map(Into::into).collect(),
+            images: v.images.into_iter().map(Into::into).collect(),
+            structured_data: v.structured_data.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<OcrMetadata> for kreuzberg::OcrMetadata {
+    fn from(v: OcrMetadata) -> Self {
+        kreuzberg::OcrMetadata {
+            language: v.language.into(),
+            psm: v.psm as _,
+            output_format: v.output_format.into(),
+            table_count: v.table_count as _,
+            table_rows: v.table_rows.map(|x| x as _),
+            table_cols: v.table_cols.map(|x| x as _),
+        }
+    }
+}
+
 impl From<ErrorMetadata> for kreuzberg::ErrorMetadata {
     fn from(v: ErrorMetadata) -> Self {
         kreuzberg::ErrorMetadata {
             error_type: v.error_type.into(),
             message: v.message.into(),
+        }
+    }
+}
+
+impl From<PptxMetadata> for kreuzberg::PptxMetadata {
+    fn from(v: PptxMetadata) -> Self {
+        kreuzberg::PptxMetadata {
+            slide_count: v.slide_count as _,
+            slide_names: v.slide_names.into_iter().map(Into::into).collect(),
+            image_count: v.image_count.map(|x| x as _),
+            table_count: v.table_count.map(|x| x as _),
+        }
+    }
+}
+
+impl From<DocxMetadata> for kreuzberg::DocxMetadata {
+    fn from(v: DocxMetadata) -> Self {
+        kreuzberg::DocxMetadata {
+            core_properties: v.core_properties.map(Into::into),
+            app_properties: v.app_properties.map(Into::into),
+            custom_properties: v
+                .custom_properties
+                .map(|m| m.into_iter().map(|(k, v)| (k.into(), v.into())).collect()),
+        }
+    }
+}
+
+impl From<CsvMetadata> for kreuzberg::CsvMetadata {
+    fn from(v: CsvMetadata) -> Self {
+        kreuzberg::CsvMetadata {
+            row_count: v.row_count as _,
+            column_count: v.column_count as _,
+            delimiter: v.delimiter.map(Into::into),
+            has_header: v.has_header as _,
+            column_types: v.column_types.map(|vec| vec.into_iter().map(Into::into).collect()),
+        }
+    }
+}
+
+impl From<BibtexMetadata> for kreuzberg::BibtexMetadata {
+    fn from(v: BibtexMetadata) -> Self {
+        kreuzberg::BibtexMetadata {
+            entry_count: v.entry_count as _,
+            citation_keys: v.citation_keys.into_iter().map(Into::into).collect(),
+            authors: v.authors.into_iter().map(Into::into).collect(),
+            year_range: v.year_range.map(Into::into),
+            entry_types: v
+                .entry_types
+                .map(|m| m.into_iter().map(|(k, v)| (k.into(), v as _)).collect()),
+        }
+    }
+}
+
+impl From<CitationMetadata> for kreuzberg::CitationMetadata {
+    fn from(v: CitationMetadata) -> Self {
+        kreuzberg::CitationMetadata {
+            citation_count: v.citation_count as _,
+            format: v.format.map(Into::into),
+            authors: v.authors.into_iter().map(Into::into).collect(),
+            year_range: v.year_range.map(Into::into),
+            dois: v.dois.into_iter().map(Into::into).collect(),
+            keywords: v.keywords.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<YearRange> for kreuzberg::YearRange {
+    fn from(v: YearRange) -> Self {
+        kreuzberg::YearRange {
+            min: v.min.map(|x| x as _),
+            max: v.max.map(|x| x as _),
+            years: v.years.into_iter().map(|x| x as _).collect(),
+        }
+    }
+}
+
+impl From<FictionBookMetadata> for kreuzberg::FictionBookMetadata {
+    fn from(v: FictionBookMetadata) -> Self {
+        kreuzberg::FictionBookMetadata {
+            genres: v.genres.into_iter().map(Into::into).collect(),
+            sequences: v.sequences.into_iter().map(Into::into).collect(),
+            annotation: v.annotation.map(Into::into),
+        }
+    }
+}
+
+impl From<DbfMetadata> for kreuzberg::DbfMetadata {
+    fn from(v: DbfMetadata) -> Self {
+        kreuzberg::DbfMetadata {
+            record_count: v.record_count as _,
+            field_count: v.field_count as _,
+            fields: v.fields.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<DbfFieldInfo> for kreuzberg::DbfFieldInfo {
+    fn from(v: DbfFieldInfo) -> Self {
+        kreuzberg::DbfFieldInfo {
+            name: v.name.into(),
+            field_type: v.field_type.into(),
+        }
+    }
+}
+
+impl From<JatsMetadata> for kreuzberg::JatsMetadata {
+    fn from(v: JatsMetadata) -> Self {
+        kreuzberg::JatsMetadata {
+            copyright: v.copyright.map(Into::into),
+            license: v.license.map(Into::into),
+            history_dates: v.history_dates.into_iter().map(|(k, v)| (k.into(), v.into())).collect(),
+            contributor_roles: v.contributor_roles.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<ContributorRole> for kreuzberg::ContributorRole {
+    fn from(v: ContributorRole) -> Self {
+        kreuzberg::ContributorRole {
+            name: v.name.into(),
+            role: v.role.map(Into::into),
+        }
+    }
+}
+
+impl From<EpubMetadata> for kreuzberg::EpubMetadata {
+    fn from(v: EpubMetadata) -> Self {
+        kreuzberg::EpubMetadata {
+            coverage: v.coverage.map(Into::into),
+            dc_format: v.dc_format.map(Into::into),
+            relation: v.relation.map(Into::into),
+            source: v.source.map(Into::into),
+            dc_type: v.dc_type.map(Into::into),
+            cover_image: v.cover_image.map(Into::into),
+        }
+    }
+}
+
+impl From<PstMetadata> for kreuzberg::PstMetadata {
+    fn from(v: PstMetadata) -> Self {
+        kreuzberg::PstMetadata {
+            message_count: v.message_count as _,
         }
     }
 }
@@ -7406,6 +7841,19 @@ impl From<Keyword> for kreuzberg::Keyword {
             score: v.score as _,
             algorithm: v.algorithm.into(),
             positions: v.positions.map(|vec| vec.into_iter().map(|x| x as _).collect()),
+        }
+    }
+}
+
+impl From<PdfMetadata> for kreuzberg::pdf::metadata::PdfMetadata {
+    fn from(v: PdfMetadata) -> Self {
+        kreuzberg::pdf::metadata::PdfMetadata {
+            pdf_version: v.pdf_version.map(Into::into),
+            producer: v.producer.map(Into::into),
+            is_encrypted: v.is_encrypted.map(|x| x as _),
+            width: v.width.map(|x| x as _),
+            height: v.height.map(|x| x as _),
+            page_count: v.page_count.map(|x| x as _),
         }
     }
 }
@@ -7618,6 +8066,77 @@ impl From<ContentLayer> for kreuzberg::ContentLayer {
     }
 }
 
+impl From<NodeContent> for kreuzberg::NodeContent {
+    fn from(v: NodeContent) -> Self {
+        match v {
+            NodeContent::Title { text } => kreuzberg::NodeContent::Title { text },
+            NodeContent::Heading { level, text } => kreuzberg::NodeContent::Heading {
+                level: level as _,
+                text,
+            },
+            NodeContent::Paragraph { text } => kreuzberg::NodeContent::Paragraph { text },
+            NodeContent::List { ordered } => kreuzberg::NodeContent::List { ordered: ordered as _ },
+            NodeContent::ListItem { text } => kreuzberg::NodeContent::ListItem { text },
+            NodeContent::Table { grid } => kreuzberg::NodeContent::Table { grid: grid.into() },
+            NodeContent::Image {
+                description,
+                image_index,
+                src,
+            } => kreuzberg::NodeContent::Image {
+                description: if description.is_empty() {
+                    None
+                } else {
+                    Some(description)
+                },
+                image_index: if image_index == 0 { None } else { Some(image_index as _) },
+                src: if src.is_empty() { None } else { Some(src) },
+            },
+            NodeContent::Code { text, language } => kreuzberg::NodeContent::Code {
+                text,
+                language: if language.is_empty() { None } else { Some(language) },
+            },
+            NodeContent::Quote => kreuzberg::NodeContent::Quote,
+            NodeContent::Formula { text } => kreuzberg::NodeContent::Formula { text },
+            NodeContent::Footnote { text } => kreuzberg::NodeContent::Footnote { text },
+            NodeContent::Group {
+                label,
+                heading_level,
+                heading_text,
+            } => kreuzberg::NodeContent::Group {
+                label: if label.is_empty() { None } else { Some(label) },
+                heading_level: if heading_level == 0 {
+                    None
+                } else {
+                    Some(heading_level as _)
+                },
+                heading_text: if heading_text.is_empty() {
+                    None
+                } else {
+                    Some(heading_text)
+                },
+            },
+            NodeContent::PageBreak => kreuzberg::NodeContent::PageBreak,
+            NodeContent::Slide { number, title } => kreuzberg::NodeContent::Slide {
+                number: number as _,
+                title: if title.is_empty() { None } else { Some(title) },
+            },
+            NodeContent::DefinitionList => kreuzberg::NodeContent::DefinitionList,
+            NodeContent::DefinitionItem { term, definition } => {
+                kreuzberg::NodeContent::DefinitionItem { term, definition }
+            }
+            NodeContent::Citation { key, text } => kreuzberg::NodeContent::Citation { key, text },
+            NodeContent::Admonition { kind, title } => kreuzberg::NodeContent::Admonition {
+                kind,
+                title: if title.is_empty() { None } else { Some(title) },
+            },
+            NodeContent::RawBlock { format, content } => kreuzberg::NodeContent::RawBlock { format, content },
+            NodeContent::MetadataBlock { entries } => kreuzberg::NodeContent::MetadataBlock {
+                entries: Default::default(),
+            },
+        }
+    }
+}
+
 impl From<AnnotationKind> for kreuzberg::AnnotationKind {
     fn from(v: AnnotationKind) -> Self {
         match v {
@@ -7639,6 +8158,16 @@ impl From<AnnotationKind> for kreuzberg::AnnotationKind {
                 name,
                 value: if value.is_empty() { None } else { Some(value) },
             },
+        }
+    }
+}
+
+impl From<ExtractionMethod> for kreuzberg::ExtractionMethod {
+    fn from(v: ExtractionMethod) -> Self {
+        match v {
+            ExtractionMethod::Native => kreuzberg::ExtractionMethod::Native,
+            ExtractionMethod::Ocr => kreuzberg::ExtractionMethod::Ocr,
+            ExtractionMethod::Mixed => kreuzberg::ExtractionMethod::Mixed,
         }
     }
 }
@@ -7704,6 +8233,77 @@ impl From<ElementType> for kreuzberg::ElementType {
             ElementType::BlockQuote => kreuzberg::ElementType::BlockQuote,
             ElementType::Footer => kreuzberg::ElementType::Footer,
             ElementType::Header => kreuzberg::ElementType::Header,
+        }
+    }
+}
+
+impl From<FormatMetadata> for kreuzberg::FormatMetadata {
+    fn from(v: FormatMetadata) -> Self {
+        match v {
+            FormatMetadata::Pdf { field0 } => kreuzberg::FormatMetadata::Pdf(field0.into()),
+            FormatMetadata::Docx { field0 } => kreuzberg::FormatMetadata::Docx(Box::new(field0.into())),
+            FormatMetadata::Excel { field0 } => kreuzberg::FormatMetadata::Excel(field0.into()),
+            FormatMetadata::Email { field0 } => kreuzberg::FormatMetadata::Email(field0.into()),
+            FormatMetadata::Pptx { field0 } => kreuzberg::FormatMetadata::Pptx(field0.into()),
+            FormatMetadata::Archive { field0 } => kreuzberg::FormatMetadata::Archive(field0.into()),
+            FormatMetadata::Image { field0 } => kreuzberg::FormatMetadata::Image(field0.into()),
+            FormatMetadata::Xml { field0 } => kreuzberg::FormatMetadata::Xml(field0.into()),
+            FormatMetadata::Text { field0 } => kreuzberg::FormatMetadata::Text(field0.into()),
+            FormatMetadata::Html { field0 } => kreuzberg::FormatMetadata::Html(Box::new(field0.into())),
+            FormatMetadata::Ocr { field0 } => kreuzberg::FormatMetadata::Ocr(field0.into()),
+            FormatMetadata::Csv { field0 } => kreuzberg::FormatMetadata::Csv(field0.into()),
+            FormatMetadata::Bibtex { field0 } => kreuzberg::FormatMetadata::Bibtex(field0.into()),
+            FormatMetadata::Citation { field0 } => kreuzberg::FormatMetadata::Citation(field0.into()),
+            FormatMetadata::FictionBook { field0 } => kreuzberg::FormatMetadata::FictionBook(field0.into()),
+            FormatMetadata::Dbf { field0 } => kreuzberg::FormatMetadata::Dbf(field0.into()),
+            FormatMetadata::Jats { field0 } => kreuzberg::FormatMetadata::Jats(field0.into()),
+            FormatMetadata::Epub { field0 } => kreuzberg::FormatMetadata::Epub(field0.into()),
+            FormatMetadata::Pst { field0 } => kreuzberg::FormatMetadata::Pst(field0.into()),
+            FormatMetadata::Code { field0 } => kreuzberg::FormatMetadata::Code(Default::default()),
+        }
+    }
+}
+
+impl From<TextDirection> for kreuzberg::TextDirection {
+    fn from(v: TextDirection) -> Self {
+        match v {
+            TextDirection::LeftToRight => kreuzberg::TextDirection::LeftToRight,
+            TextDirection::RightToLeft => kreuzberg::TextDirection::RightToLeft,
+            TextDirection::Auto => kreuzberg::TextDirection::Auto,
+        }
+    }
+}
+
+impl From<LinkType> for kreuzberg::LinkType {
+    fn from(v: LinkType) -> Self {
+        match v {
+            LinkType::Anchor => kreuzberg::LinkType::Anchor,
+            LinkType::Internal => kreuzberg::LinkType::Internal,
+            LinkType::External => kreuzberg::LinkType::External,
+            LinkType::Email => kreuzberg::LinkType::Email,
+            LinkType::Phone => kreuzberg::LinkType::Phone,
+            LinkType::Other => kreuzberg::LinkType::Other,
+        }
+    }
+}
+
+impl From<ImageType> for kreuzberg::ImageType {
+    fn from(v: ImageType) -> Self {
+        match v {
+            ImageType::DataUri => kreuzberg::ImageType::DataUri,
+            ImageType::InlineSvg => kreuzberg::ImageType::InlineSvg,
+            ImageType::External => kreuzberg::ImageType::External,
+            ImageType::Relative => kreuzberg::ImageType::Relative,
+        }
+    }
+}
+
+impl From<StructuredDataType> for kreuzberg::StructuredDataType {
+    fn from(v: StructuredDataType) -> Self {
+        match v {
+            StructuredDataType::JsonLd => kreuzberg::StructuredDataType::JsonLd,
+            StructuredDataType::Microdata => kreuzberg::StructuredDataType::Microdata,
+            StructuredDataType::RDFa => kreuzberg::StructuredDataType::RDFa,
         }
     }
 }
@@ -8152,9 +8752,8 @@ pub fn embed_texts(texts: Vec<String>, config: EmbeddingConfig) -> Result<Vec<Ve
 ///
 /// Returns `null` if no preset with the given name exists. Returns an owned
 /// clone so the value is safe to pass across FFI boundaries.
-pub fn get_embedding_preset(name: String) -> Option<String> {
-    let _ = name;
-    None
+pub fn get_embedding_preset(name: String) -> Option<EmbeddingPreset> {
+    (|v: Option<_>| v.map(EmbeddingPreset::from))(kreuzberg::get_embedding_preset(&name))
 }
 
 /// List the names of all available embedding presets.
@@ -8968,9 +9567,9 @@ pub fn create_detect_response_from_json(json: String) -> Result<DetectResponse, 
 }
 
 #[frb]
-pub fn create_embedding_preset2_from_json(json: String) -> Result<EmbeddingPreset2, String> {
+pub fn create_embedding_preset_from_json(json: String) -> Result<EmbeddingPreset, String> {
     serde_json::from_str::<kreuzberg::EmbeddingPreset>(&json)
-        .map(EmbeddingPreset2::from)
+        .map(EmbeddingPreset::from)
         .map_err(|e| e.to_string())
 }
 
@@ -9055,6 +9654,13 @@ pub fn create_detection_result_from_json(json: String) -> Result<DetectionResult
 pub fn create_embedded_file_from_json(json: String) -> Result<EmbeddedFile, String> {
     serde_json::from_str::<kreuzberg::pdf::embedded_files::EmbeddedFile>(&json)
         .map(EmbeddedFile::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_pdf_metadata_from_json(json: String) -> Result<PdfMetadata, String> {
+    serde_json::from_str::<kreuzberg::pdf::metadata::PdfMetadata>(&json)
+        .map(PdfMetadata::from)
         .map_err(|e| e.to_string())
 }
 

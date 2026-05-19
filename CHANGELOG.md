@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (kotlin-android e2e parity sweep)
+
+- **kotlin-android**: now honours `#[cfg_attr(alef, alef(skip))]` annotations
+  during DTO and enum emission (alef-backend-kotlin-android filter fix).
+- **alef-extract disambiguation**: when two types collide and one carries
+  `binding_excluded=true`, the non-excluded one now keeps the original name
+  (instead of getting a "2" suffix). Eliminates spurious `EmbeddingPreset2`,
+  `NodeContent2`, `LayoutClass2`, `PaddleLanguage2`, `FormatMetadata2`,
+  `ExtractionMethod2` from the IR.
+- **`pdf/metadata.rs::PdfMetadata`**: removed incorrect `alef(skip)`
+  annotation — there's only one definition (no duplicate to disambiguate),
+  so the annotation was hiding the only public type from bindings.
+- **stale kotlin-android wrappers**: 28+ leftover `*2.kt`,
+  `OcrTesseractConfig.kt`, `PdfMetadata.kt`, `ListType.kt`, `TableTableGrid.kt`,
+  `ArchiveArchive*.kt` files removed after the disambiguation fix.
+- **alef-e2e trait-bridge fixture support**: lifted the deferred-to-v0.14.5+
+  gate; trait-bridge fixtures (register/unregister/clear × 6 traits) now
+  generate per-language test calls.
+- **alef-extract embed_texts_async**: confirmed the cfg-gated generic
+  signature extracts cleanly; cleared the 3 stale skip blocks on
+  `embed_async_pending/embed_texts_async_*.json`.
+- **e2e generation surface**: regenerated all 16 language e2e suites. All
+  trait-bridge + plugin_api categories now exercise the full public API.
+  Only legitimate WASM/Rust platform-imposed skips remain (7× WASM-async,
+  1× Rust-missing-file-path).
+
 ### Added
 
 - **`kreuzberg` crate root**: plugin_api surface (`list_*`, `clear_*`, `register_*`,

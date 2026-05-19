@@ -4,7 +4,9 @@
   "description": "embed_texts_async: preset override",
   "call": "embed_texts_async",
   "input": {
-    "texts": ["Text"],
+    "texts": [
+      "Text"
+    ],
     "config": {
       "embedding_model": "default"
     }
@@ -13,27 +15,5 @@
     {
       "type": "not_error"
     }
-  ],
-  "skip": {
-    "languages": [
-      "rust",
-      "python",
-      "node",
-      "go",
-      "ruby",
-      "php",
-      "java",
-      "csharp",
-      "kotlin",
-      "kotlin_android",
-      "swift",
-      "dart",
-      "wasm",
-      "r",
-      "elixir",
-      "zig",
-      "ffi"
-    ],
-    "reason": "embed_texts_async generic+cfg-gated signature not yet supported by alef-extract; tracked in cycle-5-alef-queue.md"
-  }
+  ]
 }
