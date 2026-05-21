@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **kotlin-android**: Removed `#[cfg_attr(alef, alef(skip))]` from `InternalDocument` struct so it gets generated for Kotlin bindings. The type is used in trait bridge method signatures (e.g., `IRenderer::render(doc: InternalDocument)`) and must be available for the generated interface to compile. Previously the generated Kotlin code referenced `InternalDocument` but the type was never emitted, causing "Unresolved reference" errors. (`crates/kreuzberg/src/types/internal.rs`)
+- **kotlin-android**: Added `crates/kreuzberg/src/types/internal.rs` to alef.toml sources list so `InternalDocument` is extracted and generated for Kotlin bindings. The type is used in trait bridge method signatures (e.g., `IRenderer::render(doc: InternalDocument)`) and must be available for the generated interface to compile. Previously the generated Kotlin code referenced `InternalDocument` but the type was never extracted (missing source file), causing "Unresolved reference" errors. The skip attribute was already removed in pass-2 (`bf80c2fce7`); this completes the fix by ensuring the type is extracted. (`alef.toml`)
 
 - **kotlin-android**: Added `embed_texts_async` to `exclude_functions` in `alef.toml`. The function creates a naming conflict with the suspend wrapper of `embed_texts` — both generate `suspend fun embedTextsAsync()` in Kotlin, causing overload ambiguity. Callers should use the suspend function from `embed_texts` instead. This resolves duplicate function declaration errors in the generated `Kreuzberg.kt`. (`alef.toml`)
 

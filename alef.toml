@@ -103,6 +103,7 @@ sources = [
   "crates/kreuzberg/src/types/formats.rs",
   "crates/kreuzberg/src/types/uri.rs",
   "crates/kreuzberg/src/types/djot.rs",
+  "crates/kreuzberg/src/types/internal.rs",
   # Config types (re-exported via `pub use core::config::*`)
   "crates/kreuzberg/src/core/config/mod.rs",
   "crates/kreuzberg/src/core/config/extraction/types.rs",
