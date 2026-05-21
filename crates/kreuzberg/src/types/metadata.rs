@@ -124,7 +124,7 @@ impl std::fmt::Display for FormatMetadata {
             Self::Email(_) => f.write_str("email"),
             Self::Pptx(_) => f.write_str("pptx"),
             Self::Archive(_) => f.write_str("archive"),
-            Self::Image(image) => f.write_str(&image.format),
+            Self::Image(image) => f.write_str(&image.format.to_uppercase()),
             Self::Xml(_) => f.write_str("xml"),
             Self::Text(_) => f.write_str("text"),
             Self::Html(_) => f.write_str("html"),

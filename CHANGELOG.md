@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (core: code_intelligence Go type mismatch)
+
+- **core**: Changed `ExtractionResult.code_intelligence` field type from `Option<crate::ProcessResult>` to `Option<serde_json::Value>`. The `ProcessResult` type lives in `tree_sitter_language_pack` — an external crate whose struct layout alef cannot resolve — so the Go backend emitted `*string`, causing `cannot unmarshal object into string` at runtime. Using `serde_json::Value` maps to `json.RawMessage` in Go, preserving full JSON fidelity while being opaque to alef. Updated `extraction/derive.rs` to serialize the `ProcessResult` before assignment; a `tracing::warn!` guards the rare serialization failure. (`crates/kreuzberg/src/types/extraction.rs`, `crates/kreuzberg/src/extraction/derive.rs`, `packages/go/v5/binding.go`)
+
+### Fixed (core: chunk_size=0 panic)
+
+- **core**: `build_chunk_config` in `crates/kreuzberg/src/chunking/builder.rs` now clamps `max_characters == 0` to 1000 (the `default_chunk_size` value) instead of forwarding zero to `text-splitter`, which panics with `chunk size must be non-zero`. Binding mirror structs whose `serde(default)` zeroes the field no longer abort the host process. A `tracing::warn!` line logs the clamp. (`crates/kreuzberg/src/chunking/builder.rs`)
+
+### Fixed (core: null-tolerant serde for ChunkSizing, EmbeddingModelType, FormatMetadata::Image uppercase)
+
+- **core**: `ChunkingConfig.sizing` and `EmbeddingConfig.model` fields now tolerate explicit JSON `null` (in addition to missing fields). Language binding mirror structs emit `"sizing": null` / `"model": null` from zero-valued structs; the previous `#[serde(default)]` annotation handled a missing key but not an explicit null for internally-tagged enums. Added `deserialize_null_default<T>` and `deserialize_null_model` helpers in `processing.rs` and switched both fields to use them. (`crates/kreuzberg/src/core/config/processing.rs`)
+- **core**: `FormatMetadata::Image` `Display` impl now emits the format string in uppercase (e.g., `"PNG"` instead of `"png"`), matching the fixture assertion convention used across all language e2e suites. (`crates/kreuzberg/src/types/metadata.rs`)
+
 ### Fixed (e2e/php: hermetic ini)
 
 - **scripts/setup-php-ext-ini.sh + alef.toml**: PHP e2e runs were failing system-wide because a sibling project (tree-sitter-language-pack) had left a stale `/opt/homebrew/etc/php/8.4/conf.d/ext-kreuzberg.ini` pointing at a non-existent `ts_pack_core_php.so`. The local `php -c php.ini` flag only overrides the main `php.ini` path, not the scan-dir, so the stale entry kept being loaded. Hardened the e2e launcher to set `PHP_INI_SCAN_DIR=` (disabling conf.d scanning entirely) and made the generated `e2e/php/php.ini` set `extension_dir` explicitly so the hermetic config still finds the built extension. PHP e2e is now reproducible without depending on the host's conf.d state.

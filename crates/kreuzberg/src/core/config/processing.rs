@@ -164,7 +164,7 @@ pub struct ChunkingConfig {
     ///
     /// Default: `Characters` (Unicode character count).
     /// Enable `chunking-tiktoken` or `chunking-tokenizers` features for token-based sizing.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_null_default")]
     pub sizing: ChunkSizing,
 
     /// When `true` and `chunker_type` is `Markdown`, prepend the heading hierarchy
@@ -286,7 +286,7 @@ impl Default for ChunkingConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EmbeddingConfig {
     /// The embedding model to use (defaults to "balanced" preset if not specified)
-    #[serde(default = "default_model")]
+    #[serde(default = "default_model", deserialize_with = "deserialize_null_model")]
     pub model: EmbeddingModelType,
 
     /// Whether to normalize embedding vectors (recommended for cosine similarity)
@@ -398,6 +398,22 @@ fn default_chunk_size() -> usize {
     1000
 }
 
+/// Deserialize a value that may be explicitly `null` into its `Default` value.
+///
+/// Internally-tagged serde enums (e.g. `#[serde(tag = "type")]`) reject `null`
+/// even when the containing field has `#[serde(default)]`, because that attribute
+/// only covers the *missing* case. Polyglot bindings frequently emit explicit
+/// `"field": null` from zero-valued mirror structs, so this helper accepts either
+/// `null` or a present value and falls back to `T::default()` for null.
+fn deserialize_null_default<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: Default + serde::Deserialize<'de>,
+{
+    let opt = Option::<T>::deserialize(deserializer)?;
+    Ok(opt.unwrap_or_default())
+}
+
 fn default_chunk_overlap() -> usize {
     200
 }
@@ -422,6 +438,18 @@ fn default_model() -> EmbeddingModelType {
     EmbeddingModelType::Preset {
         name: "balanced".to_string(),
     }
+}
+
+/// `deserialize_with` companion for `EmbeddingModelType` fields that may be
+/// explicitly `null` in polyglot binding payloads. Treats null as the configured
+/// `default_model()` (the "balanced" preset) rather than the trait `Default` impl
+/// (which is an empty-name placeholder unsuitable for live use).
+fn deserialize_null_model<'de, D>(deserializer: D) -> Result<EmbeddingModelType, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let opt = Option::<EmbeddingModelType>::deserialize(deserializer)?;
+    Ok(opt.unwrap_or_else(default_model))
 }
 
 #[cfg(test)]
