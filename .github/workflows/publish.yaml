@@ -1687,12 +1687,10 @@ jobs:
       - name: Verify Node platform sub-package contents
         uses: kreuzberg-dev/actions/verify-package-contents@v1
         with:
-          language: node
+          language: node-platform
           artifact-path: crates/kreuzberg-node/npm
           package-name: "@kreuzberg/node"
           required-extras: |
-            **/*.d.ts
-            **/index.js
             **/*.node
 
       - name: Publish platform sub-packages
