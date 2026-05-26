@@ -1908,9 +1908,30 @@ jobs:
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
+  finalize-github-release-after-uploads:
+    name: Finalize GitHub Release (after uploads)
+    needs:
+      - prepare
+      - verify-assets
+      - upload-cli-release
+      - upload-go-release
+      - upload-c-ffi-release
+      - upload-elixir-release
+      - upload-php-pie-release
+      - upload-swift-bundle
+    if: ${{ needs.prepare.outputs.is_tag == 'true' && needs.prepare.outputs.dry_run != 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: kreuzberg-dev/actions/finalize-release@v1
+        with:
+          tag: ${{ needs.prepare.outputs.tag }}
+          is-prerelease: ${{ needs.prepare.outputs.is_prerelease }}
+
   publish-hex:
     name: Publish Elixir Hex package
-    needs: [prepare, upload-elixir-release, check-hex]
+    needs: [prepare, finalize-github-release-after-uploads, check-hex]
     if: ${{ needs.prepare.outputs.release_elixir == 'true' && needs.prepare.outputs.is_tag == 'true' && (needs.check-hex.outputs.elixir_exists != 'true' || needs.prepare.outputs.force_republish == 'true') }}
     runs-on: ubuntu-latest
     steps:
@@ -2062,7 +2083,7 @@ jobs:
 
   publish-zig:
     name: Publish Zig package metadata
-    needs: [prepare, check-zig]
+    needs: [prepare, finalize-github-release-after-uploads, check-zig]
     if: ${{ needs.prepare.outputs.release_zig == 'true' && needs.prepare.outputs.is_tag == 'true' && (needs.check-zig.outputs.exists != 'true' || needs.prepare.outputs.force_republish == 'true') }}
     runs-on: ubuntu-latest
     steps:
@@ -2247,10 +2268,9 @@ jobs:
   # ─── Finalization ─────────────────────────────────────────────────────
 
   release-finalize:
-    name: Finalize GitHub Release
+    name: Finalize GitHub Release (post-publish validation)
     needs:
-      - prepare
-      - verify-assets
+      - finalize-github-release-after-uploads
       - publish-crates
       - publish-pypi
       - publish-rubygems
@@ -2265,8 +2285,6 @@ jobs:
       - publish-zig
       - publish-homebrew-formula
       - publish-homebrew-bottles
-      - upload-go-release
-      - upload-c-ffi-release
     if: |
       always() &&
       !cancelled() &&
