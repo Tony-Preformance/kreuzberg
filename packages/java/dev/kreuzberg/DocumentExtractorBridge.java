@@ -26,8 +26,8 @@ public final class DocumentExtractorBridge implements AutoCloseable {
     private static final ConcurrentHashMap<String, DocumentExtractorBridge>
             DOCUMENT_EXTRACTOR_BRIDGES = new ConcurrentHashMap<>();
 
-    // C vtable: 11 fields (4 plugin methods + 6 trait methods + free_user_data)
-    private static final long VTABLE_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 11L;
+    // C vtable: 8 fields (4 plugin methods + 3 trait methods + free_user_data)
+    private static final long VTABLE_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 8L;
 
     private final Arena arena;
     private final MemorySegment vtable;
@@ -69,54 +69,6 @@ public final class DocumentExtractorBridge implements AutoCloseable {
             vtable.set(ValueLayout.ADDRESS, offset, stubShutdown);
             offset += ValueLayout.ADDRESS.byteSize();
 
-            var stubExtractBytes = LINKER.upcallStub(LOOKUP.bind(this, "handleExtractBytes",
-                MethodType.methodType(
-                    int.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    long.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class
-                )),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.JAVA_LONG,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubExtractBytes);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubExtractFile = LINKER.upcallStub(LOOKUP.bind(this, "handleExtractFile",
-                MethodType.methodType(
-                    int.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class
-                )),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubExtractFile);
-            offset += ValueLayout.ADDRESS.byteSize();
-
             var stubSupportedMimeTypes = LINKER.upcallStub(LOOKUP.bind(this, "handleSupportedMimeTypes",
                 MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
                 FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
@@ -150,13 +102,6 @@ public final class DocumentExtractorBridge implements AutoCloseable {
                 ),
                 arena);
             vtable.set(ValueLayout.ADDRESS, offset, stubCanHandle);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubAsSyncExtractor = LINKER.upcallStub(LOOKUP.bind(this, "handleAsSyncExtractor",
-                MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubAsSyncExtractor);
             offset += ValueLayout.ADDRESS.byteSize();
 
             vtable.set(ValueLayout.ADDRESS, offset, MemorySegment.NULL);
@@ -193,55 +138,6 @@ public final class DocumentExtractorBridge implements AutoCloseable {
             impl.shutdown();
             return 0;
         } catch (Throwable e) { return 1; }
-    }
-
-    private int handleExtractBytes(
-        MemorySegment userData,
-        MemorySegment content_in,
-        long contentLen,
-        MemorySegment mime_type_in,
-        MemorySegment config_in,
-        MemorySegment outResult,
-        MemorySegment outError
-    ) {
-        try {
-            byte[] content = content_in.reinterpret(contentLen).toArray(ValueLayout.JAVA_BYTE);
-            String mime_type = mime_type_in.reinterpret(Long.MAX_VALUE).getString(0);
-            String config_json = config_in.reinterpret(Long.MAX_VALUE).getString(0);
-            ExtractionConfig config = JSON.readValue(config_json, ExtractionConfig.class);
-            String result = impl.extract_bytes(content, mime_type, config);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
-    private int handleExtractFile(
-        MemorySegment userData,
-        MemorySegment path_in,
-        MemorySegment mime_type_in,
-        MemorySegment config_in,
-        MemorySegment outResult,
-        MemorySegment outError
-    ) {
-        try {
-            java.nio.file.Path path = java.nio.file.Paths.get(path_in.reinterpret(Long.MAX_VALUE).getString(0));
-            String mime_type = mime_type_in.reinterpret(Long.MAX_VALUE).getString(0);
-            String config_json = config_in.reinterpret(Long.MAX_VALUE).getString(0);
-            ExtractionConfig config = JSON.readValue(config_json, ExtractionConfig.class);
-            String result = impl.extract_file(path, mime_type, config);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
     }
 
     private int handleSupportedMimeTypes(MemorySegment userData, MemorySegment outResult, MemorySegment outError) {
@@ -281,19 +177,6 @@ public final class DocumentExtractorBridge implements AutoCloseable {
             java.nio.file.Path _path = java.nio.file.Paths.get(_path_in.reinterpret(Long.MAX_VALUE).getString(0));
             String _mime_type = _mime_type_in.reinterpret(Long.MAX_VALUE).getString(0);
             boolean result = impl.can_handle(_path, _mime_type);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
-    private int handleAsSyncExtractor(MemorySegment userData, MemorySegment outResult, MemorySegment outError) {
-        try {
-            String result = impl.as_sync_extractor();
             String json = JSON.writeValueAsString(result);
             MemorySegment jsonCs = arena.allocateFrom(json);
             outResult.set(ValueLayout.ADDRESS, 0, jsonCs);

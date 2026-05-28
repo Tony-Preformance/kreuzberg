@@ -25,8 +25,8 @@ public final class RendererBridge implements AutoCloseable {
     private static final ConcurrentHashMap<String, RendererBridge>
             RENDERER_BRIDGES = new ConcurrentHashMap<>();
 
-    // C vtable: 6 fields (4 plugin methods + 1 trait methods + free_user_data)
-    private static final long VTABLE_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 6L;
+    // C vtable: 5 fields (4 plugin methods + 0 trait methods + free_user_data)
+    private static final long VTABLE_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 5L;
 
     private final Arena arena;
     private final MemorySegment vtable;
@@ -68,19 +68,6 @@ public final class RendererBridge implements AutoCloseable {
             vtable.set(ValueLayout.ADDRESS, offset, stubShutdown);
             offset += ValueLayout.ADDRESS.byteSize();
 
-            var stubRender = LINKER.upcallStub(LOOKUP.bind(this, "handleRender",
-                MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubRender);
-            offset += ValueLayout.ADDRESS.byteSize();
-
             vtable.set(ValueLayout.ADDRESS, offset, MemorySegment.NULL);
 
         } catch (ReflectiveOperationException e) {
@@ -115,21 +102,6 @@ public final class RendererBridge implements AutoCloseable {
             impl.shutdown();
             return 0;
         } catch (Throwable e) { return 1; }
-    }
-
-    private int handleRender(MemorySegment userData, MemorySegment doc_in, MemorySegment outResult, MemorySegment outError) {
-        try {
-            String doc_json = doc_in.reinterpret(Long.MAX_VALUE).getString(0);
-            InternalDocument doc = JSON.readValue(doc_json, InternalDocument.class);
-            String result = impl.render(doc);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
     }
 
     private void writeError(MemorySegment outError, Throwable e) {

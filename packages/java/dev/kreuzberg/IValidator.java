@@ -20,9 +20,5 @@ public interface IValidator {
     /** Shut down the plugin. */
     default void shutdown() throws Exception {}
 
-/** validate. */    void validate(ExtractionResult result, ExtractionConfig config) throws Exception;
-
-/** should_validate. */    boolean should_validate(ExtractionResult _result, ExtractionConfig _config) throws Exception;
-
 /** priority. */    int priority() throws Exception;
 }

@@ -20,13 +20,5 @@ public interface IPostProcessor {
     /** Shut down the plugin. */
     default void shutdown() throws Exception {}
 
-/** process. */    void process(ExtractionResult result, ExtractionConfig config) throws Exception;
-
-/** processing_stage. */    ProcessingStage processing_stage() throws Exception;
-
-/** should_process. */    boolean should_process(ExtractionResult _result, ExtractionConfig _config) throws Exception;
-
-/** estimated_duration_ms. */    long estimated_duration_ms(ExtractionResult _result) throws Exception;
-
 /** priority. */    int priority() throws Exception;
 }

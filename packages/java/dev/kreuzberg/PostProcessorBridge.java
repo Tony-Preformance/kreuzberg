@@ -25,8 +25,8 @@ public final class PostProcessorBridge implements AutoCloseable {
     private static final ConcurrentHashMap<String, PostProcessorBridge>
             POST_PROCESSOR_BRIDGES = new ConcurrentHashMap<>();
 
-    // C vtable: 10 fields (4 plugin methods + 5 trait methods + free_user_data)
-    private static final long VTABLE_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 10L;
+    // C vtable: 6 fields (4 plugin methods + 1 trait methods + free_user_data)
+    private static final long VTABLE_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 6L;
 
     private final Arena arena;
     private final MemorySegment vtable;
@@ -66,60 +66,6 @@ public final class PostProcessorBridge implements AutoCloseable {
                 FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
             vtable.set(ValueLayout.ADDRESS, offset, stubShutdown);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubProcess = LINKER.upcallStub(LOOKUP.bind(this, "handleProcess",
-                MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubProcess);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubProcessingStage = LINKER.upcallStub(LOOKUP.bind(this, "handleProcessingStage",
-                MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubProcessingStage);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubShouldProcess = LINKER.upcallStub(LOOKUP.bind(this, "handleShouldProcess",
-                MethodType.methodType(
-                    int.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class
-                )),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubShouldProcess);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubEstimatedDurationMs = LINKER.upcallStub(LOOKUP.bind(this, "handleEstimatedDurationMs",
-                MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubEstimatedDurationMs);
             offset += ValueLayout.ADDRESS.byteSize();
 
             var stubPriority = LINKER.upcallStub(LOOKUP.bind(this, "handlePriority",
@@ -163,76 +109,6 @@ public final class PostProcessorBridge implements AutoCloseable {
             impl.shutdown();
             return 0;
         } catch (Throwable e) { return 1; }
-    }
-
-    private int handleProcess(MemorySegment userData, MemorySegment result_in, MemorySegment config_in, MemorySegment outError) {
-        try {
-            String result_json = result_in.reinterpret(Long.MAX_VALUE).getString(0);
-            ExtractionResult result = JSON.readValue(result_json, ExtractionResult.class);
-            String config_json = config_in.reinterpret(Long.MAX_VALUE).getString(0);
-            ExtractionConfig config = JSON.readValue(config_json, ExtractionConfig.class);
-            impl.process(result, config);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
-    private int handleProcessingStage(MemorySegment userData, MemorySegment outResult, MemorySegment outError) {
-        try {
-            ProcessingStage result = impl.processing_stage();
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
-    private int handleShouldProcess(
-        MemorySegment userData,
-        MemorySegment _result_in,
-        MemorySegment _config_in,
-        MemorySegment outResult,
-        MemorySegment outError
-    ) {
-        try {
-            String _result_json = _result_in.reinterpret(Long.MAX_VALUE).getString(0);
-            ExtractionResult _result = JSON.readValue(_result_json, ExtractionResult.class);
-            String _config_json = _config_in.reinterpret(Long.MAX_VALUE).getString(0);
-            ExtractionConfig _config = JSON.readValue(_config_json, ExtractionConfig.class);
-            boolean result = impl.should_process(_result, _config);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
-    private int handleEstimatedDurationMs(
-        MemorySegment userData,
-        MemorySegment _result_in,
-        MemorySegment outResult,
-        MemorySegment outError
-    ) {
-        try {
-            String _result_json = _result_in.reinterpret(Long.MAX_VALUE).getString(0);
-            ExtractionResult _result = JSON.readValue(_result_json, ExtractionResult.class);
-            long result = impl.estimated_duration_ms(_result);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
     }
 
     private int handlePriority(MemorySegment userData, MemorySegment outResult, MemorySegment outError) {

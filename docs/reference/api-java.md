@@ -1837,53 +1837,6 @@ public boolean needsImageProcessing()
 
 ---
 
-#### ExtractionResult
-
-General extraction result used by the core extraction API.
-
-This is the main result type returned by all extraction functions.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `content` | `String` | — | The extracted text content |
-| `mimeType` | `String` | — | The detected MIME type |
-| `metadata` | `Metadata` | — | Document metadata |
-| `extractionMethod` | `Optional<ExtractionMethod>` | `null` | Extraction strategy used to produce the returned text. Populated when the extractor can reliably distinguish native text extraction, OCR-only extraction, or mixed native/OCR output. |
-| `tables` | `List<Table>` | `Collections.emptyList()` | Tables extracted from the document |
-| `detectedLanguages` | `Optional<List<String>>` | `Collections.emptyList()` | Detected languages |
-| `chunks` | `Optional<List<Chunk>>` | `Collections.emptyList()` | Text chunks when chunking is enabled. When chunking configuration is provided, the content is split into overlapping chunks for efficient processing. Each chunk contains the text, optional embeddings (if enabled), and metadata about its position. |
-| `images` | `Optional<List<ExtractedImage>>` | `Collections.emptyList()` | Extracted images from the document. When image extraction is enabled via `ImageExtractionConfig`, this field contains all images found in the document with their raw data and metadata. Each image may optionally contain a nested `ocr_result` if OCR was performed. |
-| `pages` | `Optional<List<PageContent>>` | `Collections.emptyList()` | Per-page content when page extraction is enabled. When page extraction is configured, the document is split into per-page content with tables and images mapped to their respective pages. |
-| `elements` | `Optional<List<Element>>` | `Collections.emptyList()` | Semantic elements when element-based result format is enabled. When result_format is set to ElementBased, this field contains semantic elements with type classification, unique identifiers, and metadata for Unstructured-compatible element-based processing. |
-| `djotContent` | `Optional<DjotContent>` | `null` | Rich Djot content structure (when extracting Djot documents). When extracting Djot documents with structured extraction enabled, this field contains the full semantic structure including: - Block-level elements with nesting - Inline formatting with attributes - Links, images, footnotes - Math expressions - Complete attribute information The `content` field still contains plain text for backward compatibility. Always `null` for non-Djot documents. |
-| `ocrElements` | `Optional<List<OcrElement>>` | `Collections.emptyList()` | OCR elements with full spatial and confidence metadata. When OCR is performed with element extraction enabled, this field contains the structured representation of detected text including: - Bounding geometry (rectangles or quadrilaterals) - Confidence scores (detection and recognition) - Rotation information - Hierarchical relationships (Tesseract only) This field preserves all metadata that would otherwise be lost when converting to plain text or markdown output formats. Only populated when `OcrElementConfig.include_elements` is true. |
-| `document` | `Optional<DocumentStructure>` | `null` | Structured document tree (when document structure extraction is enabled). When `include_document_structure` is true in `ExtractionConfig`, this field contains the full hierarchical representation of the document including: - Heading-driven section nesting - Table grids with cell-level metadata - Content layer classification (body, header, footer, footnote) - Inline text annotations (formatting, links) - Bounding boxes and page numbers Independent of `result_format` — can be combined with Unified or ElementBased. |
-| `extractedKeywords` | `Optional<List<Keyword>>` | `Collections.emptyList()` | Extracted keywords when keyword extraction is enabled. When keyword extraction (RAKE or YAKE) is configured, this field contains the extracted keywords with scores, algorithm info, and position data. Previously stored in `metadata.additional["keywords"]`. |
-| `qualityScore` | `Optional<Double>` | `null` | Document quality score from quality analysis. A value between 0.0 and 1.0 indicating the overall text quality. Previously stored in `metadata.additional["quality_score"]`. |
-| `processingWarnings` | `List<ProcessingWarning>` | `Collections.emptyList()` | Non-fatal warnings collected during processing pipeline stages. Captures errors from optional pipeline features (embedding, chunking, language detection, output formatting) that don't prevent extraction but may indicate degraded results. Previously stored as individual keys in `metadata.additional`. |
-| `annotations` | `Optional<List<PdfAnnotation>>` | `Collections.emptyList()` | PDF annotations extracted from the document. When annotation extraction is enabled via `PdfConfig.extract_annotations`, this field contains text notes, highlights, links, stamps, and other annotations found in PDF documents. |
-| `children` | `Optional<List<ArchiveEntry>>` | `Collections.emptyList()` | Nested extraction results from archive contents. When extracting archives, each processable file inside produces its own full extraction result. Set to `null` for non-archive formats. Use `max_archive_depth` in config to control recursion depth. |
-| `uris` | `Optional<List<Uri>>` | `Collections.emptyList()` | URIs/links discovered during document extraction. Contains hyperlinks, image references, citations, email addresses, and other URI-like references found in the document. Always extracted when present in the source document. |
-| `structuredOutput` | `Optional<Object>` | `null` | Structured extraction output from LLM-based JSON schema extraction. When `structured_extraction` is configured in `ExtractionConfig`, the extracted document content is sent to a VLM with the provided JSON schema. The response is parsed and stored here as a JSON value matching the schema. |
-| `codeIntelligence` | `Optional<Object>` | `null` | Code intelligence results from tree-sitter analysis. Populated when extracting source code files with the `tree-sitter` feature. Contains metrics, structural analysis, imports/exports, comments, docstrings, symbols, diagnostics, and optionally chunked code segments. Stored as an opaque JSON value so that all language bindings (Go, Java, C#, …) can deserialize it as a raw JSON object rather than a typed struct. The underlying type is `tree_sitter_language_pack.ProcessResult`. |
-| `llmUsage` | `Optional<List<LlmUsage>>` | `Collections.emptyList()` | LLM token usage and cost data for all LLM calls made during this extraction. Contains one entry per LLM call. Multiple entries are produced when VLM OCR, structured extraction, or LLM embeddings run during the same extraction. `null` when no LLM was used. |
-| `formattedContent` | `Optional<String>` | `null` | Pre-rendered content in the requested output format. Populated during `derive_extraction_result` before tree derivation consumes element data. `apply_output_format` swaps this into `content` at the end of the pipeline, after post-processors have operated on plain text. |
-| `ocrInternalDocument` | `Optional<String>` | `null` | Structured hOCR document for the OCR+layout pipeline. When tesseract produces hOCR output, the parsed `InternalDocument` carries paragraph structure with bounding boxes and confidence scores. The layout classification step enriches these elements before final rendering. |
-
-### Methods
-
-#### fromOcr()
-
-Convert from an OCR result.
-
-**Signature:**
-
-```java
-public static ExtractionResult fromOcr(OcrExtractionResult ocr)
-```
-
----
-
 #### FictionBookMetadata
 
 FictionBook (FB2) metadata.
@@ -4537,34 +4490,6 @@ Type of list detection.
 | `NO_BAR` | No bar |
 | `LINEAR` | Linear |
 | `SKEWED` | Skewed |
-
----
-
-#### OcrBackendType
-
-OCR backend types.
-
-| Value | Description |
-|-------|-------------|
-| `TESSERACT` | Tesseract OCR (native Rust binding) |
-| `EASY_OCR` | EasyOCR (Python-based, via FFI) |
-| `PADDLE_OCR` | PaddleOCR (Python-based, via FFI) |
-| `CUSTOM` | Custom/third-party OCR backend |
-
----
-
-#### ProcessingStage
-
-Processing stages for post-processors.
-
-Post-processors are executed in stage order (Early → Middle → Late).
-Use stages to control the order of post-processing operations.
-
-| Value | Description |
-|-------|-------------|
-| `EARLY` | Early stage - foundational processing. Use for: - Language detection - Character encoding normalization - Entity extraction (NER) - Text quality scoring |
-| `MIDDLE` | Middle stage - content transformation. Use for: - Keyword extraction - Token reduction - Text summarization - Semantic analysis |
-| `LATE` | Late stage - final enrichment. Use for: - Custom user hooks - Analytics/logging - Final validation - Output formatting |
 
 ---
 

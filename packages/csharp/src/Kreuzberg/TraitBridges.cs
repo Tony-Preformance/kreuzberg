@@ -265,7 +265,7 @@ public sealed class OcrBackendBridge : IDisposable {
         }
     }
 
-    private int supportsLanguageFnCallback(IntPtr lang, ) {
+    private int supportsLanguageFnCallback(IntPtr lang) {
         try {
             var managed_lang = global::System.Runtime.InteropServices.Marshal.PtrToStringUTF8(lang) ?? string.Empty;
             var result = _impl.SupportsLanguage(managed_lang);
@@ -666,7 +666,7 @@ public sealed class PostProcessorBridge : IDisposable {
         }
     }
 
-    private int processFnCallback(IntPtr result, IntPtr config, ) {
+    private int processFnCallback(IntPtr result, IntPtr config) {
         try {
             var json_result = global::System.Runtime.InteropServices.Marshal.PtrToStringUTF8(result) ?? "{}";
             var managed_result = JsonSerializer.Deserialize<ExtractionResult>(json_result)!;
@@ -692,7 +692,7 @@ public sealed class PostProcessorBridge : IDisposable {
         }
     }
 
-    private int shouldProcessFnCallback(IntPtr result, IntPtr config, ) {
+    private int shouldProcessFnCallback(IntPtr result, IntPtr config) {
         try {
             var json_result = global::System.Runtime.InteropServices.Marshal.PtrToStringUTF8(result) ?? "{}";
             var managed_result = JsonSerializer.Deserialize<ExtractionResult>(json_result)!;
@@ -705,7 +705,7 @@ public sealed class PostProcessorBridge : IDisposable {
         }
     }
 
-    private ulong estimatedDurationMsFnCallback(IntPtr result, ) {
+    private ulong estimatedDurationMsFnCallback(IntPtr result) {
         try {
             var json_result = global::System.Runtime.InteropServices.Marshal.PtrToStringUTF8(result) ?? "{}";
             var managed_result = JsonSerializer.Deserialize<ExtractionResult>(json_result)!;
@@ -1033,7 +1033,7 @@ public sealed class ValidatorBridge : IDisposable {
         }
     }
 
-    private int validateFnCallback(IntPtr result, IntPtr config, ) {
+    private int validateFnCallback(IntPtr result, IntPtr config) {
         try {
             var json_result = global::System.Runtime.InteropServices.Marshal.PtrToStringUTF8(result) ?? "{}";
             var managed_result = JsonSerializer.Deserialize<ExtractionResult>(json_result)!;
@@ -1046,7 +1046,7 @@ public sealed class ValidatorBridge : IDisposable {
         }
     }
 
-    private int shouldValidateFnCallback(IntPtr result, IntPtr config, ) {
+    private int shouldValidateFnCallback(IntPtr result, IntPtr config) {
         try {
             var json_result = global::System.Runtime.InteropServices.Marshal.PtrToStringUTF8(result) ?? "{}";
             var managed_result = JsonSerializer.Deserialize<ExtractionResult>(json_result)!;
@@ -1788,7 +1788,7 @@ public sealed class DocumentExtractorBridge : IDisposable {
         }
     }
 
-    private int canHandleFnCallback(IntPtr path, IntPtr mimeType, ) {
+    private int canHandleFnCallback(IntPtr path, IntPtr mimeType) {
         try {
             var json_path = global::System.Runtime.InteropServices.Marshal.PtrToStringUTF8(path) ?? "{}";
             var managed_path = JsonSerializer.Deserialize<string>(json_path)!;

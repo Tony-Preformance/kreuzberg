@@ -26,8 +26,8 @@ public final class OcrBackendBridge implements AutoCloseable {
     private static final ConcurrentHashMap<String, OcrBackendBridge>
             OCR_BACKEND_BRIDGES = new ConcurrentHashMap<>();
 
-    // C vtable: 13 fields (4 plugin methods + 8 trait methods + free_user_data)
-    private static final long VTABLE_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 13L;
+    // C vtable: 9 fields (4 plugin methods + 4 trait methods + free_user_data)
+    private static final long VTABLE_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 9L;
 
     private final Arena arena;
     private final MemorySegment vtable;
@@ -69,50 +69,6 @@ public final class OcrBackendBridge implements AutoCloseable {
             vtable.set(ValueLayout.ADDRESS, offset, stubShutdown);
             offset += ValueLayout.ADDRESS.byteSize();
 
-            var stubProcessImage = LINKER.upcallStub(LOOKUP.bind(this, "handleProcessImage",
-                MethodType.methodType(
-                    int.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    long.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class
-                )),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.JAVA_LONG,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubProcessImage);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubProcessImageFile = LINKER.upcallStub(LOOKUP.bind(this, "handleProcessImageFile",
-                MethodType.methodType(
-                    int.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class
-                )),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubProcessImageFile);
-            offset += ValueLayout.ADDRESS.byteSize();
-
             var stubSupportsLanguage = LINKER.upcallStub(LOOKUP.bind(this, "handleSupportsLanguage",
                 MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
                 FunctionDescriptor.of(
@@ -124,13 +80,6 @@ public final class OcrBackendBridge implements AutoCloseable {
                 ),
                 arena);
             vtable.set(ValueLayout.ADDRESS, offset, stubSupportsLanguage);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubBackendType = LINKER.upcallStub(LOOKUP.bind(this, "handleBackendType",
-                MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubBackendType);
             offset += ValueLayout.ADDRESS.byteSize();
 
             var stubSupportedLanguages = LINKER.upcallStub(LOOKUP.bind(this, "handleSupportedLanguages",
@@ -152,27 +101,6 @@ public final class OcrBackendBridge implements AutoCloseable {
                 FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
             vtable.set(ValueLayout.ADDRESS, offset, stubSupportsDocumentProcessing);
-            offset += ValueLayout.ADDRESS.byteSize();
-
-            var stubProcessDocument = LINKER.upcallStub(LOOKUP.bind(this, "handleProcessDocument",
-                MethodType.methodType(
-                    int.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class,
-                    MemorySegment.class
-                )),
-                FunctionDescriptor.of(
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-                ),
-                arena);
-            vtable.set(ValueLayout.ADDRESS, offset, stubProcessDocument);
             offset += ValueLayout.ADDRESS.byteSize();
 
             vtable.set(ValueLayout.ADDRESS, offset, MemorySegment.NULL);
@@ -211,68 +139,10 @@ public final class OcrBackendBridge implements AutoCloseable {
         } catch (Throwable e) { return 1; }
     }
 
-    private int handleProcessImage(
-        MemorySegment userData,
-        MemorySegment image_bytes_in,
-        long image_bytesLen,
-        MemorySegment config_in,
-        MemorySegment outResult,
-        MemorySegment outError
-    ) {
-        try {
-            byte[] image_bytes = image_bytes_in.reinterpret(image_bytesLen).toArray(ValueLayout.JAVA_BYTE);
-            String config_json = config_in.reinterpret(Long.MAX_VALUE).getString(0);
-            OcrConfig config = JSON.readValue(config_json, OcrConfig.class);
-            ExtractionResult result = impl.process_image(image_bytes, config);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
-    private int handleProcessImageFile(
-        MemorySegment userData,
-        MemorySegment path_in,
-        MemorySegment config_in,
-        MemorySegment outResult,
-        MemorySegment outError
-    ) {
-        try {
-            java.nio.file.Path path = java.nio.file.Paths.get(path_in.reinterpret(Long.MAX_VALUE).getString(0));
-            String config_json = config_in.reinterpret(Long.MAX_VALUE).getString(0);
-            OcrConfig config = JSON.readValue(config_json, OcrConfig.class);
-            ExtractionResult result = impl.process_image_file(path, config);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
     private int handleSupportsLanguage(MemorySegment userData, MemorySegment lang_in, MemorySegment outResult, MemorySegment outError) {
         try {
             String lang = lang_in.reinterpret(Long.MAX_VALUE).getString(0);
             boolean result = impl.supports_language(lang);
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
-    private int handleBackendType(MemorySegment userData, MemorySegment outResult, MemorySegment outError) {
-        try {
-            OcrBackendType result = impl.backend_type();
             String json = JSON.writeValueAsString(result);
             MemorySegment jsonCs = arena.allocateFrom(json);
             outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
@@ -312,28 +182,6 @@ public final class OcrBackendBridge implements AutoCloseable {
     private int handleSupportsDocumentProcessing(MemorySegment userData, MemorySegment outResult, MemorySegment outError) {
         try {
             boolean result = impl.supports_document_processing();
-            String json = JSON.writeValueAsString(result);
-            MemorySegment jsonCs = arena.allocateFrom(json);
-            outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
-            return 0;
-        } catch (Throwable e) {
-            writeError(outError, e);
-            return 1;
-        }
-    }
-
-    private int handleProcessDocument(
-        MemorySegment userData,
-        MemorySegment _path_in,
-        MemorySegment _config_in,
-        MemorySegment outResult,
-        MemorySegment outError
-    ) {
-        try {
-            java.nio.file.Path _path = java.nio.file.Paths.get(_path_in.reinterpret(Long.MAX_VALUE).getString(0));
-            String _config_json = _config_in.reinterpret(Long.MAX_VALUE).getString(0);
-            OcrConfig _config = JSON.readValue(_config_json, OcrConfig.class);
-            ExtractionResult result = impl.process_document(_path, _config);
             String json = JSON.writeValueAsString(result);
             MemorySegment jsonCs = arena.allocateFrom(json);
             outResult.set(ValueLayout.ADDRESS, 0, jsonCs);
