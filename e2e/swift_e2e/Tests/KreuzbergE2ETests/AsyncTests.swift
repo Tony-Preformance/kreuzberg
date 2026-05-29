@@ -28,27 +28,27 @@ final class AsyncTests: XCTestCase {
         }
     }
 
-    func testAsyncExtractBytes() async throws {
+    func testAsyncExtractBytes() throws {
         // Async extract_bytes call on PDF document
-        let result = try await Kreuzberg.extractBytes("pdf/fake_memo.pdf", "application/pdf", "{}")
+        let result = try Kreuzberg.extractBytes("pdf/fake_memo.pdf", "application/pdf", "{}")
         XCTAssertEqual(result.mimeType.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "application/pdf")
         XCTAssertGreaterThanOrEqual(result.content.count, 50)
     }
 
-    func testAsyncExtractBytesEmptyMime() async throws {
+    func testAsyncExtractBytesEmptyMime() throws {
         // extract_bytes empty MIME async
         do {
-            _ = try await Kreuzberg.extractBytes("text/plain.txt", "", "{}")
+            _ = try Kreuzberg.extractBytes("text/plain.txt", "", "{}")
             XCTFail("expected to throw")
         } catch {
             // success
         }
     }
 
-    func testAsyncExtractBytesInvalidMime() async throws {
+    func testAsyncExtractBytesInvalidMime() throws {
         // extract_bytes unsupported MIME async
         do {
-            _ = try await Kreuzberg.extractBytes("text/plain.txt", "application/x-nonexistent", "{}")
+            _ = try Kreuzberg.extractBytes("text/plain.txt", "application/x-nonexistent", "{}")
             XCTFail("expected to throw")
         } catch {
             // success

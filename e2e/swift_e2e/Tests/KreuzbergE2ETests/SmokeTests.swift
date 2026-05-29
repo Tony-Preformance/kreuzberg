@@ -28,9 +28,9 @@ final class SmokeTests: XCTestCase {
         }
     }
 
-    func testOcrImagePng() async throws {
+    func testOcrImagePng() throws {
         // OCR: PNG image extraction with OCR enabled. In WASM this exercises the Uint8Array bridge parameter and Promise await in the generated OcrBackend bridge.
-        let result = try await Kreuzberg.extractBytes("images/test_hello_world.png", "image/png", "{}")
+        let result = try Kreuzberg.extractBytes("images/test_hello_world.png", "image/png", "{}")
         XCTAssertEqual(result.mimeType.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "image/png")
         XCTAssertGreaterThanOrEqual(result.content.count, 1)
         XCTAssertTrue(result.content.contains("Hello") || result.content.contains("World") || result.content.contains("hello") || result.content.contains("world"), "expected to contain at least one of the specified values")

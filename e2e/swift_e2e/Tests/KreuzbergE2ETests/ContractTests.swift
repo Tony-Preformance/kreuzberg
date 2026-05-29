@@ -28,41 +28,41 @@ final class ContractTests: XCTestCase {
         }
     }
 
-    func testApiBatchBytesAsync() async throws {
+    func testApiBatchBytesAsync() throws {
         // Tests async batch bytes extraction API (batch_extract_bytes)
-        let result = try await Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{}")
+        let result = try Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{}")
         XCTAssertEqual(result.mimeType.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "application/pdf")
         XCTAssertGreaterThanOrEqual(result.content.count, 10)
         XCTAssertTrue(result.content.contains("May 5, 2023") || result.content.contains("Mallori"), "expected to contain at least one of the specified values")
     }
 
-    func testApiBatchBytesWithConfigsAsync() async throws {
+    func testApiBatchBytesWithConfigsAsync() throws {
         // Tests async batch bytes extraction with per-file configs (batch_extract_bytes with file_configs parameter)
-        let result = try await Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{\"output_format\":\"markdown\"}")
+        let result = try Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{\"output_format\":\"markdown\"}")
         XCTAssertEqual(result.mimeType.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "application/pdf")
         XCTAssertGreaterThanOrEqual(result.content.count, 10)
         // skipped: field 'metadata.output_format' not available on result type
     }
 
-    func testApiBatchFileAsync() async throws {
+    func testApiBatchFileAsync() throws {
         // Tests async batch file extraction API (batch_extract_file)
-        let result = try await Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{}")
+        let result = try Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{}")
         XCTAssertEqual(result.mimeType.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "application/pdf")
         XCTAssertGreaterThanOrEqual(result.content.count, 10)
         XCTAssertTrue(result.content.contains("May 5, 2023") || result.content.contains("Mallori"), "expected to contain at least one of the specified values")
     }
 
-    func testApiBatchFileWithConfigsAsync() async throws {
+    func testApiBatchFileWithConfigsAsync() throws {
         // Tests async batch file extraction with per-file configs (batch_extract_files with file_configs parameter)
-        let result = try await Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{\"output_format\":\"markdown\"}")
+        let result = try Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{\"output_format\":\"markdown\"}")
         XCTAssertEqual(result.mimeType.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "application/pdf")
         XCTAssertGreaterThanOrEqual(result.content.count, 10)
         // skipped: field 'metadata.output_format' not available on result type
     }
 
-    func testApiExtractBytesAsync() async throws {
+    func testApiExtractBytesAsync() throws {
         // Tests async bytes extraction API (extract_bytes)
-        let result = try await Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{}")
+        let result = try Kreuzberg.extractFile("pdf/fake_memo.pdf", nil, "{}")
         XCTAssertEqual(result.mimeType.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "application/pdf")
         XCTAssertGreaterThanOrEqual(result.content.count, 10)
         XCTAssertTrue(result.content.contains("May 5, 2023") || result.content.contains("Mallori"), "expected to contain at least one of the specified values")

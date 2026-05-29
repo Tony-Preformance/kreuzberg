@@ -1,5 +1,5 @@
 [workspace]
-alef_version = "0.20.11"
+alef_version = "0.20.12"
 languages = [
   "python",
   "node",
@@ -970,6 +970,7 @@ function = "extract_bytes"
 async = true
 
 [crates.e2e.calls.extract_file.overrides.swift]
+async = false
 unnamed_arg_indices = [0, 1, 2]
 
 [crates.e2e.calls.extract_file.overrides.zig]
@@ -1000,6 +1001,7 @@ options_via = "from_json"
 json_object_types = { chunking = "ChunkingConfig", ocr = "OcrConfig", images = "ImageExtractionConfig", html_output = "HtmlOutputConfig", language_detection = "LanguageDetectionConfig", postprocessor = "PostProcessorConfig", acceleration = "AccelerationConfig", email = "EmailConfig", pages = "PageConfig", pdf_options = "PdfConfig", layout = "LayoutDetectionConfig", tree_sitter = "TreeSitterConfig", structured_extraction = "StructuredExtractionConfig", content_filter = "ContentFilterConfig", token_reduction = "TokenReductionOptions" }
 
 [crates.e2e.calls.extract_bytes.overrides.swift]
+async = false
 unnamed_arg_indices = [0, 1, 2]
 
 [crates.e2e.calls.extract_bytes.overrides.python]
