@@ -23,6 +23,7 @@ Systematic bug audit of `packages/typescript/`, `crates/kreuzberg-node/`, and `e
 **File**: `crates/kreuzberg-node/index.d.ts`
 **Location**: Lines 99-101 (and others)
 **Description**: The generated `.d.ts` file contains duplicate function declarations for six registry management functions:
+
 - `clearDocumentExtractors()` (appears twice)
 - `clearEmbeddingBackends()` (appears twice)
 - `clearOcrBackends()` (appears twice)
@@ -46,11 +47,13 @@ Systematic bug audit of `packages/typescript/`, `crates/kreuzberg-node/`, and `e
 **Description**: All Rust errors are converted to `napi::Status::GenericFailure` with only the error message preserved. This prevents proper categorization of errors on the JavaScript side.
 
 **Example**:
+
 ```rust
 .map_err(|e| napi::Error::new(napi::Status::GenericFailure, e.to_string()))
 ```
 
 **Missing Opportunities**:
+
 - `InvalidArg` for validation errors
 - `InvalidData` for parsing errors
 - `ObjectExpected` for type mismatches
@@ -70,6 +73,7 @@ Systematic bug audit of `packages/typescript/`, `crates/kreuzberg-node/`, and `e
 **Description**: Timeout, cache TTL, archive size, and nesting depth fields use `i64` instead of `u32`/`u64`.
 
 **Examples**:
+
 - `extraction_timeout_secs: Option<i64>`
 - `cache_ttl_secs: Option<i64>`
 - `max_archive_size: Option<i64>`
@@ -85,12 +89,14 @@ Systematic bug audit of `packages/typescript/`, `crates/kreuzberg-node/`, and `e
 **Description**: All Buffer inputs are converted to `Vec<u8>` via `.to_vec()`, which always copies the underlying data.
 
 **Code Pattern**:
+
 ```rust
 let content: Vec<u8> = content.to_vec();
 kreuzberg::extract_bytes(&content, &mime_type, &config_core)
 ```
 
 **Trade-offs**:
+
 - **Pro**: Zero-copy would require unsafe lifetime transmission to Rust
 - **Con**: Double memory usage for large files (Buffer + Vec<u8>)
 - **Acceptable**: Node.js handles garbage collection; trade-off is reasonable for simplicity
@@ -104,11 +110,13 @@ kreuzberg::extract_bytes(&content, &mime_type, &config_core)
 **Description**: A static `WORKER_POOL` is initialized as a global Tokio runtime for both async and sync functions.
 
 **Pattern**:
+
 ```rust
 static WORKER_POOL: std::sync::LazyLock<tokio::runtime::Runtime> = ...
 ```
 
 **Correctness**:
+
 - `async fn` functions like `extract_bytes()` are directly exposed via NAPI and return Promises ✓
 - Sync functions use `WORKER_POOL.block_on()` to bridge to async Rust ✓
 - No blocking on event loop (sync functions use dedicated thread pool) ✓
@@ -124,6 +132,7 @@ static WORKER_POOL: std::sync::LazyLock<tokio::runtime::Runtime> = ...
 **Description**: Rust core returns `Vec<Vec<f32>>` embeddings, but Node binding promotes them to `Vec<Vec<f64>>` before returning to JavaScript.
 
 **Code**:
+
 ```rust
 row.into_iter().map(|x| x as f64).collect::<Vec<_>>()
 ```
@@ -141,6 +150,7 @@ row.into_iter().map(|x| x as f64).collect::<Vec<_>>()
 **Description**: TypeScript docs use legacy rustdoc syntax (`[...] links`, `:` in param names) instead of JSDoc/TSDoc syntax.
 
 **Examples**:
+
 ```typescript
 // Generated (rustdoc):
 @param items - Vector of `BatchBytesItem` structs, ...
@@ -162,11 +172,13 @@ row.into_iter().map(|x| x as f64).collect::<Vec<_>>()
 **Description**: Trait bridge wrappers use `Object<'static>` transmute to store JS objects across async boundaries.
 
 **Code Pattern**:
+
 ```rust
 let js_obj: napi::bindgen_prelude::Object<'static> = unsafe { std::mem::transmute(js_obj) };
 ```
 
 **Safety Justification** (from comments):
+
 - JS object is owned by Node.js runtime
 - Bridge is only used synchronously within the enclosing `#[napi]` call
 
@@ -188,6 +200,7 @@ let js_obj: napi::bindgen_prelude::Object<'static> = unsafe { std::mem::transmut
 ## Duplicate Functions in .d.ts - Full List
 
 These 6 functions have duplicate declarations in `index.d.ts`:
+
 1. `clearDocumentExtractors()` — lines 91, 93
 2. `clearEmbeddingBackends()` — lines 87, 89
 3. `clearOcrBackends()` — lines 99, 101
@@ -212,6 +225,7 @@ These 6 functions have duplicate declarations in `index.d.ts`:
 ## E2E Test Status
 
 Tests are currently building (napi build running). The e2e suite is comprehensive with 20+ test files covering:
+
 - Async/sync operations
 - Batch processing
 - Plugin APIs (OCR, embeddings, document extractor)

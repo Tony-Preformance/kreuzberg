@@ -49,6 +49,7 @@ Found **3 critical bugs** and **2 high-priority gaps** in the Elixir NIF binding
 #### Already Correct (3 NIFs)
 
 These have proper scheduling:
+
 - `extract_bytes_async` (line 3302) — `schedule = "DirtyCpu"` ✓
 - `extract_file_async` (line 3369) — `schedule = "DirtyCpu"` ✓
 - `embed_texts_async` (line 3646) — `schedule = "DirtyCpu"` ✓
@@ -56,6 +57,7 @@ These have proper scheduling:
 #### All Other Quick NIFs (<1ms)
 
 These are correctly unscheduled (fast metadata/lookup operations):
+
 - `detect_mime_type_from_bytes`, `get_extensions_for_mime`
 - `list_*_backends`, `list_document_extractors`, `list_renderers`, `list_post_processors`, `list_validators`
 - `get_embedding_preset`, `list_embedding_presets`
@@ -71,11 +73,13 @@ These are <1ms operations; normal scheduler is fine.
 **Issue**: `.join()` panic is converted to string error, but panics crash the BEAM.
 
 **Lines**:
+
 - 3331: `extract_bytes_async` — `.map_err(|_| "thread panicked".to_string())?`
 - 3397: `extract_file_async` — `.map_err(|_| "thread panicked".to_string())?`
 - 3665: `embed_texts_async` — `.map_err(|_| "thread panicked".to_string())?`
 
 **Root Cause**: Rust threads spawned at lines 3313-3331, 3379-3397, 3654-3665 can panic if:
+
 - Inside `kreuzberg::extract_bytes()` / `extract_file()` / `embed_texts()` async runtime
 - Tokio runtime panics or unwind propagates across FFI boundary
 - `.spawn()` itself panics (thread creation fails)
@@ -102,6 +106,7 @@ let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
 **Issue**: NIFs return `Result<T, String>`, but Elixir wrappers expect `{:ok, T} | {:error, atom, String}`.
 
 **Evidence**:
+
 - All `kreuzberg_nif` functions return `Result<T, String>` (line 3421-3727)
 - Elixir `Kreuzberg.Native` module uses `rustler::init!` which auto-converts `Result<T, String>` to `{:error, Atom, Msg}`
 - **BUT** spec in `Kreuzberg.ex` line 10 shows: `{:ok, map()} | {:error, atom, String.t()}`
@@ -111,6 +116,7 @@ let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
 **Evidence of Issue**: Line 3331, 3397, 3665 return generic "thread panicked" string, but should return proper error atoms.
 
 **Fix**: Use custom error type or explicit atom encoding:
+
 ```rust
 #[derive(NifError)]
 enum NifError {
@@ -128,16 +134,19 @@ enum NifError {
 **Issue**: No dialyxir/Dialyzer setup in `packages/elixir/mix.exs`.
 
 **Current State**:
+
 - `mix.exs` (line 31-39) has `credo` but no `:dialyxir`
 - No `.dialyzer_ignore_warnings` or `.dialyzer.yml`
 - Elixir specs in `Kreuzberg.ex` and `Kreuzberg.Native` are not validated
 
 **Why This Matters**:
+
 - Rustler auto-generates Elixir wrappers; type mismatches silently occur
 - Plugin registration functions (`register_ocr_backend`, etc.) use `pid()` but spec says they return `:ok | :error` — no typecheck
 - Missing `:dialyxir` means caller errors go undetected
 
 **Fix**:
+
 1. Add to `mix.exs` deps: `{:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}`
 2. Add to project config: `dialyzer: [plt_add_apps: [:stdlib, :kernel]]`
 3. Run `mix dialyzer` in CI
@@ -150,11 +159,13 @@ enum NifError {
 **Issue**: `e2e/elixir/` tests check happy path but not error handling thoroughly.
 
 **Evidence**:
+
 - `async_test.exs` line 22-30: Only checks `{:error, _}` — doesn't validate error structure
 - No tests for thread panics in extraction (would hang or crash)
 - No tests for invalid config JSON parsing errors
 
 **Example**:
+
 ```elixir
 # Current: too loose
 assert {:error, _} = Kreuzberg.extract_bytes_async(content, "application/x-nonexistent", "{}")
@@ -305,6 +316,7 @@ Ensure all `def` stubs match the 3-tuple error format returned by Rustler.
 **After fixes**: Should remain 28/28 pass
 
 The fixes are internal safety improvements and scheduling; they don't change the public API contract. Tests continue to pass but the NIF implementation becomes:
+
 - Non-blocking for BEAM scheduler
 - Safe against panics
 - Type-checked with Dialyzer
@@ -314,14 +326,17 @@ The fixes are internal safety improvements and scheduling; they don't change the
 ## Verification Steps
 
 1. **Run e2e before fix**:
+
    ```bash
    task elixir:e2e
    ```
+
    Expected: 28/28 pass
 
 2. **Apply fixes to NIF**
 
 3. **Rebuild and test**:
+
    ```bash
    cd packages/elixir
    KREUZBERG_BUILD=1 mix deps.get
@@ -330,13 +345,16 @@ The fixes are internal safety improvements and scheduling; they don't change the
    KREUZBERG_BUILD=1 mix deps.get
    mix test
    ```
+
    Expected: 28/28 pass
 
 4. **Add Dialyzer**:
+
    ```bash
    cd packages/elixir
    mix dialyzer
    ```
+
    Expected: No errors (type-safe)
 
 ---
@@ -353,6 +371,6 @@ The fixes are internal safety improvements and scheduling; they don't change the
 
 ## References
 
-- Rustler Docs: https://github.com/rusterlium/rustler
-- BEAM Scheduler: https://www.erlang.org/doc/man/erl_nif.html (see `schedule` param)
-- Elixir NIF best practices: https://hexdocs.pm/rustler/
+- Rustler Docs: <https://github.com/rusterlium/rustler>
+- BEAM Scheduler: <https://www.erlang.org/doc/man/erl_nif.html> (see `schedule` param)
+- Elixir NIF best practices: <https://hexdocs.pm/rustler/>

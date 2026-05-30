@@ -1,6 +1,7 @@
 # Java Binding Audit — May 2026
 
 ## Overview
+
 Systematic audit of Java Panama FFM bindings (`packages/java/`, `e2e/java/`). Currently e2e passes; audit uncovered 5 latent bugs in FFI type marshalling, error handling, and optional function resolution.
 
 ---
@@ -8,6 +9,7 @@ Systematic audit of Java Panama FFM bindings (`packages/java/`, `e2e/java/`). Cu
 ## CRITICAL BUGS
 
 ### BUG #1: NULL_CHECK_MISSING_ON_OPTIONAL_FFI_FUNCTIONS
+
 **Severity:** HIGH (NPE at runtime if optional functions are missing)
 **Location:** `packages/java/dev/kreuzberg/KreuzbergRs.java`
 **Issue:** Multiple methods invoke optional FFI functions (marked with `.orElse(null)` in NativeLib) without null checks:
@@ -23,6 +25,7 @@ Systematic audit of Java Panama FFM bindings (`packages/java/`, `e2e/java/`). Cu
 **Impact:** Silent `NullPointerException` instead of proper error handling. Users see stack traces with no context about missing features.
 
 **Fix:** Add null checks before invoking optional method handles:
+
 ```java
 if (NativeLib.KREUZBERG_CALCULATE_QUALITY_SCORE == null) {
     throw new KreuzbergRsException("Rust feature not available: quality scoring");
@@ -32,6 +35,7 @@ if (NativeLib.KREUZBERG_CALCULATE_QUALITY_SCORE == null) {
 ---
 
 ### BUG #2: TYPE_MISMATCH_IN_CALCULATEQUALITYSCORE_METADATA_PARAM
+
 **Severity:** CRITICAL (Memory corruption / undefined behavior)
 **Location:** `packages/java/dev/kreuzberg/KreuzbergRs.java`, line 701
 **Issue:** `calculateQualityScore()` tries to pass Java `Map<String, Object>` metadata directly to native code:
@@ -53,6 +57,7 @@ var cconfigJsonSeg = cconfigJson != null ? arena.allocateFrom(cconfigJson) : Mem
 **Impact:** Undefined behavior — crashes, memory corruption, or wrong results depending on how JVM passes the object reference.
 
 **Fix:** Serialize metadata to JSON and pass pointer:
+
 ```java
 var cmetadataJson = metadata != null ? MAPPER.writeValueAsString(metadata) : null;
 var cmetadataSeg = cmetadataJson != null ? arena.allocateFrom(cmetadataJson) : MemorySegment.NULL;
@@ -63,6 +68,7 @@ var primitiveResult = (double) NativeLib.KREUZBERG_CALCULATE_QUALITY_SCORE
 ---
 
 ### BUG #3: UNCHECKED_ERROR_CODES_IN_PLUGIN_MANAGEMENT
+
 **Severity:** MEDIUM (Silent failures, no error propagation)
 **Location:** `packages/java/dev/kreuzberg/KreuzbergRs.java`, plugin methods
 **Issue:** Methods like `clearOcrBackends()` (line 564), `clearDocumentExtractors()` (line 526), `clearPostProcessors()` (line 600), `clearRenderers()` (line 637), `clearValidators()` (line 668) all follow a pattern where they:
@@ -72,6 +78,7 @@ var primitiveResult = (double) NativeLib.KREUZBERG_CALCULATE_QUALITY_SCORE
 3. Never propagate the exception if error message is NULL but code != 0
 
 Example from `clearOcrBackends()` (lines 564-578):
+
 ```java
 var outErr = arena.allocate(ValueLayout.ADDRESS);
 var primitiveResult = (int) NativeLib.KREUZBERG_CLEAR_OCR_BACKEND.invoke(outErr);
@@ -89,6 +96,7 @@ Actually, this pattern is correct. Revising: **This is NOT a bug** — error is 
 ---
 
 ### BUG #3: INCORRECT_NULL_HANDLING_ON_OPTIONAL_FUNCTIONS_REVISED
+
 **Severity:** MEDIUM (Feature unavailability not detected)
 **Location:** `NativeLib.java`, lines 349–351, 423–425, etc.
 **Issue:** Optional functions use `.orElse(null)`, but:
@@ -102,6 +110,7 @@ Actually, this pattern is correct. Revising: **This is NOT a bug** — error is 
 **Impact:** API surface is misleading — users expect all public methods to work. If they call `calculateQualityScore()` in a WASM build (where quality features are optional), they get NPE with no context.
 
 **Fix:**
+
 - Add `@CheckForNull` or `@Nullable` annotations to method signatures
 - Document in method javadoc which features/builds support the method
 - Add runtime guard with clear error message
@@ -109,6 +118,7 @@ Actually, this pattern is correct. Revising: **This is NOT a bug** — error is 
 ---
 
 ### BUG #4: CALCULATEQUALITYSCORE_ACCEPTS_NULL_MAP_WITHOUT_SERIALIZATION
+
 **Severity:** CRITICAL (Undefined behavior with null metadata)
 **Location:** `packages/java/dev/kreuzberg/KreuzbergRs.java`, lines 695–706
 **Issue:** Method accepts `@Nullable Map<String, Object> metadata`, but if it's null, still tries to pass it to FFI. If metadata is null, the code passes the Java null reference (which becomes 0 or garbage) to the C function expecting a valid address.
@@ -125,6 +135,7 @@ The C function signature expects `(const char *text, const char *metadata_json_o
 **Impact:** When metadata is null, C function receives garbage or segfaults.
 
 **Fix:** Properly handle null and serialize non-null metadata:
+
 ```java
 var cmetadataJson = metadata != null ? MAPPER.writeValueAsString(metadata) : null;
 var cmetadataSeg = cmetadataJson != null ? arena.allocateFrom(cmetadataJson) : MemorySegment.NULL;
@@ -135,6 +146,7 @@ var primitiveResult = (double) NativeLib.KREUZBERG_CALCULATE_QUALITY_SCORE
 ---
 
 ### BUG #5: ARENA_RESOURCE_LEAK_RISK_ON_EXCEPTION_IN_JSON_SERIALIZATION
+
 **Severity:** LOW (Minor resource leak in error path)
 **Location:** `packages/java/dev/kreuzberg/KreuzbergRs.java`, all methods
 **Issue:** All methods allocate to arena inside try-with-resources, which is correct. However, JSON serialization (`MAPPER.writeValueAsString()`) is called *before* arena allocation. If serialization throws, the arena is created but unused:
@@ -152,9 +164,11 @@ Actually, try-with-resources will close the arena even if the body throws, so th
 ## MINOR ISSUES & CODE QUALITY
 
 ### ISSUE #1: VAR_OVERUSE_REDUCES_API_DISCOVERABILITY
+
 **Severity:** LOW
 **Location:** Throughout `KreuzbergRs.java`
 **Pattern:** Excessive use of `var` keyword obscures types:
+
 ```java
 var ccontent = arena.allocateFrom(ValueLayout.JAVA_BYTE, content);  // What type?
 var ccontentLen = (long) content.length;  // OK, long is explicit
@@ -162,6 +176,7 @@ var cmimeType = arena.allocateFrom(mimeType);  // What's the return type?
 ```
 
 **Recommendation:** Use explicit types for public-facing FFI marshalling:
+
 ```java
 MemorySegment ccontent = arena.allocateFrom(ValueLayout.JAVA_BYTE, content);
 long ccontentLen = (long) content.length;
@@ -169,9 +184,11 @@ MemorySegment cmimeType = arena.allocateFrom(mimeType);
 ```
 
 ### ISSUE #2: CHECKASTERROR_SILENTLY_RETURNS_NULL_ON_SOME_PATHS
+
 **Severity:** MEDIUM (Silent null returns confusing)
 **Location:** Lines 59–60, 130–131, 191–192, 236–237, etc.
 **Pattern:**
+
 ```java
 if (resultPtr.equals(MemorySegment.NULL)) {
     checkLastError();     // ← Throws if error code set
@@ -190,15 +207,18 @@ if (resultPtr.equals(MemorySegment.NULL)) {
 ```
 
 ### ISSUE #3: MISSING_VALIDATION_ON_POINTER_DEREFERENCES
+
 **Severity:** LOW
 **Location:** Line 68, 139, 200, 244, etc.
 **Pattern:** Dereferencing pointers returned from Rust without bounds validation:
+
 ```java
 String json = jsonPtr.reinterpret(Long.MAX_VALUE).getString(0);
 // ↑ Assumes C string is NUL-terminated and <= Long.MAX_VALUE bytes
 ```
 
 If Rust returns a buffer that's not properly NUL-terminated or is garbage, `getString(0)` could:
+
 - Read past buffer boundary
 - Hang trying to find NUL terminator
 - Return garbage
@@ -210,11 +230,13 @@ If Rust returns a buffer that's not properly NUL-terminated or is garbage, `getS
 ## INFRASTRUCTURE ISSUES
 
 ### ISSUE #4: OPTIONAL_FUNCTION_HANDLES_NOT_DOCUMENTED
+
 **Severity:** LOW
 **Location:** `NativeLib.java`, all `.orElse(null)` declarations
 **Pattern:** No javadoc explaining which functions are optional and under what conditions they're missing.
 
 **Recommendation:** Add inline comments:
+
 ```java
 // Optional: requires 'quality' feature in Rust build
 static final MethodHandle KREUZBERG_CALCULATE_QUALITY_SCORE = LIB.find("...")
@@ -227,6 +249,7 @@ static final MethodHandle KREUZBERG_CALCULATE_QUALITY_SCORE = LIB.find("...")
 ## PANAMA_FFM_TYPE_CORRECTNESS
 
 ### CHECK: FUNCTION_DESCRIPTOR_ALIGNMENT
+
 All `FunctionDescriptor` declarations were checked against the C ABI in `crates/kreuzberg-ffi/include/kreuzberg.h`:
 
 | Function | Descriptors | Status | Notes |
@@ -244,15 +267,18 @@ All `FunctionDescriptor` declarations were checked against the C ABI in `crates/
 ## SUMMARY OF FIXES
 
 ### Priority 1 (Must Fix - Correctness)
+
 1. **BUG #2:** Serialize metadata to JSON in `calculateQualityScore()`
 2. **BUG #1:** Add null checks before invoking optional method handles
 3. **BUG #4:** Proper null-to-NULL conversion for metadata parameter
 
 ### Priority 2 (Should Fix - Robustness)
+
 4. **ISSUE #2:** Replace silent `return null` with explicit exception on NULL result
 5. **ISSUE #4:** Document optional functions in javadoc and with inline comments
 
 ### Priority 3 (Nice to Have - Readability)
+
 6. **ISSUE #1:** Use explicit types instead of `var` for FFI marshalling
 
 ---
@@ -260,6 +286,7 @@ All `FunctionDescriptor` declarations were checked against the C ABI in `crates/
 ## TEST COVERAGE
 
 Current e2e tests pass (SmokeTest, AsyncTest, BatchTest, etc.), which means:
+
 - ✓ Basic extraction works
 - ✓ Arena lifecycle is correct
 - ✓ JSON serialization for config works
@@ -267,6 +294,7 @@ Current e2e tests pass (SmokeTest, AsyncTest, BatchTest, etc.), which means:
 - ✗ **Error paths not tested** (missing native library, feature unavailability)
 
 **Recommendation:** Add e2e tests for:
+
 - `calculateQualityScore()` with and without metadata
 - Optional function availability checks
 - Null input handling

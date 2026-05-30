@@ -15,6 +15,7 @@
 When trait implementations (DocumentExtractor, OcrBackend, EmbeddingBackend, PostProcessor, Renderer, Validator) are registered via `Register*()` functions, the Go `cgo.Handle` is created and passed to Rust as `userData`. However, when `Unregister*()` is called, **the Go handle is NEVER deleted**, creating a handle leak.
 
 Without proper cleanup:
+
 - Handles accumulate in Go's runtime handle table
 - If tests/code register/unregister repeatedly, handles exhaust the handle pool
 - If Rust later tries to invoke a deleted handle, memory corruption or SIGBUS results
@@ -39,6 +40,7 @@ All trait bridge exports in `packages/go/v5/trait_bridges.go`:
 ### Fix
 
 Created `/Users/naamanhirschfeld/workspace/kreuzberg-dev/kreuzberg/packages/go/v5/handle_tracking.go` with:
+
 - `handleRegistry` type managing name→handle mapping with sync.Mutex
 - 6 registries: one per trait type
 - `store()` method: add handle on successful registration
@@ -46,16 +48,19 @@ Created `/Users/naamanhirschfeld/workspace/kreuzberg-dev/kreuzberg/packages/go/v
 - `clear()` method: clean all handles on clear operation
 
 Updated all 6 `Register*()` functions to store handles:
+
 ```go
 documentExtractorRegistry.store(impl.Name(), handle)
 ```
 
 Updated all 6 `Unregister*()` functions to delete handles:
+
 ```go
 documentExtractorRegistry.delete(name)
 ```
 
 Updated all 6 `Clear*()` functions to clear handles:
+
 ```go
 documentExtractorRegistry.clear()
 ```
@@ -64,7 +69,7 @@ documentExtractorRegistry.clear()
 
 E2E registration tests crash on Rust side during `kreuzberg_register_document_extractor()` call, BEFORE any Go code runs:
 
-```
+```text
 unexpected fault address 0x10268608c
 fatal error: fault [signal SIGBUS: bus error code=0x1]
   at github.com/kreuzberg-dev/kreuzberg/v5.goDocumentExtractorPriority
@@ -78,6 +83,7 @@ fatal error: fault [signal SIGBUS: bus error code=0x1]
 ### Memory Safety: CLEAN
 
 All `C.CString()` allocations use immediate `defer C.free()`:
+
 - 50 `C.CString()` calls scanned
 - 100% deferred cleanup found
 - No leaked C strings
@@ -90,18 +96,20 @@ After: Registry tracks all handles → proper cleanup
 ### C Return Code Translation: CLEAN
 
 All `C.kreuzberg_*` C calls check return codes:
+
 - Error on non-zero rc
 - `C.GoString()` used to convert C error message
 - Error context preserved and wrapped with `fmt.Errorf()`
 
 ### Linting: CLEAN
 
-```
+```text
 $ golangci-lint run ./...
 0 issues.
 ```
 
 Checked for:
+
 - govet (type safety)
 - staticcheck (logic errors)
 - errcheck (error handling)
@@ -110,7 +118,7 @@ Checked for:
 
 ### Race Detection: PASSED
 
-```
+```text
 $ go test -race ./...
 ```
 
@@ -121,6 +129,7 @@ No race conditions detected. Handle registry uses sync.Mutex for thread safety.
 The e2e tests cannot pass until the Rust-side bug is fixed. The Go binding itself is correct.
 
 Once Rust is fixed:
+
 1. Run `task go:e2e` to verify plugin API tests pass
 2. Test plugin unregister cleanup: register → use → unregister → verify no crashes on subsequent operations
 3. Test concurrent registration: spin up multiple goroutines registering different plugins
