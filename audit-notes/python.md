@@ -22,8 +22,19 @@
 All Rust-to-Python error conversions use a single, generic `PyRuntimeError`. The binding defines specific exception classes (`OcrError`, `ParsingError`, `ValidationError`, `CacheError`, `SecurityError`, `UnsupportedFormatError`, `EmbeddingError`, `ImageProcessingError`, `PluginError`, `SerializationError`, `MissingDependencyError`, `LockPoisonedError`, `KreuzbergTimeoutError`, `CancelledError`, `IoError`) in `exceptions.py`, but these are never raised. Instead, all errors collapse to `PyRuntimeError`.
 
 **Evidence**:
-Lines in `crates/kreuzberg-py/src/lib.rs`:
 
+*Empirical verification (May 30, 2026, real runtime test)*:
+```python
+>>> kreuzberg.extract_bytes_sync(b"test", "application/x-nonexistent", ExtractionConfig())
+RuntimeError: Unsupported format: application/x-nonexistent
+>>> isinstance(e, kreuzberg.UnsupportedFormatError)
+False
+>>> isinstance(e, RuntimeError)
+True
+```
+**Conclusion**: Error message correctly identifies "Unsupported format", but exception is `RuntimeError` not `UnsupportedFormatError`.
+
+Code locations in `crates/kreuzberg-py/src/lib.rs`:
 - 10900: `extract_bytes_sync` → `.map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))`
 - 10905: `extract_file_sync` → same pattern
 - 10916: `batch_extract_files_sync` → same pattern
