@@ -6414,7 +6414,8 @@ public func extractBytes(
     _ configJson: String
 ) throws -> ExtractionResult {
     let config = try extractionConfigFromJson(configJson)
-    return try extractBytes(content: content, mimeType: mimeType, config: config)
+    let bytes = try _loadBytesFromPathOrUtf8(content)
+    return try extractBytes(content: bytes, mimeType: mimeType, config: config)
 }
 
 /// Convenience overload: accepts JSON-string config (matches e2e generator pattern).
@@ -6434,7 +6435,8 @@ public func extractBytesSync(
     _ configJson: String
 ) throws -> ExtractionResult {
     let config = try extractionConfigFromJson(configJson)
-    return try extractBytesSync(makeByteVec(Array(content.utf8)), mimeType, config)
+    let bytes = try _loadBytesFromPathOrUtf8(content)
+    return try extractBytesSync(makeByteVec(bytes), mimeType, config)
 }
 
 /// Convenience overload: accepts JSON-string config (matches e2e generator pattern).
