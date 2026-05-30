@@ -106,8 +106,9 @@ This document categorizes all hand-edits made to the WASM binding during the ale
 
 ### 6. WasmOcrBackendBridge::supports_language – Incorrect Bool Parse
 
-**File**: `crates/kreuzberg-wasm/src/lib.rs`, lines 14002–14008 (NOT YET FIXED)
-**Details**: Returns bool but parsed as JSON string: `.as_string().and_then(|s| serde_json::from_str::<bool>(&s).ok())`. Should be `.as_bool().unwrap_or_default()`.
+**File**: `crates/kreuzberg-wasm/src/lib.rs`, lines 14002–14008 (FIXED)
+**Status**: Fixed in commit 58e174310c
+**Details**: Was parsed as JSON string: `.as_string().and_then(|s| serde_json::from_str::<bool>(&s).ok())`. Changed to `.as_bool().unwrap_or_default()`.
 
 **Bridge**: `OcrBackend::supports_language(&self, lang: &str) -> bool`
 
@@ -119,21 +120,23 @@ This document categorizes all hand-edits made to the WASM binding during the ale
 
 ### 7. WasmOcrBackendBridge::backend_type – Incorrect OcrBackendType Parse
 
-**File**: `crates/kreuzberg-wasm/src/lib.rs`, lines 14036–14042 (NOT YET FIXED)
-**Details**: Returns kreuzberg::OcrBackendType (an enum) but parsed as JSON string. Since OcrBackendType is serializable, this *may* work if the JS side returns a JSON string, but it's fragile. Should be reviewed: either JS must return JSON-stringified enum, or bridge should use serde_wasm_bindgen.
+**File**: `crates/kreuzberg-wasm/src/lib.rs`, lines 14036–14042 (FIXED)
+**Status**: Fixed in commit 58e174310c
+**Details**: Was parsed as JSON string. OcrBackendType is serializable and JS returns an object, not a JSON string. Changed from `.as_string() + serde_json::from_str` to `serde_wasm_bindgen::from_value()`.
 
 **Bridge**: `OcrBackend::backend_type(&self) -> kreuzberg::OcrBackendType`
 
 **Category**: BINDING_BUG
 
-**Note**: Unlike dimensions (which is a raw usize), backend_type is a complex enum. Check if the JS stub is expected to return a JSON string or a JS object. If object, should deserialize via serde_wasm_bindgen, not manual JSON parse.
+**Note**: OcrBackendType and ProcessingStage return enum objects from JS, requiring serde_wasm_bindgen deserialization rather than string-based JSON parsing.
 
 ---
 
 ### 8. WasmPostProcessorBridge::processing_stage – Incorrect ProcessingStage Parse
 
-**File**: `crates/kreuzberg-wasm/src/lib.rs`, lines 14287–14293 (NOT YET FIXED)
-**Details**: Returns kreuzberg::ProcessingStage (an enum) but parsed as JSON string with serde_json. Same pattern as backend_type — if JS returns a JSON-stringified enum representation, this works; if it returns an object, needs serde_wasm_bindgen.
+**File**: `crates/kreuzberg-wasm/src/lib.rs`, lines 14287–14293 (FIXED)
+**Status**: Fixed in commit 58e174310c
+**Details**: Was parsed as JSON string. ProcessingStage is serializable and JS returns an object, not a JSON string. Changed from `.as_string() + serde_json::from_str` to `serde_wasm_bindgen::from_value()`.
 
 **Bridge**: `PostProcessor::processing_stage(&self) -> kreuzberg::ProcessingStage`
 
@@ -163,9 +166,9 @@ This document categorizes all hand-edits made to the WASM binding during the ale
 
 | Category | Count | Items |
 |----------|-------|-------|
-| ALEF_GAP | 4 | Feature-gated config stripping, FormatMetadata Code variant, env shim order, plugin test stubs |
-| BINDING_BUG | 4 | Dimensions JSON parse (fixed), supports_language bool parse, backend_type enum parse, processing_stage enum parse |
-| ROOT_CAUSE | 1 | PST tempfile gating in pst.rs |
+| ALEF_GAP | 4 | Feature-gated config stripping (done), FormatMetadata Code variant (done), env shim order (done), plugin test stubs (done) |
+| BINDING_BUG | 4 | Dimensions JSON parse (fixed), supports_language bool parse (fixed), backend_type enum parse (fixed), processing_stage enum parse (fixed) |
+| ROOT_CAUSE | 1 | PST tempfile gating in pst.rs (done) |
 
 ---
 

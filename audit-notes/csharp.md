@@ -380,6 +380,7 @@ var msg = ctxPtr != IntPtr.Zero
 ## Status: Fixes Applied & Verified
 
 **Commits:**
+
 - 59a36286be "fix(csharp): add try-finally guards for all P/Invoke handle cleanup"
 - 170c457080 "docs(audit): update C# binding audit status - fixes applied"
 
@@ -396,6 +397,7 @@ var msg = ctxPtr != IntPtr.Zero
 - DetectMimeTypeFromBytes: GCHandle leak
 
 **Verification:**
+
 - **Smoke tests:** 8/8 PASS (all extraction functions verified green)
 - **Full test suite:** 37/38 PASS (1 pre-existing plugin API trait bridge failure, unrelated to extraction fixes)
 
