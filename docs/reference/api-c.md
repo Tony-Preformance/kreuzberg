@@ -1836,6 +1836,7 @@ extracted content and metadata.
 |-------|------|---------|-------------|
 | `sheets` | `KreuzbergExcelSheet*` | — | All sheets in the workbook |
 | `metadata` | `void*` | — | Workbook-level metadata (author, creation date, etc.) |
+| `revisions` | `KreuzbergDocumentRevision**` | `/* serde(default) */` | Collaborative-edit revision headers from `xl/revisions/revisionHeaders.xml`. Populated for legacy shared-workbook `.xlsx` files that contain the `xl/revisions/` directory. Each `<header>` element maps to one `DocumentRevision { kind: FormatChange }` carrying the header's `guid` (→ `revision_id`), `userName` (→ `author`), and `dateTime` (→ `timestamp`). `anchor` and `delta` are `NULL`/empty for v1 (per-cell log parsing is a follow-up). `NULL` when `xl/revisions/revisionHeaders.xml` is absent. |
 
 ---
 
@@ -1971,7 +1972,7 @@ The complete diff between two `ExtractionResult` values.
 | `tables_added` | `KreuzbergTable*` | — | Tables present in `b` but not in `a` (by index position, excess right-side tables). |
 | `tables_removed` | `KreuzbergTable*` | — | Tables present in `a` but not in `b` (by index position, excess left-side tables). |
 | `tables_changed` | `KreuzbergTableDiff*` | — | Cell-level changes for table pairs that share the same index and dimensions. |
-| `metadata_changed` | `void*` | — | Metadata changes in a simplified add/remove/change map. Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...}, "changed": {key: {from: v1, to: v2}, ...} }`. Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate. |
+| `metadata_changed` | `void*` | — | Metadata difference, encoded as a JSON object with three top-level keys: `added` (keys present in `b` but not `a`), `removed` (keys present in `a` but not `b`), and `changed` (keys whose values differ — each entry is `{ "from": <value-in-a>, "to": <value-in-b> }`). This is NOT RFC 6902 JSON Patch — we deliberately chose a flatter shape to avoid pulling in a json-patch crate. If you need RFC 6902 semantics (with JSON Pointer paths) feed `a.metadata` and `b.metadata` to your preferred json-patch impl directly. |
 | `embedded_changes` | `KreuzbergEmbeddedChanges` | — | Changes to embedded archive children. |
 
 ---
@@ -3231,6 +3232,7 @@ by avoiding redundant copies during serialization.
 | `layout_regions` | `KreuzbergLayoutRegion**` | `NULL` | Layout detection regions for this page (when layout detection is enabled). Contains detected layout regions with class, confidence, bounding box, and area fraction. Only populated when layout detection is configured. |
 | `speaker_notes` | `const char**` | `NULL` | Speaker notes for this slide (PPTX only). Contains the text from the slide's notes pane (`ppt/notesSlides/notesSlide{N}.xml`). Only populated when the source is a PPTX file and notes are present. |
 | `section_name` | `const char**` | `NULL` | Section name this slide belongs to (PPTX only). PowerPoint sections group slides into logical chapters (`<p:sectionLst>` in `ppt/presentation.xml`). Only populated when the source is a PPTX file and the slide belongs to a named section. |
+| `sheet_name` | `const char**` | `NULL` | Sheet name for this page (XLSX/ODS only). Each spreadsheet sheet maps to one `PageContent` entry. This field carries the sheet's display name as it appears in the workbook. `NULL` for all non-spreadsheet formats and for sheets with an empty name. |
 
 ---
 
@@ -3689,6 +3691,7 @@ Contains extracted slide content, metadata, and embedded images/tables.
 | `document` | `KreuzbergDocumentStructure*` | `NULL` | Structured document representation |
 | `hyperlinks` | `const char**` | `/* serde(default) */` | Hyperlinks discovered in slides as (url, optional_label) pairs. |
 | `office_metadata` | `void*` | `/* serde(default) */` | Office metadata extracted from docProps/core.xml and docProps/app.xml. Contains keys like "title", "author", "created_by", "subject", "keywords", "modified_by", "created_at", "modified_at", etc. |
+| `revisions` | `KreuzbergDocumentRevision**` | `/* serde(default) */` | Slide comments as revisions. Each `<p:cm>` element in `ppt/comments/comment{N}.xml` becomes a `DocumentRevision { kind: Comment }` with author (resolved from `ppt/commentAuthors.xml`), ISO-8601 timestamp, and `RevisionAnchor.Slide { index }`. `NULL` when no comment XML parts exist. |
 
 ---
 

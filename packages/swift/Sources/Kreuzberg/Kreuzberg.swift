@@ -4229,7 +4229,13 @@ public struct PageContent: Codable, Sendable, Hashable {
     /// `ppt/presentation.xml`). Only populated when the source is a PPTX file and
     /// the slide belongs to a named section.
     public let sectionName: String?
-    public init(pageNumber: UInt32, content: String, tables: [Table], imageIndices: [UInt32], hierarchy: PageHierarchy? = nil, isBlank: Bool? = nil, layoutRegions: [LayoutRegion]? = nil, speakerNotes: String? = nil, sectionName: String? = nil) {
+    /// Sheet name for this page (XLSX/ODS only).
+    ///
+    /// Each spreadsheet sheet maps to one `PageContent` entry. This field carries the
+    /// sheet's display name as it appears in the workbook. `None` for all non-spreadsheet
+    /// formats and for sheets with an empty name.
+    public let sheetName: String?
+    public init(pageNumber: UInt32, content: String, tables: [Table], imageIndices: [UInt32], hierarchy: PageHierarchy? = nil, isBlank: Bool? = nil, layoutRegions: [LayoutRegion]? = nil, speakerNotes: String? = nil, sectionName: String? = nil, sheetName: String? = nil) {
         self.pageNumber = pageNumber
         self.content = content
         self.tables = tables
@@ -4239,6 +4245,7 @@ public struct PageContent: Codable, Sendable, Hashable {
         self.layoutRegions = layoutRegions
         self.speakerNotes = speakerNotes
         self.sectionName = sectionName
+        self.sheetName = sheetName
     }
     private enum CodingKeys: String, CodingKey {
         case pageNumber = "page_number"
@@ -4250,6 +4257,7 @@ public struct PageContent: Codable, Sendable, Hashable {
         case layoutRegions = "layout_regions"
         case speakerNotes = "speaker_notes"
         case sectionName = "section_name"
+        case sheetName = "sheet_name"
     }
 }
 
@@ -4265,6 +4273,7 @@ internal extension PageContent {
         self.layoutRegions = try rb.layoutRegions()?.map { try LayoutRegion($0) }
         self.speakerNotes = rb.speakerNotes()?.toString()
         self.sectionName = rb.sectionName()?.toString()
+        self.sheetName = rb.sheetName()?.toString()
     }
     func intoRust() throws -> RustBridge.PageContent {
         let data = try JSONEncoder().encode(self)
@@ -7967,7 +7976,7 @@ public func batchExtractFiles(items: [BatchFileItem], config: ExtractionConfig) 
     let _rb_items: RustVec<BatchFileItem> = { let v = RustVec<BatchFileItem>(); for x in items { v.push(value: x) }; return v }()
     return try await Task.detached(priority: .userInitiated) {
         let result = try RustBridge.batchExtractFiles(_rb_items, config)
-        return result
+        return result.map { ref in var item = ExtractionResult(ptr: ref.ptr); item.isOwned = false; return item }
     }.value
 }
 
@@ -8030,7 +8039,7 @@ public func batchExtractBytes(items: [BatchBytesItem], config: ExtractionConfig)
     let _rb_items: RustVec<BatchBytesItem> = { let v = RustVec<BatchBytesItem>(); for x in items { v.push(value: x) }; return v }()
     return try await Task.detached(priority: .userInitiated) {
         let result = try RustBridge.batchExtractBytes(_rb_items, config)
-        return result
+        return result.map { ref in var item = ExtractionResult(ptr: ref.ptr); item.isOwned = false; return item }
     }.value
 }
 

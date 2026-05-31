@@ -1347,6 +1347,7 @@ mod ffi {
         type ExcelWorkbook;
         fn sheets(&self) -> Vec<ExcelSheet>;
         fn metadata(&self) -> String;
+        fn revisions(&self) -> Option<Vec<DocumentRevision>>;
     }
 
     extern "Rust" {
@@ -1402,6 +1403,7 @@ mod ffi {
         fn document(&self) -> Option<DocumentStructure>;
         #[swift_bridge(swift_name = "officeMetadata")]
         fn office_metadata(&self) -> String;
+        fn revisions(&self) -> Option<Vec<DocumentRevision>>;
     }
 
     extern "Rust" {
@@ -2166,6 +2168,8 @@ mod ffi {
         fn speaker_notes(&self) -> Option<String>;
         #[swift_bridge(swift_name = "sectionName")]
         fn section_name(&self) -> Option<String>;
+        #[swift_bridge(swift_name = "sheetName")]
+        fn sheet_name(&self) -> Option<String>;
     }
 
     extern "Rust" {
@@ -7152,6 +7156,12 @@ impl ExcelWorkbook {
     pub fn metadata(&self) -> String {
         serde_json::to_string(&self.0.metadata).expect("serializable metadata")
     }
+    pub fn revisions(&self) -> Option<Vec<DocumentRevision>> {
+        self.0
+            .revisions
+            .as_ref()
+            .map(|v| v.iter().map(|elem| DocumentRevision(elem.clone())).collect())
+    }
 }
 
 pub struct ExcelSheet(pub kreuzberg::ExcelSheet);
@@ -7282,6 +7292,12 @@ impl PptxExtractionResult {
     // alef: skipped getter `hyperlinks` — type cannot be bridged through swift-bridge
     pub fn office_metadata(&self) -> String {
         serde_json::to_string(&self.0.office_metadata).expect("serializable office_metadata")
+    }
+    pub fn revisions(&self) -> Option<Vec<DocumentRevision>> {
+        self.0
+            .revisions
+            .as_ref()
+            .map(|v| v.iter().map(|elem| DocumentRevision(elem.clone())).collect())
     }
 }
 
@@ -9569,6 +9585,9 @@ impl PageContent {
     }
     pub fn section_name(&self) -> Option<String> {
         self.0.section_name.clone()
+    }
+    pub fn sheet_name(&self) -> Option<String> {
+        self.0.sheet_name.clone()
     }
 }
 

@@ -1841,6 +1841,7 @@ extracted content and metadata.
 |-------|------|---------|-------------|
 | `sheets` | `list[ExcelSheet]` | — | All sheets in the workbook |
 | `metadata` | `dict[str, str]` | — | Workbook-level metadata (author, creation date, etc.) |
+| `revisions` | `list[DocumentRevision] \| None` | `/* serde(default) */` | Collaborative-edit revision headers from `xl/revisions/revisionHeaders.xml`. Populated for legacy shared-workbook `.xlsx` files that contain the `xl/revisions/` directory. Each `<header>` element maps to one `DocumentRevision { kind: FormatChange }` carrying the header's `guid` (→ `revision_id`), `userName` (→ `author`), and `dateTime` (→ `timestamp`). `anchor` and `delta` are `None`/empty for v1 (per-cell log parsing is a follow-up). `None` when `xl/revisions/revisionHeaders.xml` is absent. |
 
 ---
 
@@ -1977,7 +1978,7 @@ The complete diff between two `ExtractionResult` values.
 | `tables_added` | `list[Table]` | — | Tables present in `b` but not in `a` (by index position, excess right-side tables). |
 | `tables_removed` | `list[Table]` | — | Tables present in `a` but not in `b` (by index position, excess left-side tables). |
 | `tables_changed` | `list[TableDiff]` | — | Cell-level changes for table pairs that share the same index and dimensions. |
-| `metadata_changed` | `dict[str, Any]` | — | Metadata changes in a simplified add/remove/change map. Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...}, "changed": {key: {from: v1, to: v2}, ...} }`. Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate. |
+| `metadata_changed` | `dict[str, Any]` | — | Metadata difference, encoded as a JSON object with three top-level keys: `added` (keys present in `b` but not `a`), `removed` (keys present in `a` but not `b`), and `changed` (keys whose values differ — each entry is `{ "from": <value-in-a>, "to": <value-in-b> }`). This is NOT RFC 6902 JSON Patch — we deliberately chose a flatter shape to avoid pulling in a json-patch crate. If you need RFC 6902 semantics (with JSON Pointer paths) feed `a.metadata` and `b.metadata` to your preferred json-patch impl directly. |
 | `embedded_changes` | `EmbeddedChanges` | — | Changes to embedded archive children. |
 
 ---
@@ -3249,6 +3250,7 @@ by avoiding redundant copies during serialization.
 | `layout_regions` | `list[LayoutRegion] \| None` | `None` | Layout detection regions for this page (when layout detection is enabled). Contains detected layout regions with class, confidence, bounding box, and area fraction. Only populated when layout detection is configured. |
 | `speaker_notes` | `str \| None` | `None` | Speaker notes for this slide (PPTX only). Contains the text from the slide's notes pane (`ppt/notesSlides/notesSlide{N}.xml`). Only populated when the source is a PPTX file and notes are present. |
 | `section_name` | `str \| None` | `None` | Section name this slide belongs to (PPTX only). PowerPoint sections group slides into logical chapters (`<p:sectionLst>` in `ppt/presentation.xml`). Only populated when the source is a PPTX file and the slide belongs to a named section. |
+| `sheet_name` | `str \| None` | `None` | Sheet name for this page (XLSX/ODS only). Each spreadsheet sheet maps to one `PageContent` entry. This field carries the sheet's display name as it appears in the workbook. `None` for all non-spreadsheet formats and for sheets with an empty name. |
 
 ---
 
@@ -3709,6 +3711,7 @@ Contains extracted slide content, metadata, and embedded images/tables.
 | `document` | `DocumentStructure \| None` | `None` | Structured document representation |
 | `hyperlinks` | `list[str]` | `/* serde(default) */` | Hyperlinks discovered in slides as (url, optional_label) pairs. |
 | `office_metadata` | `dict[str, str]` | `/* serde(default) */` | Office metadata extracted from docProps/core.xml and docProps/app.xml. Contains keys like "title", "author", "created_by", "subject", "keywords", "modified_by", "created_at", "modified_at", etc. |
+| `revisions` | `list[DocumentRevision] \| None` | `/* serde(default) */` | Slide comments as revisions. Each `<p:cm>` element in `ppt/comments/comment{N}.xml` becomes a `DocumentRevision { kind: Comment }` with author (resolved from `ppt/commentAuthors.xml`), ISO-8601 timestamp, and `RevisionAnchor.Slide { index }`. `None` when no comment XML parts exist. |
 
 ---
 

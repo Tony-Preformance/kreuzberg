@@ -3689,10 +3689,24 @@ class ExcelWorkbook {
   /// Workbook-level metadata (author, creation date, etc.)
   final Map<String, String> metadata;
 
-  const ExcelWorkbook({required this.sheets, required this.metadata});
+  /// Collaborative-edit revision headers from `xl/revisions/revisionHeaders.xml`.
+  ///
+  /// Populated for legacy shared-workbook `.xlsx` files that contain the
+  /// `xl/revisions/` directory. Each `<header>` element maps to one
+  /// `DocumentRevision { kind: FormatChange }` carrying the header's `guid`
+  /// (→ `revision_id`), `userName` (→ `author`), and `dateTime` (→ `timestamp`).
+  /// `anchor` and `delta` are `None`/empty for v1 (per-cell log parsing is a
+  /// follow-up). `None` when `xl/revisions/revisionHeaders.xml` is absent.
+  final List<DocumentRevision>? revisions;
+
+  const ExcelWorkbook({
+    required this.sheets,
+    required this.metadata,
+    this.revisions,
+  });
 
   @override
-  int get hashCode => sheets.hashCode ^ metadata.hashCode;
+  int get hashCode => sheets.hashCode ^ metadata.hashCode ^ revisions.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -3700,7 +3714,8 @@ class ExcelWorkbook {
       other is ExcelWorkbook &&
           runtimeType == other.runtimeType &&
           sheets == other.sheets &&
-          metadata == other.metadata;
+          metadata == other.metadata &&
+          revisions == other.revisions;
 }
 
 /// ONNX Runtime execution provider type.
@@ -4250,12 +4265,15 @@ class ExtractionDiff {
   /// Cell-level changes for table pairs that share the same index and dimensions.
   final List<TableDiff> tablesChanged;
 
-  /// Metadata changes in a simplified add/remove/change map.
+  /// Metadata difference, encoded as a JSON object with three top-level keys:
+  /// `added` (keys present in `b` but not `a`), `removed` (keys present in `a`
+  /// but not `b`), and `changed` (keys whose values differ — each entry is
+  /// `{ "from": <value-in-a>, "to": <value-in-b> }`).
   ///
-  /// Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...},
-  ///           "changed": {key: {from: v1, to: v2}, ...} }`.
-  ///
-  /// Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate.
+  /// This is NOT RFC 6902 JSON Patch — we deliberately chose a flatter shape
+  /// to avoid pulling in a json-patch crate. If you need RFC 6902 semantics
+  /// (with JSON Pointer paths) feed `a.metadata` and `b.metadata` to your
+  /// preferred json-patch impl directly.
   final String metadataChanged;
 
   /// Changes to embedded archive children.
@@ -7776,6 +7794,13 @@ class PageContent {
   /// the slide belongs to a named section.
   final String? sectionName;
 
+  /// Sheet name for this page (XLSX/ODS only).
+  ///
+  /// Each spreadsheet sheet maps to one `PageContent` entry. This field carries the
+  /// sheet's display name as it appears in the workbook. `None` for all non-spreadsheet
+  /// formats and for sheets with an empty name.
+  final String? sheetName;
+
   const PageContent({
     required this.pageNumber,
     required this.content,
@@ -7786,6 +7811,7 @@ class PageContent {
     this.layoutRegions,
     this.speakerNotes,
     this.sectionName,
+    this.sheetName,
   });
 
   @override
@@ -7798,7 +7824,8 @@ class PageContent {
       isBlank.hashCode ^
       layoutRegions.hashCode ^
       speakerNotes.hashCode ^
-      sectionName.hashCode;
+      sectionName.hashCode ^
+      sheetName.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -7813,7 +7840,8 @@ class PageContent {
           isBlank == other.isBlank &&
           layoutRegions == other.layoutRegions &&
           speakerNotes == other.speakerNotes &&
-          sectionName == other.sectionName;
+          sectionName == other.sectionName &&
+          sheetName == other.sheetName;
 }
 
 /// Page hierarchy structure containing heading levels and block information.
@@ -8383,6 +8411,14 @@ class PptxExtractionResult {
   /// "modified_by", "created_at", "modified_at", etc.
   final Map<String, String> officeMetadata;
 
+  /// Slide comments as revisions.
+  ///
+  /// Each `<p:cm>` element in `ppt/comments/comment{N}.xml` becomes a
+  /// `DocumentRevision { kind: Comment }` with author (resolved from
+  /// `ppt/commentAuthors.xml`), ISO-8601 timestamp, and
+  /// `RevisionAnchor::Slide { index }`. `None` when no comment XML parts exist.
+  final List<DocumentRevision>? revisions;
+
   const PptxExtractionResult({
     required this.content,
     required this.metadata,
@@ -8395,6 +8431,7 @@ class PptxExtractionResult {
     this.document,
     required this.hyperlinks,
     required this.officeMetadata,
+    this.revisions,
   });
 
   @override
@@ -8409,7 +8446,8 @@ class PptxExtractionResult {
       pageContents.hashCode ^
       document.hashCode ^
       hyperlinks.hashCode ^
-      officeMetadata.hashCode;
+      officeMetadata.hashCode ^
+      revisions.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -8426,7 +8464,8 @@ class PptxExtractionResult {
           pageContents == other.pageContents &&
           document == other.document &&
           hyperlinks == other.hyperlinks &&
-          officeMetadata == other.officeMetadata;
+          officeMetadata == other.officeMetadata &&
+          revisions == other.revisions;
 }
 
 /// PowerPoint presentation metadata.

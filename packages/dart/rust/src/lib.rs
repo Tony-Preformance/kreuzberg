@@ -1966,6 +1966,15 @@ pub struct ExcelWorkbook {
     pub sheets: Vec<ExcelSheet>,
     /// Workbook-level metadata (author, creation date, etc.)
     pub metadata: std::collections::HashMap<String, String>,
+    /// Collaborative-edit revision headers from `xl/revisions/revisionHeaders.xml`.
+    ///
+    /// Populated for legacy shared-workbook `.xlsx` files that contain the
+    /// `xl/revisions/` directory. Each `<header>` element maps to one
+    /// `DocumentRevision { kind: FormatChange }` carrying the header's `guid`
+    /// (→ `revision_id`), `userName` (→ `author`), and `dateTime` (→ `timestamp`).
+    /// `anchor` and `delta` are `None`/empty for v1 (per-cell log parsing is a
+    /// follow-up). `None` when `xl/revisions/revisionHeaders.xml` is absent.
+    pub revisions: Option<Vec<DocumentRevision>>,
 }
 
 /// Single Excel worksheet.
@@ -2056,6 +2065,13 @@ pub struct PptxExtractionResult {
     /// Contains keys like "title", "author", "created_by", "subject", "keywords",
     /// "modified_by", "created_at", "modified_at", etc.
     pub office_metadata: std::collections::HashMap<String, String>,
+    /// Slide comments as revisions.
+    ///
+    /// Each `<p:cm>` element in `ppt/comments/comment{N}.xml` becomes a
+    /// `DocumentRevision { kind: Comment }` with author (resolved from
+    /// `ppt/commentAuthors.xml`), ISO-8601 timestamp, and
+    /// `RevisionAnchor::Slide { index }`. `None` when no comment XML parts exist.
+    pub revisions: Option<Vec<DocumentRevision>>,
 }
 
 /// Email extraction result.
@@ -2908,6 +2924,12 @@ pub struct PageContent {
     /// `ppt/presentation.xml`). Only populated when the source is a PPTX file and
     /// the slide belongs to a named section.
     pub section_name: Option<String>,
+    /// Sheet name for this page (XLSX/ODS only).
+    ///
+    /// Each spreadsheet sheet maps to one `PageContent` entry. This field carries the
+    /// sheet's display name as it appears in the workbook. `None` for all non-spreadsheet
+    /// formats and for sheets with an empty name.
+    pub sheet_name: Option<String>,
 }
 
 /// A detected layout region on a page.
@@ -3117,12 +3139,15 @@ pub struct ExtractionDiff {
     pub tables_removed: Vec<Table>,
     /// Cell-level changes for table pairs that share the same index and dimensions.
     pub tables_changed: Vec<TableDiff>,
-    /// Metadata changes in a simplified add/remove/change map.
+    /// Metadata difference, encoded as a JSON object with three top-level keys:
+    /// `added` (keys present in `b` but not `a`), `removed` (keys present in `a`
+    /// but not `b`), and `changed` (keys whose values differ — each entry is
+    /// `{ "from": <value-in-a>, "to": <value-in-b> }`).
     ///
-    /// Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...},
-    ///           "changed": {key: {from: v1, to: v2}, ...} }`.
-    ///
-    /// Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate.
+    /// This is NOT RFC 6902 JSON Patch — we deliberately chose a flatter shape
+    /// to avoid pulling in a json-patch crate. If you need RFC 6902 semantics
+    /// (with JSON Pointer paths) feed `a.metadata` and `b.metadata` to your
+    /// preferred json-patch impl directly.
     pub metadata_changed: String,
     /// Changes to embedded archive children.
     pub embedded_changes: EmbeddedChanges,
@@ -5223,6 +5248,9 @@ impl From<kreuzberg::ExcelWorkbook> for ExcelWorkbook {
         ExcelWorkbook {
             sheets: v.sheets.into_iter().map(ExcelSheet::from).collect(),
             metadata: v.metadata.into_iter().map(|(k, v)| (k.into(), v.into())).collect(),
+            revisions: v
+                .revisions
+                .map(|vec| vec.into_iter().map(DocumentRevision::from).collect()),
         }
     }
 }
@@ -5284,6 +5312,9 @@ impl From<kreuzberg::PptxExtractionResult> for PptxExtractionResult {
                 .into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
                 .collect(),
+            revisions: v
+                .revisions
+                .map(|vec| vec.into_iter().map(DocumentRevision::from).collect()),
         }
     }
 }
@@ -5859,6 +5890,7 @@ impl From<kreuzberg::PageContent> for PageContent {
                 .map(|vec| vec.into_iter().map(LayoutRegion::from).collect()),
             speaker_notes: v.speaker_notes.map(|s| s.into()),
             section_name: v.section_name.map(|s| s.into()),
+            sheet_name: v.sheet_name.map(|s| s.into()),
         }
     }
 }
@@ -8154,6 +8186,7 @@ impl From<PageContent> for kreuzberg::PageContent {
             layout_regions: v.layout_regions.map(|vec| vec.into_iter().map(Into::into).collect()),
             speaker_notes: v.speaker_notes.map(Into::into),
             section_name: v.section_name.map(Into::into),
+            sheet_name: v.sheet_name.map(Into::into),
         }
     }
 }
@@ -10931,7 +10964,7 @@ impl kreuzberg::DocumentExtractor for DocumentExtractorDartCallbacks {
         let mime_type = mime_type.to_string();
         let config = ExtractionConfig::from(config.clone());
         let __ret_bridge: InternalDocumentBridge = (self.extract_bytes)(content, mime_type, config).await;
-        let __ret: kreuzberg::InternalDocument = serde_json::from_str(&__ret_bridge.json).map_err(|e| e.to_string())?;
+        let __ret: kreuzberg::InternalDocument = serde_json::from_str(&__ret_bridge.json)?;
         Ok(__ret)
     }
 
@@ -10945,7 +10978,7 @@ impl kreuzberg::DocumentExtractor for DocumentExtractorDartCallbacks {
         let mime_type = mime_type.to_string();
         let config = ExtractionConfig::from(config.clone());
         let __ret_bridge: InternalDocumentBridge = (self.extract_file)(path, mime_type, config).await;
-        let __ret: kreuzberg::InternalDocument = serde_json::from_str(&__ret_bridge.json).map_err(|e| e.to_string())?;
+        let __ret: kreuzberg::InternalDocument = serde_json::from_str(&__ret_bridge.json)?;
         Ok(__ret)
     }
 
@@ -11097,7 +11130,7 @@ impl kreuzberg::Renderer for RendererDartCallbacks {
     fn render(&self, doc: &kreuzberg::InternalDocument) -> kreuzberg::Result<String> {
         let doc = doc.clone();
         let __doc_local = InternalDocumentBridge {
-            json: serde_json::to_string(&doc).map_err(|e| e.to_string())?,
+            json: serde_json::to_string(&doc)?,
         };
         let __result = ::tokio::runtime::Builder::new_current_thread()
             .build()

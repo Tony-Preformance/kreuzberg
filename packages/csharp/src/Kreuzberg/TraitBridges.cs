@@ -120,7 +120,9 @@ public sealed class OcrBackendBridge : IDisposable {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
         _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
         _delegates = new object[14];
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
+        // Pin the delegates array to prevent GC during callback round-trips.
+        // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -206,15 +208,8 @@ public sealed class OcrBackendBridge : IDisposable {
 
     }
 
-    private static readonly JsonSerializerOptions FfiJsonOptions = new()
-    {
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
-    };
-
     private static string ToJsonString<T>(T value) {
-        return JsonSerializer.Serialize(value);
+        return JsonSerializer.Serialize(value, FfiJsonExtensions.FfiJsonOptions);
     }
 
     /// <summary>Called by Rust via FreeUserDataCallback when done with this bridge</summary>
@@ -924,7 +919,9 @@ public sealed class PostProcessorBridge : IDisposable {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
         _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
         _delegates = new object[11];
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
+        // Pin the delegates array to prevent GC during callback round-trips.
+        // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -995,15 +992,8 @@ public sealed class PostProcessorBridge : IDisposable {
 
     }
 
-    private static readonly JsonSerializerOptions FfiJsonOptions = new()
-    {
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
-    };
-
     private static string ToJsonString<T>(T value) {
-        return JsonSerializer.Serialize(value);
+        return JsonSerializer.Serialize(value, FfiJsonExtensions.FfiJsonOptions);
     }
 
     /// <summary>Called by Rust via FreeUserDataCallback when done with this bridge</summary>
@@ -1519,7 +1509,9 @@ public sealed class ValidatorBridge : IDisposable {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
         _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
         _delegates = new object[9];
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
+        // Pin the delegates array to prevent GC during callback round-trips.
+        // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -1580,15 +1572,8 @@ public sealed class ValidatorBridge : IDisposable {
 
     }
 
-    private static readonly JsonSerializerOptions FfiJsonOptions = new()
-    {
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
-    };
-
     private static string ToJsonString<T>(T value) {
-        return JsonSerializer.Serialize(value);
+        return JsonSerializer.Serialize(value, FfiJsonExtensions.FfiJsonOptions);
     }
 
     /// <summary>Called by Rust via FreeUserDataCallback when done with this bridge</summary>
@@ -2020,7 +2005,9 @@ public sealed class EmbeddingBackendBridge : IDisposable {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
         _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
         _delegates = new object[8];
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
+        // Pin the delegates array to prevent GC during callback round-trips.
+        // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -2076,15 +2063,8 @@ public sealed class EmbeddingBackendBridge : IDisposable {
 
     }
 
-    private static readonly JsonSerializerOptions FfiJsonOptions = new()
-    {
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
-    };
-
     private static string ToJsonString<T>(T value) {
-        return JsonSerializer.Serialize(value);
+        return JsonSerializer.Serialize(value, FfiJsonExtensions.FfiJsonOptions);
     }
 
     /// <summary>Called by Rust via FreeUserDataCallback when done with this bridge</summary>
@@ -2529,7 +2509,9 @@ public sealed class DocumentExtractorBridge : IDisposable {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
         _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
         _delegates = new object[11];
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
+        // Pin the delegates array to prevent GC during callback round-trips.
+        // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -2600,15 +2582,8 @@ public sealed class DocumentExtractorBridge : IDisposable {
 
     }
 
-    private static readonly JsonSerializerOptions FfiJsonOptions = new()
-    {
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
-    };
-
     private static string ToJsonString<T>(T value) {
-        return JsonSerializer.Serialize(value);
+        return JsonSerializer.Serialize(value, FfiJsonExtensions.FfiJsonOptions);
     }
 
     /// <summary>Called by Rust via FreeUserDataCallback when done with this bridge</summary>
@@ -3167,7 +3142,9 @@ public sealed class RendererBridge : IDisposable {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
         _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
         _delegates = new object[7];
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
+        // Pin the delegates array to prevent GC during callback round-trips.
+        // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -3218,15 +3195,8 @@ public sealed class RendererBridge : IDisposable {
 
     }
 
-    private static readonly JsonSerializerOptions FfiJsonOptions = new()
-    {
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
-    };
-
     private static string ToJsonString<T>(T value) {
-        return JsonSerializer.Serialize(value);
+        return JsonSerializer.Serialize(value, FfiJsonExtensions.FfiJsonOptions);
     }
 
     /// <summary>Called by Rust via FreeUserDataCallback when done with this bridge</summary>
@@ -3553,12 +3523,22 @@ public static class RendererRegistry {
     }
 }
 
-/// <summary>FFI JSON serialization extension methods</summary>
+/// <summary>FFI JSON serialization extension methods and options</summary>
 internal static class FfiJsonExtensions {
+
+    /// <summary>Global JsonSerializerOptions for FFI marshalling with relaxed numeric handling.
+    /// Supports: enum-to-snake_case conversion, ignoring default values, and reading numeric values from strings.
+    /// Used by both trait bridges and callback deserialization.</summary>
+    public static readonly JsonSerializerOptions FfiJsonOptions = new()
+    {
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString
+    };
 
     /// <summary>Serialize any object to JSON for FFI marshalling</summary>
     internal static string ToFfiJson<T>(this T value) {
-        return JsonSerializer.Serialize(value);
+        return JsonSerializer.Serialize(value, FfiJsonOptions);
     }
 
 }

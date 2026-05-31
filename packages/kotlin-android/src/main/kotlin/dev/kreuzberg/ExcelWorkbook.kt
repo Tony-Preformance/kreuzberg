@@ -33,4 +33,15 @@ data class ExcelWorkbook(
     val sheets: List<ExcelSheet> = emptyList(),
     /** Workbook-level metadata (author, creation date, etc.) */
     val metadata: Map<String, String> = emptyMap(),
+    /**
+     * Collaborative-edit revision headers from `xl/revisions/revisionHeaders.xml`.
+     *
+     * Populated for legacy shared-workbook `.xlsx` files that contain the
+     * `xl/revisions/` directory. Each `<header>` element maps to one
+     * `DocumentRevision { kind: FormatChange }` carrying the header's `guid`
+     * (→ `revision_id`), `userName` (→ `author`), and `dateTime` (→ `timestamp`).
+     * `anchor` and `delta` are `null`/empty for v1 (per-cell log parsing is a
+     * follow-up). `null` when `xl/revisions/revisionHeaders.xml` is absent.
+     */
+    val revisions: List<DocumentRevision>? = null,
 )

@@ -10054,11 +10054,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ExcelWorkbook dco_decode_excel_workbook(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2)
-      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return ExcelWorkbook(
       sheets: dco_decode_list_excel_sheet(arr[0]),
       metadata: dco_decode_Map_String_String_None(arr[1]),
+      revisions: dco_decode_opt_list_document_revision(arr[2]),
     );
   }
 
@@ -12160,8 +12161,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PageContent dco_decode_page_content(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 9)
-      throw Exception('unexpected arr length: expect 9 but see ${arr.length}');
+    if (arr.length != 10)
+      throw Exception('unexpected arr length: expect 10 but see ${arr.length}');
     return PageContent(
       pageNumber: dco_decode_i_64(arr[0]),
       content: dco_decode_String(arr[1]),
@@ -12172,6 +12173,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       layoutRegions: dco_decode_opt_list_layout_region(arr[6]),
       speakerNotes: dco_decode_opt_String(arr[7]),
       sectionName: dco_decode_opt_String(arr[8]),
+      sheetName: dco_decode_opt_String(arr[9]),
     );
   }
 
@@ -12325,8 +12327,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PptxExtractionResult dco_decode_pptx_extraction_result(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 11)
-      throw Exception('unexpected arr length: expect 11 but see ${arr.length}');
+    if (arr.length != 12)
+      throw Exception('unexpected arr length: expect 12 but see ${arr.length}');
     return PptxExtractionResult(
       content: dco_decode_String(arr[0]),
       metadata: dco_decode_pptx_metadata(arr[1]),
@@ -12339,6 +12341,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       document: dco_decode_opt_box_autoadd_document_structure(arr[8]),
       hyperlinks: dco_decode_list_String(arr[9]),
       officeMetadata: dco_decode_Map_String_String_None(arr[10]),
+      revisions: dco_decode_opt_list_document_revision(arr[11]),
     );
   }
 
@@ -14948,7 +14951,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_sheets = sse_decode_list_excel_sheet(deserializer);
     var var_metadata = sse_decode_Map_String_String_None(deserializer);
-    return ExcelWorkbook(sheets: var_sheets, metadata: var_metadata);
+    var var_revisions = sse_decode_opt_list_document_revision(deserializer);
+    return ExcelWorkbook(
+      sheets: var_sheets,
+      metadata: var_metadata,
+      revisions: var_revisions,
+    );
   }
 
   @protected
@@ -18219,6 +18227,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_layoutRegions = sse_decode_opt_list_layout_region(deserializer);
     var var_speakerNotes = sse_decode_opt_String(deserializer);
     var var_sectionName = sse_decode_opt_String(deserializer);
+    var var_sheetName = sse_decode_opt_String(deserializer);
     return PageContent(
       pageNumber: var_pageNumber,
       content: var_content,
@@ -18229,6 +18238,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       layoutRegions: var_layoutRegions,
       speakerNotes: var_speakerNotes,
       sectionName: var_sectionName,
+      sheetName: var_sheetName,
     );
   }
 
@@ -18437,6 +18447,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
     var var_hyperlinks = sse_decode_list_String(deserializer);
     var var_officeMetadata = sse_decode_Map_String_String_None(deserializer);
+    var var_revisions = sse_decode_opt_list_document_revision(deserializer);
     return PptxExtractionResult(
       content: var_content,
       metadata: var_metadata,
@@ -18449,6 +18460,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       document: var_document,
       hyperlinks: var_hyperlinks,
       officeMetadata: var_officeMetadata,
+      revisions: var_revisions,
     );
   }
 
@@ -21219,6 +21231,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_excel_sheet(self.sheets, serializer);
     sse_encode_Map_String_String_None(self.metadata, serializer);
+    sse_encode_opt_list_document_revision(self.revisions, serializer);
   }
 
   @protected
@@ -23976,6 +23989,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_list_layout_region(self.layoutRegions, serializer);
     sse_encode_opt_String(self.speakerNotes, serializer);
     sse_encode_opt_String(self.sectionName, serializer);
+    sse_encode_opt_String(self.sheetName, serializer);
   }
 
   @protected
@@ -24110,6 +24124,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_box_autoadd_document_structure(self.document, serializer);
     sse_encode_list_String(self.hyperlinks, serializer);
     sse_encode_Map_String_String_None(self.officeMetadata, serializer);
+    sse_encode_opt_list_document_revision(self.revisions, serializer);
   }
 
   @protected

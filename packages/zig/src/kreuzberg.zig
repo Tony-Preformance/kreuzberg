@@ -1878,6 +1878,15 @@ pub const ExcelWorkbook = struct {
     sheets: []const ExcelSheet,
     /// Workbook-level metadata (author, creation date, etc.)
     metadata: std.StringHashMap([]const u8),
+    /// Collaborative-edit revision headers from `xl/revisions/revisionHeaders.xml`.
+    ///
+    /// Populated for legacy shared-workbook `.xlsx` files that contain the
+    /// `xl/revisions/` directory. Each `<header>` element maps to one
+    /// `DocumentRevision { kind: FormatChange }` carrying the header's `guid`
+    /// (→ `revision_id`), `userName` (→ `author`), and `dateTime` (→ `timestamp`).
+    /// `anchor` and `delta` are `null`/empty for v1 (per-cell log parsing is a
+    /// follow-up). `null` when `xl/revisions/revisionHeaders.xml` is absent.
+    revisions: ?[]const DocumentRevision,
 };
 
 /// Single Excel worksheet.
@@ -1964,6 +1973,13 @@ pub const PptxExtractionResult = struct {
     /// Contains keys like "title", "author", "created_by", "subject", "keywords",
     /// "modified_by", "created_at", "modified_at", etc.
     office_metadata: std.StringHashMap([]const u8),
+    /// Slide comments as revisions.
+    ///
+    /// Each `<p:cm>` element in `ppt/comments/comment{N}.xml` becomes a
+    /// `DocumentRevision { kind: Comment }` with author (resolved from
+    /// `ppt/commentAuthors.xml`), ISO-8601 timestamp, and
+    /// `RevisionAnchor.Slide { index }`. `null` when no comment XML parts exist.
+    revisions: ?[]const DocumentRevision,
 };
 
 /// Email extraction result.
@@ -2775,6 +2791,12 @@ pub const PageContent = struct {
     /// `ppt/presentation.xml`). Only populated when the source is a PPTX file and
     /// the slide belongs to a named section.
     section_name: ?[]const u8,
+    /// Sheet name for this page (XLSX/ODS only).
+    ///
+    /// Each spreadsheet sheet maps to one `PageContent` entry. This field carries the
+    /// sheet's display name as it appears in the workbook. `null` for all non-spreadsheet
+    /// formats and for sheets with an empty name.
+    sheet_name: ?[]const u8,
 };
 
 /// A detected layout region on a page.
@@ -2973,12 +2995,15 @@ pub const ExtractionDiff = struct {
     tables_removed: []const Table,
     /// Cell-level changes for table pairs that share the same index and dimensions.
     tables_changed: []const TableDiff,
-    /// Metadata changes in a simplified add/remove/change map.
+    /// Metadata difference, encoded as a JSON object with three top-level keys:
+    /// `added` (keys present in `b` but not `a`), `removed` (keys present in `a`
+    /// but not `b`), and `changed` (keys whose values differ — each entry is
+    /// `{ "from": <value-in-a>, "to": <value-in-b> }`).
     ///
-    /// Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...},
-    ///           "changed": {key: {from: v1, to: v2}, ...} }`.
-    ///
-    /// Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate.
+    /// This is NOT RFC 6902 JSON Patch — we deliberately chose a flatter shape
+    /// to avoid pulling in a json-patch crate. If you need RFC 6902 semantics
+    /// (with JSON Pointer paths) feed `a.metadata` and `b.metadata` to your
+    /// preferred json-patch impl directly.
     metadata_changed: []const u8,
     /// Changes to embedded archive children.
     embedded_changes: EmbeddedChanges,
@@ -4967,6 +4992,7 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
                     // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
+                    return 0;
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -4985,6 +5011,7 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
                     // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
+                    return 0;
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -5046,6 +5073,7 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
                     // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
+                    return 0;
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -5764,6 +5792,7 @@ pub fn make_embedding_backend_vtable(comptime T: type, instance: *T) IEmbeddingB
                     // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
+                    return 0;
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -5986,6 +6015,7 @@ pub fn make_document_extractor_vtable(comptime T: type, instance: *T) IDocumentE
                     // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
+                    return 0;
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -6004,6 +6034,7 @@ pub fn make_document_extractor_vtable(comptime T: type, instance: *T) IDocumentE
                     // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
+                    return 0;
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -6182,6 +6213,7 @@ pub fn make_renderer_vtable(comptime T: type, instance: *T) IRenderer {
                     // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
+                    return 0;
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code

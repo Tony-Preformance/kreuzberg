@@ -7104,6 +7104,13 @@ char *kreuzberg_excel_workbook_sheets(const KREUZBERGExcelWorkbook *ptr);
 char *kreuzberg_excel_workbook_metadata(const KREUZBERGExcelWorkbook *ptr);
 
 /**
+ * Get the `revisions` field from a `ExcelWorkbook`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *kreuzberg_excel_workbook_revisions(const KREUZBERGExcelWorkbook *ptr);
+
+/**
  * Create a `ExcelSheet` from a JSON string. Returns null on failure.
  * # Safety
  * JSON string must be valid UTF-8 and null-terminated.
@@ -7362,6 +7369,13 @@ KREUZBERGDocumentStructure *kreuzberg_pptx_extraction_result_document(const KREU
  * Pointer must be a valid handle returned by this library.
  */
 char *kreuzberg_pptx_extraction_result_office_metadata(const KREUZBERGPptxExtractionResult *ptr);
+
+/**
+ * Get the `revisions` field from a `PptxExtractionResult`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *kreuzberg_pptx_extraction_result_revisions(const KREUZBERGPptxExtractionResult *ptr);
 
 /**
  * Create a `EmailExtractionResult` from a JSON string. Returns null on failure.
@@ -10052,6 +10066,13 @@ char *kreuzberg_page_content_speaker_notes(const KREUZBERGPageContent *ptr);
  * Pointer must be a valid handle returned by this library.
  */
 char *kreuzberg_page_content_section_name(const KREUZBERGPageContent *ptr);
+
+/**
+ * Get the `sheet_name` field from a `PageContent`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *kreuzberg_page_content_sheet_name(const KREUZBERGPageContent *ptr);
 
 /**
  * Create a `LayoutRegion` from a JSON string. Returns null on failure.

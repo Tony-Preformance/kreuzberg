@@ -6276,6 +6276,7 @@ const _: fn() = || {
         let ExcelWorkbook = None::<crate::ExcelWorkbook>.unwrap();
         let _: Vec<crate::ExcelSheet> = ExcelWorkbook.sheets;
         let _: std::collections::HashMap<String, String> = ExcelWorkbook.metadata;
+        let _: Option<Vec<crate::DocumentRevision>> = ExcelWorkbook.revisions;
     }
     {
         let ExtractedImage = None::<crate::ExtractedImage>.unwrap();
@@ -6984,6 +6985,7 @@ const _: fn() = || {
         let _: Option<Vec<crate::LayoutRegion>> = PageContent.layout_regions;
         let _: Option<String> = PageContent.speaker_notes;
         let _: Option<String> = PageContent.section_name;
+        let _: Option<String> = PageContent.sheet_name;
     }
     {
         let PageHierarchy = None::<crate::PageHierarchy>.unwrap();
@@ -7076,6 +7078,7 @@ const _: fn() = || {
         let _: Option<crate::DocumentStructure> = PptxExtractionResult.document;
         let _: Vec<String> = PptxExtractionResult.hyperlinks;
         let _: std::collections::HashMap<String, String> = PptxExtractionResult.office_metadata;
+        let _: Option<Vec<crate::DocumentRevision>> = PptxExtractionResult.revisions;
     }
     {
         let PptxMetadata = None::<crate::PptxMetadata>.unwrap();
@@ -9238,9 +9241,11 @@ impl SseDecode for crate::ExcelWorkbook {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_sheets = <Vec<crate::ExcelSheet>>::sse_decode(deserializer);
         let mut var_metadata = <std::collections::HashMap<String, String>>::sse_decode(deserializer);
+        let mut var_revisions = <Option<Vec<crate::DocumentRevision>>>::sse_decode(deserializer);
         return crate::ExcelWorkbook {
             sheets: var_sheets,
             metadata: var_metadata,
+            revisions: var_revisions,
         };
     }
 }
@@ -12449,6 +12454,7 @@ impl SseDecode for crate::PageContent {
         let mut var_layoutRegions = <Option<Vec<crate::LayoutRegion>>>::sse_decode(deserializer);
         let mut var_speakerNotes = <Option<String>>::sse_decode(deserializer);
         let mut var_sectionName = <Option<String>>::sse_decode(deserializer);
+        let mut var_sheetName = <Option<String>>::sse_decode(deserializer);
         return crate::PageContent {
             page_number: var_pageNumber,
             content: var_content,
@@ -12459,6 +12465,7 @@ impl SseDecode for crate::PageContent {
             layout_regions: var_layoutRegions,
             speaker_notes: var_speakerNotes,
             section_name: var_sectionName,
+            sheet_name: var_sheetName,
         };
     }
 }
@@ -12679,6 +12686,7 @@ impl SseDecode for crate::PptxExtractionResult {
         let mut var_document = <Option<crate::DocumentStructure>>::sse_decode(deserializer);
         let mut var_hyperlinks = <Vec<String>>::sse_decode(deserializer);
         let mut var_officeMetadata = <std::collections::HashMap<String, String>>::sse_decode(deserializer);
+        let mut var_revisions = <Option<Vec<crate::DocumentRevision>>>::sse_decode(deserializer);
         return crate::PptxExtractionResult {
             content: var_content,
             metadata: var_metadata,
@@ -12691,6 +12699,7 @@ impl SseDecode for crate::PptxExtractionResult {
             document: var_document,
             hyperlinks: var_hyperlinks,
             office_metadata: var_officeMetadata,
+            revisions: var_revisions,
         };
     }
 }
@@ -15005,6 +15014,7 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::ExcelWorkbook> {
         [
             self.0.sheets.into_into_dart().into_dart(),
             self.0.metadata.into_into_dart().into_dart(),
+            self.0.revisions.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -16558,6 +16568,7 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::PageContent> {
             self.0.layout_regions.into_into_dart().into_dart(),
             self.0.speaker_notes.into_into_dart().into_dart(),
             self.0.section_name.into_into_dart().into_dart(),
+            self.0.sheet_name.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -16787,6 +16798,7 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::PptxExtractionResult> {
             self.0.document.into_into_dart().into_dart(),
             self.0.hyperlinks.into_into_dart().into_dart(),
             self.0.office_metadata.into_into_dart().into_dart(),
+            self.0.revisions.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -18613,6 +18625,7 @@ impl SseEncode for crate::ExcelWorkbook {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Vec<crate::ExcelSheet>>::sse_encode(self.sheets, serializer);
         <std::collections::HashMap<String, String>>::sse_encode(self.metadata, serializer);
+        <Option<Vec<crate::DocumentRevision>>>::sse_encode(self.revisions, serializer);
     }
 }
 
@@ -21168,6 +21181,7 @@ impl SseEncode for crate::PageContent {
         <Option<Vec<crate::LayoutRegion>>>::sse_encode(self.layout_regions, serializer);
         <Option<String>>::sse_encode(self.speaker_notes, serializer);
         <Option<String>>::sse_encode(self.section_name, serializer);
+        <Option<String>>::sse_encode(self.sheet_name, serializer);
     }
 }
 
@@ -21325,6 +21339,7 @@ impl SseEncode for crate::PptxExtractionResult {
         <Option<crate::DocumentStructure>>::sse_encode(self.document, serializer);
         <Vec<String>>::sse_encode(self.hyperlinks, serializer);
         <std::collections::HashMap<String, String>>::sse_encode(self.office_metadata, serializer);
+        <Option<Vec<crate::DocumentRevision>>>::sse_encode(self.revisions, serializer);
     }
 }
 

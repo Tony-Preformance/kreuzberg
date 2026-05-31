@@ -94,4 +94,12 @@ data class PageContent(
      * the slide belongs to a named section.
      */
     val sectionName: String? = null,
+    /**
+     * Sheet name for this page (XLSX/ODS only).
+     *
+     * Each spreadsheet sheet maps to one `PageContent` entry. This field carries the
+     * sheet's display name as it appears in the workbook. `null` for all non-spreadsheet
+     * formats and for sheets with an empty name.
+     */
+    val sheetName: String? = null,
 )

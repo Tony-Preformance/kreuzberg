@@ -55,4 +55,13 @@ data class PptxExtractionResult(
      * "modified_by", "created_at", "modified_at", etc.
      */
     val officeMetadata: Map<String, String> = emptyMap(),
+    /**
+     * Slide comments as revisions.
+     *
+     * Each `<p:cm>` element in `ppt/comments/comment{N}.xml` becomes a
+     * `DocumentRevision { kind: Comment }` with author (resolved from
+     * `ppt/commentAuthors.xml`), ISO-8601 timestamp, and
+     * `RevisionAnchor.Slide { index }`. `null` when no comment XML parts exist.
+     */
+    val revisions: List<DocumentRevision>? = null,
 )
