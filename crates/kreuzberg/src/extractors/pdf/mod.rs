@@ -646,7 +646,7 @@ impl PdfExtractor {
             }
         }
 
-        // Extract bookmarks/outlines.
+        // Extract bookmarks/outlines and xref-chain revision history.
         #[cfg(feature = "pdf")]
         {
             if let Ok(lopdf_doc) = lopdf::Document::load_mem(content) {
@@ -654,6 +654,11 @@ impl PdfExtractor {
                 for uri in bookmark_uris {
                     doc.push_uri(uri);
                 }
+
+                // Walk the /Prev chain to surface incremental-update history.
+                // Single-save PDFs return None; incrementally-saved PDFs return
+                // Some(Vec<DocumentRevision>) with one entry per historical xref section.
+                doc.revisions = crate::pdf::xref_revisions::extract_pdf_xref_revisions(content, &lopdf_doc);
             }
         }
 

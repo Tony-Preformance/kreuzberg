@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **pdf/revisions**: PDF extraction now exposes incremental-update history in
+  `ExtractionResult.revisions`. Each historical `xref` section in the file's xref chain becomes one
+  `DocumentRevision` carrying the byte offset as `revision_id` (`xref-offset-<N>`), and (when
+  present) the `/Info` dictionary's author and creation/modification timestamps. The `/Prev` chain
+  is walked from the final xref backwards through raw bytes using the already-loaded `lopdf::Document`
+  as the chain anchor. Single-save PDFs (no `/Prev`) yield `revisions = None`. Per-revision content
+  extraction is deferred — `RevisionDelta` is empty for now; `RevisionKind::Insertion` is used as a
+  placeholder (the enum is not `#[non_exhaustive]`, so a typed `Snapshot` variant is a future
+  breaking-change candidate).
+
 - **docx/revisions**: DOCX extraction now populates `ExtractionResult.revisions` from OOXML
   track-changes markup. `w:ins` elements produce `RevisionKind::Insertion` with the inserted text
   in `RevisionDelta.content` as `DiffLine::Added`; `w:del` / `w:delText` produce

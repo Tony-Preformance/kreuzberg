@@ -31,6 +31,8 @@ pub mod structure;
 pub mod table_reconstruct;
 #[cfg(feature = "pdf")]
 pub(crate) mod text;
+#[cfg(feature = "pdf")]
+pub(crate) mod xref_revisions;
 
 #[cfg(feature = "pdf")]
 pub use crate::core::config::HierarchyConfig;
