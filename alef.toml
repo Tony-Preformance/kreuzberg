@@ -656,7 +656,7 @@ e2e = "cd e2e/php && PHP_INI_SCAN_DIR= php -c php.ini vendor/bin/phpunit"
 
 [crates.test.java]
 precondition = "command -v mvn >/dev/null 2>&1"
-before = "cargo build --release -p kreuzberg-ffi && cd packages/java && mvn package -DskipTests -q"
+before = "cargo build --release -p kreuzberg-ffi && cd packages/java && mvn -T 1 package -DskipTests -q"
 e2e = "cd e2e/java && mvn test -q"
 
 [crates.test.csharp]
