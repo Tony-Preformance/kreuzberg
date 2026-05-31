@@ -4509,7 +4509,7 @@ internal extension DocumentRevision {
         self.author = rb.author()?.toString()
         self.timestamp = rb.timestamp()?.toString()
         self.kind = RevisionKind(rawValue: rb.kind().toString()) ?? { fatalError("Unknown RevisionKind: \(rb.kind().toString())") }()
-        self.anchor = try JSONDecoder().decode(RevisionAnchor?.self, from: (rb.anchor().toString().data(using: .utf8) ?? Data("null".utf8)))
+        self.anchor = try JSONDecoder().decode(RevisionAnchor?.self, from: ((rb.anchor()?.toString() ?? "null").data(using: .utf8) ?? Data("null".utf8)))
         self.delta = try RevisionDelta(rb.delta())
     }
     func intoRust() throws -> RustBridge.DocumentRevision {
@@ -7974,10 +7974,8 @@ public func batchExtractBytesSync(items: [BatchBytesItem], config: ExtractionCon
 /// ```
 public func batchExtractFiles(items: [BatchFileItem], config: ExtractionConfig) async throws -> [ExtractionResult] {
     let _rb_items: RustVec<BatchFileItem> = { let v = RustVec<BatchFileItem>(); for x in items { v.push(value: x) }; return v }()
-    return try await Task.detached(priority: .userInitiated) {
-        let result = try RustBridge.batchExtractFiles(_rb_items, config)
-        return result.map { ref in var item = ExtractionResult(ptr: ref.ptr); item.isOwned = false; return item }
-    }.value
+    let result = try RustBridge.batchExtractFiles(_rb_items, config)
+    return result.map { ref in let item = ExtractionResult(ptr: ref.ptr); item.isOwned = false; return item }
 }
 
 /// Extract content from multiple byte arrays concurrently.
@@ -8037,10 +8035,8 @@ public func batchExtractFiles(items: [BatchFileItem], config: ExtractionConfig) 
 /// ```
 public func batchExtractBytes(items: [BatchBytesItem], config: ExtractionConfig) async throws -> [ExtractionResult] {
     let _rb_items: RustVec<BatchBytesItem> = { let v = RustVec<BatchBytesItem>(); for x in items { v.push(value: x) }; return v }()
-    return try await Task.detached(priority: .userInitiated) {
-        let result = try RustBridge.batchExtractBytes(_rb_items, config)
-        return result.map { ref in var item = ExtractionResult(ptr: ref.ptr); item.isOwned = false; return item }
-    }.value
+    let result = try RustBridge.batchExtractBytes(_rb_items, config)
+    return result.map { ref in let item = ExtractionResult(ptr: ref.ptr); item.isOwned = false; return item }
 }
 
 /// Detect MIME type from raw file bytes.

@@ -118,11 +118,11 @@ public sealed class OcrBackendBridge : IDisposable {
 
     public OcrBackendBridge(IOcrBackend impl) {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
-        _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
+        _implHandle = GCHandle.Alloc(impl, GCHandleType.Normal);
         _delegates = new object[14];
         // Pin the delegates array to prevent GC during callback round-trips.
         // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -917,11 +917,11 @@ public sealed class PostProcessorBridge : IDisposable {
 
     public PostProcessorBridge(IPostProcessor impl) {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
-        _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
+        _implHandle = GCHandle.Alloc(impl, GCHandleType.Normal);
         _delegates = new object[11];
         // Pin the delegates array to prevent GC during callback round-trips.
         // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -1507,11 +1507,11 @@ public sealed class ValidatorBridge : IDisposable {
 
     public ValidatorBridge(IValidator impl) {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
-        _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
+        _implHandle = GCHandle.Alloc(impl, GCHandleType.Normal);
         _delegates = new object[9];
         // Pin the delegates array to prevent GC during callback round-trips.
         // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -2003,11 +2003,11 @@ public sealed class EmbeddingBackendBridge : IDisposable {
 
     public EmbeddingBackendBridge(IEmbeddingBackend impl) {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
-        _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
+        _implHandle = GCHandle.Alloc(impl, GCHandleType.Normal);
         _delegates = new object[8];
         // Pin the delegates array to prevent GC during callback round-trips.
         // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -2507,11 +2507,11 @@ public sealed class DocumentExtractorBridge : IDisposable {
 
     public DocumentExtractorBridge(IDocumentExtractor impl) {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
-        _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
+        _implHandle = GCHandle.Alloc(impl, GCHandleType.Normal);
         _delegates = new object[11];
         // Pin the delegates array to prevent GC during callback round-trips.
         // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks
@@ -3140,11 +3140,11 @@ public sealed class RendererBridge : IDisposable {
 
     public RendererBridge(IRenderer impl) {
         _impl = impl ?? throw new ArgumentNullException(nameof(impl));
-        _implHandle = GCHandle.Alloc(impl, GCHandleType.Pinned);
+        _implHandle = GCHandle.Alloc(impl, GCHandleType.Normal);
         _delegates = new object[7];
         // Pin the delegates array to prevent GC during callback round-trips.
         // Must use Pinned, not Normal, to keep array address stable across managed→unmanaged→managed calls.
-        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Pinned);
+        _delegatesHandle = GCHandle.Alloc(_delegates, GCHandleType.Normal);
         _vtable = IntPtr.Zero;
         _disposed = false;
         // Allocate unique bridge ID for registry lookup during callbacks

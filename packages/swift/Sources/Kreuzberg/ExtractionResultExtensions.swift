@@ -1,3 +1,21 @@
 import RustBridge
 
-// No extensions currently needed. listen_addr is already available as a property on ServerConfigRef.
+// MARK: - Property-access ergonomics for e2e tests
+//
+// This file provides computed-property aliases for methods on swift-bridge-generated types,
+// allowing callers to write `result.mimeType` rather than `result.mimeType()`.
+// These extensions are especially useful in e2e test assertions where the alef
+// fixture generator emits property-access syntax.
+//
+// Although these are primarily for test convenience, they are part of the public API
+// and can be used in production code for more ergonomic access to extraction results.
+
+extension RustBridge.ExtractionResult {
+    public var mimeType: String {
+        self.mimeType().toString()
+    }
+
+    public var content: String {
+        self.content().toString()
+    }
+}
