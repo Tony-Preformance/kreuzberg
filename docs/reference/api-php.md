@@ -380,8 +380,8 @@ public static function clearEmbeddingBackends(): void
 
 List the names of all registered embedding backends.
 
-Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-language bindings via `alef.toml [exclude].functions`.
+Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+bindings.
 
 **Signature:**
 
@@ -581,6 +581,31 @@ public static function clearValidators(): void
 
 **Returns:** `void`
 **Errors:** Throws `Error`.
+
+---
+
+#### compare()
+
+Compare two extraction results and return a structured diff.
+
+The comparison is purely structural — no I/O, no side effects. All fields
+of `ExtractionDiff` are populated according to the provided `DiffOptions`.
+
+**Signature:**
+
+```php
+public static function compare(ExtractionResult $a, ExtractionResult $b, DiffOptions $opts): ExtractionDiff
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `a` | `ExtractionResult` | Yes | The extraction result |
+| `b` | `ExtractionResult` | Yes | The extraction result |
+| `opts` | `DiffOptions` | Yes | The options to use |
+
+**Returns:** `ExtractionDiff`
 
 ---
 
@@ -866,6 +891,23 @@ Bounding box coordinates for element positioning.
 
 ---
 
+#### CellChange
+
+A single changed cell within a table.
+
+Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+reference it unconditionally, without requiring the `diff` Cargo feature.
+`crate::diff` re-exports this type verbatim.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `row` | `int` | — | Zero-based row index. |
+| `col` | `int` | — | Zero-based column index. |
+| `from` | `string` | — | Value before the change. |
+| `to` | `string` | — | Value after the change. |
+
+---
+
 #### Chunk
 
 A text chunk with optional embedding and metadata.
@@ -1075,6 +1117,42 @@ Page-level detection result containing all detections and page metadata.
 | `pageWidth` | `int` | — | Page width |
 | `pageHeight` | `int` | — | Page height |
 | `detections` | `array<LayoutDetection>` | — | Detections |
+
+---
+
+#### DiffHunk
+
+A single contiguous hunk in a unified diff.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `fromLine` | `int` | — | Starting line number in the old content (0-indexed). |
+| `fromCount` | `int` | — | Number of lines from the old content in this hunk. |
+| `toLine` | `int` | — | Starting line number in the new content (0-indexed). |
+| `toCount` | `int` | — | Number of lines from the new content in this hunk. |
+| `lines` | `array<DiffLine>` | — | Lines that make up this hunk. |
+
+---
+
+#### DiffOptions
+
+Options controlling how two `ExtractionResult` values are compared.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `includeMetadata` | `bool` | `true` | Include metadata changes in the diff. Default: `true`. |
+| `includeEmbedded` | `bool` | `true` | Include embedded-children changes in the diff. Default: `true`. |
+| `maxContentChars` | `?int` | `null` | Truncate content to this many characters before diffing. Useful for very large documents where only the first N characters matter. `null` means no truncation. |
+
+### Methods
+
+#### default()
+
+**Signature:**
+
+```php
+public static function default(): DiffOptions
+```
 
 ---
 
@@ -1304,6 +1382,26 @@ A resolved relationship between two nodes in the document tree.
 
 ---
 
+#### DocumentRevision
+
+A single tracked change embedded in a document.
+
+Populated by per-format extractors that understand change-tracking metadata
+(DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every
+extractor defaults to `ExtractionResult.revisions = None` until a
+format-specific implementation is added.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `revisionId` | `string` | — | Format-specific revision identifier. For DOCX this is the `w:id` attribute value on the change element (e.g. `"42"`). When the attribute is absent a synthetic fallback is generated (`"docx-ins-0"`, `"docx-del-3"`, …). |
+| `author` | `?string` | `null` | Display name of the author who made this change, when available. |
+| `timestamp` | `?string` | `null` | ISO-8601 timestamp of the change, when available. Stored as a plain string so this type remains FFI-friendly and unconditionally available without the `chrono` optional dep. DOCX populates this from the `w:date` attribute (e.g. `"2024-03-15T10:30:00Z"`). |
+| `kind` | `RevisionKind` | — | Semantic kind of this revision. |
+| `anchor` | `?RevisionAnchor` | `null` | Best-effort document location for this revision. Resolution is format-dependent and may be `null` when the location cannot be determined (e.g. changes inside table cells before table-cell anchor support is added). |
+| `delta` | `RevisionDelta` | — | The content changes that make up this revision. |
+
+---
+
 #### DocumentStructure
 
 Top-level structured document representation.
@@ -1497,6 +1595,29 @@ Includes sender/recipient information, message ID, and attachment list.
 | `bccEmails` | `array<string>` | `[]` | BCC recipients |
 | `messageId` | `?string` | `null` | Message-ID header value |
 | `attachments` | `array<string>` | `[]` | List of attachment filenames |
+
+---
+
+#### EmbeddedChanges
+
+Changes to embedded archive children between two results.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `added` | `array<ArchiveEntry>` | — | Children present in `b` but not in `a` (matched by `path`). |
+| `removed` | `array<ArchiveEntry>` | — | Children present in `a` but not in `b` (matched by `path`). |
+| `changed` | `array<EmbeddedDiff>` | — | Children present in both but with differing content (matched by `path`). Each entry holds the diff of the nested `ExtractionResult`. |
+
+---
+
+#### EmbeddedDiff
+
+Diff for a single embedded archive entry that appears in both results.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `path` | `string` | — | Archive-relative path identifying this entry. |
+| `diff` | `ExtractionDiff` | — | The recursive diff of the entry's extraction result. |
 
 ---
 
@@ -1840,6 +1961,21 @@ public function needsImageProcessing(): bool
 
 ---
 
+#### ExtractionDiff
+
+The complete diff between two `ExtractionResult` values.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `contentDiff` | `array<DiffHunk>` | — | Unified-diff hunks for the `content` field. Empty when the content is identical. |
+| `tablesAdded` | `array<Table>` | — | Tables present in `b` but not in `a` (by index position, excess right-side tables). |
+| `tablesRemoved` | `array<Table>` | — | Tables present in `a` but not in `b` (by index position, excess left-side tables). |
+| `tablesChanged` | `array<TableDiff>` | — | Cell-level changes for table pairs that share the same index and dimensions. |
+| `metadataChanged` | `mixed` | — | Metadata changes in a simplified add/remove/change map. Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...}, "changed": {key: {from: v1, to: v2}, ...} }`. Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate. |
+| `embeddedChanges` | `EmbeddedChanges` | — | Changes to embedded archive children. |
+
+---
+
 #### ExtractionResult
 
 General extraction result used by the core extraction API.
@@ -1867,6 +2003,7 @@ This is the main result type returned by all extraction functions.
 | `annotations` | `?array<PdfAnnotation>` | `[]` | PDF annotations extracted from the document. When annotation extraction is enabled via `PdfConfig::extract_annotations`, this field contains text notes, highlights, links, stamps, and other annotations found in PDF documents. |
 | `children` | `?array<ArchiveEntry>` | `[]` | Nested extraction results from archive contents. When extracting archives, each processable file inside produces its own full extraction result. Set to `null` for non-archive formats. Use `max_archive_depth` in config to control recursion depth. |
 | `uris` | `?array<ExtractedUri>` | `[]` | URIs/links discovered during document extraction. Contains hyperlinks, image references, citations, email addresses, and other URI-like references found in the document. Always extracted when present in the source document. |
+| `revisions` | `?array<DocumentRevision>` | `[]` | Tracked changes embedded in the source document. Populated by per-format extractors that understand change-tracking metadata (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every extractor defaults to `null` until its format-specific implementation is added. Extractors that do populate this field follow the "accepted-changes" convention: inserted text is present in `content`, deleted text is absent — the revision list is the separate audit trail. |
 | `structuredOutput` | `?mixed` | `null` | Structured extraction output from LLM-based JSON schema extraction. When `structured_extraction` is configured in `ExtractionConfig`, the extracted document content is sent to a VLM with the provided JSON schema. The response is parsed and stored here as a JSON value matching the schema. |
 | `codeIntelligence` | `?mixed` | `null` | Code intelligence results from tree-sitter analysis. Populated when extracting source code files with the `tree-sitter` feature. Contains metrics, structural analysis, imports/exports, comments, docstrings, symbols, diagnostics, and optionally chunked code segments. Stored as an opaque JSON value so that all language bindings (Go, Java, C#, …) can deserialize it as a raw JSON object rather than a typed struct. The underlying type is `tree_sitter_language_pack::ProcessResult`. |
 | `llmUsage` | `?array<LlmUsage>` | `[]` | LLM token usage and cost data for all LLM calls made during this extraction. Contains one entry per LLM call. Multiple entries are produced when VLM OCR, structured extraction, or LLM embeddings run during the same extraction. `null` when no LLM was used. |
@@ -3672,6 +3809,22 @@ public function render(InternalDocument $doc): string
 
 ---
 
+#### RevisionDelta
+
+The content changes that make up a single revision.
+
+For insertions and deletions the `content` field carries the added/removed
+lines as `DiffLine::Added` / `DiffLine::Removed` entries. For format
+changes, `content` is empty — the property diff is left as a TODO for a
+later enrichment pass.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `content` | `array<DiffLine>` | `[]` | Line-level content changes for this revision. |
+| `tableChanges` | `array<CellChange>` | `[]` | Cell-level table changes for this revision. |
+
+---
+
 #### SecurityLimits
 
 Configuration for security limits across extractors.
@@ -3878,6 +4031,18 @@ Future extension point for rich table support with cell-level metadata.
 | `rowSpan` | `int` | — | Row span (number of rows this cell spans) |
 | `colSpan` | `int` | — | Column span (number of columns this cell spans) |
 | `isHeader` | `bool` | — | Whether this is a header cell |
+
+---
+
+#### TableDiff
+
+Cell-level changes for a pair of tables that share the same index.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `fromIndex` | `int` | — | Zero-based index of the table in both `a.tables` and `b.tables`. |
+| `toIndex` | `int` | — | Zero-based index in `b.tables` (equal to `from_index` for same-dimension tables). |
+| `cellChanges` | `array<CellChange>` | — | Cell-level changes within the table. |
 
 ---
 
@@ -4766,6 +4931,49 @@ Distinguishes between different types of "pages" (PDF pages, presentation slides
 | `Page` | Standard document pages (PDF, DOCX, images) |
 | `Slide` | Presentation slides (PPTX, ODP) |
 | `Sheet` | Spreadsheet sheets (XLSX, ODS) |
+
+---
+
+#### DiffLine
+
+A single line in a unified-diff hunk.
+
+Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+reference it unconditionally, without requiring the `diff` Cargo feature.
+`crate::diff` re-exports this type verbatim.
+
+| Value | Description |
+|-------|-------------|
+| `Context` | Unchanged context line. — Fields: `0`: `string` |
+| `Added` | Line added in the "after" version. — Fields: `0`: `string` |
+| `Removed` | Line removed from the "before" version. — Fields: `0`: `string` |
+
+---
+
+#### RevisionKind
+
+Semantic classification of a tracked change.
+
+| Value | Description |
+|-------|-------------|
+| `Insertion` | Text or content was inserted. |
+| `Deletion` | Text or content was deleted. |
+| `FormatChange` | Run-level formatting (font, size, colour, …) was changed. |
+| `Comment` | A reviewer comment or annotation. |
+
+---
+
+#### RevisionAnchor
+
+Best-effort document location for a revision.
+
+| Value | Description |
+|-------|-------------|
+| `Paragraph` | Body paragraph, identified by its zero-based index in the document flow. — Fields: `index`: `int` |
+| `TableCell` | Cell inside a table. — Fields: `row`: `int`, `col`: `int`, `tableIndex`: `int` |
+| `Page` | Page, identified by its zero-based index. — Fields: `index`: `int` |
+| `Slide` | Presentation slide, identified by its zero-based index. — Fields: `index`: `int` |
+| `Sheet` | Spreadsheet cell or range, identified by sheet index and optional name. — Fields: `index`: `int`, `name`: `string` |
 
 ---
 

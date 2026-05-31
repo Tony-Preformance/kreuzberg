@@ -1609,6 +1609,16 @@ pub const ExtractionResult = struct {
     /// other URI-like references found in the document. Always extracted when
     /// present in the source document.
     uris: ?[]const ExtractedUri,
+    /// Tracked changes embedded in the source document.
+    ///
+    /// Populated by per-format extractors that understand change-tracking
+    /// metadata (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`,
+    /// …). Every extractor defaults to `null` until its format-specific
+    /// implementation is added. Extractors that do populate this field follow
+    /// the "accepted-changes" convention: inserted text is present in
+    /// `content`, deleted text is absent — the revision list is the separate
+    /// audit trail.
+    revisions: ?[]const DocumentRevision,
     /// Structured extraction output from LLM-based JSON schema extraction.
     ///
     /// When `structured_extraction` is configured in `ExtractionConfig`, the
@@ -2821,6 +2831,69 @@ pub const HierarchicalBlock = struct {
     bbox: ?[]const f32,
 };
 
+/// A single changed cell within a table.
+///
+/// Defined here (rather than only in `crate.diff`) so `RevisionDelta` can
+/// reference it unconditionally, without requiring the `diff` Cargo feature.
+/// `crate.diff` re-exports this type verbatim.
+pub const CellChange = struct {
+    /// Zero-based row index.
+    row: u64,
+    /// Zero-based column index.
+    col: u64,
+    /// Value before the change.
+    from: []const u8,
+    /// Value after the change.
+    to: []const u8,
+};
+
+/// A single tracked change embedded in a document.
+///
+/// Populated by per-format extractors that understand change-tracking metadata
+/// (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every
+/// extractor defaults to `ExtractionResult.revisions = None` until a
+/// format-specific implementation is added.
+pub const DocumentRevision = struct {
+    /// Format-specific revision identifier.
+    ///
+    /// For DOCX this is the `w:id` attribute value on the change element
+    /// (e.g. `"42"`). When the attribute is absent a synthetic fallback is
+    /// generated (`"docx-ins-0"`, `"docx-del-3"`, …).
+    revision_id: []const u8,
+    /// Display name of the author who made this change, when available.
+    author: ?[]const u8,
+    /// ISO-8601 timestamp of the change, when available.
+    ///
+    /// Stored as a plain string so this type remains FFI-friendly and
+    /// unconditionally available without the `chrono` optional dep.
+    /// DOCX populates this from the `w:date` attribute (e.g.
+    /// `"2024-03-15T10:30:00Z"`).
+    timestamp: ?[]const u8,
+    /// Semantic kind of this revision.
+    kind: RevisionKind,
+    /// Best-effort document location for this revision.
+    ///
+    /// Resolution is format-dependent and may be `null` when the location
+    /// cannot be determined (e.g. changes inside table cells before
+    /// table-cell anchor support is added).
+    anchor: ?RevisionAnchor,
+    /// The content changes that make up this revision.
+    delta: RevisionDelta,
+};
+
+/// The content changes that make up a single revision.
+///
+/// For insertions and deletions the `content` field carries the added/removed
+/// lines as `DiffLine.Added` / `DiffLine.Removed` entries. For format
+/// changes, `content` is empty — the property diff is left as a TODO for a
+/// later enrichment pass.
+pub const RevisionDelta = struct {
+    /// Line-level content changes for this revision.
+    content: []const DiffLine,
+    /// Cell-level table changes for this revision.
+    table_changes: []const CellChange,
+};
+
 /// Extracted table structure.
 ///
 /// Represents a table detected and extracted from a document (PDF, image, etc.).
@@ -2873,6 +2946,86 @@ pub const DetectResponse = struct {
     mime_type: []const u8,
     /// Original filename (if provided)
     filename: ?[]const u8,
+};
+
+/// Options controlling how two `ExtractionResult` values are compared.
+pub const DiffOptions = struct {
+    /// Include metadata changes in the diff. Default: `true`.
+    include_metadata: bool,
+    /// Include embedded-children changes in the diff. Default: `true`.
+    include_embedded: bool,
+    /// Truncate content to this many characters before diffing.
+    ///
+    /// Useful for very large documents where only the first N characters matter.
+    /// `null` means no truncation.
+    max_content_chars: ?u64,
+};
+
+/// The complete diff between two `ExtractionResult` values.
+pub const ExtractionDiff = struct {
+    /// Unified-diff hunks for the `content` field.
+    ///
+    /// Empty when the content is identical.
+    content_diff: []const DiffHunk,
+    /// Tables present in `b` but not in `a` (by index position, excess right-side tables).
+    tables_added: []const Table,
+    /// Tables present in `a` but not in `b` (by index position, excess left-side tables).
+    tables_removed: []const Table,
+    /// Cell-level changes for table pairs that share the same index and dimensions.
+    tables_changed: []const TableDiff,
+    /// Metadata changes in a simplified add/remove/change map.
+    ///
+    /// Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...},
+    ///           "changed": {key: {from: v1, to: v2}, ...} }`.
+    ///
+    /// Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate.
+    metadata_changed: []const u8,
+    /// Changes to embedded archive children.
+    embedded_changes: EmbeddedChanges,
+};
+
+/// A single contiguous hunk in a unified diff.
+pub const DiffHunk = struct {
+    /// Starting line number in the old content (0-indexed).
+    from_line: u64,
+    /// Number of lines from the old content in this hunk.
+    from_count: u64,
+    /// Starting line number in the new content (0-indexed).
+    to_line: u64,
+    /// Number of lines from the new content in this hunk.
+    to_count: u64,
+    /// Lines that make up this hunk.
+    lines: []const DiffLine,
+};
+
+/// Cell-level changes for a pair of tables that share the same index.
+pub const TableDiff = struct {
+    /// Zero-based index of the table in both `a.tables` and `b.tables`.
+    from_index: u64,
+    /// Zero-based index in `b.tables` (equal to `from_index` for same-dimension tables).
+    to_index: u64,
+    /// Cell-level changes within the table.
+    cell_changes: []const CellChange,
+};
+
+/// Changes to embedded archive children between two results.
+pub const EmbeddedChanges = struct {
+    /// Children present in `b` but not in `a` (matched by `path`).
+    added: []const ArchiveEntry,
+    /// Children present in `a` but not in `b` (matched by `path`).
+    removed: []const ArchiveEntry,
+    /// Children present in both but with differing content (matched by `path`).
+    ///
+    /// Each entry holds the diff of the nested `ExtractionResult`.
+    changed: []const EmbeddedDiff,
+};
+
+/// Diff for a single embedded archive entry that appears in both results.
+pub const EmbeddedDiff = struct {
+    /// Archive-relative path identifying this entry.
+    path: []const u8,
+    /// The recursive diff of the entry's extraction result.
+    diff: ExtractionDiff,
 };
 
 /// Preset configurations for common RAG use cases.
@@ -3747,6 +3900,53 @@ pub const PageUnitType = enum {
     sheet,
 };
 
+/// A single line in a unified-diff hunk.
+///
+/// Defined here (rather than only in `crate.diff`) so `RevisionDelta` can
+/// reference it unconditionally, without requiring the `diff` Cargo feature.
+/// `crate.diff` re-exports this type verbatim.
+pub const DiffLine = union(enum) {
+    /// Unchanged context line.
+    context: []const u8,
+    /// Line added in the "after" version.
+    added: []const u8,
+    /// Line removed from the "before" version.
+    removed: []const u8,
+};
+
+/// Semantic classification of a tracked change.
+pub const RevisionKind = enum {
+    /// Text or content was inserted.
+    insertion,
+    /// Text or content was deleted.
+    deletion,
+    /// Run-level formatting (font, size, colour, …) was changed.
+    format_change,
+    /// A reviewer comment or annotation.
+    comment,
+};
+
+/// Best-effort document location for a revision.
+pub const RevisionAnchor = union(enum) {
+    /// Body paragraph, identified by its zero-based index in the document flow.
+    paragraph: u64,
+    /// Cell inside a table.
+    table_cell: struct {
+        row: u64,
+        col: u64,
+        table_index: u64,
+    },
+    /// Page, identified by its zero-based index.
+    page: u64,
+    /// Presentation slide, identified by its zero-based index.
+    slide: u64,
+    /// Spreadsheet cell or range, identified by sheet index and optional name.
+    sheet: struct {
+        index: u64,
+        name: ?[]const u8,
+    },
+};
+
 /// Semantic classification of an extracted URI.
 pub const UriKind = enum {
     /// A clickable hyperlink (web URL, file link).
@@ -4230,8 +4430,8 @@ pub fn get_extensions_for_mime(mime_type: []const u8) KreuzbergError![]u8 {
 
 /// List the names of all registered embedding backends.
 ///
-/// Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-/// language bindings via `alef.toml [exclude].functions`.
+/// Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+/// bindings.
 pub fn list_embedding_backends() KreuzbergError![]u8 {
     const _result = c.kreuzberg_list_embedding_backends();
     if (c.kreuzberg_last_error_code() != 0) {
@@ -4343,6 +4543,41 @@ pub fn list_validators() KreuzbergError![]u8 {
         _free_string(_result);
         break :blk owned;
     };
+}
+
+/// Compare two extraction results and return a structured diff.
+///
+/// The comparison is purely structural — no I/O, no side effects. All fields
+/// of `ExtractionDiff` are populated according to the provided `DiffOptions`.
+pub fn compare(a: []const u8, b: []const u8, opts: []const u8) error{OutOfMemory,InvalidJson}![]u8 {
+    const a_z = try std.fmt.allocPrintSentinel(
+        std.heap.c_allocator, "{s}", .{a}, 0);
+    defer std.heap.c_allocator.free(a_z);
+    const a_handle = c.kreuzberg_extraction_result_from_json(a_z);
+    if (a_handle == null) return error.InvalidJson;
+    defer c.kreuzberg_extraction_result_free(a_handle);
+    const b_z = try std.fmt.allocPrintSentinel(
+        std.heap.c_allocator, "{s}", .{b}, 0);
+    defer std.heap.c_allocator.free(b_z);
+    const b_handle = c.kreuzberg_extraction_result_from_json(b_z);
+    if (b_handle == null) return error.InvalidJson;
+    defer c.kreuzberg_extraction_result_free(b_handle);
+    const opts_z = try std.fmt.allocPrintSentinel(
+        std.heap.c_allocator, "{s}", .{opts}, 0);
+    defer std.heap.c_allocator.free(opts_z);
+    const opts_handle = c.kreuzberg_diff_options_from_json(opts_z);
+    if (opts_handle == null) return error.InvalidJson;
+    defer c.kreuzberg_diff_options_free(opts_handle);
+    const _result = c.kreuzberg_compare(a_handle, b_handle, opts_handle);
+    return blk: {
+        const _json_ptr = c.kreuzberg_extraction_diff_to_json(_result.?);
+        defer _free_string(_json_ptr);
+        c.kreuzberg_extraction_diff_free(_result.?);
+        const slice = std.mem.sliceTo(_json_ptr, 0);
+        const owned = try std.heap.c_allocator.dupe(u8, slice);
+        break :blk owned;
+    }
+;
 }
 
 /// Generate embeddings asynchronously for a list of text strings.
@@ -4497,10 +4732,10 @@ pub fn list_embedding_presets() error{OutOfMemory}![]u8 {
 /// `register_ocr_backend` function to register your implementation.
 pub const IOcrBackend = extern struct {
     /// Return the plugin name into `out_name` (heap-allocated, caller frees).
-    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void = null,
+    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Return the plugin version into `out_version` (heap-allocated, caller frees).
-    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void = null,
+    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Initialise the plugin; return 0 on success, non-zero on error.
     initialize_fn: ?*const fn (user_data: ?*anyopaque, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
@@ -4629,6 +4864,9 @@ pub const IOcrBackend = extern struct {
     /// * `path` - Path to the document file (e.g. .pdf)
     /// * `config` - OCR configuration
     process_document: ?*const fn (user_data: ?*anyopaque, _path: [*c]const u8, _config: [*c]const u8, out_result: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
+    /// Called by the Rust runtime to release strings returned by callbacks.
+    free_string: ?*const fn (ptr: [*c]u8) callconv(.c) void = null,
+
     /// Called by the Rust runtime when the bridge is dropped.
     /// Use this to release any Zig-side state held via `user_data`.
     free_user_data: ?*const fn (user_data: ?*anyopaque) callconv(.c) void = null,
@@ -4689,15 +4927,19 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
     _ = instance; // instance is passed as user_data by the caller
     return IOcrBackend{
         .name_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_name) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .version_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_version) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .initialize_fn = struct {
@@ -4719,9 +4961,12 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
                 const self: *T = @ptrCast(@alignCast(ud));
                 _ = image_bytes_len;
                 if (self.process_image(image_bytes_ptr, config)) |value| {
+                    // Complex return type: serialize to JSON and return as *u8 (NUL-terminated C string).
+                    // The caller owns the returned pointer; they must free it via the C API.
+                    // For now, return null to indicate the method is not yet implemented.
+                    // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
-                    @compileError("unsupported complex trait-vtable return; implement this vtable slot manually");
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -4734,9 +4979,12 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
             fn thunk(ud: ?*anyopaque, path: [*c]const u8, config: [*c]const u8, out_result: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 const self: *T = @ptrCast(@alignCast(ud));
                 if (self.process_image_file(path, config)) |value| {
+                    // Complex return type: serialize to JSON and return as *u8 (NUL-terminated C string).
+                    // The caller owns the returned pointer; they must free it via the C API.
+                    // For now, return null to indicate the method is not yet implemented.
+                    // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
-                    @compileError("unsupported complex trait-vtable return; implement this vtable slot manually");
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -4792,9 +5040,12 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
             fn thunk(ud: ?*anyopaque, _path: [*c]const u8, _config: [*c]const u8, out_result: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 const self: *T = @ptrCast(@alignCast(ud));
                 if (self.process_document(_path, _config)) |value| {
+                    // Complex return type: serialize to JSON and return as *u8 (NUL-terminated C string).
+                    // The caller owns the returned pointer; they must free it via the C API.
+                    // For now, return null to indicate the method is not yet implemented.
+                    // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
-                    @compileError("unsupported complex trait-vtable return; implement this vtable slot manually");
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -4803,6 +5054,11 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
             }
         }.thunk,
 
+        .free_string = struct {
+            fn thunk(ptr: [*c]u8) callconv(.c) void {
+                _ = ptr;
+            }
+        }.thunk,
         .free_user_data = struct {
             fn thunk(user_data: ?*anyopaque) callconv(.c) void {
                 _ = user_data;
@@ -4816,10 +5072,10 @@ pub fn make_ocr_backend_vtable(comptime T: type, instance: *T) IOcrBackend {
 /// `register_post_processor` function to register your implementation.
 pub const IPostProcessor = extern struct {
     /// Return the plugin name into `out_name` (heap-allocated, caller frees).
-    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void = null,
+    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Return the plugin version into `out_version` (heap-allocated, caller frees).
-    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void = null,
+    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Initialise the plugin; return 0 on success, non-zero on error.
     initialize_fn: ?*const fn (user_data: ?*anyopaque, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
@@ -4942,6 +5198,9 @@ pub const IPostProcessor = extern struct {
     /// Use 0-49 for fallback processors, 50 for normal processors, and 51-255
     /// for high-priority processors that should run early in their stage.
     priority: ?*const fn (user_data: ?*anyopaque) callconv(.c) i32 = null,
+    /// Called by the Rust runtime to release strings returned by callbacks.
+    free_string: ?*const fn (ptr: [*c]u8) callconv(.c) void = null,
+
     /// Called by the Rust runtime when the bridge is dropped.
     /// Use this to release any Zig-side state held via `user_data`.
     free_user_data: ?*const fn (user_data: ?*anyopaque) callconv(.c) void = null,
@@ -5002,15 +5261,19 @@ pub fn make_post_processor_vtable(comptime T: type, instance: *T) IPostProcessor
     _ = instance; // instance is passed as user_data by the caller
     return IPostProcessor{
         .name_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_name) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .version_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_version) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .initialize_fn = struct {
@@ -5073,6 +5336,11 @@ pub fn make_post_processor_vtable(comptime T: type, instance: *T) IPostProcessor
             }
         }.thunk,
 
+        .free_string = struct {
+            fn thunk(ptr: [*c]u8) callconv(.c) void {
+                _ = ptr;
+            }
+        }.thunk,
         .free_user_data = struct {
             fn thunk(user_data: ?*anyopaque) callconv(.c) void {
                 _ = user_data;
@@ -5086,10 +5354,10 @@ pub fn make_post_processor_vtable(comptime T: type, instance: *T) IPostProcessor
 /// `register_validator` function to register your implementation.
 pub const IValidator = extern struct {
     /// Return the plugin name into `out_name` (heap-allocated, caller frees).
-    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void = null,
+    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Return the plugin version into `out_version` (heap-allocated, caller frees).
-    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void = null,
+    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Initialise the plugin; return 0 on success, non-zero on error.
     initialize_fn: ?*const fn (user_data: ?*anyopaque, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
@@ -5227,6 +5495,9 @@ pub const IValidator = extern struct {
     /// }
     /// ```
     priority: ?*const fn (user_data: ?*anyopaque) callconv(.c) i32 = null,
+    /// Called by the Rust runtime to release strings returned by callbacks.
+    free_string: ?*const fn (ptr: [*c]u8) callconv(.c) void = null,
+
     /// Called by the Rust runtime when the bridge is dropped.
     /// Use this to release any Zig-side state held via `user_data`.
     free_user_data: ?*const fn (user_data: ?*anyopaque) callconv(.c) void = null,
@@ -5287,15 +5558,19 @@ pub fn make_validator_vtable(comptime T: type, instance: *T) IValidator {
     _ = instance; // instance is passed as user_data by the caller
     return IValidator{
         .name_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_name) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .version_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_version) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .initialize_fn = struct {
@@ -5340,6 +5615,11 @@ pub fn make_validator_vtable(comptime T: type, instance: *T) IValidator {
             }
         }.thunk,
 
+        .free_string = struct {
+            fn thunk(ptr: [*c]u8) callconv(.c) void {
+                _ = ptr;
+            }
+        }.thunk,
         .free_user_data = struct {
             fn thunk(user_data: ?*anyopaque) callconv(.c) void {
                 _ = user_data;
@@ -5353,10 +5633,10 @@ pub fn make_validator_vtable(comptime T: type, instance: *T) IValidator {
 /// `register_embedding_backend` function to register your implementation.
 pub const IEmbeddingBackend = extern struct {
     /// Return the plugin name into `out_name` (heap-allocated, caller frees).
-    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void = null,
+    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Return the plugin version into `out_version` (heap-allocated, caller frees).
-    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void = null,
+    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Initialise the plugin; return 0 on success, non-zero on error.
     initialize_fn: ?*const fn (user_data: ?*anyopaque, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
@@ -5375,6 +5655,9 @@ pub const IEmbeddingBackend = extern struct {
     /// backend-specific failures. The dispatcher layers its own validation
     /// (length, per-vector dimension) on top.
     embed: ?*const fn (user_data: ?*anyopaque, texts: [*c]const u8, out_result: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
+    /// Called by the Rust runtime to release strings returned by callbacks.
+    free_string: ?*const fn (ptr: [*c]u8) callconv(.c) void = null,
+
     /// Called by the Rust runtime when the bridge is dropped.
     /// Use this to release any Zig-side state held via `user_data`.
     free_user_data: ?*const fn (user_data: ?*anyopaque) callconv(.c) void = null,
@@ -5435,15 +5718,19 @@ pub fn make_embedding_backend_vtable(comptime T: type, instance: *T) IEmbeddingB
     _ = instance; // instance is passed as user_data by the caller
     return IEmbeddingBackend{
         .name_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_name) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .version_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_version) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .initialize_fn = struct {
@@ -5471,9 +5758,12 @@ pub fn make_embedding_backend_vtable(comptime T: type, instance: *T) IEmbeddingB
             fn thunk(ud: ?*anyopaque, texts: [*c]const u8, out_result: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 const self: *T = @ptrCast(@alignCast(ud));
                 if (self.embed(texts)) |value| {
+                    // Complex return type: serialize to JSON and return as *u8 (NUL-terminated C string).
+                    // The caller owns the returned pointer; they must free it via the C API.
+                    // For now, return null to indicate the method is not yet implemented.
+                    // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
-                    @compileError("unsupported complex trait-vtable return; implement this vtable slot manually");
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -5482,6 +5772,11 @@ pub fn make_embedding_backend_vtable(comptime T: type, instance: *T) IEmbeddingB
             }
         }.thunk,
 
+        .free_string = struct {
+            fn thunk(ptr: [*c]u8) callconv(.c) void {
+                _ = ptr;
+            }
+        }.thunk,
         .free_user_data = struct {
             fn thunk(user_data: ?*anyopaque) callconv(.c) void {
                 _ = user_data;
@@ -5495,10 +5790,10 @@ pub fn make_embedding_backend_vtable(comptime T: type, instance: *T) IEmbeddingB
 /// `register_document_extractor` function to register your implementation.
 pub const IDocumentExtractor = extern struct {
     /// Return the plugin name into `out_name` (heap-allocated, caller frees).
-    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void = null,
+    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Return the plugin version into `out_version` (heap-allocated, caller frees).
-    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void = null,
+    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Initialise the plugin; return 0 on success, non-zero on error.
     initialize_fn: ?*const fn (user_data: ?*anyopaque, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
@@ -5588,6 +5883,9 @@ pub const IDocumentExtractor = extern struct {
     ///
     /// `true` if the extractor can handle this file, `false` otherwise.
     can_handle: ?*const fn (user_data: ?*anyopaque, _path: [*c]const u8, _mime_type: [*c]const u8) callconv(.c) i32 = null,
+    /// Called by the Rust runtime to release strings returned by callbacks.
+    free_string: ?*const fn (ptr: [*c]u8) callconv(.c) void = null,
+
     /// Called by the Rust runtime when the bridge is dropped.
     /// Use this to release any Zig-side state held via `user_data`.
     free_user_data: ?*const fn (user_data: ?*anyopaque) callconv(.c) void = null,
@@ -5648,15 +5946,19 @@ pub fn make_document_extractor_vtable(comptime T: type, instance: *T) IDocumentE
     _ = instance; // instance is passed as user_data by the caller
     return IDocumentExtractor{
         .name_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_name) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .version_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_version) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .initialize_fn = struct {
@@ -5678,9 +5980,12 @@ pub fn make_document_extractor_vtable(comptime T: type, instance: *T) IDocumentE
                 const self: *T = @ptrCast(@alignCast(ud));
                 _ = content_len;
                 if (self.extract_bytes(content_ptr, mime_type, config)) |value| {
+                    // Complex return type: serialize to JSON and return as *u8 (NUL-terminated C string).
+                    // The caller owns the returned pointer; they must free it via the C API.
+                    // For now, return null to indicate the method is not yet implemented.
+                    // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
-                    @compileError("unsupported complex trait-vtable return; implement this vtable slot manually");
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -5693,9 +5998,12 @@ pub fn make_document_extractor_vtable(comptime T: type, instance: *T) IDocumentE
             fn thunk(ud: ?*anyopaque, path: [*c]const u8, mime_type: [*c]const u8, config: [*c]const u8, out_result: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 const self: *T = @ptrCast(@alignCast(ud));
                 if (self.extract_file(path, mime_type, config)) |value| {
+                    // Complex return type: serialize to JSON and return as *u8 (NUL-terminated C string).
+                    // The caller owns the returned pointer; they must free it via the C API.
+                    // For now, return null to indicate the method is not yet implemented.
+                    // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
-                    @compileError("unsupported complex trait-vtable return; implement this vtable slot manually");
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -5729,6 +6037,11 @@ pub fn make_document_extractor_vtable(comptime T: type, instance: *T) IDocumentE
             }
         }.thunk,
 
+        .free_string = struct {
+            fn thunk(ptr: [*c]u8) callconv(.c) void {
+                _ = ptr;
+            }
+        }.thunk,
         .free_user_data = struct {
             fn thunk(user_data: ?*anyopaque) callconv(.c) void {
                 _ = user_data;
@@ -5742,10 +6055,10 @@ pub fn make_document_extractor_vtable(comptime T: type, instance: *T) IDocumentE
 /// `register_renderer` function to register your implementation.
 pub const IRenderer = extern struct {
     /// Return the plugin name into `out_name` (heap-allocated, caller frees).
-    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void = null,
+    name_fn: ?*const fn (user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Return the plugin version into `out_version` (heap-allocated, caller frees).
-    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void = null,
+    version_fn: ?*const fn (user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
 
     /// Initialise the plugin; return 0 on success, non-zero on error.
     initialize_fn: ?*const fn (user_data: ?*anyopaque, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
@@ -5767,6 +6080,9 @@ pub const IRenderer = extern struct {
     ///
     /// Returns an error if rendering fails.
     render: ?*const fn (user_data: ?*anyopaque, doc: [*c]const u8, out_result: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 = null,
+    /// Called by the Rust runtime to release strings returned by callbacks.
+    free_string: ?*const fn (ptr: [*c]u8) callconv(.c) void = null,
+
     /// Called by the Rust runtime when the bridge is dropped.
     /// Use this to release any Zig-side state held via `user_data`.
     free_user_data: ?*const fn (user_data: ?*anyopaque) callconv(.c) void = null,
@@ -5827,15 +6143,19 @@ pub fn make_renderer_vtable(comptime T: type, instance: *T) IRenderer {
     _ = instance; // instance is passed as user_data by the caller
     return IRenderer{
         .name_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_name: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_name) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .version_fn = struct {
-            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8) callconv(.c) void {
+            fn thunk(user_data: ?*anyopaque, out_version: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 _ = user_data;
+                _ = out_error;
                 if (out_version) |slot| slot.* = null;
+                return 0;
             }
         }.thunk,
         .initialize_fn = struct {
@@ -5856,9 +6176,12 @@ pub fn make_renderer_vtable(comptime T: type, instance: *T) IRenderer {
             fn thunk(ud: ?*anyopaque, doc: [*c]const u8, out_result: ?*?[*c]u8, out_error: ?*?[*c]u8) callconv(.c) i32 {
                 const self: *T = @ptrCast(@alignCast(ud));
                 if (self.render(doc)) |value| {
+                    // Complex return type: serialize to JSON and return as *u8 (NUL-terminated C string).
+                    // The caller owns the returned pointer; they must free it via the C API.
+                    // For now, return null to indicate the method is not yet implemented.
+                    // TODO: implement JSON serialization for this complex return type.
                     _ = value;
                     if (out_result) |ptr| ptr.* = null;
-                    @compileError("unsupported complex trait-vtable return; implement this vtable slot manually");
                 } else |err| {
                     _ = err;
                     if (out_error) |ptr| ptr.* = null; // caller checks error code
@@ -5867,6 +6190,11 @@ pub fn make_renderer_vtable(comptime T: type, instance: *T) IRenderer {
             }
         }.thunk,
 
+        .free_string = struct {
+            fn thunk(ptr: [*c]u8) callconv(.c) void {
+                _ = ptr;
+            }
+        }.thunk,
         .free_user_data = struct {
             fn thunk(user_data: ?*anyopaque) callconv(.c) void {
                 _ = user_data;

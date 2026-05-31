@@ -46,6 +46,7 @@ This is the main result type returned by all extraction functions.
 | `annotations` | `Vec<PdfAnnotation>` | `vec![]` | PDF annotations extracted from the document. When annotation extraction is enabled via `PdfConfig.extract_annotations`, this field contains text notes, highlights, links, stamps, and other annotations found in PDF documents. |
 | `children` | `Vec<ArchiveEntry>` | `vec![]` | Nested extraction results from archive contents. When extracting archives, each processable file inside produces its own full extraction result. Set to `None` for non-archive formats. Use `max_archive_depth` in config to control recursion depth. |
 | `uris` | `Vec<ExtractedUri>` | `vec![]` | URIs/links discovered during document extraction. Contains hyperlinks, image references, citations, email addresses, and other URI-like references found in the document. Always extracted when present in the source document. |
+| `revisions` | `Vec<DocumentRevision>` | `vec![]` | Tracked changes embedded in the source document. Populated by per-format extractors that understand change-tracking metadata (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every extractor defaults to `None` until its format-specific implementation is added. Extractors that do populate this field follow the "accepted-changes" convention: inserted text is present in `content`, deleted text is absent — the revision list is the separate audit trail. |
 | `structured_output` | `Option<serde_json::Value>` | `Default::default()` | Structured extraction output from LLM-based JSON schema extraction. When `structured_extraction` is configured in `ExtractionConfig`, the extracted document content is sent to a VLM with the provided JSON schema. The response is parsed and stored here as a JSON value matching the schema. |
 | `code_intelligence` | `Option<serde_json::Value>` | `Default::default()` | Code intelligence results from tree-sitter analysis. Populated when extracting source code files with the `tree-sitter` feature. Contains metrics, structural analysis, imports/exports, comments, docstrings, symbols, diagnostics, and optionally chunked code segments. Stored as an opaque JSON value so that all language bindings (Go, Java, C#, …) can deserialize it as a raw JSON object rather than a typed struct. The underlying type is `tree_sitter_language_pack.ProcessResult`. |
 | `llm_usage` | `Vec<LlmUsage>` | `vec![]` | LLM token usage and cost data for all LLM calls made during this extraction. Contains one entry per LLM call. Multiple entries are produced when VLM OCR, structured extraction, or LLM embeddings run during the same extraction. `None` when no LLM was used. |
@@ -1013,6 +1014,22 @@ with confidence scores and spatial positions.
 
 ---
 
+#### RevisionDelta
+
+The content changes that make up a single revision.
+
+For insertions and deletions the `content` field carries the added/removed
+lines as `DiffLine.Added` / `DiffLine.Removed` entries. For format
+changes, `content` is empty — the property diff is left as a TODO for a
+later enrichment pass.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `content` | `Vec<DiffLine>` | `vec![]` | Line-level content changes for this revision. |
+| `table_changes` | `Vec<CellChange>` | `vec![]` | Cell-level table changes for this revision. |
+
+---
+
 #### Table
 
 Extracted table structure.
@@ -1041,6 +1058,18 @@ Future extension point for rich table support with cell-level metadata.
 | `row_span` | `u32` | — | Row span (number of rows this cell spans) |
 | `col_span` | `u32` | — | Column span (number of columns this cell spans) |
 | `is_header` | `bool` | — | Whether this is a header cell |
+
+---
+
+#### DiffOptions
+
+Options controlling how two `ExtractionResult` values are compared.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `include_metadata` | `bool` | `true` | Include metadata changes in the diff. Default: `true`. |
+| `include_embedded` | `bool` | `true` | Include embedded-children changes in the diff. Default: `true`. |
+| `max_content_chars` | `Option<usize>` | `None` | Truncate content to this many characters before diffing. Useful for very large documents where only the first N characters matter. `None` means no truncation. |
 
 ---
 
@@ -1653,6 +1682,38 @@ Bounding box for an OCR-detected table in pixel coordinates.
 | `top` | `u32` | — | Top y-coordinate (pixels) |
 | `right` | `u32` | — | Right x-coordinate (pixels) |
 | `bottom` | `u32` | — | Bottom y-coordinate (pixels) |
+
+---
+
+#### DocumentRevision
+
+A single tracked change embedded in a document.
+
+Populated by per-format extractors that understand change-tracking metadata
+(DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every
+extractor defaults to `ExtractionResult.revisions = None` until a
+format-specific implementation is added.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `revision_id` | `String` | — | Format-specific revision identifier. For DOCX this is the `w:id` attribute value on the change element (e.g. `"42"`). When the attribute is absent a synthetic fallback is generated (`"docx-ins-0"`, `"docx-del-3"`, …). |
+| `author` | `Option<String>` | `None` | Display name of the author who made this change, when available. |
+| `timestamp` | `Option<String>` | `None` | ISO-8601 timestamp of the change, when available. Stored as a plain string so this type remains FFI-friendly and unconditionally available without the `chrono` optional dep. DOCX populates this from the `w:date` attribute (e.g. `"2024-03-15T10:30:00Z"`). |
+| `kind` | `RevisionKind` | — | Semantic kind of this revision. |
+| `anchor` | `Option<RevisionAnchor>` | `None` | Best-effort document location for this revision. Resolution is format-dependent and may be `None` when the location cannot be determined (e.g. changes inside table cells before table-cell anchor support is added). |
+| `delta` | `RevisionDelta` | — | The content changes that make up this revision. |
+
+---
+
+#### TableDiff
+
+Cell-level changes for a pair of tables that share the same index.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `from_index` | `usize` | — | Zero-based index of the table in both `a.tables` and `b.tables`. |
+| `to_index` | `usize` | — | Zero-based index in `b.tables` (equal to `from_index` for same-dimension tables). |
+| `cell_changes` | `Vec<CellChange>` | — | Cell-level changes within the table. |
 
 ---
 
@@ -2384,6 +2445,23 @@ font size clustering and hierarchical analysis.
 
 ---
 
+#### CellChange
+
+A single changed cell within a table.
+
+Defined here (rather than only in `crate.diff`) so `RevisionDelta` can
+reference it unconditionally, without requiring the `diff` Cargo feature.
+`crate.diff` re-exports this type verbatim.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `row` | `usize` | — | Zero-based row index. |
+| `col` | `usize` | — | Zero-based column index. |
+| `from` | `String` | — | Value before the change. |
+| `to` | `String` | — | Value after the change. |
+
+---
+
 #### ExtractedUri
 
 A URI extracted from a document.
@@ -2409,6 +2487,58 @@ MIME type detection response.
 |-------|------|---------|-------------|
 | `mime_type` | `String` | — | Detected MIME type |
 | `filename` | `Option<String>` | `None` | Original filename (if provided) |
+
+---
+
+#### ExtractionDiff
+
+The complete diff between two `ExtractionResult` values.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `content_diff` | `Vec<DiffHunk>` | — | Unified-diff hunks for the `content` field. Empty when the content is identical. |
+| `tables_added` | `Vec<Table>` | — | Tables present in `b` but not in `a` (by index position, excess right-side tables). |
+| `tables_removed` | `Vec<Table>` | — | Tables present in `a` but not in `b` (by index position, excess left-side tables). |
+| `tables_changed` | `Vec<TableDiff>` | — | Cell-level changes for table pairs that share the same index and dimensions. |
+| `metadata_changed` | `serde_json::Value` | — | Metadata changes in a simplified add/remove/change map. Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...}, "changed": {key: {from: v1, to: v2}, ...} }`. Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate. |
+| `embedded_changes` | `EmbeddedChanges` | — | Changes to embedded archive children. |
+
+---
+
+#### DiffHunk
+
+A single contiguous hunk in a unified diff.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `from_line` | `usize` | — | Starting line number in the old content (0-indexed). |
+| `from_count` | `usize` | — | Number of lines from the old content in this hunk. |
+| `to_line` | `usize` | — | Starting line number in the new content (0-indexed). |
+| `to_count` | `usize` | — | Number of lines from the new content in this hunk. |
+| `lines` | `Vec<DiffLine>` | — | Lines that make up this hunk. |
+
+---
+
+#### EmbeddedChanges
+
+Changes to embedded archive children between two results.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `added` | `Vec<ArchiveEntry>` | — | Children present in `b` but not in `a` (matched by `path`). |
+| `removed` | `Vec<ArchiveEntry>` | — | Children present in `a` but not in `b` (matched by `path`). |
+| `changed` | `Vec<EmbeddedDiff>` | — | Children present in both but with differing content (matched by `path`). Each entry holds the diff of the nested `ExtractionResult`. |
+
+---
+
+#### EmbeddedDiff
+
+Diff for a single embedded archive entry that appears in both results.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `path` | `String` | — | Archive-relative path identifying this entry. |
+| `diff` | `ExtractionDiff` | — | The recursive diff of the entry's extraction result. |
 
 ---
 
@@ -2643,6 +2773,22 @@ Replaces separate body/furniture arrays with per-node granularity.
 | `Header` | `header` | Page/section header (running header). |
 | `Footer` | `footer` | Page/section footer (running footer). |
 | `Footnote` | `footnote` | Footnote content. |
+
+---
+
+#### DiffLine
+
+A single line in a unified-diff hunk.
+
+Defined here (rather than only in `crate.diff`) so `RevisionDelta` can
+reference it unconditionally, without requiring the `diff` Cargo feature.
+`crate.diff` re-exports this type verbatim.
+
+| Variant | Wire value | Description |
+|---------|------------|-------------|
+| `Context` | `context` | Unchanged context line. — Fields: `_0`: `String` |
+| `Added` | `added` | Line added in the "after" version. — Fields: `_0`: `String` |
+| `Removed` | `removed` | Line removed from the "before" version. — Fields: `_0`: `String` |
 
 ---
 
@@ -3116,6 +3262,33 @@ blob vs. an element-based decomposition.
 |---------|------------|-------------|
 | `Unified` | `unified` | Unified format with all content in `content` field |
 | `ElementBased` | `element_based` | Element-based format with semantic element extraction |
+
+---
+
+#### RevisionAnchor
+
+Best-effort document location for a revision.
+
+| Variant | Wire value | Description |
+|---------|------------|-------------|
+| `Paragraph` | `paragraph` | Body paragraph, identified by its zero-based index in the document flow. — Fields: `index`: `usize` |
+| `TableCell` | `table_cell` | Cell inside a table. — Fields: `row`: `usize`, `col`: `usize`, `table_index`: `usize` |
+| `Page` | `page` | Page, identified by its zero-based index. — Fields: `index`: `usize` |
+| `Slide` | `slide` | Presentation slide, identified by its zero-based index. — Fields: `index`: `usize` |
+| `Sheet` | `sheet` | Spreadsheet cell or range, identified by sheet index and optional name. — Fields: `index`: `usize`, `name`: `String` |
+
+---
+
+#### RevisionKind
+
+Semantic classification of a tracked change.
+
+| Variant | Wire value | Description |
+|---------|------------|-------------|
+| `Insertion` | `insertion` | Text or content was inserted. |
+| `Deletion` | `deletion` | Text or content was deleted. |
+| `FormatChange` | `format_change` | Run-level formatting (font, size, colour, …) was changed. |
+| `Comment` | `comment` | A reviewer comment or annotation. |
 
 ---
 

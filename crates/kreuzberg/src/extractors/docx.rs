@@ -887,7 +887,13 @@ fn parse_docx_core(
     } else {
         None
     };
-    let internal_doc = build_internal_document(&doc, inject_placeholders);
+    let revisions = if doc.revisions.is_empty() {
+        None
+    } else {
+        Some(doc.revisions.clone())
+    };
+    let mut internal_doc = build_internal_document(&doc, inject_placeholders);
+    internal_doc.revisions = revisions;
     Ok((
         text,
         tables,
@@ -2767,5 +2773,268 @@ mod tests {
             }
             _ => panic!("Expected FormatMetadata::Docx"),
         }
+    }
+
+    // --- Track-changes / revision tests ---
+
+    /// Document XML with one insertion (w:ins), one deletion (w:del), and one
+    /// format change (w:rPrChange), each carrying w:id / w:author / w:date.
+    const TRACK_CHANGES_XML: &str = r#"<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:p>
+      <w:r><w:t xml:space="preserve">Original text. </w:t></w:r>
+      <w:ins w:id="1" w:author="Alice" w:date="2024-03-15T10:00:00Z">
+        <w:r><w:t>inserted content</w:t></w:r>
+      </w:ins>
+    </w:p>
+    <w:p>
+      <w:del w:id="2" w:author="Bob" w:date="2024-03-16T14:30:00Z">
+        <w:r><w:delText>deleted text</w:delText></w:r>
+      </w:del>
+      <w:r><w:t>Remaining text.</w:t></w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:rPr>
+          <w:rPrChange w:id="3" w:author="Carol" w:date="2024-03-17T09:15:00Z">
+            <w:rPr><w:b/></w:rPr>
+          </w:rPrChange>
+          <w:i/>
+        </w:rPr>
+        <w:t>Format-changed text.</w:t>
+      </w:r>
+    </w:p>
+  </w:body>
+</w:document>"#;
+
+    #[tokio::test]
+    async fn should_extract_correct_revision_count_from_track_changes_docx() {
+        let data = build_test_docx(TRACK_CHANGES_XML);
+        let extractor = DocxExtractor::new();
+        let config = ExtractionConfig::default();
+        let internal_doc = extractor
+            .extract_bytes(
+                &data,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                &config,
+            )
+            .await
+            .unwrap();
+        let result = crate::extraction::derive::derive_extraction_result(
+            internal_doc,
+            false,
+            crate::core::config::OutputFormat::Plain,
+        );
+
+        let revisions = result.revisions.expect("revisions should be Some for a doc with track changes");
+        assert_eq!(revisions.len(), 3, "expected 3 revisions (1 ins + 1 del + 1 rPrChange)");
+    }
+
+    #[tokio::test]
+    async fn should_extract_revision_authors_timestamps_and_kinds() {
+        use crate::types::revisions::RevisionKind;
+
+        let data = build_test_docx(TRACK_CHANGES_XML);
+        let extractor = DocxExtractor::new();
+        let config = ExtractionConfig::default();
+        let internal_doc = extractor
+            .extract_bytes(
+                &data,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                &config,
+            )
+            .await
+            .unwrap();
+        let result = crate::extraction::derive::derive_extraction_result(
+            internal_doc,
+            false,
+            crate::core::config::OutputFormat::Plain,
+        );
+
+        let revisions = result.revisions.unwrap();
+
+        let ins = revisions.iter().find(|r| r.kind == RevisionKind::Insertion).unwrap();
+        assert_eq!(ins.author.as_deref(), Some("Alice"));
+        assert_eq!(ins.timestamp.as_deref(), Some("2024-03-15T10:00:00Z"));
+        assert_eq!(ins.revision_id, "1");
+
+        let del = revisions.iter().find(|r| r.kind == RevisionKind::Deletion).unwrap();
+        assert_eq!(del.author.as_deref(), Some("Bob"));
+        assert_eq!(del.timestamp.as_deref(), Some("2024-03-16T14:30:00Z"));
+        assert_eq!(del.revision_id, "2");
+
+        let fmt = revisions.iter().find(|r| r.kind == RevisionKind::FormatChange).unwrap();
+        assert_eq!(fmt.author.as_deref(), Some("Carol"));
+        assert_eq!(fmt.timestamp.as_deref(), Some("2024-03-17T09:15:00Z"));
+        assert_eq!(fmt.revision_id, "3");
+    }
+
+    #[tokio::test]
+    async fn should_include_inserted_text_and_exclude_deleted_text_in_content() {
+        let data = build_test_docx(TRACK_CHANGES_XML);
+        let extractor = DocxExtractor::new();
+        let config = ExtractionConfig::default();
+        let internal_doc = extractor
+            .extract_bytes(
+                &data,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                &config,
+            )
+            .await
+            .unwrap();
+        let result = crate::extraction::derive::derive_extraction_result(
+            internal_doc,
+            false,
+            crate::core::config::OutputFormat::Plain,
+        );
+
+        // Accepted-changes view: insertions appear in content; deletions do not.
+        assert!(
+            result.content.contains("inserted content"),
+            "inserted text must appear in accepted-changes content: {}",
+            result.content
+        );
+        assert!(
+            !result.content.contains("deleted text"),
+            "deleted text must not appear in accepted-changes content: {}",
+            result.content
+        );
+    }
+
+    #[tokio::test]
+    async fn should_capture_insertion_delta_text_in_revision() {
+        use crate::types::revisions::{DiffLine, RevisionKind};
+
+        let data = build_test_docx(TRACK_CHANGES_XML);
+        let extractor = DocxExtractor::new();
+        let config = ExtractionConfig::default();
+        let internal_doc = extractor
+            .extract_bytes(
+                &data,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                &config,
+            )
+            .await
+            .unwrap();
+        let result = crate::extraction::derive::derive_extraction_result(
+            internal_doc,
+            false,
+            crate::core::config::OutputFormat::Plain,
+        );
+
+        let revisions = result.revisions.unwrap();
+        let ins = revisions.iter().find(|r| r.kind == RevisionKind::Insertion).unwrap();
+        assert!(
+            ins.delta.content.iter().any(|l| matches!(l, DiffLine::Added(t) if t == "inserted content")),
+            "insertion delta should contain Added(\"inserted content\")"
+        );
+    }
+
+    #[tokio::test]
+    async fn should_capture_deletion_delta_text_in_revision() {
+        use crate::types::revisions::{DiffLine, RevisionKind};
+
+        let data = build_test_docx(TRACK_CHANGES_XML);
+        let extractor = DocxExtractor::new();
+        let config = ExtractionConfig::default();
+        let internal_doc = extractor
+            .extract_bytes(
+                &data,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                &config,
+            )
+            .await
+            .unwrap();
+        let result = crate::extraction::derive::derive_extraction_result(
+            internal_doc,
+            false,
+            crate::core::config::OutputFormat::Plain,
+        );
+
+        let revisions = result.revisions.unwrap();
+        let del = revisions.iter().find(|r| r.kind == crate::types::revisions::RevisionKind::Deletion).unwrap();
+        assert!(
+            del.delta.content.iter().any(|l| matches!(l, DiffLine::Removed(t) if t == "deleted text")),
+            "deletion delta should contain Removed(\"deleted text\")"
+        );
+    }
+
+    #[tokio::test]
+    async fn should_assign_paragraph_anchor_indices_to_revisions() {
+        use crate::types::revisions::{RevisionAnchor, RevisionKind};
+
+        let data = build_test_docx(TRACK_CHANGES_XML);
+        let extractor = DocxExtractor::new();
+        let config = ExtractionConfig::default();
+        let internal_doc = extractor
+            .extract_bytes(
+                &data,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                &config,
+            )
+            .await
+            .unwrap();
+        let result = crate::extraction::derive::derive_extraction_result(
+            internal_doc,
+            false,
+            crate::core::config::OutputFormat::Plain,
+        );
+
+        let revisions = result.revisions.unwrap();
+
+        // Insertion is in paragraph 0 (first w:p), deletion in paragraph 1, format change in paragraph 2.
+        let ins = revisions.iter().find(|r| r.kind == RevisionKind::Insertion).unwrap();
+        assert!(
+            matches!(ins.anchor, Some(RevisionAnchor::Paragraph { index: 0 })),
+            "insertion anchor should be Paragraph {{ index: 0 }}, got {:?}",
+            ins.anchor
+        );
+
+        let del = revisions.iter().find(|r| r.kind == RevisionKind::Deletion).unwrap();
+        assert!(
+            matches!(del.anchor, Some(RevisionAnchor::Paragraph { index: 1 })),
+            "deletion anchor should be Paragraph {{ index: 1 }}, got {:?}",
+            del.anchor
+        );
+
+        let fmt = revisions.iter().find(|r| r.kind == RevisionKind::FormatChange).unwrap();
+        assert!(
+            matches!(fmt.anchor, Some(RevisionAnchor::Paragraph { index: 2 })),
+            "format-change anchor should be Paragraph {{ index: 2 }}, got {:?}",
+            fmt.anchor
+        );
+    }
+
+    #[tokio::test]
+    async fn should_return_none_revisions_for_document_without_track_changes() {
+        let document_xml = r#"<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:p><w:r><w:t>No track changes here.</w:t></w:r></w:p>
+  </w:body>
+</w:document>"#;
+
+        let data = build_test_docx(document_xml);
+        let extractor = DocxExtractor::new();
+        let config = ExtractionConfig::default();
+        let internal_doc = extractor
+            .extract_bytes(
+                &data,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                &config,
+            )
+            .await
+            .unwrap();
+        let result = crate::extraction::derive::derive_extraction_result(
+            internal_doc,
+            false,
+            crate::core::config::OutputFormat::Plain,
+        );
+
+        assert!(
+            result.revisions.is_none(),
+            "revisions should be None for a document without track-changes markup"
+        );
     }
 }

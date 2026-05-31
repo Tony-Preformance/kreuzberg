@@ -200,6 +200,13 @@ pub struct InternalDocument {
     /// `derive_extraction_result` transfers this to `ExtractionResult.llm_usage`.
     pub llm_usage: Option<Vec<crate::types::LlmUsage>>,
 
+    /// Track-changes revisions embedded in the source document.
+    ///
+    /// Set by format-specific extractors (DOCX, ODT, …) that parse
+    /// change-tracking markup. `derive_extraction_result` transfers this
+    /// directly to `ExtractionResult.revisions`.
+    pub revisions: Option<Vec<crate::types::revisions::DocumentRevision>>,
+
     /// When `true`, image OCR results are rendered as plain text without the
     /// `![...](...)` markdown placeholder. Set by the pipeline from
     /// `ImageExtractionConfig.ocr_text_only`.
@@ -225,7 +232,12 @@ impl From<crate::types::extraction::ExtractionResult> for InternalDocument {
         doc.metadata = result.metadata;
         doc.tables = result.tables;
         doc.images = result.images.unwrap_or_default();
-        doc.pre_rendered_content = if result.content.is_empty() { None } else { Some(result.content) };
+        doc.revisions = result.revisions;
+        doc.pre_rendered_content = if result.content.is_empty() {
+            None
+        } else {
+            Some(result.content)
+        };
         doc
     }
 }
@@ -258,6 +270,7 @@ impl InternalDocument {
             pre_rendered_content: None,
             prebuilt_ocr_elements: None,
             llm_usage: None,
+            revisions: None,
             ocr_text_only: false,
             append_ocr_text: false,
         }

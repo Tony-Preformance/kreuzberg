@@ -1685,6 +1685,16 @@ pub struct ExtractionResult {
     /// other URI-like references found in the document. Always extracted when
     /// present in the source document.
     pub uris: Option<Vec<ExtractedUri>>,
+    /// Tracked changes embedded in the source document.
+    ///
+    /// Populated by per-format extractors that understand change-tracking
+    /// metadata (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`,
+    /// …). Every extractor defaults to `None` until its format-specific
+    /// implementation is added. Extractors that do populate this field follow
+    /// the "accepted-changes" convention: inserted text is present in
+    /// `content`, deleted text is absent — the revision list is the separate
+    /// audit trail.
+    pub revisions: Option<Vec<DocumentRevision>>,
     /// Structured extraction output from LLM-based JSON schema extraction.
     ///
     /// When `structured_extraction` is configured in `ExtractionConfig`, the
@@ -2956,6 +2966,72 @@ pub struct HierarchicalBlock {
     pub bbox: Option<Vec<f64>>,
 }
 
+/// A single changed cell within a table.
+///
+/// Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+/// reference it unconditionally, without requiring the `diff` Cargo feature.
+/// `crate::diff` re-exports this type verbatim.
+#[frb(mirror(CellChange))]
+pub struct CellChange {
+    /// Zero-based row index.
+    pub row: i64,
+    /// Zero-based column index.
+    pub col: i64,
+    /// Value before the change.
+    pub from: String,
+    /// Value after the change.
+    pub to: String,
+}
+
+/// A single tracked change embedded in a document.
+///
+/// Populated by per-format extractors that understand change-tracking metadata
+/// (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every
+/// extractor defaults to `ExtractionResult.revisions = None` until a
+/// format-specific implementation is added.
+#[frb(mirror(DocumentRevision))]
+pub struct DocumentRevision {
+    /// Format-specific revision identifier.
+    ///
+    /// For DOCX this is the `w:id` attribute value on the change element
+    /// (e.g. `"42"`). When the attribute is absent a synthetic fallback is
+    /// generated (`"docx-ins-0"`, `"docx-del-3"`, …).
+    pub revision_id: String,
+    /// Display name of the author who made this change, when available.
+    pub author: Option<String>,
+    /// ISO-8601 timestamp of the change, when available.
+    ///
+    /// Stored as a plain string so this type remains FFI-friendly and
+    /// unconditionally available without the `chrono` optional dep.
+    /// DOCX populates this from the `w:date` attribute (e.g.
+    /// `"2024-03-15T10:30:00Z"`).
+    pub timestamp: Option<String>,
+    /// Semantic kind of this revision.
+    pub kind: RevisionKind,
+    /// Best-effort document location for this revision.
+    ///
+    /// Resolution is format-dependent and may be `None` when the location
+    /// cannot be determined (e.g. changes inside table cells before
+    /// table-cell anchor support is added).
+    pub anchor: Option<RevisionAnchor>,
+    /// The content changes that make up this revision.
+    pub delta: RevisionDelta,
+}
+
+/// The content changes that make up a single revision.
+///
+/// For insertions and deletions the `content` field carries the added/removed
+/// lines as `DiffLine::Added` / `DiffLine::Removed` entries. For format
+/// changes, `content` is empty — the property diff is left as a TODO for a
+/// later enrichment pass.
+#[frb(mirror(RevisionDelta))]
+pub struct RevisionDelta {
+    /// Line-level content changes for this revision.
+    pub content: Vec<DiffLine>,
+    /// Cell-level table changes for this revision.
+    pub table_changes: Vec<CellChange>,
+}
+
 /// Extracted table structure.
 ///
 /// Represents a table detected and extracted from a document (PDF, image, etc.).
@@ -3012,6 +3088,92 @@ pub struct DetectResponse {
     pub mime_type: String,
     /// Original filename (if provided)
     pub filename: Option<String>,
+}
+
+/// Options controlling how two `ExtractionResult` values are compared.
+#[frb(mirror(DiffOptions))]
+pub struct DiffOptions {
+    /// Include metadata changes in the diff. Default: `true`.
+    pub include_metadata: bool,
+    /// Include embedded-children changes in the diff. Default: `true`.
+    pub include_embedded: bool,
+    /// Truncate content to this many characters before diffing.
+    ///
+    /// Useful for very large documents where only the first N characters matter.
+    /// `None` means no truncation.
+    pub max_content_chars: Option<i64>,
+}
+
+/// The complete diff between two `ExtractionResult` values.
+#[frb(mirror(ExtractionDiff))]
+pub struct ExtractionDiff {
+    /// Unified-diff hunks for the `content` field.
+    ///
+    /// Empty when the content is identical.
+    pub content_diff: Vec<DiffHunk>,
+    /// Tables present in `b` but not in `a` (by index position, excess right-side tables).
+    pub tables_added: Vec<Table>,
+    /// Tables present in `a` but not in `b` (by index position, excess left-side tables).
+    pub tables_removed: Vec<Table>,
+    /// Cell-level changes for table pairs that share the same index and dimensions.
+    pub tables_changed: Vec<TableDiff>,
+    /// Metadata changes in a simplified add/remove/change map.
+    ///
+    /// Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...},
+    ///           "changed": {key: {from: v1, to: v2}, ...} }`.
+    ///
+    /// Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate.
+    pub metadata_changed: String,
+    /// Changes to embedded archive children.
+    pub embedded_changes: EmbeddedChanges,
+}
+
+/// A single contiguous hunk in a unified diff.
+#[frb(mirror(DiffHunk))]
+pub struct DiffHunk {
+    /// Starting line number in the old content (0-indexed).
+    pub from_line: i64,
+    /// Number of lines from the old content in this hunk.
+    pub from_count: i64,
+    /// Starting line number in the new content (0-indexed).
+    pub to_line: i64,
+    /// Number of lines from the new content in this hunk.
+    pub to_count: i64,
+    /// Lines that make up this hunk.
+    pub lines: Vec<DiffLine>,
+}
+
+/// Cell-level changes for a pair of tables that share the same index.
+#[frb(mirror(TableDiff))]
+pub struct TableDiff {
+    /// Zero-based index of the table in both `a.tables` and `b.tables`.
+    pub from_index: i64,
+    /// Zero-based index in `b.tables` (equal to `from_index` for same-dimension tables).
+    pub to_index: i64,
+    /// Cell-level changes within the table.
+    pub cell_changes: Vec<CellChange>,
+}
+
+/// Changes to embedded archive children between two results.
+#[frb(mirror(EmbeddedChanges))]
+pub struct EmbeddedChanges {
+    /// Children present in `b` but not in `a` (matched by `path`).
+    pub added: Vec<ArchiveEntry>,
+    /// Children present in `a` but not in `b` (matched by `path`).
+    pub removed: Vec<ArchiveEntry>,
+    /// Children present in both but with differing content (matched by `path`).
+    ///
+    /// Each entry holds the diff of the nested `ExtractionResult`.
+    pub changed: Vec<EmbeddedDiff>,
+}
+
+/// Diff for a single embedded archive entry that appears in both results.
+#[frb(mirror(EmbeddedDiff))]
+pub struct EmbeddedDiff {
+    /// Archive-relative path identifying this entry.
+    pub path: String,
+    /// The recursive diff of the entry's extraction result.
+    pub diff: ExtractionDiff,
 }
 
 /// Preset configurations for common RAG use cases.
@@ -3949,6 +4111,70 @@ pub enum PageUnitType {
     Sheet,
 }
 
+/// A single line in a unified-diff hunk.
+///
+/// Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+/// reference it unconditionally, without requiring the `diff` Cargo feature.
+/// `crate::diff` re-exports this type verbatim.
+#[frb(mirror(DiffLine))]
+pub enum DiffLine {
+    /// Unchanged context line.
+    Context { field0: String },
+    /// Line added in the "after" version.
+    Added { field0: String },
+    /// Line removed from the "before" version.
+    Removed { field0: String },
+}
+
+/// Semantic classification of a tracked change.
+#[frb(mirror(RevisionKind))]
+pub enum RevisionKind {
+    /// Text or content was inserted.
+    Insertion,
+    /// Text or content was deleted.
+    Deletion,
+    /// Run-level formatting (font, size, colour, …) was changed.
+    FormatChange,
+    /// A reviewer comment or annotation.
+    Comment,
+}
+
+/// Best-effort document location for a revision.
+#[frb(mirror(RevisionAnchor))]
+pub enum RevisionAnchor {
+    /// Body paragraph, identified by its zero-based index in the document flow.
+    Paragraph {
+        /// Zero-based index of the paragraph in document order.
+        index: i64,
+    },
+    /// Cell inside a table.
+    TableCell {
+        /// Zero-based row index within the table.
+        row: i64,
+        /// Zero-based column index within the table.
+        col: i64,
+        /// Zero-based index of the table in document order.
+        table_index: i64,
+    },
+    /// Page, identified by its zero-based index.
+    Page {
+        /// Zero-based page index.
+        index: i64,
+    },
+    /// Presentation slide, identified by its zero-based index.
+    Slide {
+        /// Zero-based slide index.
+        index: i64,
+    },
+    /// Spreadsheet cell or range, identified by sheet index and optional name.
+    Sheet {
+        /// Zero-based sheet index.
+        index: i64,
+        /// Sheet display name when available.
+        name: String,
+    },
+}
+
 /// Semantic classification of an extracted URI.
 #[frb(mirror(UriKind))]
 pub enum UriKind {
@@ -4842,6 +5068,9 @@ impl From<kreuzberg::ExtractionResult> for ExtractionResult {
                 .map(|vec| vec.into_iter().map(PdfAnnotation::from).collect()),
             children: v.children.map(|vec| vec.into_iter().map(ArchiveEntry::from).collect()),
             uris: v.uris.map(|vec| vec.into_iter().map(ExtractedUri::from).collect()),
+            revisions: v
+                .revisions
+                .map(|vec| vec.into_iter().map(DocumentRevision::from).collect()),
             structured_output: v
                 .structured_output
                 .map(|j| serde_json::to_string(&j).unwrap_or_default()),
@@ -5665,6 +5894,39 @@ impl From<kreuzberg::HierarchicalBlock> for HierarchicalBlock {
     }
 }
 
+impl From<kreuzberg::CellChange> for CellChange {
+    fn from(v: kreuzberg::CellChange) -> Self {
+        CellChange {
+            row: v.row as _,
+            col: v.col as _,
+            from: v.from.into(),
+            to: v.to.into(),
+        }
+    }
+}
+
+impl From<kreuzberg::DocumentRevision> for DocumentRevision {
+    fn from(v: kreuzberg::DocumentRevision) -> Self {
+        DocumentRevision {
+            revision_id: v.revision_id.into(),
+            author: v.author.map(|s| s.into()),
+            timestamp: v.timestamp.map(|s| s.into()),
+            kind: RevisionKind::from(v.kind),
+            anchor: v.anchor.map(RevisionAnchor::from),
+            delta: RevisionDelta::from(v.delta),
+        }
+    }
+}
+
+impl From<kreuzberg::RevisionDelta> for RevisionDelta {
+    fn from(v: kreuzberg::RevisionDelta) -> Self {
+        RevisionDelta {
+            content: v.content.into_iter().map(DiffLine::from).collect(),
+            table_changes: v.table_changes.into_iter().map(CellChange::from).collect(),
+        }
+    }
+}
+
 impl From<kreuzberg::Table> for Table {
     fn from(v: kreuzberg::Table) -> Self {
         Table {
@@ -5703,6 +5965,70 @@ impl From<kreuzberg::api::DetectResponse> for DetectResponse {
         DetectResponse {
             mime_type: v.mime_type.into(),
             filename: v.filename.map(|s| s.into()),
+        }
+    }
+}
+
+impl From<kreuzberg::DiffOptions> for DiffOptions {
+    fn from(v: kreuzberg::DiffOptions) -> Self {
+        DiffOptions {
+            include_metadata: v.include_metadata as _,
+            include_embedded: v.include_embedded as _,
+            max_content_chars: v.max_content_chars.map(|x| x as _),
+        }
+    }
+}
+
+impl From<kreuzberg::ExtractionDiff> for ExtractionDiff {
+    fn from(v: kreuzberg::ExtractionDiff) -> Self {
+        ExtractionDiff {
+            content_diff: v.content_diff.into_iter().map(DiffHunk::from).collect(),
+            tables_added: v.tables_added.into_iter().map(Table::from).collect(),
+            tables_removed: v.tables_removed.into_iter().map(Table::from).collect(),
+            tables_changed: v.tables_changed.into_iter().map(TableDiff::from).collect(),
+            metadata_changed: serde_json::to_string(&v.metadata_changed).unwrap_or_default(),
+            embedded_changes: EmbeddedChanges::from(v.embedded_changes),
+        }
+    }
+}
+
+impl From<kreuzberg::DiffHunk> for DiffHunk {
+    fn from(v: kreuzberg::DiffHunk) -> Self {
+        DiffHunk {
+            from_line: v.from_line as _,
+            from_count: v.from_count as _,
+            to_line: v.to_line as _,
+            to_count: v.to_count as _,
+            lines: v.lines.into_iter().map(DiffLine::from).collect(),
+        }
+    }
+}
+
+impl From<kreuzberg::TableDiff> for TableDiff {
+    fn from(v: kreuzberg::TableDiff) -> Self {
+        TableDiff {
+            from_index: v.from_index as _,
+            to_index: v.to_index as _,
+            cell_changes: v.cell_changes.into_iter().map(CellChange::from).collect(),
+        }
+    }
+}
+
+impl From<kreuzberg::EmbeddedChanges> for EmbeddedChanges {
+    fn from(v: kreuzberg::EmbeddedChanges) -> Self {
+        EmbeddedChanges {
+            added: v.added.into_iter().map(ArchiveEntry::from).collect(),
+            removed: v.removed.into_iter().map(ArchiveEntry::from).collect(),
+            changed: v.changed.into_iter().map(EmbeddedDiff::from).collect(),
+        }
+    }
+}
+
+impl From<kreuzberg::EmbeddedDiff> for EmbeddedDiff {
+    fn from(v: kreuzberg::EmbeddedDiff) -> Self {
+        EmbeddedDiff {
+            path: v.path.into(),
+            diff: ExtractionDiff::from(*v.diff),
         }
     }
 }
@@ -6410,6 +6736,46 @@ impl From<kreuzberg::PageUnitType> for PageUnitType {
             kreuzberg::PageUnitType::Page => PageUnitType::Page,
             kreuzberg::PageUnitType::Slide => PageUnitType::Slide,
             kreuzberg::PageUnitType::Sheet => PageUnitType::Sheet,
+        }
+    }
+}
+
+impl From<kreuzberg::DiffLine> for DiffLine {
+    fn from(v: kreuzberg::DiffLine) -> Self {
+        match v {
+            kreuzberg::DiffLine::Context(f0) => DiffLine::Context { field0: f0 },
+            kreuzberg::DiffLine::Added(f0) => DiffLine::Added { field0: f0 },
+            kreuzberg::DiffLine::Removed(f0) => DiffLine::Removed { field0: f0 },
+        }
+    }
+}
+
+impl From<kreuzberg::RevisionKind> for RevisionKind {
+    fn from(v: kreuzberg::RevisionKind) -> Self {
+        match v {
+            kreuzberg::RevisionKind::Insertion => RevisionKind::Insertion,
+            kreuzberg::RevisionKind::Deletion => RevisionKind::Deletion,
+            kreuzberg::RevisionKind::FormatChange => RevisionKind::FormatChange,
+            kreuzberg::RevisionKind::Comment => RevisionKind::Comment,
+        }
+    }
+}
+
+impl From<kreuzberg::RevisionAnchor> for RevisionAnchor {
+    fn from(v: kreuzberg::RevisionAnchor) -> Self {
+        match v {
+            kreuzberg::RevisionAnchor::Paragraph { index } => RevisionAnchor::Paragraph { index: index as _ },
+            kreuzberg::RevisionAnchor::TableCell { row, col, table_index } => RevisionAnchor::TableCell {
+                row: row as _,
+                col: col as _,
+                table_index: table_index as _,
+            },
+            kreuzberg::RevisionAnchor::Page { index } => RevisionAnchor::Page { index: index as _ },
+            kreuzberg::RevisionAnchor::Slide { index } => RevisionAnchor::Slide { index: index as _ },
+            kreuzberg::RevisionAnchor::Sheet { index, name } => RevisionAnchor::Sheet {
+                index: index as _,
+                name: name.unwrap_or_default(),
+            },
         }
     }
 }
@@ -7149,6 +7515,7 @@ impl From<ExtractionResult> for kreuzberg::ExtractionResult {
             annotations: v.annotations.map(|vec| vec.into_iter().map(Into::into).collect()),
             children: v.children.map(|vec| vec.into_iter().map(Into::into).collect()),
             uris: v.uris.map(|vec| vec.into_iter().map(Into::into).collect()),
+            revisions: v.revisions.map(|vec| vec.into_iter().map(Into::into).collect()),
             structured_output: v
                 .structured_output
                 .as_deref()
@@ -7822,6 +8189,39 @@ impl From<HierarchicalBlock> for kreuzberg::HierarchicalBlock {
     }
 }
 
+impl From<CellChange> for kreuzberg::CellChange {
+    fn from(v: CellChange) -> Self {
+        kreuzberg::CellChange {
+            row: v.row as _,
+            col: v.col as _,
+            from: v.from.into(),
+            to: v.to.into(),
+        }
+    }
+}
+
+impl From<DocumentRevision> for kreuzberg::DocumentRevision {
+    fn from(v: DocumentRevision) -> Self {
+        kreuzberg::DocumentRevision {
+            revision_id: v.revision_id.into(),
+            author: v.author.map(Into::into),
+            timestamp: v.timestamp.map(Into::into),
+            kind: v.kind.into(),
+            anchor: v.anchor.map(Into::into),
+            delta: v.delta.into(),
+        }
+    }
+}
+
+impl From<RevisionDelta> for kreuzberg::RevisionDelta {
+    fn from(v: RevisionDelta) -> Self {
+        kreuzberg::RevisionDelta {
+            content: v.content.into_iter().map(Into::into).collect(),
+            table_changes: v.table_changes.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
 impl From<Table> for kreuzberg::Table {
     fn from(v: Table) -> Self {
         kreuzberg::Table {
@@ -7844,6 +8244,16 @@ impl From<ExtractedUri> for kreuzberg::ExtractedUri {
             label: v.label.map(Into::into),
             page: v.page.map(|x| x as _),
             kind: v.kind.into(),
+        }
+    }
+}
+
+impl From<DiffOptions> for kreuzberg::DiffOptions {
+    fn from(v: DiffOptions) -> Self {
+        kreuzberg::DiffOptions {
+            include_metadata: v.include_metadata as _,
+            include_embedded: v.include_embedded as _,
+            max_content_chars: v.max_content_chars.map(|x| x as _),
         }
     }
 }
@@ -8398,6 +8808,46 @@ impl From<PageUnitType> for kreuzberg::PageUnitType {
     }
 }
 
+impl From<DiffLine> for kreuzberg::DiffLine {
+    fn from(v: DiffLine) -> Self {
+        match v {
+            DiffLine::Context { field0 } => kreuzberg::DiffLine::Context(field0),
+            DiffLine::Added { field0 } => kreuzberg::DiffLine::Added(field0),
+            DiffLine::Removed { field0 } => kreuzberg::DiffLine::Removed(field0),
+        }
+    }
+}
+
+impl From<RevisionKind> for kreuzberg::RevisionKind {
+    fn from(v: RevisionKind) -> Self {
+        match v {
+            RevisionKind::Insertion => kreuzberg::RevisionKind::Insertion,
+            RevisionKind::Deletion => kreuzberg::RevisionKind::Deletion,
+            RevisionKind::FormatChange => kreuzberg::RevisionKind::FormatChange,
+            RevisionKind::Comment => kreuzberg::RevisionKind::Comment,
+        }
+    }
+}
+
+impl From<RevisionAnchor> for kreuzberg::RevisionAnchor {
+    fn from(v: RevisionAnchor) -> Self {
+        match v {
+            RevisionAnchor::Paragraph { index } => kreuzberg::RevisionAnchor::Paragraph { index: index as _ },
+            RevisionAnchor::TableCell { row, col, table_index } => kreuzberg::RevisionAnchor::TableCell {
+                row: row as _,
+                col: col as _,
+                table_index: table_index as _,
+            },
+            RevisionAnchor::Page { index } => kreuzberg::RevisionAnchor::Page { index: index as _ },
+            RevisionAnchor::Slide { index } => kreuzberg::RevisionAnchor::Slide { index: index as _ },
+            RevisionAnchor::Sheet { index, name } => kreuzberg::RevisionAnchor::Sheet {
+                index: index as _,
+                name: if name.is_empty() { None } else { Some(name) },
+            },
+        }
+    }
+}
+
 impl From<UriKind> for kreuzberg::UriKind {
     fn from(v: UriKind) -> Self {
         match v {
@@ -8667,8 +9117,8 @@ pub fn get_extensions_for_mime(mime_type: String) -> Result<Vec<String>, String>
 
 /// List the names of all registered embedding backends.
 ///
-/// Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-/// language bindings via `alef.toml [exclude].functions`.
+/// Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+/// bindings.
 pub fn list_embedding_backends() -> Result<Vec<String>, String> {
     kreuzberg::list_embedding_backends()
         .map(|v| v.into_iter().map(|s| s.to_string()).collect::<Vec<_>>())
@@ -8726,6 +9176,18 @@ pub fn list_validators() -> Result<Vec<String>, String> {
     kreuzberg::list_validators()
         .map(|v| v.into_iter().map(|s| s.to_string()).collect::<Vec<_>>())
         .map_err(|e| e.to_string())
+}
+
+/// Compare two extraction results and return a structured diff.
+///
+/// The comparison is purely structural — no I/O, no side effects. All fields
+/// of `ExtractionDiff` are populated according to the provided `DiffOptions`.
+pub fn compare(a: ExtractionResult, b: ExtractionResult, opts: DiffOptions) -> ExtractionDiff {
+    (ExtractionDiff::from)(kreuzberg::compare(
+        &kreuzberg::ExtractionResult::from(a),
+        &kreuzberg::ExtractionResult::from(b),
+        &kreuzberg::DiffOptions::from(opts),
+    ))
 }
 
 /// Generate embeddings asynchronously for a list of text strings.
@@ -9605,6 +10067,27 @@ pub fn create_hierarchical_block_from_json(json: String) -> Result<HierarchicalB
 }
 
 #[frb]
+pub fn create_cell_change_from_json(json: String) -> Result<CellChange, String> {
+    serde_json::from_str::<kreuzberg::CellChange>(&json)
+        .map(CellChange::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_document_revision_from_json(json: String) -> Result<DocumentRevision, String> {
+    serde_json::from_str::<kreuzberg::DocumentRevision>(&json)
+        .map(DocumentRevision::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_revision_delta_from_json(json: String) -> Result<RevisionDelta, String> {
+    serde_json::from_str::<kreuzberg::RevisionDelta>(&json)
+        .map(RevisionDelta::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
 pub fn create_table_from_json(json: String) -> Result<Table, String> {
     serde_json::from_str::<kreuzberg::Table>(&json)
         .map(Table::from)
@@ -9629,6 +10112,48 @@ pub fn create_extracted_uri_from_json(json: String) -> Result<ExtractedUri, Stri
 pub fn create_detect_response_from_json(json: String) -> Result<DetectResponse, String> {
     serde_json::from_str::<kreuzberg::api::DetectResponse>(&json)
         .map(DetectResponse::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_diff_options_from_json(json: String) -> Result<DiffOptions, String> {
+    serde_json::from_str::<kreuzberg::DiffOptions>(&json)
+        .map(DiffOptions::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_extraction_diff_from_json(json: String) -> Result<ExtractionDiff, String> {
+    serde_json::from_str::<kreuzberg::ExtractionDiff>(&json)
+        .map(ExtractionDiff::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_diff_hunk_from_json(json: String) -> Result<DiffHunk, String> {
+    serde_json::from_str::<kreuzberg::DiffHunk>(&json)
+        .map(DiffHunk::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_table_diff_from_json(json: String) -> Result<TableDiff, String> {
+    serde_json::from_str::<kreuzberg::TableDiff>(&json)
+        .map(TableDiff::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_embedded_changes_from_json(json: String) -> Result<EmbeddedChanges, String> {
+    serde_json::from_str::<kreuzberg::EmbeddedChanges>(&json)
+        .map(EmbeddedChanges::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_embedded_diff_from_json(json: String) -> Result<EmbeddedDiff, String> {
+    serde_json::from_str::<kreuzberg::EmbeddedDiff>(&json)
+        .map(EmbeddedDiff::from)
         .map_err(|e| e.to_string())
 }
 
@@ -10406,8 +10931,7 @@ impl kreuzberg::DocumentExtractor for DocumentExtractorDartCallbacks {
         let mime_type = mime_type.to_string();
         let config = ExtractionConfig::from(config.clone());
         let __ret_bridge: InternalDocumentBridge = (self.extract_bytes)(content, mime_type, config).await;
-        let __ret: kreuzberg::InternalDocument =
-            serde_json::from_str(&__ret_bridge.json).expect("deserialize InternalDocument from Dart trait bridge");
+        let __ret: kreuzberg::InternalDocument = serde_json::from_str(&__ret_bridge.json).map_err(|e| e.to_string())?;
         Ok(__ret)
     }
 
@@ -10421,8 +10945,7 @@ impl kreuzberg::DocumentExtractor for DocumentExtractorDartCallbacks {
         let mime_type = mime_type.to_string();
         let config = ExtractionConfig::from(config.clone());
         let __ret_bridge: InternalDocumentBridge = (self.extract_file)(path, mime_type, config).await;
-        let __ret: kreuzberg::InternalDocument =
-            serde_json::from_str(&__ret_bridge.json).expect("deserialize InternalDocument from Dart trait bridge");
+        let __ret: kreuzberg::InternalDocument = serde_json::from_str(&__ret_bridge.json).map_err(|e| e.to_string())?;
         Ok(__ret)
     }
 
@@ -10574,7 +11097,7 @@ impl kreuzberg::Renderer for RendererDartCallbacks {
     fn render(&self, doc: &kreuzberg::InternalDocument) -> kreuzberg::Result<String> {
         let doc = doc.clone();
         let __doc_local = InternalDocumentBridge {
-            json: serde_json::to_string(&doc).expect("serialize InternalDocument for Dart trait bridge"),
+            json: serde_json::to_string(&doc).map_err(|e| e.to_string())?,
         };
         let __result = ::tokio::runtime::Builder::new_current_thread()
             .build()

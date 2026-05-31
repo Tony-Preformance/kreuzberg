@@ -66,17 +66,17 @@ enum class PSMMode {
         @com.fasterxml.jackson.annotation.JsonCreator
         @JvmStatic
         fun fromWire(value: String): PSMMode = when (value) {
-            "OsdOnly" -> OSD_ONLY
-            "AutoOsd" -> AUTO_OSD
-            "AutoOnly" -> AUTO_ONLY
-            "Auto" -> AUTO
-            "SingleColumn" -> SINGLE_COLUMN
-            "SingleBlockVertical" -> SINGLE_BLOCK_VERTICAL
-            "SingleBlock" -> SINGLE_BLOCK
-            "SingleLine" -> SINGLE_LINE
-            "SingleWord" -> SINGLE_WORD
-            "CircleWord" -> CIRCLE_WORD
-            "SingleChar" -> SINGLE_CHAR
+            "OsdOnly", "osdonly" -> OSD_ONLY
+            "AutoOsd", "autoosd" -> AUTO_OSD
+            "AutoOnly", "autoonly" -> AUTO_ONLY
+            "Auto", "auto" -> AUTO
+            "SingleColumn", "singlecolumn" -> SINGLE_COLUMN
+            "SingleBlockVertical", "singleblockvertical" -> SINGLE_BLOCK_VERTICAL
+            "SingleBlock", "singleblock" -> SINGLE_BLOCK
+            "SingleLine", "singleline" -> SINGLE_LINE
+            "SingleWord", "singleword" -> SINGLE_WORD
+            "CircleWord", "circleword" -> CIRCLE_WORD
+            "SingleChar", "singlechar" -> SINGLE_CHAR
             else -> throw IllegalArgumentException("Unknown PSMMode value: $value")
         }
     }

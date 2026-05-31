@@ -27,8 +27,8 @@ public final class EmbeddingBackendBridge implements AutoCloseable {
     private static final ConcurrentHashMap<String, EmbeddingBackendBridge>
             EMBEDDING_BACKEND_BRIDGES = new ConcurrentHashMap<>();
 
-    // C vtable: 7 fields (4 plugin methods + 2 trait methods + free_user_data)
-    private static final MemoryLayout VTABLE_LAYOUT = MemoryLayout.structLayout(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+    // C vtable: 8 fields (4 plugin methods + 2 trait methods + free_string + free_user_data)
+    private static final MemoryLayout VTABLE_LAYOUT = MemoryLayout.structLayout(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
     private static final long VTABLE_SIZE = VTABLE_LAYOUT.byteSize();
 
     private final Arena arena;
@@ -44,15 +44,15 @@ public final class EmbeddingBackendBridge implements AutoCloseable {
             long offset = 0L;
 
             var stubName = LINKER.upcallStub(LOOKUP.bind(this, "handleName",
-                MethodType.methodType(MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
             vtable.set(ValueLayout.ADDRESS, offset, stubName);
             offset += ValueLayout.ADDRESS.byteSize();
 
             var stubVersion = LINKER.upcallStub(LOOKUP.bind(this, "handleVersion",
-                MethodType.methodType(MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
             vtable.set(ValueLayout.ADDRESS, offset, stubVersion);
             offset += ValueLayout.ADDRESS.byteSize();
@@ -91,6 +91,13 @@ public final class EmbeddingBackendBridge implements AutoCloseable {
             vtable.set(ValueLayout.ADDRESS, offset, stubEmbed);
             offset += ValueLayout.ADDRESS.byteSize();
 
+            var stubFreeString = LINKER.upcallStub(LOOKUP.bind(this, "freeString",
+                MethodType.methodType(void.class, MemorySegment.class)),
+                FunctionDescriptor.ofVoid(ValueLayout.ADDRESS),
+                arena);
+            vtable.set(ValueLayout.ADDRESS, offset, stubFreeString);
+            offset += ValueLayout.ADDRESS.byteSize();
+
             vtable.set(ValueLayout.ADDRESS, offset, MemorySegment.NULL);
 
         } catch (ReflectiveOperationException e) {
@@ -101,16 +108,18 @@ public final class EmbeddingBackendBridge implements AutoCloseable {
 
     MemorySegment vtableSegment() { return vtable; }
 
-    private MemorySegment handleName(MemorySegment userData) {
+    private int handleName(MemorySegment userData, MemorySegment outName, MemorySegment outError) {
         try {
-            return arena.allocateFrom(impl.name());
-        } catch (Throwable e) { return MemorySegment.NULL; }
+            outName.set(ValueLayout.ADDRESS, 0, arena.allocateFrom(impl.name()));
+            return 0;
+        } catch (Throwable e) { return 1; }
     }
 
-    private MemorySegment handleVersion(MemorySegment userData) {
+    private int handleVersion(MemorySegment userData, MemorySegment outVersion, MemorySegment outError) {
         try {
-            return arena.allocateFrom(impl.version());
-        } catch (Throwable e) { return MemorySegment.NULL; }
+            outVersion.set(ValueLayout.ADDRESS, 0, arena.allocateFrom(impl.version()));
+            return 0;
+        } catch (Throwable e) { return 1; }
     }
 
     private int handleInitialize(MemorySegment userData, MemorySegment outError) {
@@ -158,6 +167,10 @@ public final class EmbeddingBackendBridge implements AutoCloseable {
     private void writeError(MemorySegment outError, Throwable e) {
         try { outError.set(ValueLayout.ADDRESS, 0, arena.allocateFrom(e.getClass().getSimpleName() + ": " + e.getMessage())); }
         catch (Throwable ignored) { /* swallow */ }
+    }
+
+    private void freeString(MemorySegment ptr) {
+        // Strings returned by Java callbacks are arena-owned and released when this bridge closes.
     }
 
     /** Read a NUL-terminated native C string safely without unbounded reinterpret. */

@@ -101,22 +101,22 @@ enum class PaddleLanguage {
         @com.fasterxml.jackson.annotation.JsonCreator
         @JvmStatic
         fun fromWire(value: String): PaddleLanguage = when (value) {
-            "English" -> ENGLISH
-            "Chinese" -> CHINESE
-            "Japanese" -> JAPANESE
-            "Korean" -> KOREAN
-            "German" -> GERMAN
-            "French" -> FRENCH
-            "Latin" -> LATIN
-            "Cyrillic" -> CYRILLIC
-            "TraditionalChinese" -> TRADITIONAL_CHINESE
-            "Thai" -> THAI
-            "Greek" -> GREEK
-            "EastSlavic" -> EAST_SLAVIC
-            "Arabic" -> ARABIC
-            "Devanagari" -> DEVANAGARI
-            "Tamil" -> TAMIL
-            "Telugu" -> TELUGU
+            "English", "english" -> ENGLISH
+            "Chinese", "chinese" -> CHINESE
+            "Japanese", "japanese" -> JAPANESE
+            "Korean", "korean" -> KOREAN
+            "German", "german" -> GERMAN
+            "French", "french" -> FRENCH
+            "Latin", "latin" -> LATIN
+            "Cyrillic", "cyrillic" -> CYRILLIC
+            "TraditionalChinese", "traditionalchinese" -> TRADITIONAL_CHINESE
+            "Thai", "thai" -> THAI
+            "Greek", "greek" -> GREEK
+            "EastSlavic", "eastslavic" -> EAST_SLAVIC
+            "Arabic", "arabic" -> ARABIC
+            "Devanagari", "devanagari" -> DEVANAGARI
+            "Tamil", "tamil" -> TAMIL
+            "Telugu", "telugu" -> TELUGU
             else -> throw IllegalArgumentException("Unknown PaddleLanguage value: $value")
         }
     }

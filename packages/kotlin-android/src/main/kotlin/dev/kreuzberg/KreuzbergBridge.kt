@@ -82,6 +82,9 @@ object KreuzbergBridge {
     external fun nativeClearValidators()
 
     @Throws(KreuzbergBridgeException::class)
+    external fun nativeCompare(a: String, b: String, opts: String): String
+
+    @Throws(KreuzbergBridgeException::class)
     external fun nativeRenderPdfPageToPng(pdfBytes: ByteArray, pageIndex: Long, dpi: Int, password: String): ByteArray
 
     @Throws(KreuzbergBridgeException::class)

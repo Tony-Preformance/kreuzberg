@@ -462,6 +462,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DbfMetadata dco_decode_box_autoadd_dbf_metadata(dynamic raw);
 
   @protected
+  DiffOptions dco_decode_box_autoadd_diff_options(dynamic raw);
+
+  @protected
   DjotContent dco_decode_box_autoadd_djot_content(dynamic raw);
 
   @protected
@@ -630,6 +633,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ResultFormat dco_decode_box_autoadd_result_format(dynamic raw);
 
   @protected
+  RevisionAnchor dco_decode_box_autoadd_revision_anchor(dynamic raw);
+
+  @protected
   SecurityLimits dco_decode_box_autoadd_security_limits(dynamic raw);
 
   @protected
@@ -667,6 +673,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   CacheStats dco_decode_cache_stats(dynamic raw);
+
+  @protected
+  CellChange dco_decode_cell_change(dynamic raw);
 
   @protected
   Chunk dco_decode_chunk(dynamic raw);
@@ -720,6 +729,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DetectionResult dco_decode_detection_result(dynamic raw);
 
   @protected
+  DiffHunk dco_decode_diff_hunk(dynamic raw);
+
+  @protected
+  DiffLine dco_decode_diff_line(dynamic raw);
+
+  @protected
+  DiffOptions dco_decode_diff_options(dynamic raw);
+
+  @protected
   DjotContent dco_decode_djot_content(dynamic raw);
 
   @protected
@@ -733,6 +751,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   DocumentRelationship dco_decode_document_relationship(dynamic raw);
+
+  @protected
+  DocumentRevision dco_decode_document_revision(dynamic raw);
 
   @protected
   DocumentStructure dco_decode_document_structure(dynamic raw);
@@ -763,6 +784,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   EmailMetadata dco_decode_email_metadata(dynamic raw);
+
+  @protected
+  EmbeddedChanges dco_decode_embedded_changes(dynamic raw);
+
+  @protected
+  EmbeddedDiff dco_decode_embedded_diff(dynamic raw);
 
   @protected
   EmbeddedFile dco_decode_embedded_file(dynamic raw);
@@ -802,6 +829,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ExtractionConfig dco_decode_extraction_config(dynamic raw);
+
+  @protected
+  ExtractionDiff dco_decode_extraction_diff(dynamic raw);
 
   @protected
   ExtractionMethod dco_decode_extraction_method(dynamic raw);
@@ -941,6 +971,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<BatchFileItem> dco_decode_list_batch_file_item(dynamic raw);
 
   @protected
+  List<CellChange> dco_decode_list_cell_change(dynamic raw);
+
+  @protected
   List<Chunk> dco_decode_list_chunk(dynamic raw);
 
   @protected
@@ -948,6 +981,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<DbfFieldInfo> dco_decode_list_dbf_field_info(dynamic raw);
+
+  @protected
+  List<DiffHunk> dco_decode_list_diff_hunk(dynamic raw);
+
+  @protected
+  List<DiffLine> dco_decode_list_diff_line(dynamic raw);
 
   @protected
   List<DjotImage> dco_decode_list_djot_image(dynamic raw);
@@ -962,10 +1001,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<DocumentRelationship> dco_decode_list_document_relationship(dynamic raw);
 
   @protected
+  List<DocumentRevision> dco_decode_list_document_revision(dynamic raw);
+
+  @protected
   List<Element> dco_decode_list_element(dynamic raw);
 
   @protected
   List<EmailAttachment> dco_decode_list_email_attachment(dynamic raw);
+
+  @protected
+  List<EmbeddedDiff> dco_decode_list_embedded_diff(dynamic raw);
 
   @protected
   List<ExcelSheet> dco_decode_list_excel_sheet(dynamic raw);
@@ -1081,6 +1126,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<Table> dco_decode_list_table(dynamic raw);
+
+  @protected
+  List<TableDiff> dco_decode_list_table_diff(dynamic raw);
 
   @protected
   List<TextAnnotation> dco_decode_list_text_annotation(dynamic raw);
@@ -1321,6 +1369,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ResultFormat? dco_decode_opt_box_autoadd_result_format(dynamic raw);
 
   @protected
+  RevisionAnchor? dco_decode_opt_box_autoadd_revision_anchor(dynamic raw);
+
+  @protected
   SecurityLimits? dco_decode_opt_box_autoadd_security_limits(dynamic raw);
 
   @protected
@@ -1355,6 +1406,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<Chunk>? dco_decode_opt_list_chunk(dynamic raw);
+
+  @protected
+  List<DocumentRevision>? dco_decode_opt_list_document_revision(dynamic raw);
 
   @protected
   List<Element>? dco_decode_opt_list_element(dynamic raw);
@@ -1494,6 +1548,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ResultFormat dco_decode_result_format(dynamic raw);
 
   @protected
+  RevisionAnchor dco_decode_revision_anchor(dynamic raw);
+
+  @protected
+  RevisionDelta dco_decode_revision_delta(dynamic raw);
+
+  @protected
+  RevisionKind dco_decode_revision_kind(dynamic raw);
+
+  @protected
   SecurityLimits dco_decode_security_limits(dynamic raw);
 
   @protected
@@ -1521,6 +1584,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   TableCell dco_decode_table_cell(dynamic raw);
+
+  @protected
+  TableDiff dco_decode_table_diff(dynamic raw);
 
   @protected
   TableGrid dco_decode_table_grid(dynamic raw);
@@ -1910,6 +1976,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DbfMetadata sse_decode_box_autoadd_dbf_metadata(SseDeserializer deserializer);
 
   @protected
+  DiffOptions sse_decode_box_autoadd_diff_options(SseDeserializer deserializer);
+
+  @protected
   DjotContent sse_decode_box_autoadd_djot_content(SseDeserializer deserializer);
 
   @protected
@@ -2138,6 +2207,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RevisionAnchor sse_decode_box_autoadd_revision_anchor(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   SecurityLimits sse_decode_box_autoadd_security_limits(
     SseDeserializer deserializer,
   );
@@ -2187,6 +2261,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   CacheStats sse_decode_cache_stats(SseDeserializer deserializer);
+
+  @protected
+  CellChange sse_decode_cell_change(SseDeserializer deserializer);
 
   @protected
   Chunk sse_decode_chunk(SseDeserializer deserializer);
@@ -2242,6 +2319,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DetectionResult sse_decode_detection_result(SseDeserializer deserializer);
 
   @protected
+  DiffHunk sse_decode_diff_hunk(SseDeserializer deserializer);
+
+  @protected
+  DiffLine sse_decode_diff_line(SseDeserializer deserializer);
+
+  @protected
+  DiffOptions sse_decode_diff_options(SseDeserializer deserializer);
+
+  @protected
   DjotContent sse_decode_djot_content(SseDeserializer deserializer);
 
   @protected
@@ -2257,6 +2343,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DocumentRelationship sse_decode_document_relationship(
     SseDeserializer deserializer,
   );
+
+  @protected
+  DocumentRevision sse_decode_document_revision(SseDeserializer deserializer);
 
   @protected
   DocumentStructure sse_decode_document_structure(SseDeserializer deserializer);
@@ -2291,6 +2380,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   EmailMetadata sse_decode_email_metadata(SseDeserializer deserializer);
+
+  @protected
+  EmbeddedChanges sse_decode_embedded_changes(SseDeserializer deserializer);
+
+  @protected
+  EmbeddedDiff sse_decode_embedded_diff(SseDeserializer deserializer);
 
   @protected
   EmbeddedFile sse_decode_embedded_file(SseDeserializer deserializer);
@@ -2334,6 +2429,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ExtractionConfig sse_decode_extraction_config(SseDeserializer deserializer);
+
+  @protected
+  ExtractionDiff sse_decode_extraction_diff(SseDeserializer deserializer);
 
   @protected
   ExtractionMethod sse_decode_extraction_method(SseDeserializer deserializer);
@@ -2495,6 +2593,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<CellChange> sse_decode_list_cell_change(SseDeserializer deserializer);
+
+  @protected
   List<Chunk> sse_decode_list_chunk(SseDeserializer deserializer);
 
   @protected
@@ -2506,6 +2607,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<DbfFieldInfo> sse_decode_list_dbf_field_info(
     SseDeserializer deserializer,
   );
+
+  @protected
+  List<DiffHunk> sse_decode_list_diff_hunk(SseDeserializer deserializer);
+
+  @protected
+  List<DiffLine> sse_decode_list_diff_line(SseDeserializer deserializer);
 
   @protected
   List<DjotImage> sse_decode_list_djot_image(SseDeserializer deserializer);
@@ -2524,10 +2631,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<DocumentRevision> sse_decode_list_document_revision(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<Element> sse_decode_list_element(SseDeserializer deserializer);
 
   @protected
   List<EmailAttachment> sse_decode_list_email_attachment(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<EmbeddedDiff> sse_decode_list_embedded_diff(
     SseDeserializer deserializer,
   );
 
@@ -2685,6 +2802,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<Table> sse_decode_list_table(SseDeserializer deserializer);
+
+  @protected
+  List<TableDiff> sse_decode_list_table_diff(SseDeserializer deserializer);
 
   @protected
   List<TextAnnotation> sse_decode_list_text_annotation(
@@ -3001,6 +3121,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RevisionAnchor? sse_decode_opt_box_autoadd_revision_anchor(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   SecurityLimits? sse_decode_opt_box_autoadd_security_limits(
     SseDeserializer deserializer,
   );
@@ -3051,6 +3176,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<Chunk>? sse_decode_opt_list_chunk(SseDeserializer deserializer);
+
+  @protected
+  List<DocumentRevision>? sse_decode_opt_list_document_revision(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<Element>? sse_decode_opt_list_element(SseDeserializer deserializer);
@@ -3222,6 +3352,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ResultFormat sse_decode_result_format(SseDeserializer deserializer);
 
   @protected
+  RevisionAnchor sse_decode_revision_anchor(SseDeserializer deserializer);
+
+  @protected
+  RevisionDelta sse_decode_revision_delta(SseDeserializer deserializer);
+
+  @protected
+  RevisionKind sse_decode_revision_kind(SseDeserializer deserializer);
+
+  @protected
   SecurityLimits sse_decode_security_limits(SseDeserializer deserializer);
 
   @protected
@@ -3253,6 +3392,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   TableCell sse_decode_table_cell(SseDeserializer deserializer);
+
+  @protected
+  TableDiff sse_decode_table_diff(SseDeserializer deserializer);
 
   @protected
   TableGrid sse_decode_table_grid(SseDeserializer deserializer);
@@ -3836,6 +3978,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_diff_options(
+    DiffOptions self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_djot_content(
     DjotContent self,
     SseSerializer serializer,
@@ -4139,6 +4287,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_revision_anchor(
+    RevisionAnchor self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_security_limits(
     SecurityLimits self,
     SseSerializer serializer,
@@ -4206,6 +4360,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_cache_stats(CacheStats self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_cell_change(CellChange self, SseSerializer serializer);
 
   @protected
   void sse_encode_chunk(Chunk self, SseSerializer serializer);
@@ -4283,6 +4440,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_diff_hunk(DiffHunk self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_diff_line(DiffLine self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_diff_options(DiffOptions self, SseSerializer serializer);
+
+  @protected
   void sse_encode_djot_content(DjotContent self, SseSerializer serializer);
 
   @protected
@@ -4297,6 +4463,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_document_relationship(
     DocumentRelationship self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_document_revision(
+    DocumentRevision self,
     SseSerializer serializer,
   );
 
@@ -4344,6 +4516,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_email_metadata(EmailMetadata self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_embedded_changes(
+    EmbeddedChanges self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_embedded_diff(EmbeddedDiff self, SseSerializer serializer);
 
   @protected
   void sse_encode_embedded_file(EmbeddedFile self, SseSerializer serializer);
@@ -4399,6 +4580,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_extraction_config(
     ExtractionConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_extraction_diff(
+    ExtractionDiff self,
     SseSerializer serializer,
   );
 
@@ -4607,6 +4794,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_cell_change(
+    List<CellChange> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_chunk(List<Chunk> self, SseSerializer serializer);
 
   @protected
@@ -4620,6 +4813,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     List<DbfFieldInfo> self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_list_diff_hunk(List<DiffHunk> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_diff_line(List<DiffLine> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_djot_image(
@@ -4643,11 +4842,23 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_document_revision(
+    List<DocumentRevision> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_element(List<Element> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_email_attachment(
     List<EmailAttachment> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_embedded_diff(
+    List<EmbeddedDiff> self,
     SseSerializer serializer,
   );
 
@@ -4848,6 +5059,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_table(List<Table> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_table_diff(
+    List<TableDiff> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_text_annotation(
@@ -5228,6 +5445,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_revision_anchor(
+    RevisionAnchor? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_security_limits(
     SecurityLimits? self,
     SseSerializer serializer,
@@ -5286,6 +5509,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_list_chunk(List<Chunk>? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_list_document_revision(
+    List<DocumentRevision>? self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_opt_list_element(
@@ -5513,6 +5742,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_result_format(ResultFormat self, SseSerializer serializer);
 
   @protected
+  void sse_encode_revision_anchor(
+    RevisionAnchor self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_revision_delta(RevisionDelta self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_revision_kind(RevisionKind self, SseSerializer serializer);
+
+  @protected
   void sse_encode_security_limits(
     SecurityLimits self,
     SseSerializer serializer,
@@ -5556,6 +5797,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_table_cell(TableCell self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_table_diff(TableDiff self, SseSerializer serializer);
 
   @protected
   void sse_encode_table_grid(TableGrid self, SseSerializer serializer);

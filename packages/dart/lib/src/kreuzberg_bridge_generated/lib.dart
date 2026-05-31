@@ -9,7 +9,7 @@ import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'lib.freezed.dart';
 
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `DocumentExtractorDartCallbacks`, `EmbeddingBackendDartCallbacks`, `KreuzbergError`, `ListType`, `OcrBackendDartCallbacks`, `PSMMode`, `PaddleLanguage`, `PostProcessorDartCallbacks`, `RendererDartCallbacks`, `ValidatorDartCallbacks`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `backend_type`, `can_handle`, `dimensions`, `embed`, `estimated_duration_ms`, `extract_bytes`, `extract_file`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `name`, `name`, `name`, `name`, `name`, `name`, `priority`, `priority`, `priority`, `process_document`, `process_image_file`, `process_image`, `process`, `processing_stage`, `render`, `should_process`, `should_validate`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `supported_languages`, `supported_mime_types`, `supports_document_processing`, `supports_language`, `supports_table_detection`, `validate`, `version`, `version`, `version`, `version`, `version`, `version`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `backend_type`, `can_handle`, `dimensions`, `embed`, `estimated_duration_ms`, `extract_bytes`, `extract_file`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `name`, `name`, `name`, `name`, `name`, `name`, `priority`, `priority`, `priority`, `process_document`, `process_image_file`, `process_image`, `process`, `processing_stage`, `render`, `should_process`, `should_validate`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `supported_languages`, `supported_mime_types`, `supports_document_processing`, `supports_language`, `supports_table_detection`, `validate`, `version`, `version`, `version`, `version`, `version`, `version`
 
 /// Extract content from a byte array.
 ///
@@ -223,8 +223,8 @@ Future<List<String>> getExtensionsForMime({required String mimeType}) =>
 
 /// List the names of all registered embedding backends.
 ///
-/// Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-/// language bindings via `alef.toml [exclude].functions`.
+/// Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+/// bindings.
 Future<List<String>> listEmbeddingBackends() =>
     RustLib.instance.api.crateListEmbeddingBackends();
 
@@ -265,6 +265,16 @@ Future<List<String>> listRenderers() =>
 /// List names of all registered validators.
 Future<List<String>> listValidators() =>
     RustLib.instance.api.crateListValidators();
+
+/// Compare two extraction results and return a structured diff.
+///
+/// The comparison is purely structural — no I/O, no side effects. All fields
+/// of `ExtractionDiff` are populated according to the provided `DiffOptions`.
+Future<ExtractionDiff> compare({
+  required ExtractionResult a,
+  required ExtractionResult b,
+  required DiffOptions opts,
+}) => RustLib.instance.api.crateCompare(a: a, b: b, opts: opts);
 
 /// Generate embeddings asynchronously for a list of text strings.
 ///
@@ -720,6 +730,16 @@ Future<HierarchicalBlock> createHierarchicalBlockFromJson({
   required String json,
 }) => RustLib.instance.api.crateCreateHierarchicalBlockFromJson(json: json);
 
+Future<CellChange> createCellChangeFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateCellChangeFromJson(json: json);
+
+Future<DocumentRevision> createDocumentRevisionFromJson({
+  required String json,
+}) => RustLib.instance.api.crateCreateDocumentRevisionFromJson(json: json);
+
+Future<RevisionDelta> createRevisionDeltaFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateRevisionDeltaFromJson(json: json);
+
 Future<Table> createTableFromJson({required String json}) =>
     RustLib.instance.api.crateCreateTableFromJson(json: json);
 
@@ -731,6 +751,24 @@ Future<ExtractedUri> createExtractedUriFromJson({required String json}) =>
 
 Future<DetectResponse> createDetectResponseFromJson({required String json}) =>
     RustLib.instance.api.crateCreateDetectResponseFromJson(json: json);
+
+Future<DiffOptions> createDiffOptionsFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateDiffOptionsFromJson(json: json);
+
+Future<ExtractionDiff> createExtractionDiffFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateExtractionDiffFromJson(json: json);
+
+Future<DiffHunk> createDiffHunkFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateDiffHunkFromJson(json: json);
+
+Future<TableDiff> createTableDiffFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateTableDiffFromJson(json: json);
+
+Future<EmbeddedChanges> createEmbeddedChangesFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateEmbeddedChangesFromJson(json: json);
+
+Future<EmbeddedDiff> createEmbeddedDiffFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateEmbeddedDiffFromJson(json: json);
 
 Future<EmbeddingPreset> createEmbeddingPresetFromJson({required String json}) =>
     RustLib.instance.api.crateCreateEmbeddingPresetFromJson(json: json);
@@ -1469,6 +1507,45 @@ class CacheStats {
           newestFileAgeDays == other.newestFileAgeDays;
 }
 
+/// A single changed cell within a table.
+///
+/// Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+/// reference it unconditionally, without requiring the `diff` Cargo feature.
+/// `crate::diff` re-exports this type verbatim.
+class CellChange {
+  /// Zero-based row index.
+  final PlatformInt64 row;
+
+  /// Zero-based column index.
+  final PlatformInt64 col;
+
+  /// Value before the change.
+  final String from;
+
+  /// Value after the change.
+  final String to;
+
+  const CellChange({
+    required this.row,
+    required this.col,
+    required this.from,
+    required this.to,
+  });
+
+  @override
+  int get hashCode => row.hashCode ^ col.hashCode ^ from.hashCode ^ to.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CellChange &&
+          runtimeType == other.runtimeType &&
+          row == other.row &&
+          col == other.col &&
+          from == other.from &&
+          to == other.to;
+}
+
 /// A text chunk with optional embedding and metadata.
 ///
 /// Chunks are created when chunking is enabled in `ExtractionConfig`. Each chunk
@@ -2196,6 +2273,101 @@ class DetectionResult {
           detections == other.detections;
 }
 
+/// A single contiguous hunk in a unified diff.
+class DiffHunk {
+  /// Starting line number in the old content (0-indexed).
+  final PlatformInt64 fromLine;
+
+  /// Number of lines from the old content in this hunk.
+  final PlatformInt64 fromCount;
+
+  /// Starting line number in the new content (0-indexed).
+  final PlatformInt64 toLine;
+
+  /// Number of lines from the new content in this hunk.
+  final PlatformInt64 toCount;
+
+  /// Lines that make up this hunk.
+  final List<DiffLine> lines;
+
+  const DiffHunk({
+    required this.fromLine,
+    required this.fromCount,
+    required this.toLine,
+    required this.toCount,
+    required this.lines,
+  });
+
+  @override
+  int get hashCode =>
+      fromLine.hashCode ^
+      fromCount.hashCode ^
+      toLine.hashCode ^
+      toCount.hashCode ^
+      lines.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DiffHunk &&
+          runtimeType == other.runtimeType &&
+          fromLine == other.fromLine &&
+          fromCount == other.fromCount &&
+          toLine == other.toLine &&
+          toCount == other.toCount &&
+          lines == other.lines;
+}
+
+@freezed
+sealed class DiffLine with _$DiffLine {
+  const DiffLine._();
+
+  /// Unchanged context line.
+  const factory DiffLine.context({required String field0}) = DiffLine_Context;
+
+  /// Line added in the "after" version.
+  const factory DiffLine.added({required String field0}) = DiffLine_Added;
+
+  /// Line removed from the "before" version.
+  const factory DiffLine.removed({required String field0}) = DiffLine_Removed;
+}
+
+/// Options controlling how two `ExtractionResult` values are compared.
+class DiffOptions {
+  /// Include metadata changes in the diff. Default: `true`.
+  final bool includeMetadata;
+
+  /// Include embedded-children changes in the diff. Default: `true`.
+  final bool includeEmbedded;
+
+  /// Truncate content to this many characters before diffing.
+  ///
+  /// Useful for very large documents where only the first N characters matter.
+  /// `None` means no truncation.
+  final PlatformInt64? maxContentChars;
+
+  const DiffOptions({
+    required this.includeMetadata,
+    required this.includeEmbedded,
+    this.maxContentChars,
+  });
+
+  @override
+  int get hashCode =>
+      includeMetadata.hashCode ^
+      includeEmbedded.hashCode ^
+      maxContentChars.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DiffOptions &&
+          runtimeType == other.runtimeType &&
+          includeMetadata == other.includeMetadata &&
+          includeEmbedded == other.includeEmbedded &&
+          maxContentChars == other.maxContentChars;
+}
+
 /// Comprehensive Djot document structure with semantic preservation.
 ///
 /// This type captures the full richness of Djot markup, including:
@@ -2452,6 +2624,75 @@ class DocumentRelationship {
           source == other.source &&
           target == other.target &&
           kind == other.kind;
+}
+
+/// A single tracked change embedded in a document.
+///
+/// Populated by per-format extractors that understand change-tracking metadata
+/// (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every
+/// extractor defaults to `ExtractionResult.revisions = None` until a
+/// format-specific implementation is added.
+class DocumentRevision {
+  /// Format-specific revision identifier.
+  ///
+  /// For DOCX this is the `w:id` attribute value on the change element
+  /// (e.g. `"42"`). When the attribute is absent a synthetic fallback is
+  /// generated (`"docx-ins-0"`, `"docx-del-3"`, …).
+  final String revisionId;
+
+  /// Display name of the author who made this change, when available.
+  final String? author;
+
+  /// ISO-8601 timestamp of the change, when available.
+  ///
+  /// Stored as a plain string so this type remains FFI-friendly and
+  /// unconditionally available without the `chrono` optional dep.
+  /// DOCX populates this from the `w:date` attribute (e.g.
+  /// `"2024-03-15T10:30:00Z"`).
+  final String? timestamp;
+
+  /// Semantic kind of this revision.
+  final RevisionKind kind;
+
+  /// Best-effort document location for this revision.
+  ///
+  /// Resolution is format-dependent and may be `None` when the location
+  /// cannot be determined (e.g. changes inside table cells before
+  /// table-cell anchor support is added).
+  final RevisionAnchor? anchor;
+
+  /// The content changes that make up this revision.
+  final RevisionDelta delta;
+
+  const DocumentRevision({
+    required this.revisionId,
+    this.author,
+    this.timestamp,
+    required this.kind,
+    this.anchor,
+    required this.delta,
+  });
+
+  @override
+  int get hashCode =>
+      revisionId.hashCode ^
+      author.hashCode ^
+      timestamp.hashCode ^
+      kind.hashCode ^
+      anchor.hashCode ^
+      delta.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocumentRevision &&
+          runtimeType == other.runtimeType &&
+          revisionId == other.revisionId &&
+          author == other.author &&
+          timestamp == other.timestamp &&
+          kind == other.kind &&
+          anchor == other.anchor &&
+          delta == other.delta;
 }
 
 /// Top-level structured document representation.
@@ -3035,6 +3276,60 @@ class EmailMetadata {
           bccEmails == other.bccEmails &&
           messageId == other.messageId &&
           attachments == other.attachments;
+}
+
+/// Changes to embedded archive children between two results.
+class EmbeddedChanges {
+  /// Children present in `b` but not in `a` (matched by `path`).
+  final List<ArchiveEntry> added;
+
+  /// Children present in `a` but not in `b` (matched by `path`).
+  final List<ArchiveEntry> removed;
+
+  /// Children present in both but with differing content (matched by `path`).
+  ///
+  /// Each entry holds the diff of the nested `ExtractionResult`.
+  final List<EmbeddedDiff> changed;
+
+  const EmbeddedChanges({
+    required this.added,
+    required this.removed,
+    required this.changed,
+  });
+
+  @override
+  int get hashCode => added.hashCode ^ removed.hashCode ^ changed.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EmbeddedChanges &&
+          runtimeType == other.runtimeType &&
+          added == other.added &&
+          removed == other.removed &&
+          changed == other.changed;
+}
+
+/// Diff for a single embedded archive entry that appears in both results.
+class EmbeddedDiff {
+  /// Archive-relative path identifying this entry.
+  final String path;
+
+  /// The recursive diff of the entry's extraction result.
+  final ExtractionDiff diff;
+
+  const EmbeddedDiff({required this.path, required this.diff});
+
+  @override
+  int get hashCode => path.hashCode ^ diff.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EmbeddedDiff &&
+          runtimeType == other.runtimeType &&
+          path == other.path &&
+          diff == other.diff;
 }
 
 /// Embedded file descriptor extracted from the PDF name tree.
@@ -3939,6 +4234,64 @@ class ExtractionConfig {
           cancelToken == other.cancelToken;
 }
 
+/// The complete diff between two `ExtractionResult` values.
+class ExtractionDiff {
+  /// Unified-diff hunks for the `content` field.
+  ///
+  /// Empty when the content is identical.
+  final List<DiffHunk> contentDiff;
+
+  /// Tables present in `b` but not in `a` (by index position, excess right-side tables).
+  final List<Table> tablesAdded;
+
+  /// Tables present in `a` but not in `b` (by index position, excess left-side tables).
+  final List<Table> tablesRemoved;
+
+  /// Cell-level changes for table pairs that share the same index and dimensions.
+  final List<TableDiff> tablesChanged;
+
+  /// Metadata changes in a simplified add/remove/change map.
+  ///
+  /// Shape: `{ "added": {key: value, ...}, "removed": {key: value, ...},
+  ///           "changed": {key: {from: v1, to: v2}, ...} }`.
+  ///
+  /// Approximates RFC 6902 JSON Patch semantics without pulling in an extra crate.
+  final String metadataChanged;
+
+  /// Changes to embedded archive children.
+  final EmbeddedChanges embeddedChanges;
+
+  const ExtractionDiff({
+    required this.contentDiff,
+    required this.tablesAdded,
+    required this.tablesRemoved,
+    required this.tablesChanged,
+    required this.metadataChanged,
+    required this.embeddedChanges,
+  });
+
+  @override
+  int get hashCode =>
+      contentDiff.hashCode ^
+      tablesAdded.hashCode ^
+      tablesRemoved.hashCode ^
+      tablesChanged.hashCode ^
+      metadataChanged.hashCode ^
+      embeddedChanges.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ExtractionDiff &&
+          runtimeType == other.runtimeType &&
+          contentDiff == other.contentDiff &&
+          tablesAdded == other.tablesAdded &&
+          tablesRemoved == other.tablesRemoved &&
+          tablesChanged == other.tablesChanged &&
+          metadataChanged == other.metadataChanged &&
+          embeddedChanges == other.embeddedChanges;
+}
+
 /// How the extracted text was produced.
 enum ExtractionMethod { native, ocr, mixed }
 
@@ -4070,6 +4423,17 @@ class ExtractionResult {
   /// present in the source document.
   final List<ExtractedUri>? uris;
 
+  /// Tracked changes embedded in the source document.
+  ///
+  /// Populated by per-format extractors that understand change-tracking
+  /// metadata (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`,
+  /// …). Every extractor defaults to `None` until its format-specific
+  /// implementation is added. Extractors that do populate this field follow
+  /// the "accepted-changes" convention: inserted text is present in
+  /// `content`, deleted text is absent — the revision list is the separate
+  /// audit trail.
+  final List<DocumentRevision>? revisions;
+
   /// Structured extraction output from LLM-based JSON schema extraction.
   ///
   /// When `structured_extraction` is configured in `ExtractionConfig`, the
@@ -4131,6 +4495,7 @@ class ExtractionResult {
     this.annotations,
     this.children,
     this.uris,
+    this.revisions,
     this.structuredOutput,
     this.codeIntelligence,
     this.llmUsage,
@@ -4159,6 +4524,7 @@ class ExtractionResult {
       annotations.hashCode ^
       children.hashCode ^
       uris.hashCode ^
+      revisions.hashCode ^
       structuredOutput.hashCode ^
       codeIntelligence.hashCode ^
       llmUsage.hashCode ^
@@ -4189,6 +4555,7 @@ class ExtractionResult {
           annotations == other.annotations &&
           children == other.children &&
           uris == other.uris &&
+          revisions == other.revisions &&
           structuredOutput == other.structuredOutput &&
           codeIntelligence == other.codeIntelligence &&
           llmUsage == other.llmUsage &&
@@ -8279,6 +8646,92 @@ enum ResultFormat {
   elementBased,
 }
 
+@freezed
+sealed class RevisionAnchor with _$RevisionAnchor {
+  const RevisionAnchor._();
+
+  /// Body paragraph, identified by its zero-based index in the document flow.
+  const factory RevisionAnchor.paragraph({
+    /// Zero-based index of the paragraph in document order.
+    required PlatformInt64 index,
+  }) = RevisionAnchor_Paragraph;
+
+  /// Cell inside a table.
+  const factory RevisionAnchor.tableCell({
+    /// Zero-based row index within the table.
+    required PlatformInt64 row,
+
+    /// Zero-based column index within the table.
+    required PlatformInt64 col,
+
+    /// Zero-based index of the table in document order.
+    required PlatformInt64 tableIndex,
+  }) = RevisionAnchor_TableCell;
+
+  /// Page, identified by its zero-based index.
+  const factory RevisionAnchor.page({
+    /// Zero-based page index.
+    required PlatformInt64 index,
+  }) = RevisionAnchor_Page;
+
+  /// Presentation slide, identified by its zero-based index.
+  const factory RevisionAnchor.slide({
+    /// Zero-based slide index.
+    required PlatformInt64 index,
+  }) = RevisionAnchor_Slide;
+
+  /// Spreadsheet cell or range, identified by sheet index and optional name.
+  const factory RevisionAnchor.sheet({
+    /// Zero-based sheet index.
+    required PlatformInt64 index,
+
+    /// Sheet display name when available.
+    required String name,
+  }) = RevisionAnchor_Sheet;
+}
+
+/// The content changes that make up a single revision.
+///
+/// For insertions and deletions the `content` field carries the added/removed
+/// lines as `DiffLine::Added` / `DiffLine::Removed` entries. For format
+/// changes, `content` is empty — the property diff is left as a TODO for a
+/// later enrichment pass.
+class RevisionDelta {
+  /// Line-level content changes for this revision.
+  final List<DiffLine> content;
+
+  /// Cell-level table changes for this revision.
+  final List<CellChange> tableChanges;
+
+  const RevisionDelta({required this.content, required this.tableChanges});
+
+  @override
+  int get hashCode => content.hashCode ^ tableChanges.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RevisionDelta &&
+          runtimeType == other.runtimeType &&
+          content == other.content &&
+          tableChanges == other.tableChanges;
+}
+
+/// Semantic classification of a tracked change.
+enum RevisionKind {
+  /// Text or content was inserted.
+  insertion,
+
+  /// Text or content was deleted.
+  deletion,
+
+  /// Run-level formatting (font, size, colour, …) was changed.
+  formatChange,
+
+  /// A reviewer comment or annotation.
+  comment,
+}
+
 /// Configuration for security limits across extractors.
 ///
 /// All limits are intentionally conservative to prevent DoS attacks
@@ -8672,6 +9125,37 @@ class TableCell {
           rowSpan == other.rowSpan &&
           colSpan == other.colSpan &&
           isHeader == other.isHeader;
+}
+
+/// Cell-level changes for a pair of tables that share the same index.
+class TableDiff {
+  /// Zero-based index of the table in both `a.tables` and `b.tables`.
+  final PlatformInt64 fromIndex;
+
+  /// Zero-based index in `b.tables` (equal to `from_index` for same-dimension tables).
+  final PlatformInt64 toIndex;
+
+  /// Cell-level changes within the table.
+  final List<CellChange> cellChanges;
+
+  const TableDiff({
+    required this.fromIndex,
+    required this.toIndex,
+    required this.cellChanges,
+  });
+
+  @override
+  int get hashCode =>
+      fromIndex.hashCode ^ toIndex.hashCode ^ cellChanges.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TableDiff &&
+          runtimeType == other.runtimeType &&
+          fromIndex == other.fromIndex &&
+          toIndex == other.toIndex &&
+          cellChanges == other.cellChanges;
 }
 
 /// Structured table grid with cell-level metadata.

@@ -471,8 +471,8 @@ object Kreuzberg {
     /**
      * List the names of all registered embedding backends.
      *
-     * Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-     * language bindings via `alef.toml [exclude].functions`.
+     * Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+     * bindings.
      */
     fun listEmbeddingBackends(): List<String> {
         val resultJson = KreuzbergBridge.nativeListEmbeddingBackends()
@@ -482,8 +482,8 @@ object Kreuzberg {
     /**
      * List the names of all registered embedding backends.
      *
-     * Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-     * language bindings via `alef.toml [exclude].functions`.
+     * Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+     * bindings.
      */
     suspend fun listEmbeddingBackendsAsync(): List<String> =
         withContext(Dispatchers.IO) { listEmbeddingBackends() }
@@ -624,6 +624,26 @@ object Kreuzberg {
 
     /** Remove all registered validators. */
     fun clearValidators(): Unit = KreuzbergBridge.nativeClearValidators()
+    /**
+     * Compare two extraction results and return a structured diff.
+     *
+     * The comparison is purely structural — no I/O, no side effects. All fields
+     * of `ExtractionDiff` are populated according to the provided `DiffOptions`.
+     */
+    fun compare(a: ExtractionResult, b: ExtractionResult, opts: DiffOptions): ExtractionDiff {
+        val resultJson = KreuzbergBridge.nativeCompare(mapper.writeValueAsString(a), mapper.writeValueAsString(b), mapper.writeValueAsString(opts))
+        return mapper.readValue(resultJson, ExtractionDiff::class.java)
+    }
+
+    /**
+     * Compare two extraction results and return a structured diff.
+     *
+     * The comparison is purely structural — no I/O, no side effects. All fields
+     * of `ExtractionDiff` are populated according to the provided `DiffOptions`.
+     */
+    suspend fun compareAsync(a: ExtractionResult, b: ExtractionResult, opts: DiffOptions): ExtractionDiff =
+        withContext(Dispatchers.IO) { compare(a, b, opts) }
+
     /**
      * Render a single PDF page to PNG bytes.
      *

@@ -77,9 +77,9 @@ enum class ProcessingStage {
         @com.fasterxml.jackson.annotation.JsonCreator
         @JvmStatic
         fun fromWire(value: String): ProcessingStage = when (value) {
-            "Early" -> EARLY
-            "Middle" -> MIDDLE
-            "Late" -> LATE
+            "Early", "early" -> EARLY
+            "Middle", "middle" -> MIDDLE
+            "Late", "late" -> LATE
             else -> throw IllegalArgumentException("Unknown ProcessingStage value: $value")
         }
     }

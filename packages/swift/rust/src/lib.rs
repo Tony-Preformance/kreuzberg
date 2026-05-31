@@ -1156,6 +1156,7 @@ mod ffi {
             annotations: Option<Vec<PdfAnnotation>>,
             children: Option<Vec<ArchiveEntry>>,
             uris: Option<Vec<ExtractedUri>>,
+            revisions: Option<Vec<DocumentRevision>>,
             structured_output: Option<String>,
             code_intelligence: Option<String>,
             llm_usage: Option<Vec<LlmUsage>>,
@@ -1188,6 +1189,7 @@ mod ffi {
         fn annotations(&self) -> Option<Vec<PdfAnnotation>>;
         fn children(&self) -> Option<Vec<ArchiveEntry>>;
         fn uris(&self) -> Option<Vec<ExtractedUri>>;
+        fn revisions(&self) -> Option<Vec<DocumentRevision>>;
         #[swift_bridge(swift_name = "structuredOutput")]
         fn structured_output(&self) -> Option<String>;
         #[swift_bridge(swift_name = "codeIntelligence")]
@@ -2196,6 +2198,34 @@ mod ffi {
     }
 
     extern "Rust" {
+        type CellChange;
+        fn row(&self) -> usize;
+        fn col(&self) -> usize;
+        fn from(&self) -> String;
+        fn to(&self) -> String;
+    }
+
+    extern "Rust" {
+        type DocumentRevision;
+        #[swift_bridge(swift_name = "revisionId")]
+        fn revision_id(&self) -> String;
+        fn author(&self) -> Option<String>;
+        fn timestamp(&self) -> Option<String>;
+        fn kind(&self) -> String;
+        fn anchor(&self) -> Option<String>;
+        fn delta(&self) -> RevisionDelta;
+    }
+
+    extern "Rust" {
+        type RevisionDelta;
+        #[swift_bridge(init)]
+        fn new(content: Vec<DiffLine>, table_changes: Vec<CellChange>) -> RevisionDelta;
+        fn content(&self) -> Vec<String>;
+        #[swift_bridge(swift_name = "tableChanges")]
+        fn table_changes(&self) -> Vec<CellChange>;
+    }
+
+    extern "Rust" {
         type Table;
         #[swift_bridge(init)]
         fn new(cells: String, markdown: String, page_number: u32, bounding_box: Option<BoundingBox>) -> Table;
@@ -2233,6 +2263,70 @@ mod ffi {
         #[swift_bridge(swift_name = "mimeType")]
         fn mime_type(&self) -> String;
         fn filename(&self) -> Option<String>;
+    }
+
+    extern "Rust" {
+        type DiffOptions;
+        #[swift_bridge(init)]
+        fn new(include_metadata: bool, include_embedded: bool, max_content_chars: Option<usize>) -> DiffOptions;
+        #[swift_bridge(swift_name = "includeMetadata")]
+        fn include_metadata(&self) -> bool;
+        #[swift_bridge(swift_name = "includeEmbedded")]
+        fn include_embedded(&self) -> bool;
+        #[swift_bridge(swift_name = "maxContentChars")]
+        fn max_content_chars(&self) -> Option<usize>;
+    }
+
+    extern "Rust" {
+        type ExtractionDiff;
+        #[swift_bridge(swift_name = "contentDiff")]
+        fn content_diff(&self) -> Vec<DiffHunk>;
+        #[swift_bridge(swift_name = "tablesAdded")]
+        fn tables_added(&self) -> Vec<Table>;
+        #[swift_bridge(swift_name = "tablesRemoved")]
+        fn tables_removed(&self) -> Vec<Table>;
+        #[swift_bridge(swift_name = "tablesChanged")]
+        fn tables_changed(&self) -> Vec<TableDiff>;
+        #[swift_bridge(swift_name = "metadataChanged")]
+        fn metadata_changed(&self) -> String;
+        #[swift_bridge(swift_name = "embeddedChanges")]
+        fn embedded_changes(&self) -> EmbeddedChanges;
+    }
+
+    extern "Rust" {
+        type DiffHunk;
+        #[swift_bridge(swift_name = "fromLine")]
+        fn from_line(&self) -> usize;
+        #[swift_bridge(swift_name = "fromCount")]
+        fn from_count(&self) -> usize;
+        #[swift_bridge(swift_name = "toLine")]
+        fn to_line(&self) -> usize;
+        #[swift_bridge(swift_name = "toCount")]
+        fn to_count(&self) -> usize;
+        fn lines(&self) -> Vec<String>;
+    }
+
+    extern "Rust" {
+        type TableDiff;
+        #[swift_bridge(swift_name = "fromIndex")]
+        fn from_index(&self) -> usize;
+        #[swift_bridge(swift_name = "toIndex")]
+        fn to_index(&self) -> usize;
+        #[swift_bridge(swift_name = "cellChanges")]
+        fn cell_changes(&self) -> Vec<CellChange>;
+    }
+
+    extern "Rust" {
+        type EmbeddedChanges;
+        fn added(&self) -> Vec<ArchiveEntry>;
+        fn removed(&self) -> Vec<ArchiveEntry>;
+        fn changed(&self) -> Vec<EmbeddedDiff>;
+    }
+
+    extern "Rust" {
+        type EmbeddedDiff;
+        fn path(&self) -> String;
+        fn diff(&self) -> ExtractionDiff;
     }
 
     extern "Rust" {
@@ -2589,6 +2683,21 @@ mod ffi {
     }
 
     extern "Rust" {
+        type DiffLine;
+        fn to_string(&self) -> String;
+    }
+
+    extern "Rust" {
+        type RevisionKind;
+        fn to_string(&self) -> String;
+    }
+
+    extern "Rust" {
+        type RevisionAnchor;
+        fn to_string(&self) -> String;
+    }
+
+    extern "Rust" {
         type UriKind;
         fn to_string(&self) -> String;
     }
@@ -2674,6 +2783,7 @@ mod ffi {
         fn list_renderers() -> Result<Vec<String>, String>;
         #[swift_bridge(swift_name = "listValidators")]
         fn list_validators() -> Result<Vec<String>, String>;
+        fn compare(a: ExtractionResult, b: ExtractionResult, opts: DiffOptions) -> ExtractionDiff;
         #[swift_bridge(swift_name = "embedTextsAsync")]
         fn embed_texts_async(texts: Vec<String>, config: EmbeddingConfig) -> Result<String, String>;
         #[swift_bridge(swift_name = "renderPdfPageToPng")]
@@ -2884,6 +2994,8 @@ mod ffi {
         fn extraction_result_from_json(json: String) -> Result<ExtractionResult, String>;
         #[swift_bridge(swift_name = "ocrExtractionResultFromJson")]
         fn ocr_extraction_result_from_json(json: String) -> Result<OcrExtractionResult, String>;
+        #[swift_bridge(swift_name = "diffOptionsFromJson")]
+        fn diff_options_from_json(json: String) -> Result<DiffOptions, String>;
     }
     extern "Rust" {
         #[swift_bridge(swift_name = "cacheStatsFromJson")]
@@ -3096,6 +3208,12 @@ mod ffi {
         fn page_hierarchy_from_json(json: String) -> Result<PageHierarchy, String>;
         #[swift_bridge(swift_name = "hierarchicalBlockFromJson")]
         fn hierarchical_block_from_json(json: String) -> Result<HierarchicalBlock, String>;
+        #[swift_bridge(swift_name = "cellChangeFromJson")]
+        fn cell_change_from_json(json: String) -> Result<CellChange, String>;
+        #[swift_bridge(swift_name = "documentRevisionFromJson")]
+        fn document_revision_from_json(json: String) -> Result<DocumentRevision, String>;
+        #[swift_bridge(swift_name = "revisionDeltaFromJson")]
+        fn revision_delta_from_json(json: String) -> Result<RevisionDelta, String>;
         #[swift_bridge(swift_name = "tableFromJson")]
         fn table_from_json(json: String) -> Result<Table, String>;
         #[swift_bridge(swift_name = "tableCellFromJson")]
@@ -3104,6 +3222,16 @@ mod ffi {
         fn extracted_uri_from_json(json: String) -> Result<ExtractedUri, String>;
         #[swift_bridge(swift_name = "detectResponseFromJson")]
         fn detect_response_from_json(json: String) -> Result<DetectResponse, String>;
+        #[swift_bridge(swift_name = "extractionDiffFromJson")]
+        fn extraction_diff_from_json(json: String) -> Result<ExtractionDiff, String>;
+        #[swift_bridge(swift_name = "diffHunkFromJson")]
+        fn diff_hunk_from_json(json: String) -> Result<DiffHunk, String>;
+        #[swift_bridge(swift_name = "tableDiffFromJson")]
+        fn table_diff_from_json(json: String) -> Result<TableDiff, String>;
+        #[swift_bridge(swift_name = "embeddedChangesFromJson")]
+        fn embedded_changes_from_json(json: String) -> Result<EmbeddedChanges, String>;
+        #[swift_bridge(swift_name = "embeddedDiffFromJson")]
+        fn embedded_diff_from_json(json: String) -> Result<EmbeddedDiff, String>;
         #[swift_bridge(swift_name = "embeddingPresetFromJson")]
         fn embedding_preset_from_json(json: String) -> Result<EmbeddingPreset, String>;
         #[swift_bridge(swift_name = "yakeParamsFromJson")]
@@ -3196,6 +3324,12 @@ mod ffi {
         fn ocr_element_level_from_json(json: String) -> Result<OcrElementLevel, String>;
         #[swift_bridge(swift_name = "pageUnitTypeFromJson")]
         fn page_unit_type_from_json(json: String) -> Result<PageUnitType, String>;
+        #[swift_bridge(swift_name = "diffLineFromJson")]
+        fn diff_line_from_json(json: String) -> Result<DiffLine, String>;
+        #[swift_bridge(swift_name = "revisionKindFromJson")]
+        fn revision_kind_from_json(json: String) -> Result<RevisionKind, String>;
+        #[swift_bridge(swift_name = "revisionAnchorFromJson")]
+        fn revision_anchor_from_json(json: String) -> Result<RevisionAnchor, String>;
         #[swift_bridge(swift_name = "uriKindFromJson")]
         fn uri_kind_from_json(json: String) -> Result<UriKind, String>;
         #[swift_bridge(swift_name = "keywordAlgorithmFromJson")]
@@ -6404,6 +6538,7 @@ impl ExtractionResult {
         annotations: Option<Vec<PdfAnnotation>>,
         children: Option<Vec<ArchiveEntry>>,
         uris: Option<Vec<ExtractedUri>>,
+        revisions: Option<Vec<DocumentRevision>>,
         structured_output: Option<String>,
         code_intelligence: Option<String>,
         llm_usage: Option<Vec<LlmUsage>>,
@@ -6474,6 +6609,9 @@ impl ExtractionResult {
         }
         if let Some(v) = uris {
             __target.uris = Some(v.into_iter().map(|w| w.0).collect());
+        }
+        if let Some(v) = revisions {
+            __target.revisions = Some(v.into_iter().map(|w| w.0).collect());
         }
         if let Some(s) = structured_output {
             // Try JSON parse first (handles enum/object values); on parse failure
@@ -6609,6 +6747,12 @@ impl ExtractionResult {
             .uris
             .as_ref()
             .map(|v| v.iter().map(|elem| ExtractedUri(elem.clone())).collect())
+    }
+    pub fn revisions(&self) -> Option<Vec<DocumentRevision>> {
+        self.0
+            .revisions
+            .as_ref()
+            .map(|v| v.iter().map(|elem| DocumentRevision(elem.clone())).collect())
     }
     pub fn structured_output(&self) -> Option<String> {
         self.0
@@ -9508,6 +9652,74 @@ impl HierarchicalBlock {
     }
 }
 
+pub struct CellChange(pub kreuzberg::CellChange);
+impl CellChange {
+    pub fn row(&self) -> usize {
+        ::serde_json::to_value(&self.0.row)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn col(&self) -> usize {
+        ::serde_json::to_value(&self.0.col)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn from(&self) -> String {
+        self.0.from.clone()
+    }
+    pub fn to(&self) -> String {
+        self.0.to.clone()
+    }
+}
+
+pub struct DocumentRevision(pub kreuzberg::DocumentRevision);
+impl DocumentRevision {
+    pub fn revision_id(&self) -> String {
+        self.0.revision_id.clone()
+    }
+    pub fn author(&self) -> Option<String> {
+        self.0.author.clone()
+    }
+    pub fn timestamp(&self) -> Option<String> {
+        self.0.timestamp.clone()
+    }
+    pub fn kind(&self) -> String {
+        RevisionKind::from(self.0.kind.clone()).to_string()
+    }
+    pub fn anchor(&self) -> Option<String> {
+        self.0.anchor.clone().map(|w| RevisionAnchor::from(w).to_string())
+    }
+    pub fn delta(&self) -> RevisionDelta {
+        RevisionDelta(self.0.delta.clone())
+    }
+}
+
+pub struct RevisionDelta(pub kreuzberg::RevisionDelta);
+impl RevisionDelta {
+    pub fn new(content: Vec<DiffLine>, table_changes: Vec<CellChange>) -> RevisionDelta {
+        let mut __target: kreuzberg::RevisionDelta = ::std::default::Default::default();
+        // alef: content (Vec<>) contains enum elements — left at default
+        __target.table_changes = table_changes.into_iter().map(|w| w.0).collect();
+        RevisionDelta(__target)
+    }
+    pub fn content(&self) -> Vec<String> {
+        self.0
+            .content
+            .iter()
+            .map(|elem| DiffLine::from(elem.clone()).to_string())
+            .collect()
+    }
+    pub fn table_changes(&self) -> Vec<CellChange> {
+        self.0
+            .table_changes
+            .iter()
+            .map(|elem| CellChange(elem.clone()))
+            .collect()
+    }
+}
+
 pub struct Table(pub kreuzberg::Table);
 impl Table {
     pub fn new(cells: String, markdown: String, page_number: u32, bounding_box: Option<BoundingBox>) -> Table {
@@ -9621,6 +9833,143 @@ impl DetectResponse {
     }
     pub fn filename(&self) -> Option<String> {
         self.0.filename.clone()
+    }
+}
+
+pub struct DiffOptions(pub kreuzberg::DiffOptions);
+impl DiffOptions {
+    pub fn new(include_metadata: bool, include_embedded: bool, max_content_chars: Option<usize>) -> DiffOptions {
+        DiffOptions(kreuzberg::DiffOptions {
+            include_metadata,
+            include_embedded,
+            max_content_chars,
+        })
+    }
+    pub fn include_metadata(&self) -> bool {
+        ::serde_json::to_value(&self.0.include_metadata)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn include_embedded(&self) -> bool {
+        ::serde_json::to_value(&self.0.include_embedded)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn max_content_chars(&self) -> Option<usize> {
+        self.0.max_content_chars.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+}
+
+pub struct ExtractionDiff(pub kreuzberg::ExtractionDiff);
+impl ExtractionDiff {
+    pub fn content_diff(&self) -> Vec<DiffHunk> {
+        self.0.content_diff.iter().map(|elem| DiffHunk(elem.clone())).collect()
+    }
+    pub fn tables_added(&self) -> Vec<Table> {
+        self.0.tables_added.iter().map(|elem| Table(elem.clone())).collect()
+    }
+    pub fn tables_removed(&self) -> Vec<Table> {
+        self.0.tables_removed.iter().map(|elem| Table(elem.clone())).collect()
+    }
+    pub fn tables_changed(&self) -> Vec<TableDiff> {
+        self.0
+            .tables_changed
+            .iter()
+            .map(|elem| TableDiff(elem.clone()))
+            .collect()
+    }
+    pub fn metadata_changed(&self) -> String {
+        serde_json::to_string(&self.0.metadata_changed).unwrap_or_default()
+    }
+    pub fn embedded_changes(&self) -> EmbeddedChanges {
+        EmbeddedChanges(self.0.embedded_changes.clone())
+    }
+}
+
+pub struct DiffHunk(pub kreuzberg::DiffHunk);
+impl DiffHunk {
+    pub fn from_line(&self) -> usize {
+        ::serde_json::to_value(&self.0.from_line)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn from_count(&self) -> usize {
+        ::serde_json::to_value(&self.0.from_count)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn to_line(&self) -> usize {
+        ::serde_json::to_value(&self.0.to_line)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn to_count(&self) -> usize {
+        ::serde_json::to_value(&self.0.to_count)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn lines(&self) -> Vec<String> {
+        self.0
+            .lines
+            .iter()
+            .map(|elem| DiffLine::from(elem.clone()).to_string())
+            .collect()
+    }
+}
+
+pub struct TableDiff(pub kreuzberg::TableDiff);
+impl TableDiff {
+    pub fn from_index(&self) -> usize {
+        ::serde_json::to_value(&self.0.from_index)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn to_index(&self) -> usize {
+        ::serde_json::to_value(&self.0.to_index)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn cell_changes(&self) -> Vec<CellChange> {
+        self.0
+            .cell_changes
+            .iter()
+            .map(|elem| CellChange(elem.clone()))
+            .collect()
+    }
+}
+
+pub struct EmbeddedChanges(pub kreuzberg::EmbeddedChanges);
+impl EmbeddedChanges {
+    pub fn added(&self) -> Vec<ArchiveEntry> {
+        self.0.added.iter().map(|elem| ArchiveEntry(elem.clone())).collect()
+    }
+    pub fn removed(&self) -> Vec<ArchiveEntry> {
+        self.0.removed.iter().map(|elem| ArchiveEntry(elem.clone())).collect()
+    }
+    pub fn changed(&self) -> Vec<EmbeddedDiff> {
+        self.0.changed.iter().map(|elem| EmbeddedDiff(elem.clone())).collect()
+    }
+}
+
+pub struct EmbeddedDiff(pub kreuzberg::EmbeddedDiff);
+impl EmbeddedDiff {
+    pub fn path(&self) -> String {
+        self.0.path.clone()
+    }
+    pub fn diff(&self) -> ExtractionDiff {
+        ExtractionDiff(*self.0.diff.clone())
     }
 }
 
@@ -11322,6 +11671,93 @@ impl PageUnitType {
     }
 }
 
+pub enum DiffLine {
+    Context,
+    Added,
+    Removed,
+}
+
+impl From<kreuzberg::DiffLine> for DiffLine {
+    fn from(val: kreuzberg::DiffLine) -> Self {
+        match val {
+            kreuzberg::DiffLine::Context(..) => Self::Context,
+            kreuzberg::DiffLine::Added(..) => Self::Added,
+            kreuzberg::DiffLine::Removed(..) => Self::Removed,
+        }
+    }
+}
+
+impl DiffLine {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Context => "context".to_string(),
+            Self::Added => "added".to_string(),
+            Self::Removed => "removed".to_string(),
+        }
+    }
+}
+
+pub enum RevisionKind {
+    Insertion,
+    Deletion,
+    FormatChange,
+    Comment,
+}
+
+impl From<kreuzberg::RevisionKind> for RevisionKind {
+    fn from(val: kreuzberg::RevisionKind) -> Self {
+        match val {
+            kreuzberg::RevisionKind::Insertion => Self::Insertion,
+            kreuzberg::RevisionKind::Deletion => Self::Deletion,
+            kreuzberg::RevisionKind::FormatChange => Self::FormatChange,
+            kreuzberg::RevisionKind::Comment => Self::Comment,
+        }
+    }
+}
+
+impl RevisionKind {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Insertion => "insertion".to_string(),
+            Self::Deletion => "deletion".to_string(),
+            Self::FormatChange => "format_change".to_string(),
+            Self::Comment => "comment".to_string(),
+        }
+    }
+}
+
+pub enum RevisionAnchor {
+    Paragraph,
+    TableCell,
+    Page,
+    Slide,
+    Sheet,
+}
+
+impl From<kreuzberg::RevisionAnchor> for RevisionAnchor {
+    fn from(val: kreuzberg::RevisionAnchor) -> Self {
+        match val {
+            kreuzberg::RevisionAnchor::Paragraph { .. } => Self::Paragraph,
+            kreuzberg::RevisionAnchor::TableCell { .. } => Self::TableCell,
+            kreuzberg::RevisionAnchor::Page { .. } => Self::Page,
+            kreuzberg::RevisionAnchor::Slide { .. } => Self::Slide,
+            kreuzberg::RevisionAnchor::Sheet { .. } => Self::Sheet,
+        }
+    }
+}
+
+impl RevisionAnchor {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Paragraph => "paragraph".to_string(),
+            Self::TableCell => "table_cell".to_string(),
+            Self::Page => "page".to_string(),
+            Self::Slide => "slide".to_string(),
+            Self::Sheet => "sheet".to_string(),
+        }
+    }
+}
+
 pub enum UriKind {
     Hyperlink,
     Image,
@@ -11697,6 +12133,10 @@ pub fn list_validators() -> Result<Vec<String>, String> {
     kreuzberg::list_validators()
         .map_err(|e| e.to_string())
         .map(|v| v.into_iter().map(|s| s.to_string()).collect::<Vec<_>>())
+}
+
+pub fn compare(a: ExtractionResult, b: ExtractionResult, opts: DiffOptions) -> ExtractionDiff {
+    ExtractionDiff(kreuzberg::compare(&a.0, &b.0, &opts.0))
 }
 
 pub fn embed_texts_async(texts: Vec<String>, config: EmbeddingConfig) -> Result<String, String> {
@@ -12443,6 +12883,11 @@ pub fn ocr_extraction_result_from_json(json: String) -> Result<OcrExtractionResu
         .map(OcrExtractionResult)
         .map_err(|e| e.to_string())
 }
+pub fn diff_options_from_json(json: String) -> Result<DiffOptions, String> {
+    serde_json::from_str::<kreuzberg::DiffOptions>(&json)
+        .map(DiffOptions)
+        .map_err(|e| e.to_string())
+}
 pub fn cache_stats_from_json(json: String) -> Result<CacheStats, String> {
     serde_json::from_str::<kreuzberg::CacheStats>(&json)
         .map(CacheStats)
@@ -12968,6 +13413,21 @@ pub fn hierarchical_block_from_json(json: String) -> Result<HierarchicalBlock, S
         .map(HierarchicalBlock)
         .map_err(|e| e.to_string())
 }
+pub fn cell_change_from_json(json: String) -> Result<CellChange, String> {
+    serde_json::from_str::<kreuzberg::CellChange>(&json)
+        .map(CellChange)
+        .map_err(|e| e.to_string())
+}
+pub fn document_revision_from_json(json: String) -> Result<DocumentRevision, String> {
+    serde_json::from_str::<kreuzberg::DocumentRevision>(&json)
+        .map(DocumentRevision)
+        .map_err(|e| e.to_string())
+}
+pub fn revision_delta_from_json(json: String) -> Result<RevisionDelta, String> {
+    serde_json::from_str::<kreuzberg::RevisionDelta>(&json)
+        .map(RevisionDelta)
+        .map_err(|e| e.to_string())
+}
 pub fn table_from_json(json: String) -> Result<Table, String> {
     serde_json::from_str::<kreuzberg::Table>(&json)
         .map(Table)
@@ -12986,6 +13446,31 @@ pub fn extracted_uri_from_json(json: String) -> Result<ExtractedUri, String> {
 pub fn detect_response_from_json(json: String) -> Result<DetectResponse, String> {
     serde_json::from_str::<kreuzberg::api::DetectResponse>(&json)
         .map(DetectResponse)
+        .map_err(|e| e.to_string())
+}
+pub fn extraction_diff_from_json(json: String) -> Result<ExtractionDiff, String> {
+    serde_json::from_str::<kreuzberg::ExtractionDiff>(&json)
+        .map(ExtractionDiff)
+        .map_err(|e| e.to_string())
+}
+pub fn diff_hunk_from_json(json: String) -> Result<DiffHunk, String> {
+    serde_json::from_str::<kreuzberg::DiffHunk>(&json)
+        .map(DiffHunk)
+        .map_err(|e| e.to_string())
+}
+pub fn table_diff_from_json(json: String) -> Result<TableDiff, String> {
+    serde_json::from_str::<kreuzberg::TableDiff>(&json)
+        .map(TableDiff)
+        .map_err(|e| e.to_string())
+}
+pub fn embedded_changes_from_json(json: String) -> Result<EmbeddedChanges, String> {
+    serde_json::from_str::<kreuzberg::EmbeddedChanges>(&json)
+        .map(EmbeddedChanges)
+        .map_err(|e| e.to_string())
+}
+pub fn embedded_diff_from_json(json: String) -> Result<EmbeddedDiff, String> {
+    serde_json::from_str::<kreuzberg::EmbeddedDiff>(&json)
+        .map(EmbeddedDiff)
         .map_err(|e| e.to_string())
 }
 pub fn embedding_preset_from_json(json: String) -> Result<EmbeddingPreset, String> {
@@ -13211,6 +13696,21 @@ pub fn ocr_element_level_from_json(json: String) -> Result<OcrElementLevel, Stri
 pub fn page_unit_type_from_json(json: String) -> Result<PageUnitType, String> {
     serde_json::from_str::<kreuzberg::PageUnitType>(&json)
         .map(PageUnitType::from)
+        .map_err(|e| e.to_string())
+}
+pub fn diff_line_from_json(json: String) -> Result<DiffLine, String> {
+    serde_json::from_str::<kreuzberg::DiffLine>(&json)
+        .map(DiffLine::from)
+        .map_err(|e| e.to_string())
+}
+pub fn revision_kind_from_json(json: String) -> Result<RevisionKind, String> {
+    serde_json::from_str::<kreuzberg::RevisionKind>(&json)
+        .map(RevisionKind::from)
+        .map_err(|e| e.to_string())
+}
+pub fn revision_anchor_from_json(json: String) -> Result<RevisionAnchor, String> {
+    serde_json::from_str::<kreuzberg::RevisionAnchor>(&json)
+        .map(RevisionAnchor::from)
         .map_err(|e| e.to_string())
 }
 pub fn uri_kind_from_json(json: String) -> Result<UriKind, String> {

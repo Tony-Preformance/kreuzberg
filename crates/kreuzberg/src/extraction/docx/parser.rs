@@ -51,6 +51,8 @@ pub(crate) struct Document {
     pub drawings: Vec<super::drawing::Drawing>,
     /// Image relationships (rId → target path) for image extraction.
     pub image_relationships: AHashMap<String, String>,
+    /// Track-changes revisions captured from `w:ins`, `w:del`, and `w:rPrChange` elements.
+    pub revisions: Vec<crate::types::revisions::DocumentRevision>,
 }
 
 #[cfg_attr(alef, alef(skip))]
@@ -182,6 +184,42 @@ fn get_val_attr_string(e: &BytesStart) -> Option<String> {
         }
     }
     None
+}
+
+/// Collect the standard revision-mark attributes from a `w:ins`, `w:del`, or
+/// `w:rPrChange` start element: `w:id`, `w:author`, and `w:date`.
+///
+/// Returns `(id_opt, author_opt, date_opt)` where `id_opt` is the raw string
+/// value of the `w:id` attribute (a numeric string like `"42"`).
+fn collect_revision_attrs(e: &BytesStart) -> (Option<String>, Option<String>, Option<String>) {
+    let mut id: Option<String> = None;
+    let mut author: Option<String> = None;
+    let mut date: Option<String> = None;
+    for attr in e.attributes().flatten() {
+        match attr.key.as_ref() {
+            b"w:id" => {
+                id = std::str::from_utf8(&attr.value).ok().map(String::from);
+            }
+            b"w:author" => {
+                author = std::str::from_utf8(&attr.value).ok().map(String::from);
+                if let Some(ref a) = author {
+                    if a.is_empty() {
+                        author = None;
+                    }
+                }
+            }
+            b"w:date" => {
+                date = std::str::from_utf8(&attr.value).ok().map(String::from);
+                if let Some(ref d) = date {
+                    if d.is_empty() {
+                        date = None;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    (id, author, date)
 }
 
 /// Map heading style name to markdown heading level (fallback for docs without styles.xml).
@@ -1341,6 +1379,8 @@ impl<R: Read + Seek> DocxParser<R> {
         document: &mut Document,
         budget: &mut SecurityBudget,
     ) -> Result<(), DocxParseError> {
+        use crate::types::revisions::{DiffLine, DocumentRevision, RevisionAnchor, RevisionDelta, RevisionKind};
+
         let mut reader = Reader::from_str(xml);
         reader.config_mut().trim_text(false);
 
@@ -1352,6 +1392,24 @@ impl<R: Read + Seek> DocxParser<R> {
         let mut current_hyperlink_url: Option<String> = None;
         let mut table_stack: Vec<TableContext> = Vec::new();
 
+        // Revision tracking state.
+        //
+        // `revision_kind` is `Some` whenever the parser is inside a `w:ins`,
+        // `w:del`, or `w:rPrChange` element.  The inner text is accumulated in
+        // `revision_text` (for insertions/deletions; format changes carry no
+        // text delta).  `revision_id_counter` provides a synthetic fallback when
+        // the `w:id` attribute is absent.
+        let mut revision_kind: Option<RevisionKind> = None;
+        let mut revision_attrs: (Option<String>, Option<String>, Option<String>) = (None, None, None);
+        let mut revision_text = String::new();
+        let mut revision_id_counter: usize = 0;
+        // Track `w:delText` — text inside deleted runs (excluded from main content).
+        let mut in_del_text = false;
+        // Index of the paragraph that is currently being built (= the index it will
+        // have in `document.paragraphs` once `w:p` closes and it is committed).
+        // Set to `document.paragraphs.len()` each time a top-level `w:p` opens.
+        let mut current_paragraph_index: usize = 0;
+
         loop {
             budget.step()?;
             match reader.read_event_into(&mut buf) {
@@ -1362,6 +1420,9 @@ impl<R: Read + Seek> DocxParser<R> {
                             if let Some(ctx) = table_stack.last_mut() {
                                 ctx.paragraph = Some(Paragraph::new());
                             } else {
+                                // Record which index this paragraph will receive when committed,
+                                // so revision anchors inside the paragraph can reference it.
+                                current_paragraph_index = document.paragraphs.len();
                                 current_paragraph = Some(Paragraph::new());
                             }
                         }
@@ -1519,6 +1580,41 @@ impl<R: Read + Seek> DocxParser<R> {
                             let sect_props = super::section::parse_section_properties_streaming(&mut reader);
                             document.sections.push(sect_props);
                         }
+                        // Track-changes: insertion mark.
+                        //
+                        // Text inside `w:ins` children is standard `w:t` content and will be
+                        // processed by the normal flow — giving the accepted-changes view.
+                        // We additionally capture it in `revision_text` for the audit trail.
+                        b"w:ins" => {
+                            revision_kind = Some(RevisionKind::Insertion);
+                            revision_attrs = collect_revision_attrs(e);
+                            revision_text.clear();
+                        }
+                        // Track-changes: deletion mark.
+                        //
+                        // Deleted text is in `w:delText` (not `w:t`) so it is already
+                        // excluded from the accepted-changes output.  We capture it here.
+                        b"w:del" => {
+                            revision_kind = Some(RevisionKind::Deletion);
+                            revision_attrs = collect_revision_attrs(e);
+                            revision_text.clear();
+                        }
+                        // Track-changes: run-property (formatting) change.
+                        //
+                        // No text delta — the format details are carried in the OOXML attributes.
+                        // We record the revision with an empty delta for now.
+                        // TODO: enrich with before/after property diff in a follow-up.
+                        b"w:rPrChange" => {
+                            if revision_kind.is_none() {
+                                revision_kind = Some(RevisionKind::FormatChange);
+                                revision_attrs = collect_revision_attrs(e);
+                                revision_text.clear();
+                            }
+                        }
+                        // Deleted text content — inside `w:del` → `w:r` → `w:delText`.
+                        b"w:delText" => {
+                            in_del_text = true;
+                        }
                         _ => {}
                     }
                 }
@@ -1611,6 +1707,16 @@ impl<R: Read + Seek> DocxParser<R> {
                         budget.check_entity(&text)?;
                         budget.account_text(text.len())?;
                         run.text.push_str(&text);
+                        // Also accumulate text for the insertion revision delta.
+                        if revision_kind == Some(RevisionKind::Insertion) {
+                            revision_text.push_str(&text);
+                        }
+                    } else if in_del_text {
+                        // Deleted text lives in w:delText (not w:t); accumulate for deletion delta.
+                        let text = e.decode()?;
+                        budget.check_entity(&text)?;
+                        budget.account_text(text.len())?;
+                        revision_text.push_str(&text);
                     }
                 }
                 Ok(Event::End(ref e)) => {
@@ -1690,6 +1796,85 @@ impl<R: Read + Seek> DocxParser<R> {
                         }
                         b"w:hyperlink" => {
                             current_hyperlink_url = None;
+                        }
+                        // Commit an insertion revision when the w:ins element closes.
+                        b"w:ins" if revision_kind == Some(RevisionKind::Insertion) => {
+                            let (id_opt, author_opt, date_opt) =
+                                (revision_attrs.0.take(), revision_attrs.1.take(), revision_attrs.2.take());
+                            let revision_id = id_opt.unwrap_or_else(|| {
+                                let fallback = format!("docx-ins-{}", revision_id_counter);
+                                revision_id_counter += 1;
+                                fallback
+                            });
+                            let delta = if revision_text.is_empty() {
+                                RevisionDelta::default()
+                            } else {
+                                RevisionDelta {
+                                    content: vec![DiffLine::Added(std::mem::take(&mut revision_text))],
+                                    table_changes: vec![],
+                                }
+                            };
+                            document.revisions.push(DocumentRevision {
+                                revision_id,
+                                author: author_opt,
+                                timestamp: date_opt,
+                                kind: RevisionKind::Insertion,
+                                anchor: Some(RevisionAnchor::Paragraph { index: current_paragraph_index }),
+                                delta,
+                            });
+                            revision_kind = None;
+                            revision_text.clear();
+                        }
+                        // Commit a deletion revision when the w:del element closes.
+                        b"w:del" if revision_kind == Some(RevisionKind::Deletion) => {
+                            let (id_opt, author_opt, date_opt) =
+                                (revision_attrs.0.take(), revision_attrs.1.take(), revision_attrs.2.take());
+                            let revision_id = id_opt.unwrap_or_else(|| {
+                                let fallback = format!("docx-del-{}", revision_id_counter);
+                                revision_id_counter += 1;
+                                fallback
+                            });
+                            let delta = if revision_text.is_empty() {
+                                RevisionDelta::default()
+                            } else {
+                                RevisionDelta {
+                                    content: vec![DiffLine::Removed(std::mem::take(&mut revision_text))],
+                                    table_changes: vec![],
+                                }
+                            };
+                            document.revisions.push(DocumentRevision {
+                                revision_id,
+                                author: author_opt,
+                                timestamp: date_opt,
+                                kind: RevisionKind::Deletion,
+                                anchor: Some(RevisionAnchor::Paragraph { index: current_paragraph_index }),
+                                delta,
+                            });
+                            revision_kind = None;
+                            revision_text.clear();
+                        }
+                        // Commit a format-change revision when w:rPrChange closes.
+                        b"w:rPrChange" if revision_kind == Some(RevisionKind::FormatChange) => {
+                            let (id_opt, author_opt, date_opt) =
+                                (revision_attrs.0.take(), revision_attrs.1.take(), revision_attrs.2.take());
+                            let revision_id = id_opt.unwrap_or_else(|| {
+                                let fallback = format!("docx-fmt-{}", revision_id_counter);
+                                revision_id_counter += 1;
+                                fallback
+                            });
+                            // TODO: capture before/after property diff (font, size, colour, etc.)
+                            document.revisions.push(DocumentRevision {
+                                revision_id,
+                                author: author_opt,
+                                timestamp: date_opt,
+                                kind: RevisionKind::FormatChange,
+                                anchor: Some(RevisionAnchor::Paragraph { index: current_paragraph_index }),
+                                delta: RevisionDelta::default(),
+                            });
+                            revision_kind = None;
+                        }
+                        b"w:delText" => {
+                            in_del_text = false;
                         }
                         _ => {}
                     }

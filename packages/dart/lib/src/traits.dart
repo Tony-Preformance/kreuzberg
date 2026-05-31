@@ -502,9 +502,9 @@ abstract class EmbeddingBackend {
 /// ```dart
 /// class MyDocumentExtractor implements DocumentExtractor {
 ///   @override
-///   Future<InternalDocument> extractBytes(...) async { ... }
+///   Future<InternalDocumentBridge> extractBytes(...) async { ... }
 ///   @override
-///   Future<InternalDocument> extractFile(...) async { ... }
+///   Future<InternalDocumentBridge> extractFile(...) async { ... }
 ///   @override
 ///   Future<List<String>> supportedMimeTypes(...) async { ... }
 ///   @override

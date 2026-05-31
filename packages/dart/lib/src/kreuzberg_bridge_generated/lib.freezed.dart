@@ -1020,6 +1020,401 @@ as String,
 }
 
 /// @nodoc
+mixin _$DiffLine {
+
+ String get field0;
+/// Create a copy of DiffLine
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DiffLineCopyWith<DiffLine> get copyWith => _$DiffLineCopyWithImpl<DiffLine>(this as DiffLine, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiffLine&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'DiffLine(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DiffLineCopyWith<$Res>  {
+  factory $DiffLineCopyWith(DiffLine value, $Res Function(DiffLine) _then) = _$DiffLineCopyWithImpl;
+@useResult
+$Res call({
+ String field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$DiffLineCopyWithImpl<$Res>
+    implements $DiffLineCopyWith<$Res> {
+  _$DiffLineCopyWithImpl(this._self, this._then);
+
+  final DiffLine _self;
+  final $Res Function(DiffLine) _then;
+
+/// Create a copy of DiffLine
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? field0 = null,}) {
+  return _then(_self.copyWith(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [DiffLine].
+extension DiffLinePatterns on DiffLine {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( DiffLine_Context value)?  context,TResult Function( DiffLine_Added value)?  added,TResult Function( DiffLine_Removed value)?  removed,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case DiffLine_Context() when context != null:
+return context(_that);case DiffLine_Added() when added != null:
+return added(_that);case DiffLine_Removed() when removed != null:
+return removed(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( DiffLine_Context value)  context,required TResult Function( DiffLine_Added value)  added,required TResult Function( DiffLine_Removed value)  removed,}){
+final _that = this;
+switch (_that) {
+case DiffLine_Context():
+return context(_that);case DiffLine_Added():
+return added(_that);case DiffLine_Removed():
+return removed(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( DiffLine_Context value)?  context,TResult? Function( DiffLine_Added value)?  added,TResult? Function( DiffLine_Removed value)?  removed,}){
+final _that = this;
+switch (_that) {
+case DiffLine_Context() when context != null:
+return context(_that);case DiffLine_Added() when added != null:
+return added(_that);case DiffLine_Removed() when removed != null:
+return removed(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  context,TResult Function( String field0)?  added,TResult Function( String field0)?  removed,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case DiffLine_Context() when context != null:
+return context(_that.field0);case DiffLine_Added() when added != null:
+return added(_that.field0);case DiffLine_Removed() when removed != null:
+return removed(_that.field0);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  context,required TResult Function( String field0)  added,required TResult Function( String field0)  removed,}) {final _that = this;
+switch (_that) {
+case DiffLine_Context():
+return context(_that.field0);case DiffLine_Added():
+return added(_that.field0);case DiffLine_Removed():
+return removed(_that.field0);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  context,TResult? Function( String field0)?  added,TResult? Function( String field0)?  removed,}) {final _that = this;
+switch (_that) {
+case DiffLine_Context() when context != null:
+return context(_that.field0);case DiffLine_Added() when added != null:
+return added(_that.field0);case DiffLine_Removed() when removed != null:
+return removed(_that.field0);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class DiffLine_Context extends DiffLine {
+  const DiffLine_Context({required this.field0}): super._();
+  
+
+@override final  String field0;
+
+/// Create a copy of DiffLine
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DiffLine_ContextCopyWith<DiffLine_Context> get copyWith => _$DiffLine_ContextCopyWithImpl<DiffLine_Context>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiffLine_Context&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'DiffLine.context(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DiffLine_ContextCopyWith<$Res> implements $DiffLineCopyWith<$Res> {
+  factory $DiffLine_ContextCopyWith(DiffLine_Context value, $Res Function(DiffLine_Context) _then) = _$DiffLine_ContextCopyWithImpl;
+@override @useResult
+$Res call({
+ String field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$DiffLine_ContextCopyWithImpl<$Res>
+    implements $DiffLine_ContextCopyWith<$Res> {
+  _$DiffLine_ContextCopyWithImpl(this._self, this._then);
+
+  final DiffLine_Context _self;
+  final $Res Function(DiffLine_Context) _then;
+
+/// Create a copy of DiffLine
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(DiffLine_Context(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class DiffLine_Added extends DiffLine {
+  const DiffLine_Added({required this.field0}): super._();
+  
+
+@override final  String field0;
+
+/// Create a copy of DiffLine
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DiffLine_AddedCopyWith<DiffLine_Added> get copyWith => _$DiffLine_AddedCopyWithImpl<DiffLine_Added>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiffLine_Added&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'DiffLine.added(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DiffLine_AddedCopyWith<$Res> implements $DiffLineCopyWith<$Res> {
+  factory $DiffLine_AddedCopyWith(DiffLine_Added value, $Res Function(DiffLine_Added) _then) = _$DiffLine_AddedCopyWithImpl;
+@override @useResult
+$Res call({
+ String field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$DiffLine_AddedCopyWithImpl<$Res>
+    implements $DiffLine_AddedCopyWith<$Res> {
+  _$DiffLine_AddedCopyWithImpl(this._self, this._then);
+
+  final DiffLine_Added _self;
+  final $Res Function(DiffLine_Added) _then;
+
+/// Create a copy of DiffLine
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(DiffLine_Added(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class DiffLine_Removed extends DiffLine {
+  const DiffLine_Removed({required this.field0}): super._();
+  
+
+@override final  String field0;
+
+/// Create a copy of DiffLine
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DiffLine_RemovedCopyWith<DiffLine_Removed> get copyWith => _$DiffLine_RemovedCopyWithImpl<DiffLine_Removed>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DiffLine_Removed&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'DiffLine.removed(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DiffLine_RemovedCopyWith<$Res> implements $DiffLineCopyWith<$Res> {
+  factory $DiffLine_RemovedCopyWith(DiffLine_Removed value, $Res Function(DiffLine_Removed) _then) = _$DiffLine_RemovedCopyWithImpl;
+@override @useResult
+$Res call({
+ String field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$DiffLine_RemovedCopyWithImpl<$Res>
+    implements $DiffLine_RemovedCopyWith<$Res> {
+  _$DiffLine_RemovedCopyWithImpl(this._self, this._then);
+
+  final DiffLine_Removed _self;
+  final $Res Function(DiffLine_Removed) _then;
+
+/// Create a copy of DiffLine
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(DiffLine_Removed(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$EmbeddingModelType {
 
 
@@ -5307,6 +5702,528 @@ class _$OutputFormat_CustomCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(OutputFormat_Custom(
 field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$RevisionAnchor {
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RevisionAnchor);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'RevisionAnchor()';
+}
+
+
+}
+
+/// @nodoc
+class $RevisionAnchorCopyWith<$Res>  {
+$RevisionAnchorCopyWith(RevisionAnchor _, $Res Function(RevisionAnchor) __);
+}
+
+
+/// Adds pattern-matching-related methods to [RevisionAnchor].
+extension RevisionAnchorPatterns on RevisionAnchor {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RevisionAnchor_Paragraph value)?  paragraph,TResult Function( RevisionAnchor_TableCell value)?  tableCell,TResult Function( RevisionAnchor_Page value)?  page,TResult Function( RevisionAnchor_Slide value)?  slide,TResult Function( RevisionAnchor_Sheet value)?  sheet,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case RevisionAnchor_Paragraph() when paragraph != null:
+return paragraph(_that);case RevisionAnchor_TableCell() when tableCell != null:
+return tableCell(_that);case RevisionAnchor_Page() when page != null:
+return page(_that);case RevisionAnchor_Slide() when slide != null:
+return slide(_that);case RevisionAnchor_Sheet() when sheet != null:
+return sheet(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RevisionAnchor_Paragraph value)  paragraph,required TResult Function( RevisionAnchor_TableCell value)  tableCell,required TResult Function( RevisionAnchor_Page value)  page,required TResult Function( RevisionAnchor_Slide value)  slide,required TResult Function( RevisionAnchor_Sheet value)  sheet,}){
+final _that = this;
+switch (_that) {
+case RevisionAnchor_Paragraph():
+return paragraph(_that);case RevisionAnchor_TableCell():
+return tableCell(_that);case RevisionAnchor_Page():
+return page(_that);case RevisionAnchor_Slide():
+return slide(_that);case RevisionAnchor_Sheet():
+return sheet(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RevisionAnchor_Paragraph value)?  paragraph,TResult? Function( RevisionAnchor_TableCell value)?  tableCell,TResult? Function( RevisionAnchor_Page value)?  page,TResult? Function( RevisionAnchor_Slide value)?  slide,TResult? Function( RevisionAnchor_Sheet value)?  sheet,}){
+final _that = this;
+switch (_that) {
+case RevisionAnchor_Paragraph() when paragraph != null:
+return paragraph(_that);case RevisionAnchor_TableCell() when tableCell != null:
+return tableCell(_that);case RevisionAnchor_Page() when page != null:
+return page(_that);case RevisionAnchor_Slide() when slide != null:
+return slide(_that);case RevisionAnchor_Sheet() when sheet != null:
+return sheet(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PlatformInt64 index)?  paragraph,TResult Function( PlatformInt64 row,  PlatformInt64 col,  PlatformInt64 tableIndex)?  tableCell,TResult Function( PlatformInt64 index)?  page,TResult Function( PlatformInt64 index)?  slide,TResult Function( PlatformInt64 index,  String name)?  sheet,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case RevisionAnchor_Paragraph() when paragraph != null:
+return paragraph(_that.index);case RevisionAnchor_TableCell() when tableCell != null:
+return tableCell(_that.row,_that.col,_that.tableIndex);case RevisionAnchor_Page() when page != null:
+return page(_that.index);case RevisionAnchor_Slide() when slide != null:
+return slide(_that.index);case RevisionAnchor_Sheet() when sheet != null:
+return sheet(_that.index,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PlatformInt64 index)  paragraph,required TResult Function( PlatformInt64 row,  PlatformInt64 col,  PlatformInt64 tableIndex)  tableCell,required TResult Function( PlatformInt64 index)  page,required TResult Function( PlatformInt64 index)  slide,required TResult Function( PlatformInt64 index,  String name)  sheet,}) {final _that = this;
+switch (_that) {
+case RevisionAnchor_Paragraph():
+return paragraph(_that.index);case RevisionAnchor_TableCell():
+return tableCell(_that.row,_that.col,_that.tableIndex);case RevisionAnchor_Page():
+return page(_that.index);case RevisionAnchor_Slide():
+return slide(_that.index);case RevisionAnchor_Sheet():
+return sheet(_that.index,_that.name);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PlatformInt64 index)?  paragraph,TResult? Function( PlatformInt64 row,  PlatformInt64 col,  PlatformInt64 tableIndex)?  tableCell,TResult? Function( PlatformInt64 index)?  page,TResult? Function( PlatformInt64 index)?  slide,TResult? Function( PlatformInt64 index,  String name)?  sheet,}) {final _that = this;
+switch (_that) {
+case RevisionAnchor_Paragraph() when paragraph != null:
+return paragraph(_that.index);case RevisionAnchor_TableCell() when tableCell != null:
+return tableCell(_that.row,_that.col,_that.tableIndex);case RevisionAnchor_Page() when page != null:
+return page(_that.index);case RevisionAnchor_Slide() when slide != null:
+return slide(_that.index);case RevisionAnchor_Sheet() when sheet != null:
+return sheet(_that.index,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class RevisionAnchor_Paragraph extends RevisionAnchor {
+  const RevisionAnchor_Paragraph({required this.index}): super._();
+  
+
+/// Zero-based index of the paragraph in document order.
+ final  PlatformInt64 index;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RevisionAnchor_ParagraphCopyWith<RevisionAnchor_Paragraph> get copyWith => _$RevisionAnchor_ParagraphCopyWithImpl<RevisionAnchor_Paragraph>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RevisionAnchor_Paragraph&&(identical(other.index, index) || other.index == index));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,index);
+
+@override
+String toString() {
+  return 'RevisionAnchor.paragraph(index: $index)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RevisionAnchor_ParagraphCopyWith<$Res> implements $RevisionAnchorCopyWith<$Res> {
+  factory $RevisionAnchor_ParagraphCopyWith(RevisionAnchor_Paragraph value, $Res Function(RevisionAnchor_Paragraph) _then) = _$RevisionAnchor_ParagraphCopyWithImpl;
+@useResult
+$Res call({
+ PlatformInt64 index
+});
+
+
+
+
+}
+/// @nodoc
+class _$RevisionAnchor_ParagraphCopyWithImpl<$Res>
+    implements $RevisionAnchor_ParagraphCopyWith<$Res> {
+  _$RevisionAnchor_ParagraphCopyWithImpl(this._self, this._then);
+
+  final RevisionAnchor_Paragraph _self;
+  final $Res Function(RevisionAnchor_Paragraph) _then;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? index = null,}) {
+  return _then(RevisionAnchor_Paragraph(
+index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RevisionAnchor_TableCell extends RevisionAnchor {
+  const RevisionAnchor_TableCell({required this.row, required this.col, required this.tableIndex}): super._();
+  
+
+/// Zero-based row index within the table.
+ final  PlatformInt64 row;
+/// Zero-based column index within the table.
+ final  PlatformInt64 col;
+/// Zero-based index of the table in document order.
+ final  PlatformInt64 tableIndex;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RevisionAnchor_TableCellCopyWith<RevisionAnchor_TableCell> get copyWith => _$RevisionAnchor_TableCellCopyWithImpl<RevisionAnchor_TableCell>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RevisionAnchor_TableCell&&(identical(other.row, row) || other.row == row)&&(identical(other.col, col) || other.col == col)&&(identical(other.tableIndex, tableIndex) || other.tableIndex == tableIndex));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,row,col,tableIndex);
+
+@override
+String toString() {
+  return 'RevisionAnchor.tableCell(row: $row, col: $col, tableIndex: $tableIndex)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RevisionAnchor_TableCellCopyWith<$Res> implements $RevisionAnchorCopyWith<$Res> {
+  factory $RevisionAnchor_TableCellCopyWith(RevisionAnchor_TableCell value, $Res Function(RevisionAnchor_TableCell) _then) = _$RevisionAnchor_TableCellCopyWithImpl;
+@useResult
+$Res call({
+ PlatformInt64 row, PlatformInt64 col, PlatformInt64 tableIndex
+});
+
+
+
+
+}
+/// @nodoc
+class _$RevisionAnchor_TableCellCopyWithImpl<$Res>
+    implements $RevisionAnchor_TableCellCopyWith<$Res> {
+  _$RevisionAnchor_TableCellCopyWithImpl(this._self, this._then);
+
+  final RevisionAnchor_TableCell _self;
+  final $Res Function(RevisionAnchor_TableCell) _then;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? row = null,Object? col = null,Object? tableIndex = null,}) {
+  return _then(RevisionAnchor_TableCell(
+row: null == row ? _self.row : row // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,col: null == col ? _self.col : col // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,tableIndex: null == tableIndex ? _self.tableIndex : tableIndex // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RevisionAnchor_Page extends RevisionAnchor {
+  const RevisionAnchor_Page({required this.index}): super._();
+  
+
+/// Zero-based page index.
+ final  PlatformInt64 index;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RevisionAnchor_PageCopyWith<RevisionAnchor_Page> get copyWith => _$RevisionAnchor_PageCopyWithImpl<RevisionAnchor_Page>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RevisionAnchor_Page&&(identical(other.index, index) || other.index == index));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,index);
+
+@override
+String toString() {
+  return 'RevisionAnchor.page(index: $index)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RevisionAnchor_PageCopyWith<$Res> implements $RevisionAnchorCopyWith<$Res> {
+  factory $RevisionAnchor_PageCopyWith(RevisionAnchor_Page value, $Res Function(RevisionAnchor_Page) _then) = _$RevisionAnchor_PageCopyWithImpl;
+@useResult
+$Res call({
+ PlatformInt64 index
+});
+
+
+
+
+}
+/// @nodoc
+class _$RevisionAnchor_PageCopyWithImpl<$Res>
+    implements $RevisionAnchor_PageCopyWith<$Res> {
+  _$RevisionAnchor_PageCopyWithImpl(this._self, this._then);
+
+  final RevisionAnchor_Page _self;
+  final $Res Function(RevisionAnchor_Page) _then;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? index = null,}) {
+  return _then(RevisionAnchor_Page(
+index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RevisionAnchor_Slide extends RevisionAnchor {
+  const RevisionAnchor_Slide({required this.index}): super._();
+  
+
+/// Zero-based slide index.
+ final  PlatformInt64 index;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RevisionAnchor_SlideCopyWith<RevisionAnchor_Slide> get copyWith => _$RevisionAnchor_SlideCopyWithImpl<RevisionAnchor_Slide>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RevisionAnchor_Slide&&(identical(other.index, index) || other.index == index));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,index);
+
+@override
+String toString() {
+  return 'RevisionAnchor.slide(index: $index)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RevisionAnchor_SlideCopyWith<$Res> implements $RevisionAnchorCopyWith<$Res> {
+  factory $RevisionAnchor_SlideCopyWith(RevisionAnchor_Slide value, $Res Function(RevisionAnchor_Slide) _then) = _$RevisionAnchor_SlideCopyWithImpl;
+@useResult
+$Res call({
+ PlatformInt64 index
+});
+
+
+
+
+}
+/// @nodoc
+class _$RevisionAnchor_SlideCopyWithImpl<$Res>
+    implements $RevisionAnchor_SlideCopyWith<$Res> {
+  _$RevisionAnchor_SlideCopyWithImpl(this._self, this._then);
+
+  final RevisionAnchor_Slide _self;
+  final $Res Function(RevisionAnchor_Slide) _then;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? index = null,}) {
+  return _then(RevisionAnchor_Slide(
+index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RevisionAnchor_Sheet extends RevisionAnchor {
+  const RevisionAnchor_Sheet({required this.index, required this.name}): super._();
+  
+
+/// Zero-based sheet index.
+ final  PlatformInt64 index;
+/// Sheet display name when available.
+ final  String name;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RevisionAnchor_SheetCopyWith<RevisionAnchor_Sheet> get copyWith => _$RevisionAnchor_SheetCopyWithImpl<RevisionAnchor_Sheet>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RevisionAnchor_Sheet&&(identical(other.index, index) || other.index == index)&&(identical(other.name, name) || other.name == name));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,index,name);
+
+@override
+String toString() {
+  return 'RevisionAnchor.sheet(index: $index, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RevisionAnchor_SheetCopyWith<$Res> implements $RevisionAnchorCopyWith<$Res> {
+  factory $RevisionAnchor_SheetCopyWith(RevisionAnchor_Sheet value, $Res Function(RevisionAnchor_Sheet) _then) = _$RevisionAnchor_SheetCopyWithImpl;
+@useResult
+$Res call({
+ PlatformInt64 index, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$RevisionAnchor_SheetCopyWithImpl<$Res>
+    implements $RevisionAnchor_SheetCopyWith<$Res> {
+  _$RevisionAnchor_SheetCopyWithImpl(this._self, this._then);
+
+  final RevisionAnchor_Sheet _self;
+  final $Res Function(RevisionAnchor_Sheet) _then;
+
+/// Create a copy of RevisionAnchor
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? index = null,Object? name = null,}) {
+  return _then(RevisionAnchor_Sheet(
+index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

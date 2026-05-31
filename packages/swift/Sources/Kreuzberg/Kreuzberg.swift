@@ -4406,6 +4406,151 @@ internal extension HierarchicalBlock {
     }
 }
 
+/// A single changed cell within a table.
+///
+/// Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+/// reference it unconditionally, without requiring the `diff` Cargo feature.
+/// `crate::diff` re-exports this type verbatim.
+public struct CellChange: Codable, Sendable, Hashable {
+    /// Zero-based row index.
+    public let row: UInt
+    /// Zero-based column index.
+    public let col: UInt
+    /// Value before the change.
+    public let from: String
+    /// Value after the change.
+    public let to: String
+    public init(row: UInt, col: UInt, from: String, to: String) {
+        self.row = row
+        self.col = col
+        self.from = from
+        self.to = to
+    }
+}
+
+// MARK: - Internal FFI conversions for CellChange
+internal extension CellChange {
+    init(_ rb: RustBridge.CellChangeRef) throws {
+        self.row = rb.row()
+        self.col = rb.col()
+        self.from = rb.from().toString()
+        self.to = rb.to().toString()
+    }
+    func intoRust() throws -> RustBridge.CellChange {
+        let data = try JSONEncoder().encode(self)
+        let json = String(data: data, encoding: .utf8) ?? "{}"
+        return try RustBridge.cellChangeFromJson(json)
+    }
+}
+
+/// A single tracked change embedded in a document.
+///
+/// Populated by per-format extractors that understand change-tracking metadata
+/// (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every
+/// extractor defaults to `ExtractionResult.revisions = None` until a
+/// format-specific implementation is added.
+public struct DocumentRevision: Codable, Sendable, Hashable {
+    /// Format-specific revision identifier.
+    ///
+    /// For DOCX this is the `w:id` attribute value on the change element
+    /// (e.g. `"42"`). When the attribute is absent a synthetic fallback is
+    /// generated (`"docx-ins-0"`, `"docx-del-3"`, …).
+    public let revisionId: String
+    /// Display name of the author who made this change, when available.
+    public let author: String?
+    /// ISO-8601 timestamp of the change, when available.
+    ///
+    /// Stored as a plain string so this type remains FFI-friendly and
+    /// unconditionally available without the `chrono` optional dep.
+    /// DOCX populates this from the `w:date` attribute (e.g.
+    /// `"2024-03-15T10:30:00Z"`).
+    public let timestamp: String?
+    /// Semantic kind of this revision.
+    public let kind: RevisionKind
+    /// Best-effort document location for this revision.
+    ///
+    /// Resolution is format-dependent and may be `None` when the location
+    /// cannot be determined (e.g. changes inside table cells before
+    /// table-cell anchor support is added).
+    public let anchor: RevisionAnchor?
+    /// The content changes that make up this revision.
+    public let delta: RevisionDelta
+    public init(revisionId: String, author: String? = nil, timestamp: String? = nil, kind: RevisionKind, anchor: RevisionAnchor? = nil, delta: RevisionDelta) {
+        self.revisionId = revisionId
+        self.author = author
+        self.timestamp = timestamp
+        self.kind = kind
+        self.anchor = anchor
+        self.delta = delta
+    }
+    private enum CodingKeys: String, CodingKey {
+        case revisionId = "revision_id"
+        case author = "author"
+        case timestamp = "timestamp"
+        case kind = "kind"
+        case anchor = "anchor"
+        case delta = "delta"
+    }
+}
+
+// MARK: - Internal FFI conversions for DocumentRevision
+internal extension DocumentRevision {
+    init(_ rb: RustBridge.DocumentRevisionRef) throws {
+        self.revisionId = rb.revisionId().toString()
+        self.author = rb.author()?.toString()
+        self.timestamp = rb.timestamp()?.toString()
+        self.kind = RevisionKind(rawValue: rb.kind().toString()) ?? { fatalError("Unknown RevisionKind: \(rb.kind().toString())") }()
+        self.anchor = try JSONDecoder().decode(RevisionAnchor?.self, from: (rb.anchor().toString().data(using: .utf8) ?? Data("null".utf8)))
+        self.delta = try RevisionDelta(rb.delta())
+    }
+    func intoRust() throws -> RustBridge.DocumentRevision {
+        let data = try JSONEncoder().encode(self)
+        let json = String(data: data, encoding: .utf8) ?? "{}"
+        return try RustBridge.documentRevisionFromJson(json)
+    }
+}
+
+/// The content changes that make up a single revision.
+///
+/// For insertions and deletions the `content` field carries the added/removed
+/// lines as `DiffLine::Added` / `DiffLine::Removed` entries. For format
+/// changes, `content` is empty — the property diff is left as a TODO for a
+/// later enrichment pass.
+public struct RevisionDelta: Codable, Sendable, Hashable {
+    /// Line-level content changes for this revision.
+    public let content: [DiffLine]
+    /// Cell-level table changes for this revision.
+    public let tableChanges: [CellChange]
+    public init(content: [DiffLine], tableChanges: [CellChange]) {
+        self.content = content
+        self.tableChanges = tableChanges
+    }
+    private enum CodingKeys: String, CodingKey {
+        case content = "content"
+        case tableChanges = "table_changes"
+    }
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.content = try container.decodeIfPresent([DiffLine].self, forKey: .content) ?? []
+        self.tableChanges = try container.decodeIfPresent([CellChange].self, forKey: .tableChanges) ?? []
+    }
+}
+
+// MARK: - Internal FFI conversions for RevisionDelta
+internal extension RevisionDelta {
+    init(_ rb: RustBridge.RevisionDeltaRef) throws {
+        self.content = try rb.content().map { (s: RustStringRef) -> DiffLine in let d = s.as_str().toString().data(using: .utf8) ?? Data(); return try JSONDecoder().decode(DiffLine.self, from: d) }
+        self.tableChanges = try rb.tableChanges().map { try CellChange($0) }
+    }
+    func intoRust() throws -> RustBridge.RevisionDelta {
+        let __content = RustVec<RustBridge.DiffLine>()
+        for __elem in self.content { __content.push(value: try __elem.intoRust()) }
+        let __tableChanges = RustVec<RustBridge.CellChange>()
+        for __elem in self.tableChanges { __tableChanges.push(value: try __elem.intoRust()) }
+        return RustBridge.RevisionDelta(__content, __tableChanges)
+    }
+}
+
 /// Extracted table structure.
 ///
 /// Represents a table detected and extracted from a document (PDF, image, etc.).
@@ -4567,6 +4712,134 @@ internal extension DetectResponse {
         return try RustBridge.detectResponseFromJson(json)
     }
 }
+
+/// Options controlling how two `ExtractionResult` values are compared.
+public struct DiffOptions: Codable, Sendable, Hashable {
+    /// Include metadata changes in the diff. Default: `true`.
+    public let includeMetadata: Bool
+    /// Include embedded-children changes in the diff. Default: `true`.
+    public let includeEmbedded: Bool
+    /// Truncate content to this many characters before diffing.
+    ///
+    /// Useful for very large documents where only the first N characters matter.
+    /// `None` means no truncation.
+    public let maxContentChars: UInt?
+    public init(includeMetadata: Bool, includeEmbedded: Bool, maxContentChars: UInt? = nil) {
+        self.includeMetadata = includeMetadata
+        self.includeEmbedded = includeEmbedded
+        self.maxContentChars = maxContentChars
+    }
+    private enum CodingKeys: String, CodingKey {
+        case includeMetadata = "include_metadata"
+        case includeEmbedded = "include_embedded"
+        case maxContentChars = "max_content_chars"
+    }
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.includeMetadata = try container.decodeIfPresent(Bool.self, forKey: .includeMetadata) ?? true
+        self.includeEmbedded = try container.decodeIfPresent(Bool.self, forKey: .includeEmbedded) ?? true
+        self.maxContentChars = try container.decodeIfPresent(UInt.self, forKey: .maxContentChars) ?? nil
+    }
+}
+
+// MARK: - Internal FFI conversions for DiffOptions
+internal extension DiffOptions {
+    init(_ rb: RustBridge.DiffOptionsRef) throws {
+        self.includeMetadata = rb.includeMetadata()
+        self.includeEmbedded = rb.includeEmbedded()
+        self.maxContentChars = rb.maxContentChars()
+    }
+    func intoRust() throws -> RustBridge.DiffOptions {
+        return RustBridge.DiffOptions(self.includeMetadata, self.includeEmbedded, self.maxContentChars)
+    }
+}
+
+/// The complete diff between two `ExtractionResult` values.
+public typealias ExtractionDiff = RustBridge.ExtractionDiff
+
+/// A single contiguous hunk in a unified diff.
+public struct DiffHunk: Codable, Sendable, Hashable {
+    /// Starting line number in the old content (0-indexed).
+    public let fromLine: UInt
+    /// Number of lines from the old content in this hunk.
+    public let fromCount: UInt
+    /// Starting line number in the new content (0-indexed).
+    public let toLine: UInt
+    /// Number of lines from the new content in this hunk.
+    public let toCount: UInt
+    /// Lines that make up this hunk.
+    public let lines: [DiffLine]
+    public init(fromLine: UInt, fromCount: UInt, toLine: UInt, toCount: UInt, lines: [DiffLine]) {
+        self.fromLine = fromLine
+        self.fromCount = fromCount
+        self.toLine = toLine
+        self.toCount = toCount
+        self.lines = lines
+    }
+    private enum CodingKeys: String, CodingKey {
+        case fromLine = "from_line"
+        case fromCount = "from_count"
+        case toLine = "to_line"
+        case toCount = "to_count"
+        case lines = "lines"
+    }
+}
+
+// MARK: - Internal FFI conversions for DiffHunk
+internal extension DiffHunk {
+    init(_ rb: RustBridge.DiffHunkRef) throws {
+        self.fromLine = rb.fromLine()
+        self.fromCount = rb.fromCount()
+        self.toLine = rb.toLine()
+        self.toCount = rb.toCount()
+        self.lines = try rb.lines().map { (s: RustStringRef) -> DiffLine in let d = s.as_str().toString().data(using: .utf8) ?? Data(); return try JSONDecoder().decode(DiffLine.self, from: d) }
+    }
+    func intoRust() throws -> RustBridge.DiffHunk {
+        let data = try JSONEncoder().encode(self)
+        let json = String(data: data, encoding: .utf8) ?? "{}"
+        return try RustBridge.diffHunkFromJson(json)
+    }
+}
+
+/// Cell-level changes for a pair of tables that share the same index.
+public struct TableDiff: Codable, Sendable, Hashable {
+    /// Zero-based index of the table in both `a.tables` and `b.tables`.
+    public let fromIndex: UInt
+    /// Zero-based index in `b.tables` (equal to `from_index` for same-dimension tables).
+    public let toIndex: UInt
+    /// Cell-level changes within the table.
+    public let cellChanges: [CellChange]
+    public init(fromIndex: UInt, toIndex: UInt, cellChanges: [CellChange]) {
+        self.fromIndex = fromIndex
+        self.toIndex = toIndex
+        self.cellChanges = cellChanges
+    }
+    private enum CodingKeys: String, CodingKey {
+        case fromIndex = "from_index"
+        case toIndex = "to_index"
+        case cellChanges = "cell_changes"
+    }
+}
+
+// MARK: - Internal FFI conversions for TableDiff
+internal extension TableDiff {
+    init(_ rb: RustBridge.TableDiffRef) throws {
+        self.fromIndex = rb.fromIndex()
+        self.toIndex = rb.toIndex()
+        self.cellChanges = try rb.cellChanges().map { try CellChange($0) }
+    }
+    func intoRust() throws -> RustBridge.TableDiff {
+        let data = try JSONEncoder().encode(self)
+        let json = String(data: data, encoding: .utf8) ?? "{}"
+        return try RustBridge.tableDiffFromJson(json)
+    }
+}
+
+/// Changes to embedded archive children between two results.
+public typealias EmbeddedChanges = RustBridge.EmbeddedChanges
+
+/// Diff for a single embedded archive entry that appears in both results.
+public typealias EmbeddedDiff = RustBridge.EmbeddedDiff
 
 /// Preset configurations for common RAG use cases.
 ///
@@ -6186,6 +6459,162 @@ extension PageUnitType {
     }
 }
 
+/// A single line in a unified-diff hunk.
+///
+/// Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+/// reference it unconditionally, without requiring the `diff` Cargo feature.
+/// `crate::diff` re-exports this type verbatim.
+public enum DiffLine: Codable, Sendable, Hashable {
+    /// Unchanged context line.
+    case context(field0: String)
+    /// Line added in the "after" version.
+    case added(field0: String)
+    /// Line removed from the "before" version.
+    case removed(field0: String)
+
+    private enum CodingKeys: String, CodingKey {
+        case kind
+        case field0 = "_0"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .kind)
+        switch type {
+        case "context":
+            self = .context(field0: try container.decode(String.self, forKey: .field0))
+        case "added":
+            self = .added(field0: try container.decode(String.self, forKey: .field0))
+        case "removed":
+            self = .removed(field0: try container.decode(String.self, forKey: .field0))
+        default:
+            throw DecodingError.dataCorruptedError(
+                forKey: .kind,
+                in: container,
+                debugDescription: "Unknown DiffLine type: \(type)"
+            )
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .context(let field0):
+            try container.encode("context", forKey: .kind)
+            try container.encode(field0, forKey: .field0)
+        case .added(let field0):
+            try container.encode("added", forKey: .kind)
+            try container.encode(field0, forKey: .field0)
+        case .removed(let field0):
+            try container.encode("removed", forKey: .kind)
+            try container.encode(field0, forKey: .field0)
+        }
+    }
+}
+extension DiffLine {
+    func intoRust() throws -> RustBridge.DiffLine {
+        let data = try JSONEncoder().encode(self)
+        let json = String(data: data, encoding: .utf8) ?? "null"
+        return try RustBridge.diffLineFromJson(json)
+    }
+}
+
+/// Semantic classification of a tracked change.
+public enum RevisionKind: String, Codable, Sendable, Hashable {
+    /// Text or content was inserted.
+    case insertion
+    /// Text or content was deleted.
+    case deletion
+    /// Run-level formatting (font, size, colour, …) was changed.
+    case formatChange = "format_change"
+    /// A reviewer comment or annotation.
+    case comment
+}
+extension RevisionKind {
+    func intoRust() throws -> RustBridge.RevisionKind {
+        let data = try JSONEncoder().encode(self)
+        let json = String(data: data, encoding: .utf8) ?? "null"
+        return try RustBridge.revisionKindFromJson(json)
+    }
+}
+
+/// Best-effort document location for a revision.
+public enum RevisionAnchor: Codable, Sendable, Hashable {
+    /// Body paragraph, identified by its zero-based index in the document flow.
+    case paragraph(index: UInt)
+    /// Cell inside a table.
+    case tableCell(row: UInt, col: UInt, tableIndex: UInt)
+    /// Page, identified by its zero-based index.
+    case page(index: UInt)
+    /// Presentation slide, identified by its zero-based index.
+    case slide(index: UInt)
+    /// Spreadsheet cell or range, identified by sheet index and optional name.
+    case sheet(index: UInt, name: String?)
+
+    private enum CodingKeys: String, CodingKey {
+        case type
+        case col
+        case index
+        case name
+        case row
+        case tableIndex = "table_index"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+        switch type {
+        case "paragraph":
+            self = .paragraph(index: try container.decode(UInt.self, forKey: .index))
+        case "table_cell":
+            self = .tableCell(row: try container.decode(UInt.self, forKey: .row), col: try container.decode(UInt.self, forKey: .col), tableIndex: try container.decode(UInt.self, forKey: .tableIndex))
+        case "page":
+            self = .page(index: try container.decode(UInt.self, forKey: .index))
+        case "slide":
+            self = .slide(index: try container.decode(UInt.self, forKey: .index))
+        case "sheet":
+            self = .sheet(index: try container.decode(UInt.self, forKey: .index), name: try container.decodeIfPresent(String.self, forKey: .name))
+        default:
+            throw DecodingError.dataCorruptedError(
+                forKey: .type,
+                in: container,
+                debugDescription: "Unknown RevisionAnchor type: \(type)"
+            )
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .paragraph(let index):
+            try container.encode("paragraph", forKey: .type)
+            try container.encode(index, forKey: .index)
+        case .tableCell(let row, let col, let tableIndex):
+            try container.encode("table_cell", forKey: .type)
+            try container.encode(row, forKey: .row)
+            try container.encode(col, forKey: .col)
+            try container.encode(tableIndex, forKey: .tableIndex)
+        case .page(let index):
+            try container.encode("page", forKey: .type)
+            try container.encode(index, forKey: .index)
+        case .slide(let index):
+            try container.encode("slide", forKey: .type)
+            try container.encode(index, forKey: .index)
+        case .sheet(let index, let name):
+            try container.encode("sheet", forKey: .type)
+            try container.encode(index, forKey: .index)
+            try container.encodeIfPresent(name, forKey: .name)
+        }
+    }
+}
+extension RevisionAnchor {
+    func intoRust() throws -> RustBridge.RevisionAnchor {
+        let data = try JSONEncoder().encode(self)
+        let json = String(data: data, encoding: .utf8) ?? "null"
+        return try RustBridge.revisionAnchorFromJson(json)
+    }
+}
+
 /// Semantic classification of an extracted URI.
 public enum UriKind: String, Codable, Sendable, Hashable {
     /// A clickable hyperlink (web URL, file link).
@@ -6484,6 +6913,21 @@ public func batchExtractFiles(_ items: [BatchFileItem], _ configJson: String) as
 public func batchExtractBytes(_ items: [BatchBytesItem], _ configJson: String) async throws -> [ExtractionResult] {
     let config = try extractionConfigFromJson(configJson)
     return try await batchExtractBytes(items: items, config: config)
+}
+
+public func compare(_ configJson: String, _ b: ExtractionResult, _ opts: DiffOptions) throws -> ExtractionDiff {
+    let config = try extractionResultFromJson(configJson)
+    return try compare(a: config, b: b, opts: opts)
+}
+
+public func compare(_ a: ExtractionResult, _ configJson: String, _ opts: DiffOptions) throws -> ExtractionDiff {
+    let config = try extractionResultFromJson(configJson)
+    return try compare(a: a, b: config, opts: opts)
+}
+
+public func compare(_ a: ExtractionResult, _ b: ExtractionResult, _ configJson: String) throws -> ExtractionDiff {
+    let config = try diffOptionsFromJson(configJson)
+    return try compare(a: a, b: b, opts: config)
 }
 
 public func embedTextsAsync(_ texts: [String], _ configJson: String) async throws -> [[Float]] {
@@ -7024,6 +7468,21 @@ public func hierarchicalBlockFromJson(_ json: String) throws -> HierarchicalBloc
     return try JSONDecoder().decode(HierarchicalBlock.self, from: data)
 }
 
+public func cellChangeFromJson(_ json: String) throws -> CellChange {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(CellChange.self, from: data)
+}
+
+public func documentRevisionFromJson(_ json: String) throws -> DocumentRevision {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(DocumentRevision.self, from: data)
+}
+
+public func revisionDeltaFromJson(_ json: String) throws -> RevisionDelta {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(RevisionDelta.self, from: data)
+}
+
 public func tableFromJson(_ json: String) throws -> Table {
     let data = json.data(using: .utf8) ?? Data()
     return try JSONDecoder().decode(Table.self, from: data)
@@ -7042,6 +7501,33 @@ public func extractedUriFromJson(_ json: String) throws -> ExtractedUri {
 public func detectResponseFromJson(_ json: String) throws -> DetectResponse {
     let data = json.data(using: .utf8) ?? Data()
     return try JSONDecoder().decode(DetectResponse.self, from: data)
+}
+
+public func diffOptionsFromJson(_ json: String) throws -> DiffOptions {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(DiffOptions.self, from: data)
+}
+
+public func extractionDiffFromJson(_ json: String) throws -> ExtractionDiff {
+    return try RustBridge.extractionDiffFromJson(json)
+}
+
+public func diffHunkFromJson(_ json: String) throws -> DiffHunk {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(DiffHunk.self, from: data)
+}
+
+public func tableDiffFromJson(_ json: String) throws -> TableDiff {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(TableDiff.self, from: data)
+}
+
+public func embeddedChangesFromJson(_ json: String) throws -> EmbeddedChanges {
+    return try RustBridge.embeddedChangesFromJson(json)
+}
+
+public func embeddedDiffFromJson(_ json: String) throws -> EmbeddedDiff {
+    return try RustBridge.embeddedDiffFromJson(json)
 }
 
 public func embeddingPresetFromJson(_ json: String) throws -> EmbeddingPreset {
@@ -7263,6 +7749,21 @@ public func ocrElementLevelFromJson(_ json: String) throws -> OcrElementLevel {
 public func pageUnitTypeFromJson(_ json: String) throws -> PageUnitType {
     let data = json.data(using: .utf8) ?? Data()
     return try JSONDecoder().decode(PageUnitType.self, from: data)
+}
+
+public func diffLineFromJson(_ json: String) throws -> DiffLine {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(DiffLine.self, from: data)
+}
+
+public func revisionKindFromJson(_ json: String) throws -> RevisionKind {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(RevisionKind.self, from: data)
+}
+
+public func revisionAnchorFromJson(_ json: String) throws -> RevisionAnchor {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(RevisionAnchor.self, from: data)
 }
 
 public func uriKindFromJson(_ json: String) throws -> UriKind {
@@ -7586,8 +8087,8 @@ public func getExtensionsForMime(mimeType: String) throws -> [String] {
 
 /// List the names of all registered embedding backends.
 ///
-/// Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-/// language bindings via `alef.toml [exclude].functions`.
+/// Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+/// bindings.
 public func listEmbeddingBackends() throws -> [String] {
     return try RustBridge.listEmbeddingBackends().map { $0.as_str().toString() }
 }
@@ -7655,6 +8156,35 @@ public func listRenderers() throws -> [String] {
 /// List names of all registered validators.
 public func listValidators() throws -> [String] {
     return try RustBridge.listValidators().map { $0.as_str().toString() }
+}
+
+/// Compare two extraction results and return a structured diff.
+///
+/// The comparison is purely structural — no I/O, no side effects. All fields
+/// of [`ExtractionDiff`] are populated according to the provided [`DiffOptions`].
+///
+/// # Arguments
+///
+/// * `a` — the "before" extraction result
+/// * `b` — the "after" extraction result
+/// * `opts` — controls which sections are compared and optional truncation
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use kreuzberg::{ExtractionResult, diff::{compare, DiffOptions}};
+///
+/// let mut a = ExtractionResult::default();
+/// let mut b = ExtractionResult::default();
+/// a.content = "Hello world".to_string();
+/// b.content = "Hello Rust".to_string();
+///
+/// let diff = compare(&a, &b, &DiffOptions::default());
+/// assert_eq!(diff.content_diff.len(), 1);
+/// ```
+public func compare(a: ExtractionResult, b: ExtractionResult, opts: DiffOptions) throws -> ExtractionDiff {
+    let _rb_opts = try opts.intoRust()
+    return RustBridge.compare(a, b, _rb_opts)
 }
 
 /// Generate embeddings asynchronously for a list of text strings.
@@ -7910,6 +8440,10 @@ extension RustBridge.ExtractionResult: @unchecked Sendable {}
 extension RustBridge.ImagePreprocessingConfig: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
 extension RustBridge.TesseractConfig: @unchecked Sendable {}
+// swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
+extension RustBridge.DiffOptions: @unchecked Sendable {}
+// swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
+extension RustBridge.ExtractionDiff: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
 extension RustBridge.EmbeddingPreset: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.

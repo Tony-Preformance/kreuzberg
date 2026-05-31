@@ -152,8 +152,8 @@ detect_mime_type_from_bytes <- function(content) .Call("wrap__detect_mime_type_f
 get_extensions_for_mime <- function(mime_type) .Call("wrap__get_extensions_for_mime", mime_type, PACKAGE = "kreuzberg")
 #' List the names of all registered embedding backends
 #'
-#' Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-#' language bindings via `alef.toml [exclude].functions`.
+#' Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+#' bindings.
 #' @return List of character string.
 #' @export
 list_embedding_backends <- function() .Call("wrap__list_embedding_backends", PACKAGE = "kreuzberg")
@@ -186,6 +186,16 @@ list_renderers <- function() .Call("wrap__list_renderers", PACKAGE = "kreuzberg"
 #' @return List of character string.
 #' @export
 list_validators <- function() .Call("wrap__list_validators", PACKAGE = "kreuzberg")
+#' Compare two extraction results and return a structured diff
+#'
+#' The comparison is purely structural — no I/O, no side effects. All fields
+#' of [`ExtractionDiff`] are populated according to the provided [`DiffOptions`].
+#' @param a — the "before" extraction result.
+#' @param b — the "after" extraction result.
+#' @param opts — controls which sections are compared and optional truncation.
+#' @return ExtractionDiff object (list with class attribute).
+#' @export
+compare <- function(a = ExtractionResult$default(), b = ExtractionResult$default(), opts = DiffOptions$default()) .Call("wrap__compare", a, b, opts, PACKAGE = "kreuzberg")
 #' Generate embeddings asynchronously for a list of text strings
 #'
 #' This is the async counterpart to [`embed_texts`]. It offloads the blocking
@@ -2576,6 +2586,53 @@ HierarchicalBlock <- new.env(parent = emptyenv())
 }
 #' @export
 `[[.HierarchicalBlock` <- `$.HierarchicalBlock`
+#' A single changed cell within a table
+#'
+#' Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+#' reference it unconditionally, without requiring the `diff` Cargo feature.
+#' `crate::diff` re-exports this type verbatim.
+#' @field row Zero-based row index.
+#' @field col Zero-based column index.
+#' @field from Value before the change.
+#' @field to Value after the change.
+#' @export
+CellChange <- new.env(parent = emptyenv())
+#' @export
+`$.CellChange` <- function(self, name) {
+  func <- CellChange[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.CellChange` <- `$.CellChange`
+#' A single tracked change embedded in a document
+#'
+#' Populated by per-format extractors that understand change-tracking metadata
+#' (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every
+#' extractor defaults to `ExtractionResult.revisions = None` until a
+#' format-specific implementation is added.
+#' @field revision_id Format-specific revision identifier.
+#' @field author Display name of the author who made this change, when available.
+#' @field timestamp ISO-8601 timestamp of the change, when available.
+#' @field kind Semantic kind of this revision.
+#' @field anchor Best-effort document location for this revision.
+#' @field delta The content changes that make up this revision.
+#' @export
+DocumentRevision <- new.env(parent = emptyenv())
+#' @export
+`$.DocumentRevision` <- function(self, name) {
+  func <- DocumentRevision[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.DocumentRevision` <- `$.DocumentRevision`
 #' Individual table cell with content and optional styling
 #'
 #' Future extension point for rich table support with cell-level metadata.
@@ -2634,6 +2691,62 @@ DetectResponse <- new.env(parent = emptyenv())
 }
 #' @export
 `[[.DetectResponse` <- `$.DetectResponse`
+#' Options controlling how two `ExtractionResult` values are compared
+#' @field include_metadata Include metadata changes in the diff. Default: `true`.
+#' @field include_embedded Include embedded-children changes in the diff. Default: `true`.
+#' @field max_content_chars Truncate content to this many characters before diffing.
+#' @export
+DiffOptions <- new.env(parent = emptyenv())
+DiffOptions$default <- function() .Call("wrap__DiffOptions__default", PACKAGE = "kreuzberg")
+DiffOptions$from_json <- function(json) {
+  .Call("wrap__DiffOptions__from_json", json, PACKAGE = "kreuzberg")
+}
+#' @export
+`$.DiffOptions` <- function(self, name) {
+  func <- DiffOptions[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.DiffOptions` <- `$.DiffOptions`
+#' A single contiguous hunk in a unified diff
+#' @field from_line Starting line number in the old content (0-indexed).
+#' @field from_count Number of lines from the old content in this hunk.
+#' @field to_line Starting line number in the new content (0-indexed).
+#' @field to_count Number of lines from the new content in this hunk.
+#' @field lines Lines that make up this hunk.
+#' @export
+DiffHunk <- new.env(parent = emptyenv())
+#' @export
+`$.DiffHunk` <- function(self, name) {
+  func <- DiffHunk[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.DiffHunk` <- `$.DiffHunk`
+#' Diff for a single embedded archive entry that appears in both results
+#' @field path Archive-relative path identifying this entry.
+#' @field diff The recursive diff of the entry's extraction result.
+#' @export
+EmbeddedDiff <- new.env(parent = emptyenv())
+#' @export
+`$.EmbeddedDiff` <- function(self, name) {
+  func <- EmbeddedDiff[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.EmbeddedDiff` <- `$.EmbeddedDiff`
 #' Preset configurations for common RAG use cases
 #'
 #' Each preset combines chunk size, overlap, and embedding model
@@ -2987,6 +3100,27 @@ FormatMetadata <- new.env(parent = emptyenv())
 }
 #' @export
 `[[.FormatMetadata` <- `$.FormatMetadata`
+#' A single line in a unified-diff hunk
+#'
+#' Defined here (rather than only in `crate::diff`) so `RevisionDelta` can
+#' reference it unconditionally, without requiring the `diff` Cargo feature.
+#' `crate::diff` re-exports this type verbatim.
+#' @field Context Unchanged context line.
+#' @field Added Line added in the "after" version.
+#' @field Removed Line removed from the "before" version.
+#' @export
+DiffLine <- new.env(parent = emptyenv())
+#' @export
+`$.DiffLine` <- function(self, name) {
+  func <- DiffLine[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.DiffLine` <- `$.DiffLine`
 #' Create a ExecutionProviderType enum value
 #'
 #' Returns the default ExecutionProviderType variant.
@@ -3187,6 +3321,14 @@ OcrElementLevel  <- function() list() |> structure(class = "OcrElementLevel")
 #' @export
 PageUnitType  <- function() list() |> structure(class = "PageUnitType")
 
+#' Create a RevisionKind enum value
+#'
+#' Returns the default RevisionKind variant.
+#'
+#' @return A RevisionKind enum value
+#' @export
+RevisionKind  <- function() list() |> structure(class = "RevisionKind")
+
 #' Create a UriKind enum value
 #'
 #' Returns the default UriKind variant.
@@ -3320,6 +3462,22 @@ OcrBoundingGeometry$from_json <- function(json) .Call("wrap__OcrBoundingGeometry
 }
 #' @export
 `[[.OcrBoundingGeometry` <- `$.OcrBoundingGeometry`
+#' Best-effort document location for a revision
+#' @export
+RevisionAnchor <- new.env(parent = emptyenv())
+RevisionAnchor$default <- function() .Call("wrap__RevisionAnchor__default", PACKAGE = "kreuzberg")
+RevisionAnchor$from_json <- function(json) .Call("wrap__RevisionAnchor__from_json", json, PACKAGE = "kreuzberg")
+#' @export
+`$.RevisionAnchor` <- function(self, name) {
+  func <- RevisionAnchor[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.RevisionAnchor` <- `$.RevisionAnchor`
 #' @export
 cors_allows_all <- function(x, ...) UseMethod("cors_allows_all")
 #' @export

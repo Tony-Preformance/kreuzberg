@@ -49,10 +49,10 @@ enum class ListType {
         @com.fasterxml.jackson.annotation.JsonCreator
         @JvmStatic
         fun fromWire(value: String): ListType = when (value) {
-            "Bullet" -> BULLET
-            "Numbered" -> NUMBERED
-            "Lettered" -> LETTERED
-            "Indented" -> INDENTED
+            "Bullet", "bullet" -> BULLET
+            "Numbered", "numbered" -> NUMBERED
+            "Lettered", "lettered" -> LETTERED
+            "Indented", "indented" -> INDENTED
             else -> throw IllegalArgumentException("Unknown ListType value: $value")
         }
     }

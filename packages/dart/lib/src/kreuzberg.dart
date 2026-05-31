@@ -375,8 +375,8 @@ class KreuzbergBridge {
 
   /// List the names of all registered embedding backends.
   ///
-  /// Used by `kreuzberg-cli` and the api/mcp endpoints; excluded from the
-  /// language bindings via `alef.toml [exclude].functions`.
+  /// Used by `kreuzberg-cli`, the api/mcp endpoints, and generated language
+  /// bindings.
   /// throws anyhow::Error on failure
   static Future<List<String>> listEmbeddingBackends() async {
     return await rust_bridge.listEmbeddingBackends();
@@ -450,6 +450,34 @@ class KreuzbergBridge {
   /// throws anyhow::Error on failure
   static Future<List<String>> listValidators() async {
     return await rust_bridge.listValidators();
+  }
+
+  /// Compare two extraction results and return a structured diff.
+  ///
+  /// The comparison is purely structural — no I/O, no side effects. All fields
+  /// of [`ExtractionDiff`] are populated according to the provided [`DiffOptions`].
+  ///
+  /// # Arguments
+  ///
+  /// * `a` — the "before" extraction result
+  /// * `b` — the "after" extraction result
+  /// * `opts` — controls which sections are compared and optional truncation
+  ///
+  /// # Example
+  ///
+  /// ```rust,no_run
+  /// use kreuzberg::{ExtractionResult, diff::{compare, DiffOptions}};
+  ///
+  /// let mut a = ExtractionResult::default();
+  /// let mut b = ExtractionResult::default();
+  /// a.content = "Hello world".to_string();
+  /// b.content = "Hello Rust".to_string();
+  ///
+  /// let diff = compare(&a, &b, &DiffOptions::default());
+  /// assert_eq!(diff.content_diff.len(), 1);
+  /// ```
+  static Future<ExtractionDiff> compare(ExtractionResult a, ExtractionResult b, DiffOptions opts) async {
+    return await rust_bridge.compare(a: a, b: b, opts: opts);
   }
 
   /// Generate embeddings asynchronously for a list of text strings.

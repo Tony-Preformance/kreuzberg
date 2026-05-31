@@ -714,6 +714,7 @@ This is the main result type returned by all extraction functions.
 | `annotations` | `list[PdfAnnotation] \| None` | `[]` | PDF annotations extracted from the document. When annotation extraction is enabled via `PdfConfig.extract_annotations`, this field contains text notes, highlights, links, stamps, and other annotations found in PDF documents. |
 | `children` | `list[ArchiveEntry] \| None` | `[]` | Nested extraction results from archive contents. When extracting archives, each processable file inside produces its own full extraction result. Set to `None` for non-archive formats. Use `max_archive_depth` in config to control recursion depth. |
 | `uris` | `list[ExtractedUri] \| None` | `[]` | URIs/links discovered during document extraction. Contains hyperlinks, image references, citations, email addresses, and other URI-like references found in the document. Always extracted when present in the source document. |
+| `revisions` | `list[DocumentRevision] \| None` | `[]` | Tracked changes embedded in the source document. Populated by per-format extractors that understand change-tracking metadata (DOCX `w:ins`/`w:del`/`w:rPrChange`, ODT `text:change-*`, …). Every extractor defaults to `None` until its format-specific implementation is added. Extractors that do populate this field follow the "accepted-changes" convention: inserted text is present in `content`, deleted text is absent — the revision list is the separate audit trail. |
 | `structured_output` | `dict[str, Any] \| None` | `None` | Structured extraction output from LLM-based JSON schema extraction. When `structured_extraction` is configured in `ExtractionConfig`, the extracted document content is sent to a VLM with the provided JSON schema. The response is parsed and stored here as a JSON value matching the schema. |
 | `code_intelligence` | `dict[str, Any] \| None` | `None` | Code intelligence results from tree-sitter analysis. Populated when extracting source code files with the `tree-sitter` feature. Contains metrics, structural analysis, imports/exports, comments, docstrings, symbols, diagnostics, and optionally chunked code segments. Stored as an opaque JSON value so that all language bindings (Go, Java, C#, …) can deserialize it as a raw JSON object rather than a typed struct. The underlying type is `tree_sitter_language_pack.ProcessResult`. |
 | `llm_usage` | `list[LlmUsage] \| None` | `[]` | LLM token usage and cost data for all LLM calls made during this extraction. Contains one entry per LLM call. Multiple entries are produced when VLM OCR, structured extraction, or LLM embeddings run during the same extraction. `None` when no LLM was used. |
@@ -1182,6 +1183,22 @@ with confidence scores and spatial positions.
 
 ---
 
+### RevisionDelta
+
+The content changes that make up a single revision.
+
+For insertions and deletions the `content` field carries the added/removed
+lines as `DiffLine.Added` / `DiffLine.Removed` entries. For format
+changes, `content` is empty — the property diff is left as a TODO for a
+later enrichment pass.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `content` | `list[DiffLine]` | `[]` | Line-level content changes for this revision. |
+| `table_changes` | `list[CellChange]` | `[]` | Cell-level table changes for this revision. |
+
+---
+
 ### Table
 
 Extracted table structure.
@@ -1210,6 +1227,18 @@ Future extension point for rich table support with cell-level metadata.
 | `row_span` | `int` | — | Row span (number of rows this cell spans) |
 | `col_span` | `int` | — | Column span (number of columns this cell spans) |
 | `is_header` | `bool` | — | Whether this is a header cell |
+
+---
+
+### DiffOptions
+
+Options controlling how two `ExtractionResult` values are compared.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `include_metadata` | `bool` | `True` | Include metadata changes in the diff. Default: `True`. |
+| `include_embedded` | `bool` | `True` | Include embedded-children changes in the diff. Default: `True`. |
+| `max_content_chars` | `int \| None` | `None` | Truncate content to this many characters before diffing. Useful for very large documents where only the first N characters matter. `None` means no truncation. |
 
 ---
 
@@ -1351,6 +1380,22 @@ of `ExtractionResult`.
 | `Chunks` | `chunks` | Use TSLP semantic chunks as content (default). |
 | `Raw` | `raw` | Use raw source code as content. |
 | `Structure` | `structure` | Emit function/class headings + docstrings (no code bodies). |
+
+---
+
+#### DiffLine
+
+A single line in a unified-diff hunk.
+
+Defined here (rather than only in `crate.diff`) so `RevisionDelta` can
+reference it unconditionally, without requiring the `diff` Cargo feature.
+`crate.diff` re-exports this type verbatim.
+
+| Variant | Wire value | Description |
+|---------|------------|-------------|
+| `Context` | `context` | Unchanged context line. — Fields: `_0`: `String` |
+| `Added` | `added` | Line added in the "after" version. — Fields: `_0`: `String` |
+| `Removed` | `removed` | Line removed from the "before" version. — Fields: `_0`: `String` |
 
 ---
 

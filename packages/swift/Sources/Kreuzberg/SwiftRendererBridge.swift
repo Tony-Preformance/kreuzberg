@@ -9,7 +9,7 @@ import RustBridge
 /// Conform your Swift class or struct to this protocol to implement
 /// a Rust trait from the host side.
 public protocol SwiftRendererBridge: AnyObject {
-    func render(doc: InternalDocument) throws -> String
+    func render(doc: String) throws -> String
 }
 
 /// Internal adapter wrapping a `SwiftRendererBridge` conformer.

@@ -49,10 +49,10 @@ enum class OcrBackendType {
         @com.fasterxml.jackson.annotation.JsonCreator
         @JvmStatic
         fun fromWire(value: String): OcrBackendType = when (value) {
-            "Tesseract" -> TESSERACT
-            "EasyOCR" -> EASY_O_C_R
-            "PaddleOCR" -> PADDLE_O_C_R
-            "Custom" -> CUSTOM
+            "Tesseract", "tesseract" -> TESSERACT
+            "EasyOCR", "easyocr" -> EASY_O_C_R
+            "PaddleOCR", "paddleocr" -> PADDLE_O_C_R
+            "Custom", "custom" -> CUSTOM
             else -> throw IllegalArgumentException("Unknown OcrBackendType value: $value")
         }
     }
