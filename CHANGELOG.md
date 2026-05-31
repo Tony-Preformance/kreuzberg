@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **config**: `ExtractionConfig::extraction_timeout_secs` now defaults to `Some(60)` instead
+  of `None`. Pathological inputs (deeply nested archives, sheets with millions of cells,
+  adversarial PDFs) would otherwise run indefinitely. The 60 s limit is enforced via
+  `tokio::time::timeout` in `extract_bytes`. Set to `None` to disable for trusted input.
+
+- **config**: New `ExtractionConfig::max_embedded_file_bytes` field (default `Some(52_428_800)`,
+  50 MiB) caps the uncompressed size of any single embedded file before recursive extraction
+  is attempted. Applies to OOXML embedded objects (DOCX/PPTX) and email attachments. Files
+  exceeding the cap are skipped with a `ProcessingWarning`. Set to `None` to disable.
+
 ### Added
 
 - **tools/generate_test_fixtures**: Python-based, deterministic fixture-generation

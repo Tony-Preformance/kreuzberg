@@ -171,6 +171,20 @@ pub struct ExtractionConfig {
     #[serde(default)]
     pub security_limits: Option<crate::extractors::security::SecurityLimits>,
 
+    /// Maximum uncompressed size in bytes for a single embedded file before
+    /// recursive extraction is attempted (default: 50 MiB).
+    ///
+    /// Applies to embedded objects inside OOXML containers (DOCX, PPTX) and
+    /// to email attachments processed via recursive extraction. Files that
+    /// exceed this limit are skipped with a `ProcessingWarning` rather than
+    /// passed to the extraction pipeline, preventing a single oversized
+    /// embedded object from consuming unbounded memory or time.
+    ///
+    /// Set to `None` to disable the per-embedded-file cap (falls back to
+    /// `security_limits.max_archive_size` as the only guard).
+    #[serde(default = "default_max_embedded_file_bytes")]
+    pub max_embedded_file_bytes: Option<u64>,
+
     /// Content text format (default: Plain).
     ///
     /// Controls the format of the extracted content:
@@ -320,6 +334,7 @@ impl Default for ExtractionConfig {
             extraction_timeout_secs: default_extraction_timeout(),
             max_concurrent_extractions: None,
             security_limits: None,
+            max_embedded_file_bytes: default_max_embedded_file_bytes(),
             #[cfg(feature = "layout-types")]
             layout: None,
             use_layout_for_markdown: false,
@@ -544,6 +559,15 @@ fn default_true() -> bool {
 
 fn default_archive_depth() -> usize {
     3
+}
+
+/// Default per-embedded-file cap: 50 MiB.
+///
+/// A single embedded object larger than this can consume significant memory
+/// when the recursive extractor materialises it. 50 MiB is generous for
+/// real-world embedded documents while still bounding worst-case allocation.
+fn default_max_embedded_file_bytes() -> Option<u64> {
+    Some(50 * 1024 * 1024)
 }
 
 /// Default extraction timeout: 60 seconds.

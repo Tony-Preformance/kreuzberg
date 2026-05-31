@@ -87,6 +87,24 @@ pub(crate) async fn extract_ooxml_embedded_objects(
             continue;
         }
 
+        // Enforce per-embedded-file size cap before attempting recursive extraction.
+        if config
+            .max_embedded_file_bytes
+            .is_some_and(|cap| data.len() as u64 > cap)
+        {
+            let cap = config.max_embedded_file_bytes.unwrap_or(0);
+            warnings.push(ProcessingWarning {
+                source: Cow::Owned(format!("{}_embedded_objects", source_label)),
+                message: Cow::Owned(format!(
+                    "Skipped embedded file '{}': size {} bytes exceeds cap {} bytes",
+                    filename,
+                    data.len(),
+                    cap
+                )),
+            });
+            continue;
+        }
+
         // Skip OLE compound binary files unless we can identify their actual format.
         // OLE files start with the magic bytes D0 CF 11 E0 (Microsoft Compound File).
         let is_ole_binary = data.len() >= 4 && data[0..4] == [0xD0, 0xCF, 0x11, 0xE0];
@@ -137,4 +155,85 @@ pub(crate) async fn extract_ooxml_embedded_objects(
     }
 
     (children, warnings)
+}
+
+#[cfg(all(test, feature = "office"))]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    /// Build a minimal ZIP in memory with one file at the given path and contents.
+    fn make_zip_with_file(entry_path: &str, entry_data: &[u8]) -> Vec<u8> {
+        let buf = Cursor::new(Vec::new());
+        let mut zip = zip::ZipWriter::new(buf);
+        let options =
+            zip::write::FileOptions::<()>::default().compression_method(zip::CompressionMethod::Stored);
+        zip.start_file(entry_path, options).unwrap();
+        zip.write_all(entry_data).unwrap();
+        zip.finish().unwrap().into_inner()
+    }
+
+    #[tokio::test]
+    async fn test_embedded_file_over_cap_skipped_with_warning() {
+        // Build a ZIP with a plain-text file larger than our tiny cap.
+        let data = b"Hello world! This is a test document.";
+        let zip_bytes = make_zip_with_file("word/embeddings/doc.txt", data);
+
+        let mut config = ExtractionConfig::default();
+        // Set cap to 10 bytes — the file is 37 bytes, so it should be skipped.
+        config.max_embedded_file_bytes = Some(10);
+
+        let (children, warnings) =
+            extract_ooxml_embedded_objects(&zip_bytes, "word/embeddings/", "test", &config).await;
+
+        assert!(
+            children.is_empty(),
+            "oversized embedded file must not produce a child entry"
+        );
+        assert_eq!(warnings.len(), 1, "exactly one warning expected");
+        assert!(
+            warnings[0].message.contains("exceeds cap"),
+            "warning must mention cap: {}",
+            warnings[0].message
+        );
+        assert!(
+            warnings[0].message.contains("doc.txt"),
+            "warning must name the file: {}",
+            warnings[0].message
+        );
+    }
+
+    #[tokio::test]
+    async fn test_embedded_file_under_cap_proceeds_to_extraction() {
+        // Build a ZIP with a plain-text file well under any reasonable cap.
+        let data = b"Hello";
+        let zip_bytes = make_zip_with_file("word/embeddings/note.txt", data);
+
+        let mut config = ExtractionConfig::default();
+        // Cap is 1 MiB — the 5-byte file is well under it.
+        config.max_embedded_file_bytes = Some(1024 * 1024);
+
+        let (_children, warnings) =
+            extract_ooxml_embedded_objects(&zip_bytes, "word/embeddings/", "test", &config).await;
+
+        // We expect no "exceeds cap" warning (the file may still be skipped for
+        // unknown MIME, but not for size).
+        let cap_warnings: Vec<_> = warnings.iter().filter(|w| w.message.contains("exceeds cap")).collect();
+        assert!(cap_warnings.is_empty(), "no size-cap warning expected for small file");
+    }
+
+    #[tokio::test]
+    async fn test_embedded_file_no_cap_proceeds() {
+        let data = b"some content";
+        let zip_bytes = make_zip_with_file("word/embeddings/file.txt", data);
+
+        let mut config = ExtractionConfig::default();
+        config.max_embedded_file_bytes = None; // cap disabled
+
+        let (_children, warnings) =
+            extract_ooxml_embedded_objects(&zip_bytes, "word/embeddings/", "test", &config).await;
+
+        let cap_warnings: Vec<_> = warnings.iter().filter(|w| w.message.contains("exceeds cap")).collect();
+        assert!(cap_warnings.is_empty(), "no size-cap warning when cap is None");
+    }
 }

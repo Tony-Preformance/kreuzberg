@@ -400,6 +400,24 @@ pub(crate) async fn extract_attachment_children(
             _ => continue,
         };
 
+        // Enforce per-embedded-file size cap before recursive extraction.
+        if config
+            .max_embedded_file_bytes
+            .is_some_and(|cap| bytes.len() as u64 > cap)
+        {
+            let cap = config.max_embedded_file_bytes.unwrap_or(0);
+            warnings.push(ProcessingWarning {
+                source: Cow::Borrowed("email_attachment_extraction"),
+                message: Cow::Owned(format!(
+                    "Skipped attachment '{}': size {} bytes exceeds cap {} bytes",
+                    filename,
+                    bytes.len(),
+                    cap
+                )),
+            });
+            continue;
+        }
+
         let mut child_config = config.clone();
         child_config.max_archive_depth = config.max_archive_depth.saturating_sub(1);
 
