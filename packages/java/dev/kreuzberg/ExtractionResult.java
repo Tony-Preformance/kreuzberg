@@ -177,7 +177,7 @@ public record ExtractionResult(
      * extracted document content is sent to a VLM with the provided JSON schema.
      * The response is parsed and stored here as a JSON value matching the schema.
      */
-    @JsonProperty("structured_output") com.fasterxml.jackson.databind.@Nullable JsonNode structuredOutput,
+    @Nullable @JsonProperty("structured_output") JsonNode structuredOutput,
     /**
      * Code intelligence results from tree-sitter analysis.
      *
@@ -189,7 +189,7 @@ public record ExtractionResult(
      * C#, …) can deserialize it as a raw JSON object rather than a typed struct.
      * The underlying type is {@code tree_sitter_language_pack.ProcessResult}.
      */
-    @JsonProperty("code_intelligence") com.fasterxml.jackson.databind.@Nullable JsonNode codeIntelligence,
+    @Nullable @JsonProperty("code_intelligence") JsonNode codeIntelligence,
     /**
      * LLM token usage and cost data for all LLM calls made during this extraction.
      *
@@ -254,9 +254,9 @@ private List<ArchiveEntry> children = null;
 private List<ExtractedUri> uris = null;
 private List<DocumentRevision> revisions = null;
         @JsonProperty("structured_output")
-private com.fasterxml.jackson.databind.JsonNode structuredOutput = null;
+private JsonNode structuredOutput = null;
         @JsonProperty("code_intelligence")
-private com.fasterxml.jackson.databind.JsonNode codeIntelligence = null;
+private JsonNode codeIntelligence = null;
         @JsonProperty("llm_usage")
 private List<LlmUsage> llmUsage = null;
         @JsonProperty("formatted_content")
@@ -406,14 +406,14 @@ private String ocrInternalDocument = null;
 
         /** Sets the structuredOutput field. */
         @JsonProperty("structured_output")
-        public Builder withStructuredOutput(final com.fasterxml.jackson.databind.@Nullable JsonNode value) {
+        public Builder withStructuredOutput(final @Nullable JsonNode value) {
             this.structuredOutput = value;
             return this;
         }
 
         /** Sets the codeIntelligence field. */
         @JsonProperty("code_intelligence")
-        public Builder withCodeIntelligence(final com.fasterxml.jackson.databind.@Nullable JsonNode value) {
+        public Builder withCodeIntelligence(final @Nullable JsonNode value) {
             this.codeIntelligence = value;
             return this;
         }

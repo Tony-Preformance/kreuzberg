@@ -47,7 +47,7 @@ public record ExtractionDiff(
      * (with JSON Pointer paths) feed {@code a.metadata} and {@code b.metadata} to your
      * preferred json-patch impl directly.
      */
-    @JsonProperty("metadata_changed") com.fasterxml.jackson.databind.JsonNode metadataChanged,
+    @JsonProperty("metadata_changed") JsonNode metadataChanged,
     /**
      * Changes to embedded archive children.
      */
@@ -70,7 +70,7 @@ private List<Table> tablesRemoved = List.of();
         @JsonProperty("tables_changed")
 private List<TableDiff> tablesChanged = List.of();
         @JsonProperty("metadata_changed")
-private com.fasterxml.jackson.databind.JsonNode metadataChanged = null;
+private JsonNode metadataChanged = null;
         @JsonProperty("embedded_changes")
 private EmbeddedChanges embeddedChanges = null;
 
@@ -104,7 +104,7 @@ private EmbeddedChanges embeddedChanges = null;
 
         /** Sets the metadataChanged field. */
         @JsonProperty("metadata_changed")
-        public Builder withMetadataChanged(final com.fasterxml.jackson.databind.JsonNode value) {
+        public Builder withMetadataChanged(final JsonNode value) {
             this.metadataChanged = value;
             return this;
         }

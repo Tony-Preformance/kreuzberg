@@ -24,7 +24,7 @@ public record StructuredExtractionConfig(
     /**
      * JSON Schema defining the desired output structure.
      */
-    @JsonProperty("schema") com.fasterxml.jackson.databind.JsonNode schema,
+    @JsonProperty("schema") JsonNode schema,
     /**
      * Schema name passed to the LLM's structured output mode.
      */
@@ -60,7 +60,7 @@ public record StructuredExtractionConfig(
     @JsonPOJOBuilder(withPrefix = "with", buildMethodName = "build")
     public static final class Builder {
 
-private com.fasterxml.jackson.databind.JsonNode schema = null;
+private JsonNode schema = null;
         @JsonProperty("schema_name")
 private String schemaName = null;
         @JsonProperty("schema_description")
@@ -71,7 +71,7 @@ private LlmConfig llm = null;
 
         /** Sets the schema field. */
         @JsonProperty("schema")
-        public Builder withSchema(final com.fasterxml.jackson.databind.JsonNode value) {
+        public Builder withSchema(final JsonNode value) {
             this.schema = value;
             return this;
         }

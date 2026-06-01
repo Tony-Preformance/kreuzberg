@@ -34,7 +34,7 @@ public record OcrExtractionResult(
     /**
      * OCR processing metadata (confidence scores, language, etc.)
      */
-    @JsonProperty("metadata") Map<String, com.fasterxml.jackson.databind.JsonNode> metadata,
+    @JsonProperty("metadata") Map<String, JsonNode> metadata,
     /**
      * Tables detected and extracted via OCR
      */
@@ -62,7 +62,7 @@ public record OcrExtractionResult(
 private String content = "";
         @JsonProperty("mime_type")
 private String mimeType = "";
-private Map<String, com.fasterxml.jackson.databind.JsonNode> metadata = Map.of();
+private Map<String, JsonNode> metadata = Map.of();
 private List<OcrTable> tables = List.of();
         @JsonProperty("ocr_elements")
 private List<OcrElement> ocrElements = null;
@@ -85,7 +85,7 @@ private String internalDocument = null;
 
         /** Sets the metadata field. */
         @JsonProperty("metadata")
-        public Builder withMetadata(final Map<String, com.fasterxml.jackson.databind.JsonNode> value) {
+        public Builder withMetadata(final Map<String, JsonNode> value) {
             this.metadata = value;
             return this;
         }

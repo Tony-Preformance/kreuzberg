@@ -2054,7 +2054,7 @@ internal extension TextAnnotation {
     init(_ rb: RustBridge.TextAnnotationRef) throws {
         self.start = rb.start()
         self.end = rb.end()
-        self.kind = try JSONDecoder().decode(AnnotationKind.self, from: ((rb.kind()?.toString() ?? "null").data(using: .utf8) ?? Data("null".utf8)))
+        self.kind = try JSONDecoder().decode(AnnotationKind.self, from: ((rb.kind().toString()).data(using: .utf8) ?? Data("null".utf8)))
     }
     func intoRust() throws -> RustBridge.TextAnnotation {
         let data = try JSONEncoder().encode(self)
@@ -2610,7 +2610,7 @@ public struct OcrTable: Codable, Sendable, Hashable {
 // MARK: - Internal FFI conversions for OcrTable
 internal extension OcrTable {
     init(_ rb: RustBridge.OcrTableRef) throws {
-        self.cells = try JSONDecoder().decode([[String]].self, from: ((rb.cells()?.toString() ?? "null").data(using: .utf8) ?? Data("null".utf8)))
+        self.cells = try JSONDecoder().decode([[String]].self, from: ((rb.cells().toString()).data(using: .utf8) ?? Data("null".utf8)))
         self.markdown = rb.markdown().toString()
         self.pageNumber = rb.pageNumber()
         self.boundingBox = try rb.boundingBox().map { try OcrTableBoundingBox($0) }
@@ -4598,7 +4598,7 @@ public struct Table: Codable, Sendable, Hashable {
 // MARK: - Internal FFI conversions for Table
 internal extension Table {
     init(_ rb: RustBridge.TableRef) throws {
-        self.cells = try JSONDecoder().decode([[String]].self, from: ((rb.cells()?.toString() ?? "null").data(using: .utf8) ?? Data("null".utf8)))
+        self.cells = try JSONDecoder().decode([[String]].self, from: ((rb.cells().toString()).data(using: .utf8) ?? Data("null".utf8)))
         self.markdown = rb.markdown().toString()
         self.pageNumber = rb.pageNumber()
         self.boundingBox = try rb.boundingBox().map { try BoundingBox($0) }
@@ -5212,7 +5212,7 @@ public struct RecognizedTable: Codable, Sendable, Hashable {
 internal extension RecognizedTable {
     init(_ rb: RustBridge.RecognizedTableRef) throws {
         self.detectionBbox = try BBox(rb.detectionBbox())
-        self.cells = try JSONDecoder().decode([[String]].self, from: ((rb.cells()?.toString() ?? "null").data(using: .utf8) ?? Data("null".utf8)))
+        self.cells = try JSONDecoder().decode([[String]].self, from: ((rb.cells().toString()).data(using: .utf8) ?? Data("null".utf8)))
         self.markdown = rb.markdown().toString()
     }
     func intoRust() throws -> RustBridge.RecognizedTable {
@@ -7976,7 +7976,13 @@ public func batchExtractFiles(items: [BatchFileItem], config: ExtractionConfig) 
     let _rb_items: RustVec<BatchFileItem> = { let v = RustVec<BatchFileItem>(); for x in items { v.push(value: x) }; return v }()
     return try await Task.detached(priority: .userInitiated) {
         let result = try RustBridge.batchExtractFiles(_rb_items, config)
-        return result.map { ref in var item = try RustBridge.ExtractionResult(ptr: ref.ptr); item.isOwned = false; return item }
+        var items: [[ExtractionResult]] = []
+        for ref in result {
+            var item = try RustBridge.ExtractionResult(ptr: ref.ptr)
+            item.isOwned = false
+            items.append(item)
+        }
+        return items
     }.value
 }
 
@@ -8039,7 +8045,13 @@ public func batchExtractBytes(items: [BatchBytesItem], config: ExtractionConfig)
     let _rb_items: RustVec<BatchBytesItem> = { let v = RustVec<BatchBytesItem>(); for x in items { v.push(value: x) }; return v }()
     return try await Task.detached(priority: .userInitiated) {
         let result = try RustBridge.batchExtractBytes(_rb_items, config)
-        return result.map { ref in var item = try RustBridge.ExtractionResult(ptr: ref.ptr); item.isOwned = false; return item }
+        var items: [[ExtractionResult]] = []
+        for ref in result {
+            var item = try RustBridge.ExtractionResult(ptr: ref.ptr)
+            item.isOwned = false
+            items.append(item)
+        }
+        return items
     }.value
 }
 

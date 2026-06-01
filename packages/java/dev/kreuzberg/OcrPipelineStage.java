@@ -37,7 +37,7 @@ public record OcrPipelineStage(
     /**
      * PaddleOCR-specific config for this stage.
      */
-    @JsonProperty("paddle_ocr_config") com.fasterxml.jackson.databind.@Nullable JsonNode paddleOcrConfig,
+    @Nullable @JsonProperty("paddle_ocr_config") JsonNode paddleOcrConfig,
     /**
      * VLM config override for this pipeline stage.
      */
@@ -56,7 +56,7 @@ public record OcrPipelineStage(
      * { "mode": "fast", "enable_layout": true }
      *
      */
-    @JsonProperty("backend_options") com.fasterxml.jackson.databind.@Nullable JsonNode backendOptions
+    @Nullable @JsonProperty("backend_options") JsonNode backendOptions
 ) {
     public static Builder builder() {
         return new Builder();
@@ -72,11 +72,11 @@ private String language = null;
         @JsonProperty("tesseract_config")
         @Nullable private TesseractConfig tesseractConfig = null;
         @JsonProperty("paddle_ocr_config")
-private com.fasterxml.jackson.databind.JsonNode paddleOcrConfig = null;
+private JsonNode paddleOcrConfig = null;
         @JsonProperty("vlm_config")
         @Nullable private LlmConfig vlmConfig = null;
         @JsonProperty("backend_options")
-private com.fasterxml.jackson.databind.JsonNode backendOptions = null;
+private JsonNode backendOptions = null;
 
         /** Sets the backend field. */
         @JsonProperty("backend")
@@ -108,7 +108,7 @@ private com.fasterxml.jackson.databind.JsonNode backendOptions = null;
 
         /** Sets the paddleOcrConfig field. */
         @JsonProperty("paddle_ocr_config")
-        public Builder withPaddleOcrConfig(final com.fasterxml.jackson.databind.@Nullable JsonNode value) {
+        public Builder withPaddleOcrConfig(final @Nullable JsonNode value) {
             this.paddleOcrConfig = value;
             return this;
         }
@@ -122,7 +122,7 @@ private com.fasterxml.jackson.databind.JsonNode backendOptions = null;
 
         /** Sets the backendOptions field. */
         @JsonProperty("backend_options")
-        public Builder withBackendOptions(final com.fasterxml.jackson.databind.@Nullable JsonNode value) {
+        public Builder withBackendOptions(final @Nullable JsonNode value) {
             this.backendOptions = value;
             return this;
         }

@@ -77,7 +77,7 @@ public record Metadata(
     /**
      * JSON schema (for structured data extraction)
      */
-    @JsonProperty("json_schema") com.fasterxml.jackson.databind.@Nullable JsonNode jsonSchema,
+    @Nullable @JsonProperty("json_schema") JsonNode jsonSchema,
     /**
      * Error metadata (for batch operations)
      */
@@ -126,7 +126,7 @@ public record Metadata(
      * Serialized as a nested {@code "additional"} object (not flattened at root level).
      * Uses {@code Cow&lt;'static, str&gt;} keys so static string keys avoid allocation.
      */
-    @JsonProperty("additional") Map<String, com.fasterxml.jackson.databind.@Nullable JsonNode> additional
+    @Nullable @JsonProperty("additional") Map<String, JsonNode> additional
 ) {
     public static Builder builder() {
         return new Builder();
@@ -154,7 +154,7 @@ private FormatMetadata format = null;
         @JsonProperty("image_preprocessing")
 private ImagePreprocessingMetadata imagePreprocessing = null;
         @JsonProperty("json_schema")
-private com.fasterxml.jackson.databind.JsonNode jsonSchema = null;
+private JsonNode jsonSchema = null;
 private ErrorMetadata error = null;
         @JsonProperty("extraction_duration_ms")
 private Long extractionDurationMs = null;
@@ -168,7 +168,7 @@ private String abstractText = null;
 private String outputFormat = null;
         @JsonProperty("ocr_used")
 private Boolean ocrUsed = null;
-private Map<String, com.fasterxml.jackson.databind.JsonNode> additional = null;
+private Map<String, JsonNode> additional = null;
 
         /** Sets the title field. */
         @JsonProperty("title")
@@ -256,7 +256,7 @@ private Map<String, com.fasterxml.jackson.databind.JsonNode> additional = null;
 
         /** Sets the jsonSchema field. */
         @JsonProperty("json_schema")
-        public Builder withJsonSchema(final com.fasterxml.jackson.databind.@Nullable JsonNode value) {
+        public Builder withJsonSchema(final @Nullable JsonNode value) {
             this.jsonSchema = value;
             return this;
         }
@@ -319,7 +319,7 @@ private Map<String, com.fasterxml.jackson.databind.JsonNode> additional = null;
 
         /** Sets the additional field. */
         @JsonProperty("additional")
-        public Builder withAdditional(final Map<String, com.fasterxml.jackson.databind.@Nullable JsonNode> value) {
+        public Builder withAdditional(final @Nullable Map<String, JsonNode> value) {
             this.additional = value;
             return this;
         }

@@ -42,7 +42,7 @@ public record DocxMetadata(
      * Contains key-value pairs defined by users or applications.
      * Values can be strings, numbers, booleans, or dates.
      */
-    @JsonProperty("custom_properties") Map<String, com.fasterxml.jackson.databind.@Nullable JsonNode> customProperties
+    @Nullable @JsonProperty("custom_properties") Map<String, JsonNode> customProperties
 ) {
     public static Builder builder() {
         return new Builder();
@@ -57,7 +57,7 @@ private CoreProperties coreProperties = null;
         @JsonProperty("app_properties")
 private DocxAppProperties appProperties = null;
         @JsonProperty("custom_properties")
-private Map<String, com.fasterxml.jackson.databind.JsonNode> customProperties = null;
+private Map<String, JsonNode> customProperties = null;
 
         /** Sets the coreProperties field. */
         @JsonProperty("core_properties")
@@ -75,7 +75,7 @@ private Map<String, com.fasterxml.jackson.databind.JsonNode> customProperties = 
 
         /** Sets the customProperties field. */
         @JsonProperty("custom_properties")
-        public Builder withCustomProperties(final Map<String, com.fasterxml.jackson.databind.@Nullable JsonNode> value) {
+        public Builder withCustomProperties(final @Nullable Map<String, JsonNode> value) {
             this.customProperties = value;
             return this;
         }
