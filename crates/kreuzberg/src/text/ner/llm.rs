@@ -170,23 +170,24 @@ async fn complete_with_json_schema(
         "required": ["entities"]
     });
 
-    #[allow(clippy::field_reassign_with_default)]
-    let mut request = liter_llm::ChatCompletionRequest::default();
-    request.model = config.model.clone();
-    request.messages = vec![liter_llm::Message::User(liter_llm::UserMessage {
-        content: liter_llm::UserContent::Text(prompt),
-        name: None,
-    })];
-    request.temperature = config.temperature;
-    request.max_tokens = config.max_tokens;
-    request.response_format = Some(liter_llm::ResponseFormat::JsonSchema {
-        json_schema: liter_llm::JsonSchemaFormat {
-            name: "entity_list".to_string(),
-            description: Some("Named entity recognition output.".to_string()),
-            schema,
-            strict: Some(true),
-        },
-    });
+    let request = liter_llm::ChatCompletionRequest {
+        model: config.model.clone(),
+        messages: vec![liter_llm::Message::User(liter_llm::UserMessage {
+            content: liter_llm::UserContent::Text(prompt),
+            name: None,
+        })],
+        temperature: config.temperature,
+        max_tokens: config.max_tokens,
+        response_format: Some(liter_llm::ResponseFormat::JsonSchema {
+            json_schema: liter_llm::JsonSchemaFormat {
+                name: "entity_list".to_string(),
+                description: Some("Named entity recognition output.".to_string()),
+                schema,
+                strict: Some(true),
+            },
+        }),
+        ..Default::default()
+    };
 
     let response = client
         .chat(request)

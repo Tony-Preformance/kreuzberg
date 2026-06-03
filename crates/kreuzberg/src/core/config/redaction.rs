@@ -179,8 +179,3 @@ impl RedactionConfig {
     }
 }
 
-impl Default for RedactionStrategy {
-    fn default() -> Self {
-        Self::Mask
-    }
-}

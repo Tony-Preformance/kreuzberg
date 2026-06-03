@@ -46,11 +46,12 @@ pub struct RedactionFinding {
 }
 
 /// Strategy applied when a PII match is rewritten.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[cfg_attr(feature = "api", derive(utoipa::ToSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum RedactionStrategy {
     /// Replace the matched span with a fixed mask token (default `"[REDACTED]"`).
+    #[default]
     Mask,
     /// Replace with a SHA-256 hash of the original value (truncated to 16 hex chars).
     /// Lets downstream consumers do equality joins without recovering the source.
