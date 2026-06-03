@@ -96,6 +96,8 @@ fn test_extracted_image_with_classification() {
         image_kind: Some(ImageKind::Icon),
         kind_confidence: Some(0.85),
         cluster_id: Some(1),
+        caption: None,
+        qr_codes: None,
     };
 
     let json = serde_json::to_string(&image).unwrap();

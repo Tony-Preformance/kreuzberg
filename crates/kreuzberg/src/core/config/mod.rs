@@ -56,6 +56,6 @@ pub use tree_sitter::{CodeContentMode, TreeSitterConfig, TreeSitterProcessConfig
 pub use captioning::CaptioningConfig;
 pub use classification::PageClassificationConfig;
 pub use ner::{NerBackendKind, NerConfig};
-pub use redaction::RedactionConfig;
+pub use redaction::{RedactionConfig, RedactionPattern, RedactionTerm};
 pub use summarization::SummarizationConfig;
 pub use translation::TranslationConfig;

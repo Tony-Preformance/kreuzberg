@@ -151,10 +151,12 @@ pub use core::extractor::{batch_extract_files_sync, extract_file_sync};
 
 // ── Extraction config types ───────────────────────────────────────────────────
 pub use core::config::{
-    AccelerationConfig, BatchBytesItem, BatchFileItem, ChunkSizing, ChunkerType, ChunkingConfig, ContentFilterConfig,
-    EmailConfig, EmbeddingConfig, EmbeddingModelType, ExecutionProviderType, ExtractionConfig, FileExtractionConfig,
-    ImageExtractionConfig, LanguageDetectionConfig, LlmConfig, OcrConfig, OutputFormat, PageConfig,
-    PostProcessorConfig, StructuredExtractionConfig, TokenReductionOptions,
+    AccelerationConfig, BatchBytesItem, BatchFileItem, CaptioningConfig, ChunkSizing, ChunkerType, ChunkingConfig,
+    ContentFilterConfig, EmailConfig, EmbeddingConfig, EmbeddingModelType, ExecutionProviderType, ExtractionConfig,
+    FileExtractionConfig, ImageExtractionConfig, LanguageDetectionConfig, LlmConfig, NerBackendKind, NerConfig,
+    OcrConfig, OutputFormat, PageClassificationConfig, PageConfig, PostProcessorConfig, RedactionConfig,
+    RedactionPattern, RedactionTerm, StructuredExtractionConfig, SummarizationConfig, TokenReductionOptions,
+    TranslationConfig,
 };
 pub use extractors::security::SecurityLimits;
 
@@ -168,6 +170,15 @@ pub use text::{ReductionLevel, TokenReductionConfig};
     not(all(target_os = "android", target_arch = "x86_64"))
 ))]
 pub use text::ner::llm::LlmBackend;
+
+// GlineBackend (GLiNER ONNX NER) and RegionKind (per-region VLM extraction) are
+// re-exported here so alef-generated bindings can refer to them as `kreuzberg::GlineBackend`
+// and `kreuzberg::RegionKind` without internal module path exposure.
+#[cfg(feature = "ner-onnx")]
+pub use text::ner::gline::GlineBackend;
+
+#[cfg(all(feature = "liter-llm", not(target_os = "windows")))]
+pub use llm::region_extractor::RegionKind;
 
 #[cfg(feature = "redaction")]
 pub use text::redaction::strategy::TokenCounter;
