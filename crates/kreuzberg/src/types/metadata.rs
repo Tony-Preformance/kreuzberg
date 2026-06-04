@@ -18,6 +18,7 @@ use super::page::PageStructure;
 ///
 /// Hides the external tree_sitter_language_pack::ProcessResult type from FFI/binding
 /// surface while preserving tree-sitter code analysis results for Rust consumers.
+#[cfg(feature = "tree-sitter")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[doc(hidden)]
 #[cfg_attr(alef, alef(skip))]

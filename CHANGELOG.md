@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **fix(types)**: feature-gate `CodeMetadataInner` (tree-sitter wrapper) with `#[cfg(feature = "tree-sitter")]`. The enum variant `FormatMetadata::Code` was already gated, but the inner struct referenced `tree_sitter_language_pack::ProcessResult` unconditionally, breaking `cargo check -p kreuzberg --no-default-features` which CI Rust runs as a separate step after tests. This was the persistent CI Rust failure previously mis-classified as "infra flake".
 - **fix(deps)**: switch `liter-llm` to git source (`kreuzberg-dev/liter-llm` `main`) — restores Windows build path now that the `aws-lc-sys` MSVC fix is applied upstream. Removes the temporary Windows `llm` stub module from `lib.rs` and unwinds all `not(target_os = "windows")` cfg gates introduced in `312b75e2d2`.
 
 - **fix(redaction)**: SWIFT BIC detector no longer case-folds the entire input before matching. Real BICs are always written in uppercase; the previous `to_ascii_uppercase()` conversion caused every 8-letter lowercase English word (e.g. `launches`, `codename`) to be reported as a false-positive SWIFT BIC match.
