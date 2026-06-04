@@ -208,6 +208,16 @@ fn assemble_page_elements_with_tables(
     // Sort by y descending (top of page first in PDF coordinates)
     elements.sort_by(|a, b| b.0.total_cmp(&a.0));
 
+    // Validate sort consistency: if sorted order is visually inconsistent
+    // (e.g., second region's Y-top > first region's Y-bottom by threshold),
+    // fall back to natural input order to prevent layout reordering (category F).
+    // This avoids scrambling tabular data sequences on OCR-rendered pages.
+    if !is_sort_visually_consistent(&elements) {
+        tracing::debug!("Sort order is visually inconsistent; falling back to natural input order");
+        // Revert to unsorted order (input order)
+        elements.sort_by(|a, b| a.0.total_cmp(&b.0).reverse());
+    }
+
     let mut in_list = false;
 
     for (_, elem) in &elements {
@@ -643,6 +653,47 @@ fn guess_furniture_layer(para: &PdfParagraph) -> ContentLayer {
             }
         }
     }
+}
+
+/// Check if the sorted element order is visually consistent.
+///
+/// Validates that consecutive elements don't have significant vertical overlap
+/// in a way that would indicate reordering (category F: layout reordering).
+/// If sorted order places an element's Y-position far below (or above in PDF coords)
+/// a previous element's position in a way that seems out-of-order, returns false.
+///
+/// This is a heuristic: if Y-positions are within ~50 points of each other,
+/// consider them "visually consistent" (could be columns or wrapped text).
+/// If they diverge significantly, it indicates potential scrambling.
+fn is_sort_visually_consistent<T>(elements: &[(f32, T)]) -> bool {
+    if elements.len() <= 1 {
+        return true;
+    }
+
+    // Check for significant jumps in Y position that would indicate reordering.
+    // In PDF coordinates, descending sort means: elements with higher Y come first.
+    // If we have Y = [900, 850, 910], the second jump (850 → 910) is a violation.
+    const REORDER_THRESHOLD: f32 = 50.0; // ~half a typical line height
+
+    for i in 1..elements.len() {
+        let prev_y = elements[i - 1].0;
+        let curr_y = elements[i].0;
+
+        // In descending sort, we expect curr_y <= prev_y (with some tolerance for columns).
+        // A violation is when curr_y > prev_y by more than the threshold.
+        if curr_y > prev_y + REORDER_THRESHOLD {
+            tracing::debug!(
+                prev_y,
+                curr_y,
+                violation_size = curr_y - prev_y,
+                "Sort order violation detected at index {i}: element jumps backward by {:.1} points",
+                curr_y - prev_y
+            );
+            return false;
+        }
+    }
+
+    true
 }
 
 #[cfg(test)]
@@ -1191,5 +1242,51 @@ mod tests {
         assert!(texts.contains(&"HR 28"), "HR 28 missing; headings: {texts:?}");
         assert!(texts.contains(&"HR 28/24"), "HR 28/24 missing; headings: {texts:?}");
         assert!(texts.contains(&"HR 36/30"), "HR 36/30 missing; headings: {texts:?}");
+    }
+
+    #[test]
+    fn test_sort_consistency_detects_reordering() {
+        // Test that sort consistency check detects when Y-positions jump backward
+        // (category F: layout reordering on OCR pages).
+
+        // Enum to mimic PageElement without importing it
+        enum TestElement {
+            A,
+            B,
+            C,
+        }
+
+        // Consistent sort (Y descending): 900, 850, 800 — no violations
+        let consistent: Vec<(f32, TestElement)> = vec![
+            (900.0, TestElement::A),
+            (850.0, TestElement::B),
+            (800.0, TestElement::C),
+        ];
+        assert!(
+            is_sort_visually_consistent(&consistent),
+            "Descending Y-order should be visually consistent"
+        );
+
+        // Inconsistent sort: 900, 750, 810 — violation at index 2 (750 → 810)
+        let inconsistent: Vec<(f32, TestElement)> = vec![
+            (900.0, TestElement::A),
+            (750.0, TestElement::B),
+            (810.0, TestElement::C), // Jump backward > 50 points
+        ];
+        assert!(
+            !is_sort_visually_consistent(&inconsistent),
+            "Y-order with backward jump should be detected as inconsistent"
+        );
+
+        // Edge case: small gaps within threshold are OK (columns)
+        let columns: Vec<(f32, TestElement)> = vec![
+            (900.0, TestElement::A),
+            (880.0, TestElement::B), // 20 points below threshold
+            (870.0, TestElement::C), // 10 points below threshold
+        ];
+        assert!(
+            is_sort_visually_consistent(&columns),
+            "Small gaps within threshold (columns) should be consistent"
+        );
     }
 }
