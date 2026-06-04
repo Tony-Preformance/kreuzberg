@@ -108,3 +108,92 @@ pub(crate) fn ocr_doc_to_paragraphs(
 
     result
 }
+
+#[cfg(all(feature = "ocr", test))]
+mod tests {
+    use super::*;
+    use crate::types::internal::{InternalDocument, InternalElement, ElementKind};
+    use crate::types::extraction::BoundingBox;
+    use crate::types::ocr_elements::OcrElementLevel;
+
+    /// Test that OCR elements with mixed content and blank lines preserve all text.
+    #[test]
+    fn test_ocr_doc_preserves_mixed_content_with_blanks() {
+        let mut doc = InternalDocument::new("test");
+        let mut elem = InternalElement::text(ElementKind::OcrText { level: OcrElementLevel::Line }, "line1\n\nline3", 0);
+        elem.bbox = Some(BoundingBox {
+            x0: 10.0,
+            y0: 10.0,
+            x1: 100.0,
+            y1: 70.0,
+        });
+        doc.push_element(elem);
+
+        let paragraphs = ocr_doc_to_paragraphs(&doc, 1000);
+
+        assert_eq!(paragraphs.len(), 1, "Should have one paragraph");
+        let para = &paragraphs[0];
+
+        // Full text should be preserved including blank lines
+        assert_eq!(para.text, "line1\n\nline3", "Text should preserve blank lines");
+
+        // Word count should be 2 (line1, line3) - blanks don't contribute
+        assert_eq!(para.word_count, 2, "Word count should count only non-blank words");
+
+        // Lines array should have only non-blank lines
+        assert_eq!(para.lines.len(), 2, "Lines array should have only non-blank lines");
+
+        // Content should not be filtered out
+        assert!(!para.text.is_empty(), "Text should not be empty");
+    }
+
+    /// Test that whitespace-only OCR elements are filtered out (correct behavior).
+    #[test]
+    fn test_ocr_doc_filters_whitespace_only_elements() {
+        let mut doc = InternalDocument::new("test");
+        let mut elem1 = InternalElement::text(ElementKind::OcrText { level: OcrElementLevel::Line }, "   \n  \n  ", 0);
+        elem1.bbox = Some(BoundingBox {
+            x0: 10.0,
+            y0: 10.0,
+            x1: 100.0,
+            y1: 70.0,
+        });
+        doc.push_element(elem1);
+
+        let mut elem2 = InternalElement::text(ElementKind::OcrText { level: OcrElementLevel::Line }, "real content", 0);
+        elem2.bbox = Some(BoundingBox {
+            x0: 10.0,
+            y0: 80.0,
+            x1: 100.0,
+            y1: 140.0,
+        });
+        doc.push_element(elem2);
+
+        let paragraphs = ocr_doc_to_paragraphs(&doc, 1000);
+
+        // Should only have the real content paragraph
+        assert_eq!(paragraphs.len(), 1, "Should filter out whitespace-only element");
+        assert_eq!(paragraphs[0].text, "real content");
+    }
+
+    /// Test that OCR elements with content followed by blanks preserve content.
+    #[test]
+    fn test_ocr_doc_preserves_content_before_blanks() {
+        let mut doc = InternalDocument::new("test");
+        let mut elem = InternalElement::text(ElementKind::OcrText { level: OcrElementLevel::Line }, "important\n\n", 0);
+        elem.bbox = Some(BoundingBox {
+            x0: 10.0,
+            y0: 10.0,
+            x1: 100.0,
+            y1: 70.0,
+        });
+        doc.push_element(elem);
+
+        let paragraphs = ocr_doc_to_paragraphs(&doc, 1000);
+
+        assert_eq!(paragraphs.len(), 1);
+        assert_eq!(paragraphs[0].text, "important\n\n");
+        assert_eq!(paragraphs[0].word_count, 1);
+        assert_eq!(paragraphs[0].lines.len(), 1, "Only the non-blank line should be in lines array");
+    }
+}

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **fix(ocr)**: add unit tests to verify OCR elements with mixed content and blank lines preserve all text during paragraph conversion. Tests confirm whitespace-only elements are correctly filtered, blank lines within elements don't drop content (full text preserved in `PdfParagraph.text`), and word counts are accurate. This ensures quality metrics (TF1) don't degrade when layout detection is applied to OCR-extracted documents.
 - **fix(types)**: feature-gate `CodeMetadataInner` (tree-sitter wrapper) with `#[cfg(feature = "tree-sitter")]`. The enum variant `FormatMetadata::Code` was already gated, but the inner struct referenced `tree_sitter_language_pack::ProcessResult` unconditionally, breaking `cargo check -p kreuzberg --no-default-features` which CI Rust runs as a separate step after tests. This was the persistent CI Rust failure previously mis-classified as "infra flake".
 - **fix(deps)**: switch `liter-llm` to git source (`kreuzberg-dev/liter-llm` `main`) — restores Windows build path now that the `aws-lc-sys` MSVC fix is applied upstream. Removes the temporary Windows `llm` stub module from `lib.rs` and unwinds all `not(target_os = "windows")` cfg gates introduced in `312b75e2d2`.
 
