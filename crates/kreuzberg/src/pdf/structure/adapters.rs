@@ -112,15 +112,21 @@ pub(crate) fn ocr_doc_to_paragraphs(
 #[cfg(all(feature = "ocr", test))]
 mod tests {
     use super::*;
-    use crate::types::internal::{InternalDocument, InternalElement, ElementKind};
     use crate::types::extraction::BoundingBox;
+    use crate::types::internal::{ElementKind, InternalDocument, InternalElement};
     use crate::types::ocr_elements::OcrElementLevel;
 
     /// Test that OCR elements with mixed content and blank lines preserve all text.
     #[test]
     fn test_ocr_doc_preserves_mixed_content_with_blanks() {
         let mut doc = InternalDocument::new("test");
-        let mut elem = InternalElement::text(ElementKind::OcrText { level: OcrElementLevel::Line }, "line1\n\nline3", 0);
+        let mut elem = InternalElement::text(
+            ElementKind::OcrText {
+                level: OcrElementLevel::Line,
+            },
+            "line1\n\nline3",
+            0,
+        );
         elem.bbox = Some(BoundingBox {
             x0: 10.0,
             y0: 10.0,
@@ -151,7 +157,13 @@ mod tests {
     #[test]
     fn test_ocr_doc_filters_whitespace_only_elements() {
         let mut doc = InternalDocument::new("test");
-        let mut elem1 = InternalElement::text(ElementKind::OcrText { level: OcrElementLevel::Line }, "   \n  \n  ", 0);
+        let mut elem1 = InternalElement::text(
+            ElementKind::OcrText {
+                level: OcrElementLevel::Line,
+            },
+            "   \n  \n  ",
+            0,
+        );
         elem1.bbox = Some(BoundingBox {
             x0: 10.0,
             y0: 10.0,
@@ -160,7 +172,13 @@ mod tests {
         });
         doc.push_element(elem1);
 
-        let mut elem2 = InternalElement::text(ElementKind::OcrText { level: OcrElementLevel::Line }, "real content", 0);
+        let mut elem2 = InternalElement::text(
+            ElementKind::OcrText {
+                level: OcrElementLevel::Line,
+            },
+            "real content",
+            0,
+        );
         elem2.bbox = Some(BoundingBox {
             x0: 10.0,
             y0: 80.0,
@@ -180,7 +198,13 @@ mod tests {
     #[test]
     fn test_ocr_doc_preserves_content_before_blanks() {
         let mut doc = InternalDocument::new("test");
-        let mut elem = InternalElement::text(ElementKind::OcrText { level: OcrElementLevel::Line }, "important\n\n", 0);
+        let mut elem = InternalElement::text(
+            ElementKind::OcrText {
+                level: OcrElementLevel::Line,
+            },
+            "important\n\n",
+            0,
+        );
         elem.bbox = Some(BoundingBox {
             x0: 10.0,
             y0: 10.0,
@@ -194,6 +218,10 @@ mod tests {
         assert_eq!(paragraphs.len(), 1);
         assert_eq!(paragraphs[0].text, "important\n\n");
         assert_eq!(paragraphs[0].word_count, 1);
-        assert_eq!(paragraphs[0].lines.len(), 1, "Only the non-blank line should be in lines array");
+        assert_eq!(
+            paragraphs[0].lines.len(),
+            1,
+            "Only the non-blank line should be in lines array"
+        );
     }
 }
