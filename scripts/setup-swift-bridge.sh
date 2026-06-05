@@ -3,10 +3,12 @@
 
 set -e
 
-# Find the most recently built output directory
-OUT=$(find target/release/build -maxdepth 2 -type d -name out -path '*kreuzberg-swift-*' \
-  -exec stat -f '%m %N' {} + 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
-if [ -z "$OUT" ]; then
+# Find the most recently built output directory.
+# Portable across macOS (BSD stat) and Linux (GNU stat): use `ls -td` on the
+# globbed directory list and pick the first entry (newest mtime).
+# shellcheck disable=SC2012
+OUT=$(ls -1td target/release/build/kreuzberg-swift-*/out 2>/dev/null | head -1)
+if [ -z "$OUT" ] || [ ! -d "$OUT" ]; then
   echo "ERROR: Could not find swift-bridge build output in target/release/build/"
   exit 1
 fi
