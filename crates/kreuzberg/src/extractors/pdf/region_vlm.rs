@@ -260,7 +260,6 @@ mod tests {
 
     #[test]
     fn test_min_pixel_area_constant() {
-        // MIN_REGION_PIXEL_AREA must be positive to avoid sending empty crops.
-        assert!(MIN_REGION_PIXEL_AREA > 0);
+        const { assert!(MIN_REGION_PIXEL_AREA > 0) };
     }
 }
