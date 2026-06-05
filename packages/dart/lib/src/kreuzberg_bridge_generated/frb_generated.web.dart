@@ -446,6 +446,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ArchiveMetadata dco_decode_archive_metadata(dynamic raw);
 
   @protected
+  AudioMetadata dco_decode_audio_metadata(dynamic raw);
+
+  @protected
   BBox dco_decode_b_box(dynamic raw);
 
   @protected
@@ -471,6 +474,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ArchiveMetadata dco_decode_box_autoadd_archive_metadata(dynamic raw);
+
+  @protected
+  AudioMetadata dco_decode_box_autoadd_audio_metadata(dynamic raw);
 
   @protected
   BibtexMetadata dco_decode_box_autoadd_bibtex_metadata(dynamic raw);
@@ -1838,6 +1844,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TokenReductionOptions dco_decode_token_reduction_options(dynamic raw);
 
   @protected
+  TranscriptionConfig dco_decode_transcription_config(dynamic raw);
+
+  @protected
   Translation dco_decode_translation(dynamic raw);
 
   @protected
@@ -1863,6 +1872,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   VlmFallbackPolicy dco_decode_vlm_fallback_policy(dynamic raw);
+
+  @protected
+  WhisperModel dco_decode_whisper_model(dynamic raw);
 
   @protected
   XlsxAppProperties dco_decode_xlsx_app_properties(dynamic raw);
@@ -2169,6 +2181,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ArchiveMetadata sse_decode_archive_metadata(SseDeserializer deserializer);
 
   @protected
+  AudioMetadata sse_decode_audio_metadata(SseDeserializer deserializer);
+
+  @protected
   BBox sse_decode_b_box(SseDeserializer deserializer);
 
   @protected
@@ -2196,6 +2211,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ArchiveMetadata sse_decode_box_autoadd_archive_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  AudioMetadata sse_decode_box_autoadd_audio_metadata(
     SseDeserializer deserializer,
   );
 
@@ -3929,6 +3949,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  TranscriptionConfig sse_decode_transcription_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   Translation sse_decode_translation(SseDeserializer deserializer);
 
   @protected
@@ -3958,6 +3983,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   VlmFallbackPolicy sse_decode_vlm_fallback_policy(
     SseDeserializer deserializer,
   );
+
+  @protected
+  WhisperModel sse_decode_whisper_model(SseDeserializer deserializer);
 
   @protected
   XlsxAppProperties sse_decode_xlsx_app_properties(
@@ -4433,6 +4461,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_audio_metadata(AudioMetadata self, SseSerializer serializer);
+
+  @protected
   void sse_encode_b_box(BBox self, SseSerializer serializer);
 
   @protected
@@ -4468,6 +4499,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_archive_metadata(
     ArchiveMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_audio_metadata(
+    AudioMetadata self,
     SseSerializer serializer,
   );
 
@@ -6704,6 +6741,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_transcription_config(
+    TranscriptionConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_translation(Translation self, SseSerializer serializer);
 
   @protected
@@ -6741,6 +6784,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     VlmFallbackPolicy self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_whisper_model(WhisperModel self, SseSerializer serializer);
 
   @protected
   void sse_encode_xlsx_app_properties(

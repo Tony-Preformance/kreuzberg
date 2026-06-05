@@ -47,6 +47,13 @@ typedef struct KREUZBERGArchiveEntry KREUZBERGArchiveEntry;
  */
 typedef struct KREUZBERGArchiveMetadata KREUZBERGArchiveMetadata;
 /**
+ * Audio/video file metadata.
+ *
+ * Populated from container tags (ID3v2, MP4 atoms, Vorbis comments, etc.) and
+ * PCM decode properties. Available when the `transcription-types` feature is enabled.
+ */
+typedef struct KREUZBERGAudioMetadata KREUZBERGAudioMetadata;
+/**
  * Bounding box in original image coordinates (x1, y1) top-left, (x2, y2) bottom-right.
  */
 typedef struct KREUZBERGBBox KREUZBERGBBox;
@@ -1558,6 +1565,26 @@ typedef struct KREUZBERGTokenReductionConfig KREUZBERGTokenReductionConfig;
  */
 typedef struct KREUZBERGTokenReductionOptions KREUZBERGTokenReductionOptions;
 /**
+ * Configuration for audio/video transcription (speech-to-text).
+ *
+ * When present and `enabled`, Kreuzberg will route audio and video files
+ * (mp3, mp4, m4a, wav, webm, etc.) through the transcription pipeline.
+ *
+ * The heavy dependencies (ORT, hf-hub, symphonia) are only pulled when the
+ * `transcription` feature is enabled. The config struct itself is available
+ * under `transcription-types` so that `ExtractionConfig` round-trips on all
+ * targets.
+ *
+ * All fields have sensible defaults. The recommended starting point is:
+ *
+ * ```toml
+ * [extraction.transcription]
+ * enabled = true
+ * model = "tiny"
+ * ```
+ */
+typedef struct KREUZBERGTranscriptionConfig KREUZBERGTranscriptionConfig;
+/**
  * Translation of the extracted content.
  *
  * Holds the translated rendition of `ExtractionResult::content` and (when
@@ -1694,6 +1721,14 @@ typedef struct KREUZBERGValidator KREUZBERGValidator;
  * \endcode
  */
 typedef struct KREUZBERGVlmFallbackPolicy KREUZBERGVlmFallbackPolicy;
+/**
+ * Supported Whisper model sizes.
+ *
+ * These map to published ONNX exports on Hugging Face (onnx-community or
+ * similar orgs). The actual filenames and repos are resolved inside the
+ * transcription engine.
+ */
+typedef struct KREUZBERGWhisperModel KREUZBERGWhisperModel;
 /**
  * Application properties from docProps/app.xml for XLSX
  *
@@ -5037,6 +5072,105 @@ uint32_t kreuzberg_summarization_config_max_tokens(const KREUZBERGSummarizationC
  * Pointer must be a valid handle returned by this library.
  */
 KREUZBERGLlmConfig *kreuzberg_summarization_config_llm(const KREUZBERGSummarizationConfig *ptr);
+
+/**
+ * Create a `TranscriptionConfig` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `kreuzberg_transcription_config_free`.
+ */
+KREUZBERGTranscriptionConfig *kreuzberg_transcription_config_from_json(const char *json);
+
+/**
+ * Serialize a `TranscriptionConfig` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `kreuzberg` function.
+ * The returned string must be freed with `kreuzberg_free_string`.
+ */
+char *kreuzberg_transcription_config_to_json(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Free a `TranscriptionConfig` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void kreuzberg_transcription_config_free(KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `enabled` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+int32_t kreuzberg_transcription_config_enabled(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `model` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+KREUZBERGWhisperModel *kreuzberg_transcription_config_model(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `language` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *kreuzberg_transcription_config_language(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `timestamps` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+int32_t kreuzberg_transcription_config_timestamps(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `max_duration_ms` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint64_t kreuzberg_transcription_config_max_duration_ms(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `max_bytes` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint64_t kreuzberg_transcription_config_max_bytes(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `timeout_ms` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint64_t kreuzberg_transcription_config_timeout_ms(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `model_cache_dir` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *kreuzberg_transcription_config_model_cache_dir(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `allow_network` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+int32_t kreuzberg_transcription_config_allow_network(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * Get the `verify_hash` field from a `TranscriptionConfig`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+int32_t kreuzberg_transcription_config_verify_hash(const KREUZBERGTranscriptionConfig *ptr);
+
+/**
+ * \note SAFETY: Caller must ensure all pointer arguments are valid or null. Returned pointers must be
+ * freed with the appropriate free function.
+ */
+KREUZBERGTranscriptionConfig *kreuzberg_transcription_config_default(void);
 
 /**
  * Create a `TranslationConfig` from a JSON string. Returns null on failure.
@@ -10553,6 +10687,71 @@ void kreuzberg_pst_metadata_free(KREUZBERGPstMetadata *ptr);
 uintptr_t kreuzberg_pst_metadata_message_count(const KREUZBERGPstMetadata *ptr);
 
 /**
+ * Create a `AudioMetadata` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `kreuzberg_audio_metadata_free`.
+ */
+KREUZBERGAudioMetadata *kreuzberg_audio_metadata_from_json(const char *json);
+
+/**
+ * Serialize a `AudioMetadata` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `kreuzberg` function.
+ * The returned string must be freed with `kreuzberg_free_string`.
+ */
+char *kreuzberg_audio_metadata_to_json(const KREUZBERGAudioMetadata *ptr);
+
+/**
+ * Free a `AudioMetadata` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void kreuzberg_audio_metadata_free(KREUZBERGAudioMetadata *ptr);
+
+/**
+ * Get the `duration_ms` field from a `AudioMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint64_t kreuzberg_audio_metadata_duration_ms(const KREUZBERGAudioMetadata *ptr);
+
+/**
+ * Get the `codec` field from a `AudioMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *kreuzberg_audio_metadata_codec(const KREUZBERGAudioMetadata *ptr);
+
+/**
+ * Get the `container` field from a `AudioMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *kreuzberg_audio_metadata_container(const KREUZBERGAudioMetadata *ptr);
+
+/**
+ * Get the `sample_rate_hz` field from a `AudioMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint32_t kreuzberg_audio_metadata_sample_rate_hz(const KREUZBERGAudioMetadata *ptr);
+
+/**
+ * Get the `channels` field from a `AudioMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint16_t kreuzberg_audio_metadata_channels(const KREUZBERGAudioMetadata *ptr);
+
+/**
+ * Get the `bitrate` field from a `AudioMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint32_t kreuzberg_audio_metadata_bitrate(const KREUZBERGAudioMetadata *ptr);
+
+/**
  * Create a `OcrConfidence` from a JSON string. Returns null on failure.
  * # Safety
  * JSON string must be valid UTF-8 and null-terminated.
@@ -13105,6 +13304,21 @@ int32_t kreuzberg_embedding_model_type_from_i32(int32_t value);
 int32_t kreuzberg_embedding_model_type_from_str(const char *name);
 
 /**
+ * Convert an integer to a `WhisperModel` variant. Returns -1 on invalid input.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t kreuzberg_whisper_model_from_i32(int32_t value);
+
+/**
+ * Convert a `WhisperModel` variant name (C string) to its integer value. Returns -1 on invalid input.
+ * # Safety
+ * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+ */
+int32_t kreuzberg_whisper_model_from_str(const char *name);
+
+/**
  * Convert an integer to a `CodeContentMode` variant. Returns -1 on invalid input.
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
@@ -13898,6 +14112,31 @@ char *kreuzberg_embedding_model_type_to_json(const KREUZBERGEmbeddingModelType *
  * The returned string must be freed with `kreuzberg_free_string`.
  */
 char *kreuzberg_embedding_model_type_to_string(const KREUZBERGEmbeddingModelType *ptr);
+
+/**
+ * Free a heap-allocated `WhisperModel` returned by a pointer-returning FFI function.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void kreuzberg_whisper_model_free(KREUZBERGWhisperModel *ptr);
+
+/**
+ * Serialize a heap-allocated `WhisperModel` to a JSON string.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `kreuzberg` function.
+ * The returned string must be freed with `kreuzberg_free_string`.
+ */
+char *kreuzberg_whisper_model_to_json(const KREUZBERGWhisperModel *ptr);
+
+/**
+ * Render a heap-allocated `WhisperModel` as its string representation
+ * (the unit-variant name as serialized by serde — e.g. `"completed"`,
+ * without surrounding JSON quotes).
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `kreuzberg` function.
+ * The returned string must be freed with `kreuzberg_free_string`.
+ */
+char *kreuzberg_whisper_model_to_string(const KREUZBERGWhisperModel *ptr);
 
 /**
  * Free a heap-allocated `CodeContentMode` returned by a pointer-returning FFI function.

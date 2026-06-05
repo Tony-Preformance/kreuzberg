@@ -9,7 +9,7 @@ import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'lib.freezed.dart';
 
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `DocumentExtractorDartCallbacks`, `EmbeddingBackendDartCallbacks`, `OcrBackendDartCallbacks`, `PostProcessorDartCallbacks`, `RendererDartCallbacks`, `ValidatorDartCallbacks`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `backend_type`, `can_handle`, `dimensions`, `embed`, `estimated_duration_ms`, `extract_bytes`, `extract_file`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `name`, `name`, `name`, `name`, `name`, `name`, `priority`, `priority`, `priority`, `process_document`, `process_image_file`, `process_image`, `process`, `processing_stage`, `render`, `should_process`, `should_validate`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `supported_languages`, `supported_mime_types`, `supports_document_processing`, `supports_language`, `supports_table_detection`, `validate`, `version`, `version`, `version`, `version`, `version`, `version`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `backend_type`, `can_handle`, `dimensions`, `embed`, `estimated_duration_ms`, `extract_bytes`, `extract_file`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `name`, `name`, `name`, `name`, `name`, `name`, `priority`, `priority`, `priority`, `process_document`, `process_image_file`, `process_image`, `process`, `processing_stage`, `render`, `should_process`, `should_validate`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `shutdown`, `supported_languages`, `supported_mime_types`, `supports_document_processing`, `supports_language`, `supports_table_detection`, `validate`, `version`, `version`, `version`, `version`, `version`, `version`
 
 /// Extract content from a byte array.
 ///
@@ -592,6 +592,10 @@ Future<SummarizationConfig> createSummarizationConfigFromJson({
   required String json,
 }) => RustLib.instance.api.crateCreateSummarizationConfigFromJson(json: json);
 
+Future<TranscriptionConfig> createTranscriptionConfigFromJson({
+  required String json,
+}) => RustLib.instance.api.crateCreateTranscriptionConfigFromJson(json: json);
+
 Future<TranslationConfig> createTranslationConfigFromJson({
   required String json,
 }) => RustLib.instance.api.crateCreateTranslationConfigFromJson(json: json);
@@ -864,6 +868,9 @@ Future<EpubMetadata> createEpubMetadataFromJson({required String json}) =>
 
 Future<PstMetadata> createPstMetadataFromJson({required String json}) =>
     RustLib.instance.api.crateCreatePstMetadataFromJson(json: json);
+
+Future<AudioMetadata> createAudioMetadataFromJson({required String json}) =>
+    RustLib.instance.api.crateCreateAudioMetadataFromJson(json: json);
 
 Future<OcrConfidence> createOcrConfidenceFromJson({required String json}) =>
     RustLib.instance.api.crateCreateOcrConfidenceFromJson(json: json);
@@ -1506,6 +1513,60 @@ class ArchiveMetadata {
           fileList == other.fileList &&
           totalSize == other.totalSize &&
           compressedSize == other.compressedSize;
+}
+
+/// Audio/video file metadata.
+///
+/// Populated from container tags (ID3v2, MP4 atoms, Vorbis comments, etc.) and
+/// PCM decode properties. Available when the `transcription-types` feature is enabled.
+class AudioMetadata {
+  /// Duration in milliseconds derived from the decoded audio stream.
+  final PlatformInt64? durationMs;
+
+  /// Audio codec (e.g. "mp3", "aac", "opus", "flac").
+  final String? codec;
+
+  /// Container format (e.g. "mpeg", "mp4", "ogg", "wav").
+  final String? container;
+
+  /// Sample rate in Hz after decode (always 16000 when resampled for Whisper).
+  final PlatformInt64? sampleRateHz;
+
+  /// Number of audio channels (1 = mono, 2 = stereo).
+  final PlatformInt64? channels;
+
+  /// Audio bitrate in kbps from the source file tags/properties.
+  final PlatformInt64? bitrate;
+
+  const AudioMetadata({
+    this.durationMs,
+    this.codec,
+    this.container,
+    this.sampleRateHz,
+    this.channels,
+    this.bitrate,
+  });
+
+  @override
+  int get hashCode =>
+      durationMs.hashCode ^
+      codec.hashCode ^
+      container.hashCode ^
+      sampleRateHz.hashCode ^
+      channels.hashCode ^
+      bitrate.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AudioMetadata &&
+          runtimeType == other.runtimeType &&
+          durationMs == other.durationMs &&
+          codec == other.codec &&
+          container == other.container &&
+          sampleRateHz == other.sampleRateHz &&
+          channels == other.channels &&
+          bitrate == other.bitrate;
 }
 
 /// Bounding box in original image coordinates (x1, y1) top-left, (x2, y2) bottom-right.
@@ -5280,6 +5341,8 @@ sealed class FormatMetadata with _$FormatMetadata {
       FormatMetadata_Epub;
   const factory FormatMetadata.pst({required PstMetadata field0}) =
       FormatMetadata_Pst;
+  const factory FormatMetadata.audio({required AudioMetadata field0}) =
+      FormatMetadata_Audio;
 }
 
 /// Block-level element in a Djot document.
@@ -6390,6 +6453,8 @@ sealed class KreuzbergError with _$KreuzbergError {
       KreuzbergError_UnsupportedFormat;
   const factory KreuzbergError.embedding({required String message}) =
       KreuzbergError_Embedding;
+  const factory KreuzbergError.transcription({required String message}) =
+      KreuzbergError_Transcription;
   const factory KreuzbergError.timeout({
     required PlatformInt64 elapsedMs,
     required PlatformInt64 limitMs,
@@ -10667,6 +10732,126 @@ class TokenReductionOptions {
           preserveImportantWords == other.preserveImportantWords;
 }
 
+/// Configuration for audio/video transcription (speech-to-text).
+///
+/// When present and `enabled`, Kreuzberg will route audio and video files
+/// (mp3, mp4, m4a, wav, webm, etc.) through the transcription pipeline.
+///
+/// The heavy dependencies (ORT, hf-hub, symphonia) are only pulled when the
+/// `transcription` feature is enabled. The config struct itself is available
+/// under `transcription-types` so that `ExtractionConfig` round-trips on all
+/// targets.
+///
+/// All fields have sensible defaults. The recommended starting point is:
+///
+/// ```toml
+/// [extraction.transcription]
+/// enabled = true
+/// model = "tiny"
+/// ```
+class TranscriptionConfig {
+  /// Master switch. When false the block is ignored and audio files fall back
+  /// to the normal "unsupported format" path.
+  final bool enabled;
+
+  /// Whisper model size to use.
+  ///
+  /// Smaller = faster + lower memory. `tiny` is the pragmatic default for
+  /// first-time users and CI.
+  final WhisperModel model;
+
+  /// Optional language hint (ISO-639-1 code, e.g. "en", "de").
+  ///
+  /// When `None` (default) the engine may attempt auto-detection if supported.
+  /// For deterministic production output, always set this explicitly.
+  final String? language;
+
+  /// Whether to emit segment-level timestamps in the result metadata.
+  ///
+  /// When true, `metadata["transcription.segments"]` will contain an array
+  /// of `{start_ms, end_ms, text}` objects (if the engine supports it).
+  final bool timestamps;
+
+  /// Hard safety limit on input duration (milliseconds).
+  ///
+  /// Files longer than this are rejected *before* any decode or model work.
+  /// Default: 30 minutes. Set to `None` to disable (not recommended for
+  /// untrusted input).
+  final PlatformInt64? maxDurationMs;
+
+  /// Hard safety limit on input size (bytes).
+  ///
+  /// Default: 512 MiB. Protects against pathological or malicious uploads.
+  final PlatformInt64? maxBytes;
+
+  /// Wall-clock timeout for the entire transcription operation (ms).
+  ///
+  /// Includes model download (first time), decode, and inference.
+  /// Default: 10 minutes. Uses `tokio::select!` so the async runtime is
+  /// never blocked.
+  final PlatformInt64? timeoutMs;
+
+  /// Override the directory used for Whisper model cache.
+  ///
+  /// When `None`, uses the centralized resolver:
+  /// `KREUZBERG_CACHE_DIR/transcription/whisper` or the platform default
+  /// (`~/.cache/kreuzberg/transcription/whisper` on Linux, etc.).
+  final String? modelCacheDir;
+
+  /// Allow network access to download models from Hugging Face Hub.
+  ///
+  /// When `false`, only previously cached models may be used. Useful for
+  /// air-gapped or fully offline deployments.
+  final bool allowNetwork;
+
+  /// Verify SHA256 checksums of downloaded model files (when known).
+  ///
+  /// Strongly recommended; disable only for debugging.
+  final bool verifyHash;
+
+  const TranscriptionConfig({
+    required this.enabled,
+    required this.model,
+    this.language,
+    required this.timestamps,
+    this.maxDurationMs,
+    this.maxBytes,
+    this.timeoutMs,
+    this.modelCacheDir,
+    required this.allowNetwork,
+    required this.verifyHash,
+  });
+
+  @override
+  int get hashCode =>
+      enabled.hashCode ^
+      model.hashCode ^
+      language.hashCode ^
+      timestamps.hashCode ^
+      maxDurationMs.hashCode ^
+      maxBytes.hashCode ^
+      timeoutMs.hashCode ^
+      modelCacheDir.hashCode ^
+      allowNetwork.hashCode ^
+      verifyHash.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TranscriptionConfig &&
+          runtimeType == other.runtimeType &&
+          enabled == other.enabled &&
+          model == other.model &&
+          language == other.language &&
+          timestamps == other.timestamps &&
+          maxDurationMs == other.maxDurationMs &&
+          maxBytes == other.maxBytes &&
+          timeoutMs == other.timeoutMs &&
+          modelCacheDir == other.modelCacheDir &&
+          allowNetwork == other.allowNetwork &&
+          verifyHash == other.verifyHash;
+}
+
 /// Translation of the extracted content.
 ///
 /// Holds the translated rendition of `ExtractionResult::content` and (when
@@ -10930,6 +11115,28 @@ sealed class VlmFallbackPolicy with _$VlmFallbackPolicy {
 
   /// Skip the classical OCR backend entirely. Every page is sent to the VLM.
   const factory VlmFallbackPolicy.always() = VlmFallbackPolicy_Always;
+}
+
+/// Supported Whisper model sizes.
+///
+/// These map to published ONNX exports on Hugging Face (onnx-community or
+/// similar orgs). The actual filenames and repos are resolved inside the
+/// transcription engine.
+enum WhisperModel {
+  /// ~39 MB, fastest, lowest quality. Good default for development and CI.
+  tiny,
+
+  /// ~74 MB, reasonable quality/speed tradeoff.
+  base,
+
+  /// ~244 MB, better accuracy.
+  small,
+
+  /// ~769 MB, high quality (slower, more memory).
+  medium,
+
+  /// ~1550 MB, best quality (large-v3). Use only when latency is acceptable.
+  largeV3,
 }
 
 /// Application properties from docProps/app.xml for XLSX

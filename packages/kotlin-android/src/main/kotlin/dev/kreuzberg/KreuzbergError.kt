@@ -81,6 +81,10 @@ sealed class KreuzbergError(message: String) : Exception(message) {
         override val message: String,
         val source: String?,
     ) : KreuzbergError("Embedding error: {message}")
+    data class Transcription(
+        override val message: String,
+        val source: String?,
+    ) : KreuzbergError("Transcription error: {message}")
     data class Timeout(
         val elapsedMs: Long,
         val limitMs: Long,

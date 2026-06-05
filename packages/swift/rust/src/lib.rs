@@ -771,6 +771,39 @@ mod ffi {
     }
 
     extern "Rust" {
+        type TranscriptionConfig;
+        #[swift_bridge(init)]
+        fn new(
+            enabled: bool,
+            model: WhisperModel,
+            language: Option<String>,
+            timestamps: bool,
+            max_duration_ms: Option<u64>,
+            max_bytes: Option<u64>,
+            timeout_ms: Option<u64>,
+            model_cache_dir: Option<String>,
+            allow_network: bool,
+            verify_hash: bool,
+        ) -> TranscriptionConfig;
+        fn enabled(&self) -> bool;
+        fn model(&self) -> String;
+        fn language(&self) -> Option<String>;
+        fn timestamps(&self) -> bool;
+        #[swift_bridge(swift_name = "maxDurationMs")]
+        fn max_duration_ms(&self) -> Option<u64>;
+        #[swift_bridge(swift_name = "maxBytes")]
+        fn max_bytes(&self) -> Option<u64>;
+        #[swift_bridge(swift_name = "timeoutMs")]
+        fn timeout_ms(&self) -> Option<u64>;
+        #[swift_bridge(swift_name = "modelCacheDir")]
+        fn model_cache_dir(&self) -> Option<String>;
+        #[swift_bridge(swift_name = "allowNetwork")]
+        fn allow_network(&self) -> bool;
+        #[swift_bridge(swift_name = "verifyHash")]
+        fn verify_hash(&self) -> bool;
+    }
+
+    extern "Rust" {
         type TranslationConfig;
         #[swift_bridge(swift_name = "targetLang")]
         fn target_lang(&self) -> String;
@@ -2227,6 +2260,27 @@ mod ffi {
     }
 
     extern "Rust" {
+        type AudioMetadata;
+        #[swift_bridge(init)]
+        fn new(
+            duration_ms: Option<u64>,
+            codec: Option<String>,
+            container: Option<String>,
+            sample_rate_hz: Option<u32>,
+            channels: Option<u16>,
+            bitrate: Option<u32>,
+        ) -> AudioMetadata;
+        #[swift_bridge(swift_name = "durationMs")]
+        fn duration_ms(&self) -> Option<u64>;
+        fn codec(&self) -> Option<String>;
+        fn container(&self) -> Option<String>;
+        #[swift_bridge(swift_name = "sampleRateHz")]
+        fn sample_rate_hz(&self) -> Option<u32>;
+        fn channels(&self) -> Option<u16>;
+        fn bitrate(&self) -> Option<u32>;
+    }
+
+    extern "Rust" {
         type OcrConfidence;
         #[swift_bridge(init)]
         fn new(detection: Option<f64>, recognition: f64) -> OcrConfidence;
@@ -2797,6 +2851,11 @@ mod ffi {
     }
 
     extern "Rust" {
+        type WhisperModel;
+        fn to_string(&self) -> String;
+    }
+
+    extern "Rust" {
         type CodeContentMode;
         fn to_string(&self) -> String;
     }
@@ -3342,6 +3401,8 @@ mod ffi {
         fn redaction_pattern_from_json(json: String) -> Result<RedactionPattern, String>;
         #[swift_bridge(swift_name = "summarizationConfigFromJson")]
         fn summarization_config_from_json(json: String) -> Result<SummarizationConfig, String>;
+        #[swift_bridge(swift_name = "transcriptionConfigFromJson")]
+        fn transcription_config_from_json(json: String) -> Result<TranscriptionConfig, String>;
         #[swift_bridge(swift_name = "treeSitterConfigFromJson")]
         fn tree_sitter_config_from_json(json: String) -> Result<TreeSitterConfig, String>;
         #[swift_bridge(swift_name = "treeSitterProcessConfigFromJson")]
@@ -3498,6 +3559,8 @@ mod ffi {
         fn epub_metadata_from_json(json: String) -> Result<EpubMetadata, String>;
         #[swift_bridge(swift_name = "pstMetadataFromJson")]
         fn pst_metadata_from_json(json: String) -> Result<PstMetadata, String>;
+        #[swift_bridge(swift_name = "audioMetadataFromJson")]
+        fn audio_metadata_from_json(json: String) -> Result<AudioMetadata, String>;
         #[swift_bridge(swift_name = "ocrConfidenceFromJson")]
         fn ocr_confidence_from_json(json: String) -> Result<OcrConfidence, String>;
         #[swift_bridge(swift_name = "ocrRotationFromJson")]
@@ -3604,6 +3667,8 @@ mod ffi {
         fn chunk_sizing_from_json(json: String) -> Result<ChunkSizing, String>;
         #[swift_bridge(swift_name = "embeddingModelTypeFromJson")]
         fn embedding_model_type_from_json(json: String) -> Result<EmbeddingModelType, String>;
+        #[swift_bridge(swift_name = "whisperModelFromJson")]
+        fn whisper_model_from_json(json: String) -> Result<WhisperModel, String>;
         #[swift_bridge(swift_name = "codeContentModeFromJson")]
         fn code_content_mode_from_json(json: String) -> Result<CodeContentMode, String>;
         #[swift_bridge(swift_name = "ocrBackendTypeFromJson")]
@@ -5636,6 +5701,110 @@ impl SummarizationConfig {
     }
     pub fn llm(&self) -> Option<LlmConfig> {
         self.0.llm.clone().map(LlmConfig)
+    }
+}
+
+pub struct TranscriptionConfig(pub kreuzberg::TranscriptionConfig);
+impl TranscriptionConfig {
+    pub fn new(
+        enabled: bool,
+        model: WhisperModel,
+        language: Option<String>,
+        timestamps: bool,
+        max_duration_ms: Option<u64>,
+        max_bytes: Option<u64>,
+        timeout_ms: Option<u64>,
+        model_cache_dir: Option<String>,
+        allow_network: bool,
+        verify_hash: bool,
+    ) -> TranscriptionConfig {
+        let mut __target: kreuzberg::TranscriptionConfig = ::std::default::Default::default();
+        __target.enabled = enabled;
+        // alef: model (WhisperModel) is an enum; reverse From not generated — left at default
+        if let Some(s) = language {
+            // Try JSON parse first (handles enum/object values); on parse failure
+            // treat the raw input as a JSON string scalar so plain `String` /
+            // string-like enum fields don't end up empty for inputs that aren't
+            // valid JSON tokens (e.g. `tts-1`).
+            let __v = ::serde_json::from_str::<::serde_json::Value>(&s).unwrap_or(::serde_json::Value::String(s));
+            if let Ok(t) = ::serde_json::from_value(__v) {
+                __target.language = Some(t);
+            }
+        }
+        __target.timestamps = timestamps;
+        __target.max_duration_ms = max_duration_ms;
+        __target.max_bytes = max_bytes;
+        __target.timeout_ms = timeout_ms;
+        if let Some(s) = model_cache_dir {
+            // Try JSON parse first (handles enum/object values); on parse failure
+            // treat the raw input as a JSON string scalar so plain `String` /
+            // string-like enum fields don't end up empty for inputs that aren't
+            // valid JSON tokens (e.g. `tts-1`).
+            let __v = ::serde_json::from_str::<::serde_json::Value>(&s).unwrap_or(::serde_json::Value::String(s));
+            if let Ok(t) = ::serde_json::from_value(__v) {
+                __target.model_cache_dir = Some(t);
+            }
+        }
+        __target.allow_network = allow_network;
+        __target.verify_hash = verify_hash;
+        TranscriptionConfig(__target)
+    }
+    pub fn enabled(&self) -> bool {
+        ::serde_json::to_value(&self.0.enabled)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn model(&self) -> String {
+        WhisperModel::from(self.0.model.clone()).to_string()
+    }
+    pub fn language(&self) -> Option<String> {
+        self.0.language.clone()
+    }
+    pub fn timestamps(&self) -> bool {
+        ::serde_json::to_value(&self.0.timestamps)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn max_duration_ms(&self) -> Option<u64> {
+        self.0.max_duration_ms.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn max_bytes(&self) -> Option<u64> {
+        self.0.max_bytes.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn timeout_ms(&self) -> Option<u64> {
+        self.0.timeout_ms.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn model_cache_dir(&self) -> Option<String> {
+        self.0
+            .model_cache_dir
+            .as_ref()
+            .and_then(|v| serde_json::to_string(v).ok())
+    }
+    pub fn allow_network(&self) -> bool {
+        ::serde_json::to_value(&self.0.allow_network)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
+    }
+    pub fn verify_hash(&self) -> bool {
+        ::serde_json::to_value(&self.0.verify_hash)
+            .ok()
+            .and_then(|j| ::serde_json::from_value(j).ok())
+            .unwrap_or_default()
     }
 }
 
@@ -10047,6 +10216,79 @@ impl PstMetadata {
     }
 }
 
+pub struct AudioMetadata(pub kreuzberg::AudioMetadata);
+impl AudioMetadata {
+    pub fn new(
+        duration_ms: Option<u64>,
+        codec: Option<String>,
+        container: Option<String>,
+        sample_rate_hz: Option<u32>,
+        channels: Option<u16>,
+        bitrate: Option<u32>,
+    ) -> AudioMetadata {
+        let mut __target: kreuzberg::AudioMetadata = ::std::default::Default::default();
+        __target.duration_ms = duration_ms;
+        if let Some(s) = codec {
+            // Try JSON parse first (handles enum/object values); on parse failure
+            // treat the raw input as a JSON string scalar so plain `String` /
+            // string-like enum fields don't end up empty for inputs that aren't
+            // valid JSON tokens (e.g. `tts-1`).
+            let __v = ::serde_json::from_str::<::serde_json::Value>(&s).unwrap_or(::serde_json::Value::String(s));
+            if let Ok(t) = ::serde_json::from_value(__v) {
+                __target.codec = Some(t);
+            }
+        }
+        if let Some(s) = container {
+            // Try JSON parse first (handles enum/object values); on parse failure
+            // treat the raw input as a JSON string scalar so plain `String` /
+            // string-like enum fields don't end up empty for inputs that aren't
+            // valid JSON tokens (e.g. `tts-1`).
+            let __v = ::serde_json::from_str::<::serde_json::Value>(&s).unwrap_or(::serde_json::Value::String(s));
+            if let Ok(t) = ::serde_json::from_value(__v) {
+                __target.container = Some(t);
+            }
+        }
+        __target.sample_rate_hz = sample_rate_hz;
+        __target.channels = channels;
+        __target.bitrate = bitrate;
+        AudioMetadata(__target)
+    }
+    pub fn duration_ms(&self) -> Option<u64> {
+        self.0.duration_ms.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn codec(&self) -> Option<String> {
+        self.0.codec.clone()
+    }
+    pub fn container(&self) -> Option<String> {
+        self.0.container.clone()
+    }
+    pub fn sample_rate_hz(&self) -> Option<u32> {
+        self.0.sample_rate_hz.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn channels(&self) -> Option<u16> {
+        self.0.channels.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+    pub fn bitrate(&self) -> Option<u32> {
+        self.0.bitrate.as_ref().and_then(|v| {
+            ::serde_json::to_value(v)
+                .ok()
+                .and_then(|j| ::serde_json::from_value(j).ok())
+        })
+    }
+}
+
 pub struct OcrConfidence(pub kreuzberg::OcrConfidence);
 impl OcrConfidence {
     pub fn new(detection: Option<f64>, recognition: f64) -> OcrConfidence {
@@ -11625,6 +11867,38 @@ impl EmbeddingModelType {
     }
 }
 
+pub enum WhisperModel {
+    Tiny,
+    Base,
+    Small,
+    Medium,
+    LargeV3,
+}
+
+impl From<kreuzberg::WhisperModel> for WhisperModel {
+    fn from(val: kreuzberg::WhisperModel) -> Self {
+        match val {
+            kreuzberg::WhisperModel::Tiny => Self::Tiny,
+            kreuzberg::WhisperModel::Base => Self::Base,
+            kreuzberg::WhisperModel::Small => Self::Small,
+            kreuzberg::WhisperModel::Medium => Self::Medium,
+            kreuzberg::WhisperModel::LargeV3 => Self::LargeV3,
+        }
+    }
+}
+
+impl WhisperModel {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Tiny => "tiny".to_string(),
+            Self::Base => "base".to_string(),
+            Self::Small => "small".to_string(),
+            Self::Medium => "medium".to_string(),
+            Self::LargeV3 => "large_v3".to_string(),
+        }
+    }
+}
+
 pub enum CodeContentMode {
     Chunks,
     Raw,
@@ -12410,6 +12684,7 @@ pub enum FormatMetadata {
     Jats,
     Epub,
     Pst,
+    Audio,
 }
 
 impl From<kreuzberg::FormatMetadata> for FormatMetadata {
@@ -12434,6 +12709,7 @@ impl From<kreuzberg::FormatMetadata> for FormatMetadata {
             kreuzberg::FormatMetadata::Jats(..) => Self::Jats,
             kreuzberg::FormatMetadata::Epub(..) => Self::Epub,
             kreuzberg::FormatMetadata::Pst(..) => Self::Pst,
+            kreuzberg::FormatMetadata::Audio(..) => Self::Audio,
             _ => unreachable!("bridge enum variant not exposed in binding"),
         }
     }
@@ -12461,6 +12737,7 @@ impl FormatMetadata {
             Self::Jats => "jats".to_string(),
             Self::Epub => "epub".to_string(),
             Self::Pst => "pst".to_string(),
+            Self::Audio => "audio".to_string(),
         }
     }
 }
@@ -14231,6 +14508,11 @@ pub fn summarization_config_from_json(json: String) -> Result<SummarizationConfi
         .map(SummarizationConfig)
         .map_err(|e| e.to_string())
 }
+pub fn transcription_config_from_json(json: String) -> Result<TranscriptionConfig, String> {
+    serde_json::from_str::<kreuzberg::TranscriptionConfig>(&json)
+        .map(TranscriptionConfig)
+        .map_err(|e| e.to_string())
+}
 pub fn tree_sitter_config_from_json(json: String) -> Result<TreeSitterConfig, String> {
     serde_json::from_str::<kreuzberg::TreeSitterConfig>(&json)
         .map(TreeSitterConfig)
@@ -14621,6 +14903,11 @@ pub fn pst_metadata_from_json(json: String) -> Result<PstMetadata, String> {
         .map(PstMetadata)
         .map_err(|e| e.to_string())
 }
+pub fn audio_metadata_from_json(json: String) -> Result<AudioMetadata, String> {
+    serde_json::from_str::<kreuzberg::AudioMetadata>(&json)
+        .map(AudioMetadata)
+        .map_err(|e| e.to_string())
+}
 pub fn ocr_confidence_from_json(json: String) -> Result<OcrConfidence, String> {
     serde_json::from_str::<kreuzberg::OcrConfidence>(&json)
         .map(OcrConfidence)
@@ -14879,6 +15166,11 @@ pub fn chunk_sizing_from_json(json: String) -> Result<ChunkSizing, String> {
 pub fn embedding_model_type_from_json(json: String) -> Result<EmbeddingModelType, String> {
     serde_json::from_str::<kreuzberg::EmbeddingModelType>(&json)
         .map(EmbeddingModelType::from)
+        .map_err(|e| e.to_string())
+}
+pub fn whisper_model_from_json(json: String) -> Result<WhisperModel, String> {
+    serde_json::from_str::<kreuzberg::WhisperModel>(&json)
+        .map(WhisperModel::from)
         .map_err(|e| e.to_string())
 }
 pub fn code_content_mode_from_json(json: String) -> Result<CodeContentMode, String> {

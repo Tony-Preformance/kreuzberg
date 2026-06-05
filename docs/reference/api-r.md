@@ -1120,6 +1120,24 @@ Extracted from compressed archive files containing file lists and size informati
 
 ---
 
+#### AudioMetadata
+
+Audio/video file metadata.
+
+Populated from container tags (ID3v2, MP4 atoms, Vorbis comments, etc.) and
+PCM decode properties. Available when the `transcription-types` feature is enabled.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `duration_ms` | `integer or NULL` | `NULL` | Duration in milliseconds derived from the decoded audio stream. |
+| `codec` | `character or NULL` | `NULL` | Audio codec (e.g. "mp3", "aac", "opus", "flac"). |
+| `container` | `character or NULL` | `NULL` | Container format (e.g. "mpeg", "mp4", "ogg", "wav"). |
+| `sample_rate_hz` | `integer or NULL` | `NULL` | Sample rate in Hz after decode (always 16000 when resampled for Whisper). |
+| `channels` | `integer or NULL` | `NULL` | Number of audio channels (1 = mono, 2 = stereo). |
+| `bitrate` | `integer or NULL` | `NULL` | Audio bitrate in kbps from the source file tags/properties. |
+
+---
+
 #### BBox
 
 Bounding box in original image coordinates (x1, y1) top-left, (x2, y2) bottom-right.
@@ -4863,6 +4881,51 @@ default()
 
 ---
 
+#### TranscriptionConfig
+
+Configuration for audio/video transcription (speech-to-text).
+
+When present and `enabled`, Kreuzberg will route audio and video files
+(mp3, mp4, m4a, wav, webm, etc.) through the transcription pipeline.
+
+The heavy dependencies (ORT, hf-hub, symphonia) are only pulled when the
+`transcription` feature is enabled. The config struct itself is available
+under `transcription-types` so that `ExtractionConfig` round-trips on all
+targets.
+
+All fields have sensible defaults. The recommended starting point is:
+
+```toml
+[extraction.transcription]
+enabled = true
+model = "tiny"
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | `logical` | `true` | Master switch. When false the block is ignored and audio files fall back to the normal "unsupported format" path. |
+| `model` | `WhisperModel` | `"tiny"` | Whisper model size to use. Smaller = faster + lower memory. `tiny` is the pragmatic default for first-time users and CI. |
+| `language` | `character or NULL` | `NULL` | Optional language hint (ISO-639-1 code, e.g. "en", "de"). When `NULL` (default) the engine may attempt auto-detection if supported. For deterministic production output, always set this explicitly. |
+| `timestamps` | `logical` | `false` | Whether to emit segment-level timestamps in the result metadata. When true, `metadata["transcription.segments"]` will contain an array of `{start_ms, end_ms, text}` objects (if the engine supports it). |
+| `max_duration_ms` | `integer or NULL` | `NULL` | Hard safety limit on input duration (milliseconds). Files longer than this are rejected *before* any decode or model work. Default: 30 minutes. Set to `NULL` to disable (not recommended for untrusted input). |
+| `max_bytes` | `integer or NULL` | `NULL` | Hard safety limit on input size (bytes). Default: 512 MiB. Protects against pathological or malicious uploads. |
+| `timeout_ms` | `integer or NULL` | `NULL` | Wall-clock timeout for the entire transcription operation (ms). Includes model download (first time), decode, and inference. Default: 10 minutes. Uses `tokio.select!` so the async runtime is never blocked. |
+| `model_cache_dir` | `character or NULL` | `NULL` | Override the directory used for Whisper model cache. When `NULL`, uses the centralized resolver: `KREUZBERG_CACHE_DIR/transcription/whisper` or the platform default (`~/.cache/kreuzberg/transcription/whisper` on Linux, etc.). |
+| `allow_network` | `logical` | `true` | Allow network access to download models from Hugging Face Hub. When `false`, only previously cached models may be used. Useful for air-gapped or fully offline deployments. |
+| `verify_hash` | `logical` | `true` | Verify SHA256 checksums of downloaded model files (when known). Strongly recommended; disable only for debugging. |
+
+### Methods
+
+#### default()
+
+**Signature:**
+
+```r
+default()
+```
+
+---
+
 #### Translation
 
 Translation of the extracted content.
@@ -5375,6 +5438,24 @@ Embedding model types supported by Kreuzberg.
 
 ---
 
+#### WhisperModel
+
+Supported Whisper model sizes.
+
+These map to published ONNX exports on Hugging Face (onnx-community or
+similar orgs). The actual filenames and repos are resolved inside the
+transcription engine.
+
+| Value | Description |
+|-------|-------------|
+| `tiny` | ~39 MB, fastest, lowest quality. Good default for development and CI. |
+| `base` | ~74 MB, reasonable quality/speed tradeoff. |
+| `small` | ~244 MB, better accuracy. |
+| `medium` | ~769 MB, high quality (slower, more memory). |
+| `large_v3` | ~1550 MB, best quality (large-v3). Use only when latency is acceptable. |
+
+---
+
 #### CodeContentMode
 
 Content rendering mode for code extraction.
@@ -5741,6 +5822,7 @@ type-safe, clean metadata without nested optionals.
 | `jats` | Jats — Fields: `0`: `JatsMetadata` |
 | `epub` | Epub format — Fields: `0`: `EpubMetadata` |
 | `pst` | Pst — Fields: `0`: `PstMetadata` |
+| `audio` | Audio — Fields: `0`: `AudioMetadata` |
 
 ---
 
@@ -6089,6 +6171,7 @@ and provides context for debugging.
 | `lock_poisoned` | Lock poisoned: {0} |
 | `unsupported_format` | Unsupported format: {0} |
 | `embedding` | Embedding error: {message} |
+| `transcription` | Transcription error: {message} |
 | `timeout` | Extraction timed out after {elapsed_ms}ms (limit: {limit_ms}ms) |
 | `cancelled` | Extraction cancelled |
 | `security` | Security violation: {message} |

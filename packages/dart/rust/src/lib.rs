@@ -1196,6 +1196,76 @@ pub struct SummarizationConfig {
     pub llm: Option<LlmConfig>,
 }
 
+/// Configuration for audio/video transcription (speech-to-text).
+///
+/// When present and `enabled`, Kreuzberg will route audio and video files
+/// (mp3, mp4, m4a, wav, webm, etc.) through the transcription pipeline.
+///
+/// The heavy dependencies (ORT, hf-hub, symphonia) are only pulled when the
+/// `transcription` feature is enabled. The config struct itself is available
+/// under `transcription-types` so that `ExtractionConfig` round-trips on all
+/// targets.
+///
+/// All fields have sensible defaults. The recommended starting point is:
+///
+/// ```toml
+/// [extraction.transcription]
+/// enabled = true
+/// model = "tiny"
+/// ```
+#[frb(mirror(TranscriptionConfig))]
+pub struct TranscriptionConfig {
+    /// Master switch. When false the block is ignored and audio files fall back
+    /// to the normal "unsupported format" path.
+    pub enabled: bool,
+    /// Whisper model size to use.
+    ///
+    /// Smaller = faster + lower memory. `tiny` is the pragmatic default for
+    /// first-time users and CI.
+    pub model: WhisperModel,
+    /// Optional language hint (ISO-639-1 code, e.g. "en", "de").
+    ///
+    /// When `None` (default) the engine may attempt auto-detection if supported.
+    /// For deterministic production output, always set this explicitly.
+    pub language: Option<String>,
+    /// Whether to emit segment-level timestamps in the result metadata.
+    ///
+    /// When true, `metadata["transcription.segments"]` will contain an array
+    /// of `{start_ms, end_ms, text}` objects (if the engine supports it).
+    pub timestamps: bool,
+    /// Hard safety limit on input duration (milliseconds).
+    ///
+    /// Files longer than this are rejected *before* any decode or model work.
+    /// Default: 30 minutes. Set to `None` to disable (not recommended for
+    /// untrusted input).
+    pub max_duration_ms: Option<i64>,
+    /// Hard safety limit on input size (bytes).
+    ///
+    /// Default: 512 MiB. Protects against pathological or malicious uploads.
+    pub max_bytes: Option<i64>,
+    /// Wall-clock timeout for the entire transcription operation (ms).
+    ///
+    /// Includes model download (first time), decode, and inference.
+    /// Default: 10 minutes. Uses `tokio::select!` so the async runtime is
+    /// never blocked.
+    pub timeout_ms: Option<i64>,
+    /// Override the directory used for Whisper model cache.
+    ///
+    /// When `None`, uses the centralized resolver:
+    /// `KREUZBERG_CACHE_DIR/transcription/whisper` or the platform default
+    /// (`~/.cache/kreuzberg/transcription/whisper` on Linux, etc.).
+    pub model_cache_dir: Option<String>,
+    /// Allow network access to download models from Hugging Face Hub.
+    ///
+    /// When `false`, only previously cached models may be used. Useful for
+    /// air-gapped or fully offline deployments.
+    pub allow_network: bool,
+    /// Verify SHA256 checksums of downloaded model files (when known).
+    ///
+    /// Strongly recommended; disable only for debugging.
+    pub verify_hash: bool,
+}
+
 /// Configuration for the translation post-processor.
 #[frb(mirror(TranslationConfig))]
 pub struct TranslationConfig {
@@ -2972,6 +3042,26 @@ pub struct PstMetadata {
     pub message_count: i64,
 }
 
+/// Audio/video file metadata.
+///
+/// Populated from container tags (ID3v2, MP4 atoms, Vorbis comments, etc.) and
+/// PCM decode properties. Available when the `transcription-types` feature is enabled.
+#[frb(mirror(AudioMetadata))]
+pub struct AudioMetadata {
+    /// Duration in milliseconds derived from the decoded audio stream.
+    pub duration_ms: Option<i64>,
+    /// Audio codec (e.g. "mp3", "aac", "opus", "flac").
+    pub codec: Option<String>,
+    /// Container format (e.g. "mpeg", "mp4", "ogg", "wav").
+    pub container: Option<String>,
+    /// Sample rate in Hz after decode (always 16000 when resampled for Whisper).
+    pub sample_rate_hz: Option<i64>,
+    /// Number of audio channels (1 = mono, 2 = stereo).
+    pub channels: Option<i64>,
+    /// Audio bitrate in kbps from the source file tags/properties.
+    pub bitrate: Option<i64>,
+}
+
 /// Confidence scores for an OCR element.
 ///
 /// Separates detection confidence (how confident that text exists at this location)
@@ -4053,6 +4143,25 @@ pub enum EmbeddingModelType {
     Plugin { name: String },
 }
 
+/// Supported Whisper model sizes.
+///
+/// These map to published ONNX exports on Hugging Face (onnx-community or
+/// similar orgs). The actual filenames and repos are resolved inside the
+/// transcription engine.
+#[frb(mirror(WhisperModel), unignore)]
+pub enum WhisperModel {
+    /// ~39 MB, fastest, lowest quality. Good default for development and CI.
+    Tiny,
+    /// ~74 MB, reasonable quality/speed tradeoff.
+    Base,
+    /// ~244 MB, better accuracy.
+    Small,
+    /// ~769 MB, high quality (slower, more memory).
+    Medium,
+    /// ~1550 MB, best quality (large-v3). Use only when latency is acceptable.
+    LargeV3,
+}
+
 /// Content rendering mode for code extraction.
 ///
 /// Controls how extracted code content is represented in the `content` field
@@ -4496,6 +4605,7 @@ pub enum FormatMetadata {
     Jats { field0: JatsMetadata },
     Epub { field0: EpubMetadata },
     Pst { field0: PstMetadata },
+    Audio { field0: AudioMetadata },
 }
 
 /// Text direction enumeration for HTML documents.
@@ -4899,6 +5009,7 @@ pub enum KreuzbergError {
     LockPoisoned { field0: String },
     UnsupportedFormat { field0: String },
     Embedding { message: String },
+    Transcription { message: String },
     Timeout { elapsed_ms: i64, limit_ms: i64 },
     Cancelled,
     Security { message: String },
@@ -5374,6 +5485,23 @@ impl From<kreuzberg::SummarizationConfig> for SummarizationConfig {
             strategy: SummaryStrategy::from(v.strategy),
             max_tokens: v.max_tokens.map(|x| x as _),
             llm: v.llm.map(LlmConfig::from),
+        }
+    }
+}
+
+impl From<kreuzberg::TranscriptionConfig> for TranscriptionConfig {
+    fn from(v: kreuzberg::TranscriptionConfig) -> Self {
+        TranscriptionConfig {
+            enabled: v.enabled as _,
+            model: WhisperModel::from(v.model),
+            language: v.language.map(|s| s.into()),
+            timestamps: v.timestamps as _,
+            max_duration_ms: v.max_duration_ms.map(|x| x as _),
+            max_bytes: v.max_bytes.map(|x| x as _),
+            timeout_ms: v.timeout_ms.map(|x| x as _),
+            model_cache_dir: v.model_cache_dir.map(|p| p.to_string_lossy().into_owned()),
+            allow_network: v.allow_network as _,
+            verify_hash: v.verify_hash as _,
         }
     }
 }
@@ -6537,6 +6665,19 @@ impl From<kreuzberg::PstMetadata> for PstMetadata {
     }
 }
 
+impl From<kreuzberg::AudioMetadata> for AudioMetadata {
+    fn from(v: kreuzberg::AudioMetadata) -> Self {
+        AudioMetadata {
+            duration_ms: v.duration_ms.map(|x| x as _),
+            codec: v.codec.map(|s| s.into()),
+            container: v.container.map(|s| s.into()),
+            sample_rate_hz: v.sample_rate_hz.map(|x| x as _),
+            channels: v.channels.map(|x| x as _),
+            bitrate: v.bitrate.map(|x| x as _),
+        }
+    }
+}
+
 impl From<kreuzberg::OcrConfidence> for OcrConfidence {
     fn from(v: kreuzberg::OcrConfidence) -> Self {
         OcrConfidence {
@@ -7152,6 +7293,18 @@ impl From<kreuzberg::EmbeddingModelType> for EmbeddingModelType {
     }
 }
 
+impl From<kreuzberg::WhisperModel> for WhisperModel {
+    fn from(v: kreuzberg::WhisperModel) -> Self {
+        match v {
+            kreuzberg::WhisperModel::Tiny => WhisperModel::Tiny,
+            kreuzberg::WhisperModel::Base => WhisperModel::Base,
+            kreuzberg::WhisperModel::Small => WhisperModel::Small,
+            kreuzberg::WhisperModel::Medium => WhisperModel::Medium,
+            kreuzberg::WhisperModel::LargeV3 => WhisperModel::LargeV3,
+        }
+    }
+}
+
 impl From<kreuzberg::CodeContentMode> for CodeContentMode {
     fn from(v: kreuzberg::CodeContentMode) -> Self {
         match v {
@@ -7529,6 +7682,9 @@ impl From<kreuzberg::FormatMetadata> for FormatMetadata {
             },
             kreuzberg::FormatMetadata::Pst(f0) => FormatMetadata::Pst {
                 field0: PstMetadata::from(f0),
+            },
+            kreuzberg::FormatMetadata::Audio(f0) => FormatMetadata::Audio {
+                field0: AudioMetadata::from(f0),
             },
         }
     }
@@ -9122,6 +9278,19 @@ impl From<PstMetadata> for kreuzberg::PstMetadata {
     }
 }
 
+impl From<AudioMetadata> for kreuzberg::AudioMetadata {
+    fn from(v: AudioMetadata) -> Self {
+        kreuzberg::AudioMetadata {
+            duration_ms: v.duration_ms.map(|x| x as _),
+            codec: v.codec.map(Into::into),
+            container: v.container.map(Into::into),
+            sample_rate_hz: v.sample_rate_hz.map(|x| x as _),
+            channels: v.channels.map(|x| x as _),
+            bitrate: v.bitrate.map(|x| x as _),
+        }
+    }
+}
+
 impl From<OcrConfidence> for kreuzberg::OcrConfidence {
     fn from(v: OcrConfidence) -> Self {
         kreuzberg::OcrConfidence {
@@ -9884,6 +10053,7 @@ impl From<FormatMetadata> for kreuzberg::FormatMetadata {
             FormatMetadata::Jats { field0 } => kreuzberg::FormatMetadata::Jats(field0.into()),
             FormatMetadata::Epub { field0 } => kreuzberg::FormatMetadata::Epub(field0.into()),
             FormatMetadata::Pst { field0 } => kreuzberg::FormatMetadata::Pst(field0.into()),
+            FormatMetadata::Audio { field0 } => kreuzberg::FormatMetadata::Audio(field0.into()),
         }
     }
 }
@@ -10887,6 +11057,13 @@ pub fn create_summarization_config_from_json(json: String) -> Result<Summarizati
 }
 
 #[frb]
+pub fn create_transcription_config_from_json(json: String) -> Result<TranscriptionConfig, String> {
+    serde_json::from_str::<kreuzberg::TranscriptionConfig>(&json)
+        .map(TranscriptionConfig::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
 pub fn create_translation_config_from_json(json: String) -> Result<TranslationConfig, String> {
     serde_json::from_str::<kreuzberg::TranslationConfig>(&json)
         .map(TranslationConfig::from)
@@ -11450,6 +11627,13 @@ pub fn create_epub_metadata_from_json(json: String) -> Result<EpubMetadata, Stri
 pub fn create_pst_metadata_from_json(json: String) -> Result<PstMetadata, String> {
     serde_json::from_str::<kreuzberg::PstMetadata>(&json)
         .map(PstMetadata::from)
+        .map_err(|e| e.to_string())
+}
+
+#[frb]
+pub fn create_audio_metadata_from_json(json: String) -> Result<AudioMetadata, String> {
+    serde_json::from_str::<kreuzberg::AudioMetadata>(&json)
+        .map(AudioMetadata::from)
         .map_err(|e| e.to_string())
 }
 

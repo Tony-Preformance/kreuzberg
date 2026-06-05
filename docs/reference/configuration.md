@@ -513,6 +513,41 @@ Configuration for the summarisation post-processor.
 
 ---
 
+### TranscriptionConfig
+
+Configuration for audio/video transcription (speech-to-text).
+
+When present and `enabled`, Kreuzberg will route audio and video files
+(mp3, mp4, m4a, wav, webm, etc.) through the transcription pipeline.
+
+The heavy dependencies (ORT, hf-hub, symphonia) are only pulled when the
+`transcription` feature is enabled. The config struct itself is available
+under `transcription-types` so that `ExtractionConfig` round-trips on all
+targets.
+
+All fields have sensible defaults. The recommended starting point is:
+
+```toml
+[extraction.transcription]
+enabled = true
+model = "tiny"
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | `bool` | `True` | Master switch. When false the block is ignored and audio files fall back to the normal "unsupported format" path. |
+| `model` | `WhisperModel` | `WhisperModel.TINY` | Whisper model size to use. Smaller = faster + lower memory. `tiny` is the pragmatic default for first-time users and CI. |
+| `language` | `str \| None` | `None` | Optional language hint (ISO-639-1 code, e.g. "en", "de"). When `None` (default) the engine may attempt auto-detection if supported. For deterministic production output, always set this explicitly. |
+| `timestamps` | `bool` | `False` | Whether to emit segment-level timestamps in the result metadata. When true, `metadata["transcription.segments"]` will contain an array of `{start_ms, end_ms, text}` objects (if the engine supports it). |
+| `max_duration_ms` | `int \| None` | `None` | Hard safety limit on input duration (milliseconds). Files longer than this are rejected *before* any decode or model work. Default: 30 minutes. Set to `None` to disable (not recommended for untrusted input). |
+| `max_bytes` | `int \| None` | `None` | Hard safety limit on input size (bytes). Default: 512 MiB. Protects against pathological or malicious uploads. |
+| `timeout_ms` | `int \| None` | `None` | Wall-clock timeout for the entire transcription operation (ms). Includes model download (first time), decode, and inference. Default: 10 minutes. Uses `tokio.select!` so the async runtime is never blocked. |
+| `model_cache_dir` | `str \| None` | `None` | Override the directory used for Whisper model cache. When `None`, uses the centralized resolver: `KREUZBERG_CACHE_DIR/transcription/whisper` or the platform default (`~/.cache/kreuzberg/transcription/whisper` on Linux, etc.). |
+| `allow_network` | `bool` | `True` | Allow network access to download models from Hugging Face Hub. When `False`, only previously cached models may be used. Useful for air-gapped or fully offline deployments. |
+| `verify_hash` | `bool` | `True` | Verify SHA256 checksums of downloaded model files (when known). Strongly recommended; disable only for debugging. |
+
+---
+
 ### TranslationConfig
 
 Configuration for the translation post-processor.
@@ -1241,6 +1276,24 @@ Outlook PST archive metadata.
 
 ---
 
+### AudioMetadata
+
+Audio/video file metadata.
+
+Populated from container tags (ID3v2, MP4 atoms, Vorbis comments, etc.) and
+PCM decode properties. Available when the `transcription-types` feature is enabled.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `duration_ms` | `int \| None` | `None` | Duration in milliseconds derived from the decoded audio stream. |
+| `codec` | `str \| None` | `None` | Audio codec (e.g. "mp3", "aac", "opus", "flac"). |
+| `container` | `str \| None` | `None` | Container format (e.g. "mpeg", "mp4", "ogg", "wav"). |
+| `sample_rate_hz` | `int \| None` | `None` | Sample rate in Hz after decode (always 16000 when resampled for Whisper). |
+| `channels` | `int \| None` | `None` | Number of audio channels (1 = mono, 2 = stereo). |
+| `bitrate` | `int \| None` | `None` | Audio bitrate in kbps from the source file tags/properties. |
+
+---
+
 ### OcrConfidence
 
 Confidence scores for an OCR element.
@@ -1616,6 +1669,7 @@ type-safe, clean metadata without nested optionals.
 | `Jats` | `jats` | Jats — Fields: `_0`: `JatsMetadata` |
 | `Epub` | `epub` | Epub format — Fields: `_0`: `EpubMetadata` |
 | `Pst` | `pst` | Pst — Fields: `_0`: `PstMetadata` |
+| `Audio` | `audio` | Audio — Fields: `_0`: `AudioMetadata` |
 
 ---
 
@@ -1862,5 +1916,23 @@ detected by `OcrConfig.validate` and will surface as a
 | `Disabled` | `disabled` | No VLM fallback (default). Behaves identically to the pre-policy single-backend mode. |
 | `OnLowQuality` | `on_low_quality` | Try the classical OCR backend first. If the quality score is below `quality_threshold`, send the page to the VLM. `quality_threshold` is in the `[0.0, 1.0]` range produced by `calculate_quality_score`. A value of `0.5` is a reasonable starting point; calibrate with the Stage 0 benchmark harness. — Fields: `quality_threshold`: `f64` |
 | `Always` | `always` | Skip the classical OCR backend entirely. Every page is sent to the VLM. |
+
+---
+
+#### WhisperModel
+
+Supported Whisper model sizes.
+
+These map to published ONNX exports on Hugging Face (onnx-community or
+similar orgs). The actual filenames and repos are resolved inside the
+transcription engine.
+
+| Variant | Wire value | Description |
+|---------|------------|-------------|
+| `Tiny` | `tiny` | ~39 MB, fastest, lowest quality. Good default for development and CI. |
+| `Base` | `base` | ~74 MB, reasonable quality/speed tradeoff. |
+| `Small` | `small` | ~244 MB, better accuracy. |
+| `Medium` | `medium` | ~769 MB, high quality (slower, more memory). |
+| `LargeV3` | `large_v3` | ~1550 MB, best quality (large-v3). Use only when latency is acceptable. |
 
 ---

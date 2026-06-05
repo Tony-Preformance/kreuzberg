@@ -2496,7 +2496,7 @@ extension FormatMetadataPatterns on FormatMetadata {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( FormatMetadata_Pdf value)?  pdf,TResult Function( FormatMetadata_Docx value)?  docx,TResult Function( FormatMetadata_Excel value)?  excel,TResult Function( FormatMetadata_Email value)?  email,TResult Function( FormatMetadata_Pptx value)?  pptx,TResult Function( FormatMetadata_Archive value)?  archive,TResult Function( FormatMetadata_Image value)?  image,TResult Function( FormatMetadata_Xml value)?  xml,TResult Function( FormatMetadata_Text value)?  text,TResult Function( FormatMetadata_Html value)?  html,TResult Function( FormatMetadata_Ocr value)?  ocr,TResult Function( FormatMetadata_Csv value)?  csv,TResult Function( FormatMetadata_Bibtex value)?  bibtex,TResult Function( FormatMetadata_Citation value)?  citation,TResult Function( FormatMetadata_FictionBook value)?  fictionBook,TResult Function( FormatMetadata_Dbf value)?  dbf,TResult Function( FormatMetadata_Jats value)?  jats,TResult Function( FormatMetadata_Epub value)?  epub,TResult Function( FormatMetadata_Pst value)?  pst,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( FormatMetadata_Pdf value)?  pdf,TResult Function( FormatMetadata_Docx value)?  docx,TResult Function( FormatMetadata_Excel value)?  excel,TResult Function( FormatMetadata_Email value)?  email,TResult Function( FormatMetadata_Pptx value)?  pptx,TResult Function( FormatMetadata_Archive value)?  archive,TResult Function( FormatMetadata_Image value)?  image,TResult Function( FormatMetadata_Xml value)?  xml,TResult Function( FormatMetadata_Text value)?  text,TResult Function( FormatMetadata_Html value)?  html,TResult Function( FormatMetadata_Ocr value)?  ocr,TResult Function( FormatMetadata_Csv value)?  csv,TResult Function( FormatMetadata_Bibtex value)?  bibtex,TResult Function( FormatMetadata_Citation value)?  citation,TResult Function( FormatMetadata_FictionBook value)?  fictionBook,TResult Function( FormatMetadata_Dbf value)?  dbf,TResult Function( FormatMetadata_Jats value)?  jats,TResult Function( FormatMetadata_Epub value)?  epub,TResult Function( FormatMetadata_Pst value)?  pst,TResult Function( FormatMetadata_Audio value)?  audio,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case FormatMetadata_Pdf() when pdf != null:
@@ -2518,7 +2518,8 @@ return fictionBook(_that);case FormatMetadata_Dbf() when dbf != null:
 return dbf(_that);case FormatMetadata_Jats() when jats != null:
 return jats(_that);case FormatMetadata_Epub() when epub != null:
 return epub(_that);case FormatMetadata_Pst() when pst != null:
-return pst(_that);case _:
+return pst(_that);case FormatMetadata_Audio() when audio != null:
+return audio(_that);case _:
   return orElse();
 
 }
@@ -2536,7 +2537,7 @@ return pst(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( FormatMetadata_Pdf value)  pdf,required TResult Function( FormatMetadata_Docx value)  docx,required TResult Function( FormatMetadata_Excel value)  excel,required TResult Function( FormatMetadata_Email value)  email,required TResult Function( FormatMetadata_Pptx value)  pptx,required TResult Function( FormatMetadata_Archive value)  archive,required TResult Function( FormatMetadata_Image value)  image,required TResult Function( FormatMetadata_Xml value)  xml,required TResult Function( FormatMetadata_Text value)  text,required TResult Function( FormatMetadata_Html value)  html,required TResult Function( FormatMetadata_Ocr value)  ocr,required TResult Function( FormatMetadata_Csv value)  csv,required TResult Function( FormatMetadata_Bibtex value)  bibtex,required TResult Function( FormatMetadata_Citation value)  citation,required TResult Function( FormatMetadata_FictionBook value)  fictionBook,required TResult Function( FormatMetadata_Dbf value)  dbf,required TResult Function( FormatMetadata_Jats value)  jats,required TResult Function( FormatMetadata_Epub value)  epub,required TResult Function( FormatMetadata_Pst value)  pst,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( FormatMetadata_Pdf value)  pdf,required TResult Function( FormatMetadata_Docx value)  docx,required TResult Function( FormatMetadata_Excel value)  excel,required TResult Function( FormatMetadata_Email value)  email,required TResult Function( FormatMetadata_Pptx value)  pptx,required TResult Function( FormatMetadata_Archive value)  archive,required TResult Function( FormatMetadata_Image value)  image,required TResult Function( FormatMetadata_Xml value)  xml,required TResult Function( FormatMetadata_Text value)  text,required TResult Function( FormatMetadata_Html value)  html,required TResult Function( FormatMetadata_Ocr value)  ocr,required TResult Function( FormatMetadata_Csv value)  csv,required TResult Function( FormatMetadata_Bibtex value)  bibtex,required TResult Function( FormatMetadata_Citation value)  citation,required TResult Function( FormatMetadata_FictionBook value)  fictionBook,required TResult Function( FormatMetadata_Dbf value)  dbf,required TResult Function( FormatMetadata_Jats value)  jats,required TResult Function( FormatMetadata_Epub value)  epub,required TResult Function( FormatMetadata_Pst value)  pst,required TResult Function( FormatMetadata_Audio value)  audio,}){
 final _that = this;
 switch (_that) {
 case FormatMetadata_Pdf():
@@ -2558,7 +2559,8 @@ return fictionBook(_that);case FormatMetadata_Dbf():
 return dbf(_that);case FormatMetadata_Jats():
 return jats(_that);case FormatMetadata_Epub():
 return epub(_that);case FormatMetadata_Pst():
-return pst(_that);}
+return pst(_that);case FormatMetadata_Audio():
+return audio(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -2572,7 +2574,7 @@ return pst(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( FormatMetadata_Pdf value)?  pdf,TResult? Function( FormatMetadata_Docx value)?  docx,TResult? Function( FormatMetadata_Excel value)?  excel,TResult? Function( FormatMetadata_Email value)?  email,TResult? Function( FormatMetadata_Pptx value)?  pptx,TResult? Function( FormatMetadata_Archive value)?  archive,TResult? Function( FormatMetadata_Image value)?  image,TResult? Function( FormatMetadata_Xml value)?  xml,TResult? Function( FormatMetadata_Text value)?  text,TResult? Function( FormatMetadata_Html value)?  html,TResult? Function( FormatMetadata_Ocr value)?  ocr,TResult? Function( FormatMetadata_Csv value)?  csv,TResult? Function( FormatMetadata_Bibtex value)?  bibtex,TResult? Function( FormatMetadata_Citation value)?  citation,TResult? Function( FormatMetadata_FictionBook value)?  fictionBook,TResult? Function( FormatMetadata_Dbf value)?  dbf,TResult? Function( FormatMetadata_Jats value)?  jats,TResult? Function( FormatMetadata_Epub value)?  epub,TResult? Function( FormatMetadata_Pst value)?  pst,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( FormatMetadata_Pdf value)?  pdf,TResult? Function( FormatMetadata_Docx value)?  docx,TResult? Function( FormatMetadata_Excel value)?  excel,TResult? Function( FormatMetadata_Email value)?  email,TResult? Function( FormatMetadata_Pptx value)?  pptx,TResult? Function( FormatMetadata_Archive value)?  archive,TResult? Function( FormatMetadata_Image value)?  image,TResult? Function( FormatMetadata_Xml value)?  xml,TResult? Function( FormatMetadata_Text value)?  text,TResult? Function( FormatMetadata_Html value)?  html,TResult? Function( FormatMetadata_Ocr value)?  ocr,TResult? Function( FormatMetadata_Csv value)?  csv,TResult? Function( FormatMetadata_Bibtex value)?  bibtex,TResult? Function( FormatMetadata_Citation value)?  citation,TResult? Function( FormatMetadata_FictionBook value)?  fictionBook,TResult? Function( FormatMetadata_Dbf value)?  dbf,TResult? Function( FormatMetadata_Jats value)?  jats,TResult? Function( FormatMetadata_Epub value)?  epub,TResult? Function( FormatMetadata_Pst value)?  pst,TResult? Function( FormatMetadata_Audio value)?  audio,}){
 final _that = this;
 switch (_that) {
 case FormatMetadata_Pdf() when pdf != null:
@@ -2594,7 +2596,8 @@ return fictionBook(_that);case FormatMetadata_Dbf() when dbf != null:
 return dbf(_that);case FormatMetadata_Jats() when jats != null:
 return jats(_that);case FormatMetadata_Epub() when epub != null:
 return epub(_that);case FormatMetadata_Pst() when pst != null:
-return pst(_that);case _:
+return pst(_that);case FormatMetadata_Audio() when audio != null:
+return audio(_that);case _:
   return null;
 
 }
@@ -2611,7 +2614,7 @@ return pst(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PdfMetadata field0)?  pdf,TResult Function( DocxMetadata field0)?  docx,TResult Function( ExcelMetadata field0)?  excel,TResult Function( EmailMetadata field0)?  email,TResult Function( PptxMetadata field0)?  pptx,TResult Function( ArchiveMetadata field0)?  archive,TResult Function( ImageMetadata field0)?  image,TResult Function( XmlMetadata field0)?  xml,TResult Function( TextMetadata field0)?  text,TResult Function( HtmlMetadata field0)?  html,TResult Function( OcrMetadata field0)?  ocr,TResult Function( CsvMetadata field0)?  csv,TResult Function( BibtexMetadata field0)?  bibtex,TResult Function( CitationMetadata field0)?  citation,TResult Function( FictionBookMetadata field0)?  fictionBook,TResult Function( DbfMetadata field0)?  dbf,TResult Function( JatsMetadata field0)?  jats,TResult Function( EpubMetadata field0)?  epub,TResult Function( PstMetadata field0)?  pst,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PdfMetadata field0)?  pdf,TResult Function( DocxMetadata field0)?  docx,TResult Function( ExcelMetadata field0)?  excel,TResult Function( EmailMetadata field0)?  email,TResult Function( PptxMetadata field0)?  pptx,TResult Function( ArchiveMetadata field0)?  archive,TResult Function( ImageMetadata field0)?  image,TResult Function( XmlMetadata field0)?  xml,TResult Function( TextMetadata field0)?  text,TResult Function( HtmlMetadata field0)?  html,TResult Function( OcrMetadata field0)?  ocr,TResult Function( CsvMetadata field0)?  csv,TResult Function( BibtexMetadata field0)?  bibtex,TResult Function( CitationMetadata field0)?  citation,TResult Function( FictionBookMetadata field0)?  fictionBook,TResult Function( DbfMetadata field0)?  dbf,TResult Function( JatsMetadata field0)?  jats,TResult Function( EpubMetadata field0)?  epub,TResult Function( PstMetadata field0)?  pst,TResult Function( AudioMetadata field0)?  audio,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case FormatMetadata_Pdf() when pdf != null:
 return pdf(_that.field0);case FormatMetadata_Docx() when docx != null:
@@ -2632,7 +2635,8 @@ return fictionBook(_that.field0);case FormatMetadata_Dbf() when dbf != null:
 return dbf(_that.field0);case FormatMetadata_Jats() when jats != null:
 return jats(_that.field0);case FormatMetadata_Epub() when epub != null:
 return epub(_that.field0);case FormatMetadata_Pst() when pst != null:
-return pst(_that.field0);case _:
+return pst(_that.field0);case FormatMetadata_Audio() when audio != null:
+return audio(_that.field0);case _:
   return orElse();
 
 }
@@ -2650,7 +2654,7 @@ return pst(_that.field0);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PdfMetadata field0)  pdf,required TResult Function( DocxMetadata field0)  docx,required TResult Function( ExcelMetadata field0)  excel,required TResult Function( EmailMetadata field0)  email,required TResult Function( PptxMetadata field0)  pptx,required TResult Function( ArchiveMetadata field0)  archive,required TResult Function( ImageMetadata field0)  image,required TResult Function( XmlMetadata field0)  xml,required TResult Function( TextMetadata field0)  text,required TResult Function( HtmlMetadata field0)  html,required TResult Function( OcrMetadata field0)  ocr,required TResult Function( CsvMetadata field0)  csv,required TResult Function( BibtexMetadata field0)  bibtex,required TResult Function( CitationMetadata field0)  citation,required TResult Function( FictionBookMetadata field0)  fictionBook,required TResult Function( DbfMetadata field0)  dbf,required TResult Function( JatsMetadata field0)  jats,required TResult Function( EpubMetadata field0)  epub,required TResult Function( PstMetadata field0)  pst,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PdfMetadata field0)  pdf,required TResult Function( DocxMetadata field0)  docx,required TResult Function( ExcelMetadata field0)  excel,required TResult Function( EmailMetadata field0)  email,required TResult Function( PptxMetadata field0)  pptx,required TResult Function( ArchiveMetadata field0)  archive,required TResult Function( ImageMetadata field0)  image,required TResult Function( XmlMetadata field0)  xml,required TResult Function( TextMetadata field0)  text,required TResult Function( HtmlMetadata field0)  html,required TResult Function( OcrMetadata field0)  ocr,required TResult Function( CsvMetadata field0)  csv,required TResult Function( BibtexMetadata field0)  bibtex,required TResult Function( CitationMetadata field0)  citation,required TResult Function( FictionBookMetadata field0)  fictionBook,required TResult Function( DbfMetadata field0)  dbf,required TResult Function( JatsMetadata field0)  jats,required TResult Function( EpubMetadata field0)  epub,required TResult Function( PstMetadata field0)  pst,required TResult Function( AudioMetadata field0)  audio,}) {final _that = this;
 switch (_that) {
 case FormatMetadata_Pdf():
 return pdf(_that.field0);case FormatMetadata_Docx():
@@ -2671,7 +2675,8 @@ return fictionBook(_that.field0);case FormatMetadata_Dbf():
 return dbf(_that.field0);case FormatMetadata_Jats():
 return jats(_that.field0);case FormatMetadata_Epub():
 return epub(_that.field0);case FormatMetadata_Pst():
-return pst(_that.field0);}
+return pst(_that.field0);case FormatMetadata_Audio():
+return audio(_that.field0);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -2685,7 +2690,7 @@ return pst(_that.field0);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PdfMetadata field0)?  pdf,TResult? Function( DocxMetadata field0)?  docx,TResult? Function( ExcelMetadata field0)?  excel,TResult? Function( EmailMetadata field0)?  email,TResult? Function( PptxMetadata field0)?  pptx,TResult? Function( ArchiveMetadata field0)?  archive,TResult? Function( ImageMetadata field0)?  image,TResult? Function( XmlMetadata field0)?  xml,TResult? Function( TextMetadata field0)?  text,TResult? Function( HtmlMetadata field0)?  html,TResult? Function( OcrMetadata field0)?  ocr,TResult? Function( CsvMetadata field0)?  csv,TResult? Function( BibtexMetadata field0)?  bibtex,TResult? Function( CitationMetadata field0)?  citation,TResult? Function( FictionBookMetadata field0)?  fictionBook,TResult? Function( DbfMetadata field0)?  dbf,TResult? Function( JatsMetadata field0)?  jats,TResult? Function( EpubMetadata field0)?  epub,TResult? Function( PstMetadata field0)?  pst,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PdfMetadata field0)?  pdf,TResult? Function( DocxMetadata field0)?  docx,TResult? Function( ExcelMetadata field0)?  excel,TResult? Function( EmailMetadata field0)?  email,TResult? Function( PptxMetadata field0)?  pptx,TResult? Function( ArchiveMetadata field0)?  archive,TResult? Function( ImageMetadata field0)?  image,TResult? Function( XmlMetadata field0)?  xml,TResult? Function( TextMetadata field0)?  text,TResult? Function( HtmlMetadata field0)?  html,TResult? Function( OcrMetadata field0)?  ocr,TResult? Function( CsvMetadata field0)?  csv,TResult? Function( BibtexMetadata field0)?  bibtex,TResult? Function( CitationMetadata field0)?  citation,TResult? Function( FictionBookMetadata field0)?  fictionBook,TResult? Function( DbfMetadata field0)?  dbf,TResult? Function( JatsMetadata field0)?  jats,TResult? Function( EpubMetadata field0)?  epub,TResult? Function( PstMetadata field0)?  pst,TResult? Function( AudioMetadata field0)?  audio,}) {final _that = this;
 switch (_that) {
 case FormatMetadata_Pdf() when pdf != null:
 return pdf(_that.field0);case FormatMetadata_Docx() when docx != null:
@@ -2706,7 +2711,8 @@ return fictionBook(_that.field0);case FormatMetadata_Dbf() when dbf != null:
 return dbf(_that.field0);case FormatMetadata_Jats() when jats != null:
 return jats(_that.field0);case FormatMetadata_Epub() when epub != null:
 return epub(_that.field0);case FormatMetadata_Pst() when pst != null:
-return pst(_that.field0);case _:
+return pst(_that.field0);case FormatMetadata_Audio() when audio != null:
+return audio(_that.field0);case _:
   return null;
 
 }
@@ -3969,6 +3975,72 @@ as PstMetadata,
 }
 
 /// @nodoc
+
+
+class FormatMetadata_Audio extends FormatMetadata {
+  const FormatMetadata_Audio({required this.field0}): super._();
+  
+
+@override final  AudioMetadata field0;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormatMetadata_AudioCopyWith<FormatMetadata_Audio> get copyWith => _$FormatMetadata_AudioCopyWithImpl<FormatMetadata_Audio>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormatMetadata_Audio&&(identical(other.field0, field0) || other.field0 == field0));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,field0);
+
+@override
+String toString() {
+  return 'FormatMetadata.audio(field0: $field0)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormatMetadata_AudioCopyWith<$Res> implements $FormatMetadataCopyWith<$Res> {
+  factory $FormatMetadata_AudioCopyWith(FormatMetadata_Audio value, $Res Function(FormatMetadata_Audio) _then) = _$FormatMetadata_AudioCopyWithImpl;
+@useResult
+$Res call({
+ AudioMetadata field0
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormatMetadata_AudioCopyWithImpl<$Res>
+    implements $FormatMetadata_AudioCopyWith<$Res> {
+  _$FormatMetadata_AudioCopyWithImpl(this._self, this._then);
+
+  final FormatMetadata_Audio _self;
+  final $Res Function(FormatMetadata_Audio) _then;
+
+/// Create a copy of FormatMetadata
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+  return _then(FormatMetadata_Audio(
+field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
+as AudioMetadata,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$KreuzbergError {
 
 
@@ -4012,7 +4084,7 @@ extension KreuzbergErrorPatterns on KreuzbergError {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( KreuzbergError_Io value)?  io,TResult Function( KreuzbergError_Parsing value)?  parsing,TResult Function( KreuzbergError_Ocr value)?  ocr,TResult Function( KreuzbergError_Validation value)?  validation,TResult Function( KreuzbergError_Cache value)?  cache,TResult Function( KreuzbergError_ImageProcessing value)?  imageProcessing,TResult Function( KreuzbergError_Serialization value)?  serialization,TResult Function( KreuzbergError_MissingDependency value)?  missingDependency,TResult Function( KreuzbergError_Plugin value)?  plugin,TResult Function( KreuzbergError_LockPoisoned value)?  lockPoisoned,TResult Function( KreuzbergError_UnsupportedFormat value)?  unsupportedFormat,TResult Function( KreuzbergError_Embedding value)?  embedding,TResult Function( KreuzbergError_Timeout value)?  timeout,TResult Function( KreuzbergError_Cancelled value)?  cancelled,TResult Function( KreuzbergError_Security value)?  security,TResult Function( KreuzbergError_Other value)?  other,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( KreuzbergError_Io value)?  io,TResult Function( KreuzbergError_Parsing value)?  parsing,TResult Function( KreuzbergError_Ocr value)?  ocr,TResult Function( KreuzbergError_Validation value)?  validation,TResult Function( KreuzbergError_Cache value)?  cache,TResult Function( KreuzbergError_ImageProcessing value)?  imageProcessing,TResult Function( KreuzbergError_Serialization value)?  serialization,TResult Function( KreuzbergError_MissingDependency value)?  missingDependency,TResult Function( KreuzbergError_Plugin value)?  plugin,TResult Function( KreuzbergError_LockPoisoned value)?  lockPoisoned,TResult Function( KreuzbergError_UnsupportedFormat value)?  unsupportedFormat,TResult Function( KreuzbergError_Embedding value)?  embedding,TResult Function( KreuzbergError_Transcription value)?  transcription,TResult Function( KreuzbergError_Timeout value)?  timeout,TResult Function( KreuzbergError_Cancelled value)?  cancelled,TResult Function( KreuzbergError_Security value)?  security,TResult Function( KreuzbergError_Other value)?  other,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case KreuzbergError_Io() when io != null:
@@ -4027,7 +4099,8 @@ return missingDependency(_that);case KreuzbergError_Plugin() when plugin != null
 return plugin(_that);case KreuzbergError_LockPoisoned() when lockPoisoned != null:
 return lockPoisoned(_that);case KreuzbergError_UnsupportedFormat() when unsupportedFormat != null:
 return unsupportedFormat(_that);case KreuzbergError_Embedding() when embedding != null:
-return embedding(_that);case KreuzbergError_Timeout() when timeout != null:
+return embedding(_that);case KreuzbergError_Transcription() when transcription != null:
+return transcription(_that);case KreuzbergError_Timeout() when timeout != null:
 return timeout(_that);case KreuzbergError_Cancelled() when cancelled != null:
 return cancelled(_that);case KreuzbergError_Security() when security != null:
 return security(_that);case KreuzbergError_Other() when other != null:
@@ -4049,7 +4122,7 @@ return other(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( KreuzbergError_Io value)  io,required TResult Function( KreuzbergError_Parsing value)  parsing,required TResult Function( KreuzbergError_Ocr value)  ocr,required TResult Function( KreuzbergError_Validation value)  validation,required TResult Function( KreuzbergError_Cache value)  cache,required TResult Function( KreuzbergError_ImageProcessing value)  imageProcessing,required TResult Function( KreuzbergError_Serialization value)  serialization,required TResult Function( KreuzbergError_MissingDependency value)  missingDependency,required TResult Function( KreuzbergError_Plugin value)  plugin,required TResult Function( KreuzbergError_LockPoisoned value)  lockPoisoned,required TResult Function( KreuzbergError_UnsupportedFormat value)  unsupportedFormat,required TResult Function( KreuzbergError_Embedding value)  embedding,required TResult Function( KreuzbergError_Timeout value)  timeout,required TResult Function( KreuzbergError_Cancelled value)  cancelled,required TResult Function( KreuzbergError_Security value)  security,required TResult Function( KreuzbergError_Other value)  other,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( KreuzbergError_Io value)  io,required TResult Function( KreuzbergError_Parsing value)  parsing,required TResult Function( KreuzbergError_Ocr value)  ocr,required TResult Function( KreuzbergError_Validation value)  validation,required TResult Function( KreuzbergError_Cache value)  cache,required TResult Function( KreuzbergError_ImageProcessing value)  imageProcessing,required TResult Function( KreuzbergError_Serialization value)  serialization,required TResult Function( KreuzbergError_MissingDependency value)  missingDependency,required TResult Function( KreuzbergError_Plugin value)  plugin,required TResult Function( KreuzbergError_LockPoisoned value)  lockPoisoned,required TResult Function( KreuzbergError_UnsupportedFormat value)  unsupportedFormat,required TResult Function( KreuzbergError_Embedding value)  embedding,required TResult Function( KreuzbergError_Transcription value)  transcription,required TResult Function( KreuzbergError_Timeout value)  timeout,required TResult Function( KreuzbergError_Cancelled value)  cancelled,required TResult Function( KreuzbergError_Security value)  security,required TResult Function( KreuzbergError_Other value)  other,}){
 final _that = this;
 switch (_that) {
 case KreuzbergError_Io():
@@ -4064,7 +4137,8 @@ return missingDependency(_that);case KreuzbergError_Plugin():
 return plugin(_that);case KreuzbergError_LockPoisoned():
 return lockPoisoned(_that);case KreuzbergError_UnsupportedFormat():
 return unsupportedFormat(_that);case KreuzbergError_Embedding():
-return embedding(_that);case KreuzbergError_Timeout():
+return embedding(_that);case KreuzbergError_Transcription():
+return transcription(_that);case KreuzbergError_Timeout():
 return timeout(_that);case KreuzbergError_Cancelled():
 return cancelled(_that);case KreuzbergError_Security():
 return security(_that);case KreuzbergError_Other():
@@ -4082,7 +4156,7 @@ return other(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( KreuzbergError_Io value)?  io,TResult? Function( KreuzbergError_Parsing value)?  parsing,TResult? Function( KreuzbergError_Ocr value)?  ocr,TResult? Function( KreuzbergError_Validation value)?  validation,TResult? Function( KreuzbergError_Cache value)?  cache,TResult? Function( KreuzbergError_ImageProcessing value)?  imageProcessing,TResult? Function( KreuzbergError_Serialization value)?  serialization,TResult? Function( KreuzbergError_MissingDependency value)?  missingDependency,TResult? Function( KreuzbergError_Plugin value)?  plugin,TResult? Function( KreuzbergError_LockPoisoned value)?  lockPoisoned,TResult? Function( KreuzbergError_UnsupportedFormat value)?  unsupportedFormat,TResult? Function( KreuzbergError_Embedding value)?  embedding,TResult? Function( KreuzbergError_Timeout value)?  timeout,TResult? Function( KreuzbergError_Cancelled value)?  cancelled,TResult? Function( KreuzbergError_Security value)?  security,TResult? Function( KreuzbergError_Other value)?  other,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( KreuzbergError_Io value)?  io,TResult? Function( KreuzbergError_Parsing value)?  parsing,TResult? Function( KreuzbergError_Ocr value)?  ocr,TResult? Function( KreuzbergError_Validation value)?  validation,TResult? Function( KreuzbergError_Cache value)?  cache,TResult? Function( KreuzbergError_ImageProcessing value)?  imageProcessing,TResult? Function( KreuzbergError_Serialization value)?  serialization,TResult? Function( KreuzbergError_MissingDependency value)?  missingDependency,TResult? Function( KreuzbergError_Plugin value)?  plugin,TResult? Function( KreuzbergError_LockPoisoned value)?  lockPoisoned,TResult? Function( KreuzbergError_UnsupportedFormat value)?  unsupportedFormat,TResult? Function( KreuzbergError_Embedding value)?  embedding,TResult? Function( KreuzbergError_Transcription value)?  transcription,TResult? Function( KreuzbergError_Timeout value)?  timeout,TResult? Function( KreuzbergError_Cancelled value)?  cancelled,TResult? Function( KreuzbergError_Security value)?  security,TResult? Function( KreuzbergError_Other value)?  other,}){
 final _that = this;
 switch (_that) {
 case KreuzbergError_Io() when io != null:
@@ -4097,7 +4171,8 @@ return missingDependency(_that);case KreuzbergError_Plugin() when plugin != null
 return plugin(_that);case KreuzbergError_LockPoisoned() when lockPoisoned != null:
 return lockPoisoned(_that);case KreuzbergError_UnsupportedFormat() when unsupportedFormat != null:
 return unsupportedFormat(_that);case KreuzbergError_Embedding() when embedding != null:
-return embedding(_that);case KreuzbergError_Timeout() when timeout != null:
+return embedding(_that);case KreuzbergError_Transcription() when transcription != null:
+return transcription(_that);case KreuzbergError_Timeout() when timeout != null:
 return timeout(_that);case KreuzbergError_Cancelled() when cancelled != null:
 return cancelled(_that);case KreuzbergError_Security() when security != null:
 return security(_that);case KreuzbergError_Other() when other != null:
@@ -4118,7 +4193,7 @@ return other(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  io,TResult Function( String message)?  parsing,TResult Function( String message)?  ocr,TResult Function( String message)?  validation,TResult Function( String message)?  cache,TResult Function( String message)?  imageProcessing,TResult Function( String message)?  serialization,TResult Function( String field0)?  missingDependency,TResult Function( String message,  String pluginName)?  plugin,TResult Function( String field0)?  lockPoisoned,TResult Function( String field0)?  unsupportedFormat,TResult Function( String message)?  embedding,TResult Function( PlatformInt64 elapsedMs,  PlatformInt64 limitMs)?  timeout,TResult Function()?  cancelled,TResult Function( String message)?  security,TResult Function( String field0)?  other,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  io,TResult Function( String message)?  parsing,TResult Function( String message)?  ocr,TResult Function( String message)?  validation,TResult Function( String message)?  cache,TResult Function( String message)?  imageProcessing,TResult Function( String message)?  serialization,TResult Function( String field0)?  missingDependency,TResult Function( String message,  String pluginName)?  plugin,TResult Function( String field0)?  lockPoisoned,TResult Function( String field0)?  unsupportedFormat,TResult Function( String message)?  embedding,TResult Function( String message)?  transcription,TResult Function( PlatformInt64 elapsedMs,  PlatformInt64 limitMs)?  timeout,TResult Function()?  cancelled,TResult Function( String message)?  security,TResult Function( String field0)?  other,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case KreuzbergError_Io() when io != null:
 return io(_that.field0);case KreuzbergError_Parsing() when parsing != null:
@@ -4132,7 +4207,8 @@ return missingDependency(_that.field0);case KreuzbergError_Plugin() when plugin 
 return plugin(_that.message,_that.pluginName);case KreuzbergError_LockPoisoned() when lockPoisoned != null:
 return lockPoisoned(_that.field0);case KreuzbergError_UnsupportedFormat() when unsupportedFormat != null:
 return unsupportedFormat(_that.field0);case KreuzbergError_Embedding() when embedding != null:
-return embedding(_that.message);case KreuzbergError_Timeout() when timeout != null:
+return embedding(_that.message);case KreuzbergError_Transcription() when transcription != null:
+return transcription(_that.message);case KreuzbergError_Timeout() when timeout != null:
 return timeout(_that.elapsedMs,_that.limitMs);case KreuzbergError_Cancelled() when cancelled != null:
 return cancelled();case KreuzbergError_Security() when security != null:
 return security(_that.message);case KreuzbergError_Other() when other != null:
@@ -4154,7 +4230,7 @@ return other(_that.field0);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  io,required TResult Function( String message)  parsing,required TResult Function( String message)  ocr,required TResult Function( String message)  validation,required TResult Function( String message)  cache,required TResult Function( String message)  imageProcessing,required TResult Function( String message)  serialization,required TResult Function( String field0)  missingDependency,required TResult Function( String message,  String pluginName)  plugin,required TResult Function( String field0)  lockPoisoned,required TResult Function( String field0)  unsupportedFormat,required TResult Function( String message)  embedding,required TResult Function( PlatformInt64 elapsedMs,  PlatformInt64 limitMs)  timeout,required TResult Function()  cancelled,required TResult Function( String message)  security,required TResult Function( String field0)  other,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  io,required TResult Function( String message)  parsing,required TResult Function( String message)  ocr,required TResult Function( String message)  validation,required TResult Function( String message)  cache,required TResult Function( String message)  imageProcessing,required TResult Function( String message)  serialization,required TResult Function( String field0)  missingDependency,required TResult Function( String message,  String pluginName)  plugin,required TResult Function( String field0)  lockPoisoned,required TResult Function( String field0)  unsupportedFormat,required TResult Function( String message)  embedding,required TResult Function( String message)  transcription,required TResult Function( PlatformInt64 elapsedMs,  PlatformInt64 limitMs)  timeout,required TResult Function()  cancelled,required TResult Function( String message)  security,required TResult Function( String field0)  other,}) {final _that = this;
 switch (_that) {
 case KreuzbergError_Io():
 return io(_that.field0);case KreuzbergError_Parsing():
@@ -4168,7 +4244,8 @@ return missingDependency(_that.field0);case KreuzbergError_Plugin():
 return plugin(_that.message,_that.pluginName);case KreuzbergError_LockPoisoned():
 return lockPoisoned(_that.field0);case KreuzbergError_UnsupportedFormat():
 return unsupportedFormat(_that.field0);case KreuzbergError_Embedding():
-return embedding(_that.message);case KreuzbergError_Timeout():
+return embedding(_that.message);case KreuzbergError_Transcription():
+return transcription(_that.message);case KreuzbergError_Timeout():
 return timeout(_that.elapsedMs,_that.limitMs);case KreuzbergError_Cancelled():
 return cancelled();case KreuzbergError_Security():
 return security(_that.message);case KreuzbergError_Other():
@@ -4186,7 +4263,7 @@ return other(_that.field0);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  io,TResult? Function( String message)?  parsing,TResult? Function( String message)?  ocr,TResult? Function( String message)?  validation,TResult? Function( String message)?  cache,TResult? Function( String message)?  imageProcessing,TResult? Function( String message)?  serialization,TResult? Function( String field0)?  missingDependency,TResult? Function( String message,  String pluginName)?  plugin,TResult? Function( String field0)?  lockPoisoned,TResult? Function( String field0)?  unsupportedFormat,TResult? Function( String message)?  embedding,TResult? Function( PlatformInt64 elapsedMs,  PlatformInt64 limitMs)?  timeout,TResult? Function()?  cancelled,TResult? Function( String message)?  security,TResult? Function( String field0)?  other,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  io,TResult? Function( String message)?  parsing,TResult? Function( String message)?  ocr,TResult? Function( String message)?  validation,TResult? Function( String message)?  cache,TResult? Function( String message)?  imageProcessing,TResult? Function( String message)?  serialization,TResult? Function( String field0)?  missingDependency,TResult? Function( String message,  String pluginName)?  plugin,TResult? Function( String field0)?  lockPoisoned,TResult? Function( String field0)?  unsupportedFormat,TResult? Function( String message)?  embedding,TResult? Function( String message)?  transcription,TResult? Function( PlatformInt64 elapsedMs,  PlatformInt64 limitMs)?  timeout,TResult? Function()?  cancelled,TResult? Function( String message)?  security,TResult? Function( String field0)?  other,}) {final _that = this;
 switch (_that) {
 case KreuzbergError_Io() when io != null:
 return io(_that.field0);case KreuzbergError_Parsing() when parsing != null:
@@ -4200,7 +4277,8 @@ return missingDependency(_that.field0);case KreuzbergError_Plugin() when plugin 
 return plugin(_that.message,_that.pluginName);case KreuzbergError_LockPoisoned() when lockPoisoned != null:
 return lockPoisoned(_that.field0);case KreuzbergError_UnsupportedFormat() when unsupportedFormat != null:
 return unsupportedFormat(_that.field0);case KreuzbergError_Embedding() when embedding != null:
-return embedding(_that.message);case KreuzbergError_Timeout() when timeout != null:
+return embedding(_that.message);case KreuzbergError_Transcription() when transcription != null:
+return transcription(_that.message);case KreuzbergError_Timeout() when timeout != null:
 return timeout(_that.elapsedMs,_that.limitMs);case KreuzbergError_Cancelled() when cancelled != null:
 return cancelled();case KreuzbergError_Security() when security != null:
 return security(_that.message);case KreuzbergError_Other() when other != null:
@@ -4998,6 +5076,72 @@ class _$KreuzbergError_EmbeddingCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(KreuzbergError_Embedding(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class KreuzbergError_Transcription extends KreuzbergError {
+  const KreuzbergError_Transcription({required this.message}): super._();
+  
+
+ final  String message;
+
+/// Create a copy of KreuzbergError
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$KreuzbergError_TranscriptionCopyWith<KreuzbergError_Transcription> get copyWith => _$KreuzbergError_TranscriptionCopyWithImpl<KreuzbergError_Transcription>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KreuzbergError_Transcription&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'KreuzbergError.transcription(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $KreuzbergError_TranscriptionCopyWith<$Res> implements $KreuzbergErrorCopyWith<$Res> {
+  factory $KreuzbergError_TranscriptionCopyWith(KreuzbergError_Transcription value, $Res Function(KreuzbergError_Transcription) _then) = _$KreuzbergError_TranscriptionCopyWithImpl;
+@useResult
+$Res call({
+ String message
+});
+
+
+
+
+}
+/// @nodoc
+class _$KreuzbergError_TranscriptionCopyWithImpl<$Res>
+    implements $KreuzbergError_TranscriptionCopyWith<$Res> {
+  _$KreuzbergError_TranscriptionCopyWithImpl(this._self, this._then);
+
+  final KreuzbergError_Transcription _self;
+  final $Res Function(KreuzbergError_Transcription) _then;
+
+/// Create a copy of KreuzbergError
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
+  return _then(KreuzbergError_Transcription(
 message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,
   ));

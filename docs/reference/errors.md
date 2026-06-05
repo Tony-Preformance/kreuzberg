@@ -42,6 +42,7 @@ and provides context for debugging.
 | `LockPoisoned` | Lock poisoned: {0} | Lock poisoned errors |
 | `UnsupportedFormat` | Unsupported format: {0} | Unsupported format errors |
 | `Embedding` | Embedding error: {message} | Embedding errors |
+| `Transcription` | Transcription error: {message} | Transcription errors |
 | `Timeout` | Extraction timed out after {elapsed_ms}ms (limit: {limit_ms}ms) | Timeout errors |
 | `Cancelled` | Extraction cancelled | Cancelled errors |
 | `Security` | Security violation: {message} | Security errors |

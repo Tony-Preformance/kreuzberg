@@ -1336,6 +1336,50 @@ SummarizationConfig$from_json <- function(json) {
 }
 #' @export
 `[[.SummarizationConfig` <- `$.SummarizationConfig`
+#' Configuration for audio/video transcription (speech-to-text)
+#'
+#' When present and `enabled`, Kreuzberg will route audio and video files
+#' (mp3, mp4, m4a, wav, webm, etc.) through the transcription pipeline.
+#'
+#' The heavy dependencies (ORT, hf-hub, symphonia) are only pulled when the
+#' `transcription` feature is enabled. The config struct itself is available
+#' under `transcription-types` so that `ExtractionConfig` round-trips on all
+#' targets.
+#'
+#' All fields have sensible defaults. The recommended starting point is:
+#'
+#' ```toml
+#' [extraction.transcription]
+#' enabled = true
+#' model = "tiny"
+#' ```
+#' @field enabled Master switch. When false the block is ignored and audio files fall back to the normal "unsupported
+#' @field model Whisper model size to use.
+#' @field language Optional language hint (ISO-639-1 code, e.g. "en", "de").
+#' @field timestamps Whether to emit segment-level timestamps in the result metadata.
+#' @field max_duration_ms Hard safety limit on input duration (milliseconds).
+#' @field max_bytes Hard safety limit on input size (bytes).
+#' @field timeout_ms Wall-clock timeout for the entire transcription operation (ms).
+#' @field model_cache_dir Override the directory used for Whisper model cache.
+#' @field allow_network Allow network access to download models from Hugging Face Hub.
+#' @field verify_hash Verify SHA256 checksums of downloaded model files (when known).
+#' @export
+TranscriptionConfig <- new.env(parent = emptyenv())
+TranscriptionConfig$default <- function() .Call("wrap__TranscriptionConfig__default", PACKAGE = "kreuzberg")
+TranscriptionConfig$from_json <- function(json) {
+  .Call("wrap__TranscriptionConfig__from_json", json, PACKAGE = "kreuzberg")
+}
+#' @export
+`$.TranscriptionConfig` <- function(self, name) {
+  func <- TranscriptionConfig[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.TranscriptionConfig` <- `$.TranscriptionConfig`
 #' Configuration for the translation post-processor
 #' @field target_lang BCP-47 language tag for the target language (e.g. `"de"`, `"fr-CA"`).
 #' @field source_lang Optional explicit source language. `None` asks the backend to auto-detect.
@@ -2715,6 +2759,32 @@ PstMetadata$from_json <- function(json) {
 }
 #' @export
 `[[.PstMetadata` <- `$.PstMetadata`
+#' Audio/video file metadata
+#'
+#' Populated from container tags (ID3v2, MP4 atoms, Vorbis comments, etc.) and
+#' PCM decode properties. Available when the `transcription-types` feature is enabled.
+#' @field duration_ms Duration in milliseconds derived from the decoded audio stream.
+#' @field codec Audio codec (e.g. "mp3", "aac", "opus", "flac").
+#' @field container Container format (e.g. "mpeg", "mp4", "ogg", "wav").
+#' @field sample_rate_hz Sample rate in Hz after decode (always 16000 when resampled for Whisper).
+#' @field channels Number of audio channels (1 = mono, 2 = stereo).
+#' @field bitrate Audio bitrate in kbps from the source file tags/properties.
+#' @export
+AudioMetadata <- new.env(parent = emptyenv())
+AudioMetadata$from_json <- function(json) {
+  .Call("wrap__AudioMetadata__from_json", json, PACKAGE = "kreuzberg")
+}
+#' @export
+`$.AudioMetadata` <- function(self, name) {
+  func <- AudioMetadata[[name]]
+  if (identical(names(formals(func))[1], "self")) {
+    function(...) func(self, ...)
+  } else {
+    func
+  }
+}
+#' @export
+`[[.AudioMetadata` <- `$.AudioMetadata`
 #' Confidence scores for an OCR element
 #'
 #' Separates detection confidence (how confident that text exists at this location)
@@ -3546,6 +3616,7 @@ EntityCategory <- new.env(parent = emptyenv())
 #' @field Jats Jats
 #' @field Epub Epub
 #' @field Pst Pst
+#' @field Audio Audio
 #' @export
 FormatMetadata <- new.env(parent = emptyenv())
 #' @export
@@ -3646,6 +3717,14 @@ NerBackendKind  <- function() list() |> structure(class = "NerBackendKind")
 #' @return A ChunkerType enum value
 #' @export
 ChunkerType  <- function() list() |> structure(class = "ChunkerType")
+
+#' Create a WhisperModel enum value
+#'
+#' Returns the default WhisperModel variant.
+#'
+#' @return A WhisperModel enum value
+#' @export
+WhisperModel  <- function() list() |> structure(class = "WhisperModel")
 
 #' Create a CodeContentMode enum value
 #'

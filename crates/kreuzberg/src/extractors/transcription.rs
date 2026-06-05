@@ -22,6 +22,7 @@ use tokio::task;
 ///
 /// Priority is the normal default (50). If a user registers a custom
 /// higher-priority transcription backend via the plugin system, it will win.
+#[cfg_attr(alef, alef(skip))]
 pub struct TranscriptionExtractor;
 
 impl Plugin for TranscriptionExtractor {

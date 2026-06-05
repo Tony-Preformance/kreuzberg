@@ -51,6 +51,7 @@ sealed class FormatMetadata {
     data class Jats(val metadata: JatsMetadata) : FormatMetadata()
     data class Epub(val metadata: EpubMetadata) : FormatMetadata()
     data class Pst(val metadata: PstMetadata) : FormatMetadata()
+    data class Audio(val metadata: AudioMetadata) : FormatMetadata()
 }
 
 private class FormatMetadataDeserializer : com.fasterxml.jackson.databind.deser.std.StdDeserializer<FormatMetadata>(FormatMetadata::class.java) {
@@ -83,6 +84,7 @@ private class FormatMetadataDeserializer : com.fasterxml.jackson.databind.deser.
             "jats" -> FormatMetadata.Jats(ctx.readTreeAsValue<JatsMetadata>(payload, JatsMetadata::class.java))
             "epub" -> FormatMetadata.Epub(ctx.readTreeAsValue<EpubMetadata>(payload, EpubMetadata::class.java))
             "pst" -> FormatMetadata.Pst(ctx.readTreeAsValue<PstMetadata>(payload, PstMetadata::class.java))
+            "audio" -> FormatMetadata.Audio(ctx.readTreeAsValue<AudioMetadata>(payload, AudioMetadata::class.java))
             else -> throw com.fasterxml.jackson.databind.exc.InvalidFormatException(
                 parser, "Unknown FormatMetadata tag", tag, FormatMetadata::class.java,
             )
@@ -212,6 +214,12 @@ private class FormatMetadataSerializer : com.fasterxml.jackson.databind.ser.std.
                 @Suppress("UNCHECKED_CAST")
                 val n = mapper.valueToTree<com.fasterxml.jackson.databind.node.ObjectNode>(value.metadata) as com.fasterxml.jackson.databind.node.ObjectNode
                 n.put("format_type", "pst")
+                n
+            }
+            is FormatMetadata.Audio -> {
+                @Suppress("UNCHECKED_CAST")
+                val n = mapper.valueToTree<com.fasterxml.jackson.databind.node.ObjectNode>(value.metadata) as com.fasterxml.jackson.databind.node.ObjectNode
+                n.put("format_type", "audio")
                 n
             }
         }

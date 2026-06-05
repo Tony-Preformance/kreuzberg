@@ -62,6 +62,7 @@ pub const KreuzbergError = error{
     LockPoisoned,
     UnsupportedFormat,
     Embedding,
+    Transcription,
     Timeout,
     Cancelled,
     Security,
@@ -1134,6 +1135,75 @@ pub const SummarizationConfig = struct {
     /// LLM configuration for the abstractive backend. Ignored when
     /// `strategy = Extractive`. Required when `strategy = Abstractive`.
     llm: ?LlmConfig,
+};
+
+/// Configuration for audio/video transcription (speech-to-text).
+///
+/// When present and `enabled`, Kreuzberg will route audio and video files
+/// (mp3, mp4, m4a, wav, webm, etc.) through the transcription pipeline.
+///
+/// The heavy dependencies (ORT, hf-hub, symphonia) are only pulled when the
+/// `transcription` feature is enabled. The config struct itself is available
+/// under `transcription-types` so that `ExtractionConfig` round-trips on all
+/// targets.
+///
+/// All fields have sensible defaults. The recommended starting point is:
+///
+/// ```toml
+/// [extraction.transcription]
+/// enabled = true
+/// model = "tiny"
+/// ```
+pub const TranscriptionConfig = struct {
+    /// Master switch. When false the block is ignored and audio files fall back
+    /// to the normal "unsupported format" path.
+    enabled: bool,
+    /// Whisper model size to use.
+    ///
+    /// Smaller = faster + lower memory. `tiny` is the pragmatic default for
+    /// first-time users and CI.
+    model: WhisperModel,
+    /// Optional language hint (ISO-639-1 code, e.g. "en", "de").
+    ///
+    /// When `null` (default) the engine may attempt auto-detection if supported.
+    /// For deterministic production output, always set this explicitly.
+    language: ?[]const u8,
+    /// Whether to emit segment-level timestamps in the result metadata.
+    ///
+    /// When true, `metadata["transcription.segments"]` will contain an array
+    /// of `{start_ms, end_ms, text}` objects (if the engine supports it).
+    timestamps: bool,
+    /// Hard safety limit on input duration (milliseconds).
+    ///
+    /// Files longer than this are rejected *before* any decode or model work.
+    /// Default: 30 minutes. Set to `null` to disable (not recommended for
+    /// untrusted input).
+    max_duration_ms: ?u64,
+    /// Hard safety limit on input size (bytes).
+    ///
+    /// Default: 512 MiB. Protects against pathological or malicious uploads.
+    max_bytes: ?u64,
+    /// Wall-clock timeout for the entire transcription operation (ms).
+    ///
+    /// Includes model download (first time), decode, and inference.
+    /// Default: 10 minutes. Uses `tokio.select!` so the async runtime is
+    /// never blocked.
+    timeout_ms: ?u64,
+    /// Override the directory used for Whisper model cache.
+    ///
+    /// When `null`, uses the centralized resolver:
+    /// `KREUZBERG_CACHE_DIR/transcription/whisper` or the platform default
+    /// (`~/.cache/kreuzberg/transcription/whisper` on Linux, etc.).
+    model_cache_dir: ?[]const u8,
+    /// Allow network access to download models from Hugging Face Hub.
+    ///
+    /// When `false`, only previously cached models may be used. Useful for
+    /// air-gapped or fully offline deployments.
+    allow_network: bool,
+    /// Verify SHA256 checksums of downloaded model files (when known).
+    ///
+    /// Strongly recommended; disable only for debugging.
+    verify_hash: bool,
 };
 
 /// Configuration for the translation post-processor.
@@ -2800,6 +2870,25 @@ pub const PstMetadata = struct {
     message_count: u64,
 };
 
+/// Audio/video file metadata.
+///
+/// Populated from container tags (ID3v2, MP4 atoms, Vorbis comments, etc.) and
+/// PCM decode properties. Available when the `transcription-types` feature is enabled.
+pub const AudioMetadata = struct {
+    /// Duration in milliseconds derived from the decoded audio stream.
+    duration_ms: ?u64,
+    /// Audio codec (e.g. "mp3", "aac", "opus", "flac").
+    codec: ?[]const u8,
+    /// Container format (e.g. "mpeg", "mp4", "ogg", "wav").
+    container: ?[]const u8,
+    /// Sample rate in Hz after decode (always 16000 when resampled for Whisper).
+    sample_rate_hz: ?u32,
+    /// Number of audio channels (1 = mono, 2 = stereo).
+    channels: ?u16,
+    /// Audio bitrate in kbps from the source file tags/properties.
+    bitrate: ?u32,
+};
+
 /// Confidence scores for an OCR element.
 ///
 /// Separates detection confidence (how confident that text exists at this location)
@@ -3737,6 +3826,24 @@ pub const EmbeddingModelType = union(enum) {
     plugin: []const u8,
 };
 
+/// Supported Whisper model sizes.
+///
+/// These map to published ONNX exports on Hugging Face (onnx-community or
+/// similar orgs). The actual filenames and repos are resolved inside the
+/// transcription engine.
+pub const WhisperModel = enum {
+    /// ~39 MB, fastest, lowest quality. Good default for development and CI.
+    tiny,
+    /// ~74 MB, reasonable quality/speed tradeoff.
+    base,
+    /// ~244 MB, better accuracy.
+    small,
+    /// ~769 MB, high quality (slower, more memory).
+    medium,
+    /// ~1550 MB, best quality (large-v3). Use only when latency is acceptable.
+    large_v3,
+};
+
 /// Content rendering mode for code extraction.
 ///
 /// Controls how extracted code content is represented in the `content` field
@@ -4168,6 +4275,7 @@ pub const FormatMetadata = union(enum) {
     jats: JatsMetadata,
     epub: EpubMetadata,
     pst: PstMetadata,
+    audio: AudioMetadata,
 };
 
 /// Text direction enumeration for HTML documents.

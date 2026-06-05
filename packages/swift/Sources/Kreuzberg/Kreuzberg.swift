@@ -1388,6 +1388,25 @@ internal extension SummarizationConfig {
     }
 }
 
+/// Configuration for audio/video transcription (speech-to-text).
+///
+/// When present and `enabled`, Kreuzberg will route audio and video files
+/// (mp3, mp4, m4a, wav, webm, etc.) through the transcription pipeline.
+///
+/// The heavy dependencies (ORT, hf-hub, symphonia) are only pulled when the
+/// `transcription` feature is enabled. The config struct itself is available
+/// under `transcription-types` so that `ExtractionConfig` round-trips on all
+/// targets.
+///
+/// All fields have sensible defaults. The recommended starting point is:
+///
+/// ```toml
+/// [extraction.transcription]
+/// enabled = true
+/// model = "tiny"
+/// ```
+public typealias TranscriptionConfig = RustBridge.TranscriptionConfig
+
 /// Configuration for the translation post-processor.
 public struct TranslationConfig: Codable, Sendable, Hashable {
     /// BCP-47 language tag for the target language (e.g. `"de"`, `"fr-CA"`).
@@ -4329,6 +4348,65 @@ internal extension PstMetadata {
     }
 }
 
+/// Audio/video file metadata.
+///
+/// Populated from container tags (ID3v2, MP4 atoms, Vorbis comments, etc.) and
+/// PCM decode properties. Available when the `transcription-types` feature is enabled.
+public struct AudioMetadata: Codable, Sendable, Hashable {
+    /// Duration in milliseconds derived from the decoded audio stream.
+    public let durationMs: UInt64?
+    /// Audio codec (e.g. "mp3", "aac", "opus", "flac").
+    public let codec: String?
+    /// Container format (e.g. "mpeg", "mp4", "ogg", "wav").
+    public let container: String?
+    /// Sample rate in Hz after decode (always 16000 when resampled for Whisper).
+    public let sampleRateHz: UInt32?
+    /// Number of audio channels (1 = mono, 2 = stereo).
+    public let channels: UInt16?
+    /// Audio bitrate in kbps from the source file tags/properties.
+    public let bitrate: UInt32?
+    public init(durationMs: UInt64? = nil, codec: String? = nil, container: String? = nil, sampleRateHz: UInt32? = nil, channels: UInt16? = nil, bitrate: UInt32? = nil) {
+        self.durationMs = durationMs
+        self.codec = codec
+        self.container = container
+        self.sampleRateHz = sampleRateHz
+        self.channels = channels
+        self.bitrate = bitrate
+    }
+    private enum CodingKeys: String, CodingKey {
+        case durationMs = "duration_ms"
+        case codec = "codec"
+        case container = "container"
+        case sampleRateHz = "sample_rate_hz"
+        case channels = "channels"
+        case bitrate = "bitrate"
+    }
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.durationMs = try container.decodeIfPresent(UInt64.self, forKey: .durationMs) ?? nil
+        self.codec = try container.decodeIfPresent(String.self, forKey: .codec) ?? nil
+        self.container = try container.decodeIfPresent(String.self, forKey: .container) ?? nil
+        self.sampleRateHz = try container.decodeIfPresent(UInt32.self, forKey: .sampleRateHz) ?? nil
+        self.channels = try container.decodeIfPresent(UInt16.self, forKey: .channels) ?? nil
+        self.bitrate = try container.decodeIfPresent(UInt32.self, forKey: .bitrate) ?? nil
+    }
+}
+
+// MARK: - Internal FFI conversions for AudioMetadata
+internal extension AudioMetadata {
+    init(_ rb: RustBridge.AudioMetadataRef) throws {
+        self.durationMs = rb.durationMs()
+        self.codec = rb.codec()?.toString()
+        self.container = rb.container()?.toString()
+        self.sampleRateHz = rb.sampleRateHz()
+        self.channels = rb.channels()
+        self.bitrate = rb.bitrate()
+    }
+    func intoRust() throws -> RustBridge.AudioMetadata {
+        return RustBridge.AudioMetadata(self.durationMs, self.codec.map(RustString.init), self.container.map(RustString.init), self.sampleRateHz, self.channels, self.bitrate)
+    }
+}
+
 /// Confidence scores for an OCR element.
 ///
 /// Separates detection confidence (how confident that text exists at this location)
@@ -6286,6 +6364,31 @@ extension EmbeddingModelType {
     }
 }
 
+/// Supported Whisper model sizes.
+///
+/// These map to published ONNX exports on Hugging Face (onnx-community or
+/// similar orgs). The actual filenames and repos are resolved inside the
+/// transcription engine.
+public enum WhisperModel: String, Codable, Sendable, Hashable {
+    /// ~39 MB, fastest, lowest quality. Good default for development and CI.
+    case tiny
+    /// ~74 MB, reasonable quality/speed tradeoff.
+    case base
+    /// ~244 MB, better accuracy.
+    case small
+    /// ~769 MB, high quality (slower, more memory).
+    case medium
+    /// ~1550 MB, best quality (large-v3). Use only when latency is acceptable.
+    case largeV3 = "large_v3"
+}
+extension WhisperModel {
+    func intoRust() throws -> RustBridge.WhisperModel {
+        let data = try JSONEncoder().encode(self)
+        let json = String(data: data, encoding: .utf8) ?? "null"
+        return try RustBridge.whisperModelFromJson(json)
+    }
+}
+
 /// Content rendering mode for code extraction.
 ///
 /// Controls how extracted code content is represented in the `content` field
@@ -7621,6 +7724,7 @@ public enum KreuzbergError: Swift.Error {
     case lockPoisoned(message: String, field0: String)
     case unsupportedFormat(message: String, field0: String)
     case embedding(message: String, source: String?)
+    case transcription(message: String, source: String?)
     case timeout(message: String, elapsedMs: UInt64, limitMs: UInt64)
     case cancelled
     case security(message: String, source: String?)
@@ -7962,6 +8066,10 @@ public func redactionPatternFromJson(_ json: String) throws -> RedactionPattern 
 public func summarizationConfigFromJson(_ json: String) throws -> SummarizationConfig {
     let data = json.data(using: .utf8) ?? Data()
     return try JSONDecoder().decode(SummarizationConfig.self, from: data)
+}
+
+public func transcriptionConfigFromJson(_ json: String) throws -> TranscriptionConfig {
+    return try RustBridge.transcriptionConfigFromJson(json)
 }
 
 public func translationConfigFromJson(_ json: String) throws -> TranslationConfig {
@@ -8344,6 +8452,11 @@ public func pstMetadataFromJson(_ json: String) throws -> PstMetadata {
     return try JSONDecoder().decode(PstMetadata.self, from: data)
 }
 
+public func audioMetadataFromJson(_ json: String) throws -> AudioMetadata {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(AudioMetadata.self, from: data)
+}
+
 public func ocrConfidenceFromJson(_ json: String) throws -> OcrConfidence {
     let data = json.data(using: .utf8) ?? Data()
     return try JSONDecoder().decode(OcrConfidence.self, from: data)
@@ -8595,6 +8708,11 @@ public func chunkSizingFromJson(_ json: String) throws -> ChunkSizing {
 public func embeddingModelTypeFromJson(_ json: String) throws -> EmbeddingModelType {
     let data = json.data(using: .utf8) ?? Data()
     return try JSONDecoder().decode(EmbeddingModelType.self, from: data)
+}
+
+public func whisperModelFromJson(_ json: String) throws -> WhisperModel {
+    let data = json.data(using: .utf8) ?? Data()
+    return try JSONDecoder().decode(WhisperModel.self, from: data)
 }
 
 public func codeContentModeFromJson(_ json: String) throws -> CodeContentMode {
@@ -9603,6 +9721,8 @@ extension RustBridge.RedactionPattern: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
 extension RustBridge.SummarizationConfig: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
+extension RustBridge.TranscriptionConfig: @unchecked Sendable {}
+// swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
 extension RustBridge.TranslationConfig: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
 extension RustBridge.TreeSitterConfig: @unchecked Sendable {}
@@ -9768,6 +9888,8 @@ extension RustBridge.ContributorRole: @unchecked Sendable {}
 extension RustBridge.EpubMetadata: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
 extension RustBridge.PstMetadata: @unchecked Sendable {}
+// swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
+extension RustBridge.AudioMetadata: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
 extension RustBridge.OcrConfidence: @unchecked Sendable {}
 // swift-bridge opaque type used across Task.detached boundaries — Rust type is Send + Sync.
