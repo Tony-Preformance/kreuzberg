@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **python**: fix maturin sdist build failure by switching `kreuzberg-py` to workspace-inherited version. Hardcoded version `"5.0.0-rc.5"` prevented maturin from resolving workspace member `kreuzberg-tesseract` during vendoring; workspace inheritance ensures consistent version resolution across all workspace crates.
+
 - **java**: exclude alef-generated sources from CPD (Copy-Paste Detector) analysis in Maven PMD. Alef's template-based polyglot code generation naturally produces duplications across record types (builders, getters, factory methods); these are structural artifacts of generation and not maintainability issues. Only hand-written code under `src/main/java/` is now subject to CPD enforcement.
 
 - **node**: add explicit `js_name` macro parameters to all `register_*` trait-bridge trait functions (`registerOcrBackend`, `registerDocumentExtractor`, `registerRenderer`, `registerEmbeddingBackend`, `registerPostProcessor`, `registerValidator`). Without explicit `js_name`, NAPI's default snake-to-camelCase conversion was unreliable, causing the e2e test fixture to fail at the `registerRenderer()` call with "Cannot convert undefined or null to object".
