@@ -454,6 +454,33 @@ exclude_types = [
 [crates.java]
 package = "dev.kreuzberg"
 ffi_style = "panama"
+features = [
+  "full",
+  "pdf",
+  "ocr",
+  "paddle-ocr",
+  "paddle-ocr-types",
+  "layout-detection",
+  "layout-types",
+  "embeddings",
+  "embedding-presets",
+  "chunking",
+  "keywords-yake",
+  "keywords-rake",
+  "language-detection",
+  "html",
+  "office",
+  "email",
+  "archives",
+  "stopwords",
+  "auto-rotate",
+  "auto-rotate-types",
+  "tokio-runtime",
+  "api",
+  "mcp",
+  "liter-llm",
+  "quality",
+]
 exclude_types = [
   # Trait-bridge opaque types serialized as JSON strings at FFI boundary
   "InternalDocument",
